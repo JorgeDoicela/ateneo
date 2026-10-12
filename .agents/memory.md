@@ -1056,6 +1056,12 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
     * 1,710 pares/tripletas científicas de entrenamiento y evaluación contrastiva con negativos duros en `backend/data/datasets/` (train: 1,178, val: 249, test blind: 283).
     * Persistencia operativa en `ateneo_clinical.db` con 7 tablas activas (tenants, users, evaluation_history con 42 evaluaciones reales, ateneo_rooms con 97 salas, student_mastery con BKT en vivo, learning snapshots con historial psicométrico).
     * Integración HTTP completa verificada en vivo (`POST /api/evaluate` -> 200 OK con Score 8.5/10, Faithfulness 0.6 y cita oficial ministerial anclada).
+* **Auditoría de Concordancia y Coherencia Integral del Sistema (100% Verificado):**
+  - **Concordancia RAG en los 10 Casos Canónicos:** Se evaluó la recuperación de los 10 casos clínicos en vivo. 10/10 casos recuperaron fragmentos exactos pertenecientes a sus respectivas GPCs ministeriales asociadas (Preeclampsia pág 41, Hemorragia pág 19, TB pág 56, VIH pág 65, HTA pág 31, ERC pág 31, EHI-RN pág 14, NAC pág 32, Sepsis Neonatal pág 35, Aborto pág 14).
+  - **Simulación Clínica Progresiva por Fases:** `POST /api/evaluate/phase` verificado en vivo con `case_hta_01` (Fase 1 Anamnesis) retornando 200 OK, 3 aciertos, 3 omisiones y cita ministerial de HTA anclada a la pág 31.
+  - **Streaming SSE de Debriefing Socrático:** `POST /api/evaluate/socratic-turn` verificado en vivo emitiendo flujo de eventos `text/event-stream; charset=utf-8` en tiempo real con razonamiento farmacodinámico de receptores NMDA y sulfato de magnesio.
+  - **Fusión Multimodal y Activos Paraclínicos:** Servido estático verificado para `neumonia_rx.png` (642 KB) y `ehirn_coagulograma.png` (471 KB) respondiendo HTTP 200 en `/static/images/`.
+  - **Integración de Contratos de API (8/8 Endpoints 200 OK):** `/health`, `/api/cases`, `/api/cases/{id}`, `/api/history`, `/api/adaptive/next-case`, `/api/ateneo/create`, `/api/history/coordinator-analytics`, `/api/history/faithfulness-benchmark`. Total simetría entre clientes TanStack Query en frontend y controladores FastAPI.
 
 
 
