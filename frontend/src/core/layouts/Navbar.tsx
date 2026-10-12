@@ -14,7 +14,8 @@ import {
   RefreshCw,
   Building2,
   Globe,
-  Link2
+  Link2,
+  BarChart3
 } from 'lucide-react';
 import { useConnectivitySync } from '../storage/useConnectivitySync';
 import { useTheme } from '../theme/ThemeProvider';
@@ -181,8 +182,12 @@ export default function Navbar() {
 
               {(user.rol === 'docente' || user.rol === 'administrador') && (
                 <Link
-                  to="/teacher"
-                  className="hidden sm:flex items-center gap-1 text-[#444746] hover:text-[#1f1f1f] px-2 py-1"
+                  to="/teacher/cases"
+                  className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-colors ${
+                    location.pathname.startsWith('/teacher')
+                      ? 'bg-blue-50 text-blue-700 font-semibold'
+                      : 'text-[#444746] hover:text-[#1f1f1f] hover:bg-slate-100'
+                  }`}
                 >
                   <UserCheck className="w-4 h-4 text-blue-600" />
                   <span>Docente</span>
@@ -298,6 +303,30 @@ export default function Navbar() {
                         >
                           <Link2 className="w-3.5 h-3.5 text-cyan-600" />
                           <span>Magic Links e Invitaciones</span>
+                        </Link>
+                      </div>
+                    )}
+
+                    {(user.rol === 'docente' || user.rol === 'administrador') && (
+                      <div className="py-2 border-b border-slate-100 space-y-1">
+                        <span className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-2 pb-0.5">
+                          Docencia y Tutoría
+                        </span>
+                        <Link
+                          to="/teacher/cases"
+                          onClick={() => setShowProfileMenu(false)}
+                          className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                        >
+                          <UserCheck className="w-3.5 h-3.5 text-blue-600" />
+                          <span>Casos y Salas Ateneo</span>
+                        </Link>
+                        <Link
+                          to="/teacher/analytics"
+                          onClick={() => setShowProfileMenu(false)}
+                          className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                        >
+                          <BarChart3 className="w-3.5 h-3.5 text-indigo-600" />
+                          <span>Analítica de Cohorte</span>
                         </Link>
                       </div>
                     )}

@@ -16,6 +16,9 @@ const AdminLayout = lazy(() => import('../modules/admin/pages/AdminLayout'));
 const AdminUsersPage = lazy(() => import('../modules/admin/pages/AdminUsersPage'));
 const AdminMagicLinksPage = lazy(() => import('../modules/admin/pages/AdminMagicLinksPage'));
 const TeacherDashboard = lazy(() => import('../modules/analytics/pages/TeacherDashboard'));
+const TeacherLayout = lazy(() => import('../modules/teacher/pages/TeacherLayout'));
+const TeacherCasesPage = lazy(() => import('../modules/teacher/pages/TeacherCasesPage'));
+const TeacherAnalyticsPage = lazy(() => import('../modules/teacher/pages/TeacherAnalyticsPage'));
 const ScientificBenchmarkView = lazy(() => import('../modules/analytics/components/ScientificBenchmarkView'));
 
 function RouteLoader() {
@@ -47,10 +50,28 @@ export default function AppRoutes() {
           />
 
           <Route
+            path="/cases"
+            element={
+              <ProtectedRoute>
+                <CaseList />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="/cases/:id"
             element={
               <ProtectedRoute>
                 <CaseSolve />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/ateneo"
+            element={
+              <ProtectedRoute>
+                <Navigate to="/teacher/cases" replace />
               </ProtectedRoute>
             }
           />
@@ -74,6 +95,15 @@ export default function AppRoutes() {
           />
 
           <Route
+            path="/analytics/benchmark"
+            element={
+              <ProtectedRoute>
+                <Navigate to="/benchmark" replace />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="/admin"
             element={
               <ProtectedRoute allowedRoles={['administrador']}>
@@ -90,10 +120,14 @@ export default function AppRoutes() {
             path="/teacher"
             element={
               <ProtectedRoute allowedRoles={['docente', 'administrador']}>
-                <TeacherDashboard />
+                <TeacherLayout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route index element={<Navigate to="/teacher/cases" replace />} />
+            <Route path="cases" element={<TeacherCasesPage />} />
+            <Route path="analytics" element={<TeacherAnalyticsPage />} />
+          </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

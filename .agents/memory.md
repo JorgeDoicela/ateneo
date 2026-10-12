@@ -1201,3 +1201,22 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
   - **Certificación de Calidad (100% PASS):**
     * Compilación `npm run build` en 6.18s sin errores ni warnings (chunks independientes: `AdminLayout`, `AdminUsersPage`, `AdminMagicLinksPage`).
     * 26/26 suites y 121/121 tests en Vitest aprobados al 100%.
+* **Modularización Integral Multi-Rol: Docencia, Catálogo de Casos y Rutas Canónicas (2026-10-12):**
+  - **Aislamiento del Dominio Docente (`modules/teacher/`):**
+    * Se creó `modules/teacher/pages/TeacherLayout.tsx` con encabezado contextual y pestañas Material 3 (`NavLink` hacia `/teacher/cases` y `/teacher/analytics`).
+    * Se creó `modules/teacher/pages/TeacherCasesPage.tsx`: Catálogo de casos para simulación sincrónica y creación de salas de Ateneo moderadas por tutores.
+    * Se creó `modules/teacher/pages/TeacherAnalyticsPage.tsx`: Vista dedicada para analítica psicométrica de cohorte, brechas diagnósticas e Índice de Brecha Formativa (IBF).
+    * En `AppRoutes.tsx`, `/teacher` redirige automáticamente a `/teacher/cases`.
+  - **Normalización Canónica del Catálogo de Casos (Estudiante):**
+    * Se formalizó `/cases` en `AppRoutes.tsx` renderizando `CaseList` directamente, preservando la compatibilidad absoluta con `/` y `/cases/:id`.
+  - **Alias Canónicos de Analítica y Colaboración:**
+    * `/analytics/benchmark` con alias y redirección canónica a `/benchmark`.
+    * `/ateneo` con redirección limpia a `/teacher/cases` para navegación institucional sin códigos huérfanos.
+  - **Sincronización en Barra de Navegación (`Navbar.tsx`):**
+    * Botón `Docente` en navbar con estado activo dinámico `location.pathname.startsWith('/teacher')` apuntando a `/teacher/cases`.
+    * Menú desplegable de perfil con accesos directos para docentes y administradores: "Casos y Salas Ateneo" y "Analítica de Cohorte".
+  - **Certificación de Calidad y Cero Daños:**
+    * Compilación `npm run build` completada en 3.94s con code-splitting segregado en chunks independientes (`TeacherLayout`, `TeacherCasesPage`, `TeacherAnalyticsPage`).
+    * 26/26 suites y 121/121 tests en Vitest al 100% PASS.
+    * Pytest backend al 100% PASS en contenedor `ateneo-backend-1`.
+
