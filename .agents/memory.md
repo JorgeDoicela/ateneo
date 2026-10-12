@@ -1047,6 +1047,15 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
     * **Frontend E2E (Playwright):** 15/15 pruebas aprobadas al 100% PASS en Google Chrome, Microsoft Edge y Mobile Pixel 5 (20.2s).
     * **Backend Pytest:** 84/84 pruebas unitarias aprobadas al 100% PASS en Docker (`pytest -q`, 137.61s).
     * **Backend Orquestador Maestro:** 8/8 suites maestras aprobadas al 100% PASS (`tests.run_all_tests`, 125.71s): Seguridad RBAC/UoW, KST/BKT, Diferenciadores Científicos + RAG Caché + 10 GPCs, Estudio Piloto ($g=0.74$), Endpoints HTTP + SSE + WebSockets, Fusión Multimodal + Firma SHA-256, Workers Asíncronos + Logging JSON, Auditoría de Carga (100 usuarios, 0% locks WAL, Circuit Breakers).
+* **Auditoría Forense Empírica de IA Real, Recuperación RAG y Veracidad de Datos Clínicos (/goal):**
+  - **Inferencia de IA Real Verificada:** Se comprobó mediante ejecución en vivo contra Google Gemini en la nube a través de `ResilientLLMGateway`. Modelo activo: `gemini-3.8-flash` (respuesta real generada en 8.83 segundos con JSON estricto, 3 aciertos, 3 omisiones, competencias deficientes por eje y cita normativa del MSP).
+  - **Motor RAG Híbrido Verificado:** La colección ChromaDB `gpc_msp_v2` contiene 7,052 fragmentos normativos reales. Se verificó la recuperación híbrida (Dense BGE-M3 + Sparse BM25 + RRF) retornando el fragmento idéntico `gpc_MSP_Trastornos-hipertensivos-del-embarazo-con-portada-3_chunk_0079` con la tabla oficial de impregnación/mantenimiento de sulfato de magnesio (página 40 de la GPC del MSP).
+  - **Autenticidad de Datos Clínicos y Corpus:**
+    * 42 archivos PDF físicos auténticos del Ministerio de Salud Pública de Ecuador organizados temáticamente en `backend/data/raw_pdfs/`.
+    * 10 casos clínicos canónicos en `backend/cases_data/cases.json`, cada uno vinculado de forma unívoca a su PDF oficial del MSP y a su fragmento ideal referenciado.
+    * 1,710 pares/tripletas científicas de entrenamiento y evaluación contrastiva con negativos duros en `backend/data/datasets/` (train: 1,178, val: 249, test blind: 283).
+    * Persistencia operativa en `ateneo_clinical.db` con 7 tablas activas (tenants, users, evaluation_history con 42 evaluaciones reales, ateneo_rooms con 97 salas, student_mastery con BKT en vivo, learning snapshots con historial psicométrico).
+    * Integración HTTP completa verificada en vivo (`POST /api/evaluate` -> 200 OK con Score 8.5/10, Faithfulness 0.6 y cita oficial ministerial anclada).
 
 
 
