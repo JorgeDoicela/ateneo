@@ -132,6 +132,7 @@ backend/.venv/Scripts/pytest backend/tests/ -v
 | `run_faithfulness_benchmark.py` | Benchmark de anclaje normativo de las GPCs frente a fragmentos normativos | `docs/1_tablas_latex/tabla_faithfulness_paper.tex`<br>`backend/tests/resultados_faithfulness.json` |
 | `06_train_bge_m3.py` | Fine-Tuning MNRL y evaluación cuantitativa Pre vs. Post en A100 | `docs/1_tablas_latex/tabla_pre_post_fine_tuning_bge_m3.tex`<br>`backend/data/models/eval_metrics_pre_post.json` |
 | `pilot_study_analyzer.py` | Análisis inferencial del estudio piloto con ganancia de aprendizaje | `docs/2_figuras_300dpi/figura_learning_gain.png`<br>`docs/1_tablas_latex/tabla_pilot_study_paper.tex` |
+| `audit_scientific_rag.py` | Batería de 5 experimentos científicos: RAG híbrido, discriminación letal LLM, Faithfulness, streaming SSE y BKT/ZDP | `docs/3_documentacion_metodologica/INFORME_CERTIFICACION_AUDITORIA_CIENTIFICA_RAG.md`<br>`backend/data/audit_results_dump.json` |
 
 ---
 
