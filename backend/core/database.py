@@ -22,7 +22,10 @@ if settings.is_sqlite:
     @event.listens_for(engine, "connect")
     def set_sqlite_pragma(dbapi_connection, connection_record):
         cursor = dbapi_connection.cursor()
-        cursor.execute("PRAGMA journal_mode=WAL")
+        try:
+            cursor.execute("PRAGMA journal_mode=WAL")
+        except Exception:
+            cursor.execute("PRAGMA journal_mode=DELETE")
         cursor.execute("PRAGMA synchronous=NORMAL")
         cursor.execute("PRAGMA foreign_keys=ON")
         cursor.close()
