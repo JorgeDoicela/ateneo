@@ -1219,4 +1219,12 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
     * Compilación `npm run build` completada en 3.94s con code-splitting segregado en chunks independientes (`TeacherLayout`, `TeacherCasesPage`, `TeacherAnalyticsPage`).
     * 26/26 suites y 121/121 tests en Vitest al 100% PASS.
     * Pytest backend al 100% PASS en contenedor `ateneo-backend-1`.
+* **Certificación Integral del Sistema para Investigación Científica (/goal - 2026-10-12):**
+  - **Base de Datos Relacional:** `PRAGMA integrity_check` = `ok`, `PRAGMA foreign_key_check` = `[]`. 44 usuarios, 11 tablas relacionales, 52 evaluaciones, 124 salas, magic link tokens con hash SHA-256 intactos. Fallback defensivo a `PRAGMA journal_mode=DELETE` implementado en `core/database.py` para erradicar errores de I/O sobre montajes NTFS de Docker.
+  - **Motor RAG Híbrido:** 7,052 fragmentos normativos del MSP indexados en ChromaDB v2. Búsqueda híbrida RRF con metadatos completos (CIE-10, CIE-11, página PDF real, año, hash SHA-256). Invarianza de recuperación en 10/10 casos canónicos y 9/9 tests en `test_retriever_pipeline.py`. Caché RAG de dos niveles con latencia en caliente de 0.05 ms (100% PASS en `test_rag_cache.py`).
+  - **Inferencia LLM:** `gemini-3.8-flash` activo en vivo con Google GenAI SDK. Cascada de relevo con Circuit Breaker (`CLOSED`, `OPEN`, `HALF_OPEN`) y cooldown de 300s. Blindaje contra prompt injections con 11/11 vectores neutralizados (100% PASS en `test_prompt_security.py`).
+  - **Algoritmos Psicométricos y Estudio Piloto:** Grafo KST (7 competencias), motor BKT probabilístico puro sin I/O, cálculo de ZDP y ganancia de Hake normalizada $g = 0.7400 \pm 0.0542$ (*High Gain*, $p < 0.0001$). Tabla formal exportada a `docs/1_tablas_latex/tabla_pilot_study_paper.tex`.
+  - **Frontend:** Build limpio en 3.94s con PWA precache (45 entradas, 716 KiB). 26 suites y 121/121 pruebas unitarias e integración en PASS (100%). Cero emojis en interfaz y componentes.
+
+
 

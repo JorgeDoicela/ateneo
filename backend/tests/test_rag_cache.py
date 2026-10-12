@@ -11,7 +11,6 @@ Verifica:
 """
 import time
 import threading
-import pytest
 from rag.cache_manager import RAGCacheManager, normalize_text_for_cache
 from rag.retriever import retrieve_relevant_chunk, rag_cache_manager
 

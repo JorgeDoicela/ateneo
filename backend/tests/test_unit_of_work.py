@@ -2,7 +2,6 @@
 Suite de Pruebas Unitarias e Integración para el Patrón Unit of Work (ACID).
 Verifica atomicidad estricta, commits coordinados multi-repositorio y rollbacks automáticos ante excepciones.
 """
-import pytest
 import datetime
 from core.unit_of_work import SqlAlchemyUnitOfWork
 from core.database import SessionLocal
