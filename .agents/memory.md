@@ -1022,6 +1022,14 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
     * `npx tsc --noEmit`: 0 errores en tipado estricto TypeScript.
   - **Conclusión y Cierre:**
     * Las 5 sesiones del `plan_correccion_pipeline_rag.md` quedan 100% EJECUTADAS, CERTIFICADAS Y DOCUMENTADAS bajo el estándar senior innegociable (+10 años, cero parches, cero emojis).
+* **Sincronización Canónica de Repositorio a 'ateneo' y Rama 'main' (2026-10-12):**
+  - **Rama Principal:** Rama local renombrada de `master` a `main` (`git branch -m master main`), configurada como upstream y publicada exitosamente en el repositorio remoto (`git push -u origin main`).
+  - **Sincronización de Contratos y Manifiestos:**
+    * `docker-compose.yml`: Nombre de proyecto normalizado de `clinical_rag` a `ateneo`.
+    * `README.md`: Árbol estructural del repositorio actualizado con raíz `ateneo/`.
+    * `docs/6_despliegue_y_operaciones/DESPLIEGUE_Y_ACCESO_CLOUDFLARE_TUNNEL.md`: Nombres de contenedores actualizados a `ateneo-frontend-1` y `ateneo-backend-1`.
+    * `docs/3_documentacion_metodologica/CUANTIZACION_Y_DESPLIEGUE_AWS.md`: URLs de clonación actualizadas a `https://github.com/JorgeDoicela/ateneo.git`.
+    * `backend/scratch/audit_step3_deep_verification.py`: Eliminado el path absoluto con nombre de carpeta hardcodeado, transformado a `Path(__file__).resolve().parent.parent`.
 
 
 
