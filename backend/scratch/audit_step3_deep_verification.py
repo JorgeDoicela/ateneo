@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 # Configurar path
-BACKEND_DIR = Path(r"c:\Users\DESARROLLADOR\Desktop\Proyectos\clinical_rag\backend").resolve()
+BACKEND_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BACKEND_DIR))
 
 from rag.retriever import retrieve_top_k_chunks, retrieve_relevant_chunk

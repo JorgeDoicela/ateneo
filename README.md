@@ -176,7 +176,7 @@ La base de datos SQLite relacional normalizada ([`backend/data/ateneo_clinical.d
 Todo el material experimental para el paper, las tablas en LaTeX, las figuras a 300 DPI y la documentación metodológica se encuentran organizados dentro de la carpeta [`docs/`](docs/):
 
 ```text
-clinical_rag/
+ateneo/
 ├── docs/                                 # CARPETA DE EVIDENCIA CIENTÍFICA
 │   │
 │   ├── 1_tablas_latex/                   # TABLAS EN FORMATO LATEX

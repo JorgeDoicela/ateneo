@@ -36,8 +36,8 @@ El trafico hacia Ateneo Clinical RAG ingresa a traves del borde de Cloudflare y 
 * **URL de Acceso Web:** `https://ateneo.doicela.dev`
 * **Servicio de Destino Local:** `http://localhost:5173` (o `http://127.0.0.1:5173`)
 * **Contenedores de Aplicacion:**
-  * `clinical_rag-frontend-1`: Puerto host `5173:5173` (React + Vite)
-  * `clinical_rag-backend-1`: Puerto host `8000:8000` (FastAPI / PyTorch / ChromaDB)
+  * `ateneo-frontend-1`: Puerto host `5173:5173` (React + Vite)
+  * `ateneo-backend-1`: Puerto host `8000:8000` (FastAPI / PyTorch / ChromaDB)
 * **Resolucion Interna de la API:** El servidor de desarrollo Vite incluye un proxy configurado en `vite.config.js` que redirige automaticamente las peticiones a `/api` y `/static` hacia `http://backend:8000`. De esta forma, el tunel solo necesita apuntar al puerto del frontend (`5173`).
 
 ---
@@ -53,7 +53,7 @@ El trafico hacia Ateneo Clinical RAG ingresa a traves del borde de Cloudflare y 
 ## 4. Procedimiento de Arranque y Operacion
 
 ### Paso 1: Levantar los Contenedores con Docker Compose
-En una terminal situada en la raiz del proyecto `clinical_rag`:
+En una terminal situada en la raiz del proyecto `ateneo`:
 
 ```bash
 docker compose up -d

@@ -122,8 +122,8 @@ class ONNXDenseRetriever:
 
 2. **Clonar e Iniciar Infraestructura:**
    ```bash
-   git clone https://github.com/JorgeDoicela/clinical_rag.git
-   cd clinical_rag
+   git clone https://github.com/JorgeDoicela/ateneo.git
+   cd ateneo
    
    # Crear .env con la API Key de Gemini (raíz del proyecto)
    cp .env.example .env
