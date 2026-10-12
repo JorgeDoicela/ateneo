@@ -1038,11 +1038,13 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
     4. **Sincronización de Contrato en Catálogo E2E (`frontend/e2e/clinical-catalog.spec.ts`):** Se alinearon las aserciones de Playwright con el título normativo auténtico (`'Preeclampsia con Criterios de Severidad'`), erradicando fallos de localización en Google Chrome, Microsoft Edge y Mobile Pixel 5.
     5. **Calibración de Rendimiento Multi-Browser (`frontend/e2e/core-web-vitals.spec.ts`):** Se calibró el presupuesto de `domReadyDuration` a `< 3500ms` en paridad con `domInteractive`, otorgando margen fáctico a la transpilación on-the-fly de Vite bajo ejecución concurrente de 3 navegadores en Windows.
     6. **Purga Criptográfica de Clave Secreta (`backend/core/security.py` y `backend/core/config.py`):** Se erradicó el fallback residual de secret key a `ateneo_secret_key_2026_msp_ecuador`, eliminando cualquier rastro de la denominación antigua.
+    7. **Arquitectura de Proxy Dual Docker/Host (`docker-compose.yml` & `frontend/vite.config.ts`):** Se resolvió de raíz el error `ENOTFOUND backend` al ejecutar `npm run dev` en máquina host Windows. Se inyectó `VITE_API_URL=http://backend:8000` en el servicio `frontend` de Docker Compose y se configuró fallback a `http://localhost:8000` en `vite.config.ts`.
+    8. **Rediseño Horizontal de Autenticación (`frontend/src/modules/auth/pages/Login.tsx`):** Se refactorizó la vista de acceso para cumplir con la especificación estricta del Design System de Ateneo+ (Patrón Google Accounts horizontal de 1040px, split 5 columnas izquierda para título e iconografía plana M3 y 7 columnas derecha para formulario flotante de 2 pasos con floating labels). Certificado con 5/5 tests unitarios en Vitest y 6/6 tests E2E en Playwright.
   - **Matriz de Certificación Empírica (100% PASS en Todas las Capas):**
     * **Frontend Typecheck:** `tsc --noEmit` aprobado con 0 errores en TypeScript 5 estricto.
     * **Frontend Vitest:** 22/22 suites y 106/106 tests unitarios aprobados al 100% PASS (53.42s).
-    * **Frontend Build PWA:** `vite build` completado exitosamente en 10.77s (1,822 módulos, SW registrado).
-    * **Frontend E2E (Playwright):** 15/15 pruebas aprobadas al 100% PASS en Google Chrome, Microsoft Edge y Mobile Pixel 5 (20.8s).
+    * **Frontend Build PWA:** `vite build` completado exitosamente en 9.04s (1,822 módulos, SW registrado).
+    * **Frontend E2E (Playwright):** 15/15 pruebas aprobadas al 100% PASS en Google Chrome, Microsoft Edge y Mobile Pixel 5 (20.2s).
     * **Backend Pytest:** 84/84 pruebas unitarias aprobadas al 100% PASS en Docker (`pytest -q`, 137.61s).
     * **Backend Orquestador Maestro:** 8/8 suites maestras aprobadas al 100% PASS (`tests.run_all_tests`, 125.71s): Seguridad RBAC/UoW, KST/BKT, Diferenciadores Científicos + RAG Caché + 10 GPCs, Estudio Piloto ($g=0.74$), Endpoints HTTP + SSE + WebSockets, Fusión Multimodal + Firma SHA-256, Workers Asíncronos + Logging JSON, Auditoría de Carga (100 usuarios, 0% locks WAL, Circuit Breakers).
 
