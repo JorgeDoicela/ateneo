@@ -69,7 +69,7 @@ class AppSettings(BaseModel):
 
     # Seguridad & Auth
     jwt_secret_key: str = Field(
-        default_factory=lambda: os.getenv("JWT_SECRET_KEY", "ateneo_clinical_rag_secret_key_2026_msp_ecuador")
+        default_factory=lambda: os.getenv("JWT_SECRET_KEY", "ateneo_secret_key_2026_msp_ecuador")
     )
     access_token_expire_minutes: int = Field(
         default_factory=lambda: int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "120"))

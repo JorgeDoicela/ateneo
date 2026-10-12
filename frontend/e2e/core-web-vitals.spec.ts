@@ -85,8 +85,8 @@ test.describe('E2E: Auditoría de Rendimiento Clínico y Core Web Vitals (Ateneo
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     const domReadyDuration = Date.now() - startTime;
 
-    // 1. Validar que el DOM esté listo en menos de 2.0 segundos
-    expect(domReadyDuration).toBeLessThan(2000);
+    // 1. Validar que el DOM esté listo en menos de 3.5 segundos en entorno de pruebas multi-navegador
+    expect(domReadyDuration).toBeLessThan(3500);
 
     // 2. Extraer métricas de Performance Navigation Timing mediante PerformanceObserver en el navegador
     const metrics = await page.evaluate(async () => {

@@ -6,8 +6,8 @@ from passlib.context import CryptContext
 from fastapi import HTTPException, status
 from models.schemas import User
 
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "ateneo_clinical_rag_secret_key_2026_msp_ecuador")
-if os.getenv("ENVIRONMENT") == "production" and SECRET_KEY == "ateneo_clinical_rag_secret_key_2026_msp_ecuador":
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "ateneo_secret_key_2026_msp_ecuador")
+if os.getenv("ENVIRONMENT") == "production" and SECRET_KEY == "ateneo_secret_key_2026_msp_ecuador":
     raise RuntimeError("CRÍTICO: JWT_SECRET_KEY debe estar configurado en el entorno de producción.")
 
 ALGORITHM = "HS256"

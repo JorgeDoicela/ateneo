@@ -68,7 +68,9 @@ def test_http_endpoint_rate_limit_headers_and_429():
     from core.rate_limiter import rate_limit_export, global_rate_limiter
     global_rate_limiter.clear()
 
-    client = get_test_client()
+    from fastapi.testclient import TestClient
+    from main import app
+    client = TestClient(app)
 
     payload = {
         "case_id": "case_preeclampsia_01",

@@ -101,7 +101,7 @@ test.describe('E2E: Catálogo Clínico y Navegación Diagnóstica (Ateneo+)', ()
     
     // 2. Tarjetas de Casos Clínicos Canónicos
     await expect(page.locator('text=Hemorragia Posparto Inmediata').first()).toBeVisible();
-    await expect(page.locator('text=Trastorno Hipertensivo').first()).toBeVisible();
+    await expect(page.locator('text=Preeclampsia con Criterios de Severidad').first()).toBeVisible();
 
     // 3. Filtrado por término de búsqueda (en viewports desktop md+)
     const isMobile = page.viewportSize() ? (page.viewportSize()!.width < 768) : false;
@@ -110,7 +110,7 @@ test.describe('E2E: Catálogo Clínico y Navegación Diagnóstica (Ateneo+)', ()
       await expect(searchBar).toBeVisible();
       await searchBar.fill('Hemorragia');
       await expect(page.locator('text=Hemorragia Posparto Inmediata').first()).toBeVisible();
-      await expect(page.locator('text=Trastorno Hipertensivo')).not.toBeVisible();
+      await expect(page.locator('text=Preeclampsia con Criterios de Severidad')).not.toBeVisible();
     }
   });
 });

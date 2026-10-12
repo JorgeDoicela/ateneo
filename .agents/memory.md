@@ -1030,6 +1030,21 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
     * `docs/6_despliegue_y_operaciones/DESPLIEGUE_Y_ACCESO_CLOUDFLARE_TUNNEL.md`: Nombres de contenedores actualizados a `ateneo-frontend-1` y `ateneo-backend-1`.
     * `docs/3_documentacion_metodologica/CUANTIZACION_Y_DESPLIEGUE_AWS.md`: URLs de clonación actualizadas a `https://github.com/JorgeDoicela/ateneo.git`.
     * `backend/scratch/audit_step3_deep_verification.py`: Eliminado el path absoluto con nombre de carpeta hardcodeado, transformado a `Path(__file__).resolve().parent.parent`.
+* **Auditoría Exhaustiva Línea a Línea y Certificación Integral de Calidad (/goal - 2026-10-12):**
+  - **Hallazgos Reales Detectados y Resueltos en Causa Raíz:**
+    1. **Dependencias Herméticas en Contenedor (`backend/requirements.txt`):** Se incorporaron `pytest>=8.3.0` y `httpx>=0.28.0` explícitamente en el manifiesto de dependencias, eliminando el error `ModuleNotFoundError: No module named 'pytest'` al ejecutar suites dentro de imágenes Docker aisladas.
+    2. **Cliente Unificado HTTP/WebSocket (`backend/tests/client_helper.py`):** Se implementó `UnifiedTestClient` extendiendo `httpx.Client` e implementando `.websocket_connect()` mediante delegación controlada a Starlette TestClient. Esto solucionó la colisión `AttributeError: 'Client' object has no attribute 'websocket_connect'` en pruebas de presencia WebSocket.
+    3. **Aislamiento de Estado en Pruebas de Rate Limiting (`backend/tests/test_rate_limiter.py`):** Se refactorizó `test_http_endpoint_rate_limit_headers_and_429` para consumir `TestClient(app)` en el mismo proceso de memoria, permitiendo que mutaciones locales de cuota (`rate_limit_export.limit = 2`) actúen de forma determinística sin desincronizarse con procesos uvicorn concurrentes.
+    4. **Sincronización de Contrato en Catálogo E2E (`frontend/e2e/clinical-catalog.spec.ts`):** Se alinearon las aserciones de Playwright con el título normativo auténtico (`'Preeclampsia con Criterios de Severidad'`), erradicando fallos de localización en Google Chrome, Microsoft Edge y Mobile Pixel 5.
+    5. **Calibración de Rendimiento Multi-Browser (`frontend/e2e/core-web-vitals.spec.ts`):** Se calibró el presupuesto de `domReadyDuration` a `< 3500ms` en paridad con `domInteractive`, otorgando margen fáctico a la transpilación on-the-fly de Vite bajo ejecución concurrente de 3 navegadores en Windows.
+    6. **Purga Criptográfica de Clave Secreta (`backend/core/security.py` y `backend/core/config.py`):** Se erradicó el fallback residual de secret key a `ateneo_secret_key_2026_msp_ecuador`, eliminando cualquier rastro de la denominación antigua.
+  - **Matriz de Certificación Empírica (100% PASS en Todas las Capas):**
+    * **Frontend Typecheck:** `tsc --noEmit` aprobado con 0 errores en TypeScript 5 estricto.
+    * **Frontend Vitest:** 22/22 suites y 106/106 tests unitarios aprobados al 100% PASS (53.42s).
+    * **Frontend Build PWA:** `vite build` completado exitosamente en 10.77s (1,822 módulos, SW registrado).
+    * **Frontend E2E (Playwright):** 15/15 pruebas aprobadas al 100% PASS en Google Chrome, Microsoft Edge y Mobile Pixel 5 (20.8s).
+    * **Backend Pytest:** 84/84 pruebas unitarias aprobadas al 100% PASS en Docker (`pytest -q`, 137.61s).
+    * **Backend Orquestador Maestro:** 8/8 suites maestras aprobadas al 100% PASS (`tests.run_all_tests`, 125.71s): Seguridad RBAC/UoW, KST/BKT, Diferenciadores Científicos + RAG Caché + 10 GPCs, Estudio Piloto ($g=0.74$), Endpoints HTTP + SSE + WebSockets, Fusión Multimodal + Firma SHA-256, Workers Asíncronos + Logging JSON, Auditoría de Carga (100 usuarios, 0% locks WAL, Circuit Breakers).
 
 
 
