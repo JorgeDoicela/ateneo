@@ -406,3 +406,50 @@ export interface LearningActivityEventRecord {
   metadata: Record<string, unknown>;
   timestamp: string;
 }
+
+// ==========================================
+// 9. Magic Links e Invitaciones Configurables
+// ==========================================
+
+export interface MagicLinkCreatePayload {
+  rol: 'alumno' | 'docente' | 'administrador';
+  email?: string;
+  recipient_name?: string;
+  tenant_id?: string;
+  duracion_horas: number;
+  max_uses: number;
+  target_path: string;
+  cohorte_id?: string;
+  restrict_domain?: boolean;
+}
+
+export interface MagicLinkRecord {
+  id: string;
+  magic_link_url: string;
+  email?: string | null;
+  recipient_name?: string | null;
+  rol: 'alumno' | 'docente' | 'administrador';
+  tenant_id: string;
+  target_path: string;
+  cohorte_id?: string | null;
+  restrict_domain: boolean;
+  expires_at: string;
+  max_uses: number;
+  used_count: number;
+  is_revoked: boolean;
+  created_at: string;
+}
+
+export interface MagicLinkConsumePayload {
+  token: string;
+  email?: string;
+  nombre?: string;
+}
+
+export interface MagicLinkConsumeResult {
+  access_token: string;
+  token_type: string;
+  target_path: string;
+  user: User;
+}
+

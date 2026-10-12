@@ -8,7 +8,11 @@ import type {
   LoginResponse, 
   User, 
   RegisterRequest, 
-  RegisterResponse 
+  RegisterResponse,
+  MagicLinkCreatePayload,
+  MagicLinkRecord,
+  MagicLinkConsumePayload,
+  MagicLinkConsumeResult
 } from '../../../types';
 
 /**
@@ -52,6 +56,26 @@ export const authApi = {
 
   async logout(): Promise<{ mensaje: string }> {
     const res = await httpClient.post<{ mensaje: string }>('/api/auth/logout');
+    return res.data;
+  },
+
+  async createMagicLink(data: MagicLinkCreatePayload): Promise<MagicLinkRecord> {
+    const res = await httpClient.post<MagicLinkRecord>('/api/auth/magic-links', data);
+    return res.data;
+  },
+
+  async listMagicLinks(): Promise<MagicLinkRecord[]> {
+    const res = await httpClient.get<MagicLinkRecord[]>('/api/auth/magic-links');
+    return res.data;
+  },
+
+  async revokeMagicLink(linkId: string): Promise<{ mensaje: string }> {
+    const res = await httpClient.delete<{ mensaje: string }>(`/api/auth/magic-links/${linkId}`);
+    return res.data;
+  },
+
+  async consumeMagicLink(data: MagicLinkConsumePayload): Promise<MagicLinkConsumeResult> {
+    const res = await httpClient.post<MagicLinkConsumeResult>('/api/auth/magic-links/consume', data);
     return res.data;
   }
 };

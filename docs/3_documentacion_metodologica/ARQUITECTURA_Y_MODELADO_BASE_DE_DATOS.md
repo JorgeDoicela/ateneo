@@ -256,16 +256,45 @@ erDiagram
   1. `ix_event_user_case_time`: `(user_id, case_id, timestamp)` para reconstruir la cronología de resolución del caso por alumno.
   2. `ix_event_tenant_type`: `(tenant_id, event_type)` para métricas institucionales de adopción pedagógica.
 
+### 3.7 Tabla `magic_link_tokens` (Control de Enlaces e Invitaciones Configurables)
+* **Archivo de Definición:** `backend/modules/auth/models.py`.
+* **Propósito:** Persistencia, control de expiración, auditoría y canje de enlaces de acceso directo sin contraseña. Almacena exclusivamente el hash criptográfico `SHA-256` para evitar la exposición de tokens activos en volcados de datos.
+
+| Columna | Tipo de Dato | Nulo | Restricciones / Índices | Descripción Técnica |
+| :--- | :--- | :---: | :--- | :--- |
+| `id` | `VARCHAR(64)` | NO | `PRIMARY KEY` | Identificador único del enlace (UUID v4). |
+| `token_hash` | `VARCHAR(64)` | NO | `UNIQUE`, `INDEX` | Resumen SHA-256 del token opaco emitido. |
+| `email` | `VARCHAR(150)` | SÍ | `INDEX` | Correo del destinatario si el enlace es nominativo. |
+| `recipient_name` | `VARCHAR(150)` | SÍ | — | Nombre referencial o etiqueta de la cohorte invitada. |
+| `rol` | `VARCHAR(50)` | NO | `DEFAULT 'alumno'` | Rol RBAC concedido (`alumno`, `docente`, `administrador`). |
+| `tenant_id` | `VARCHAR(50)` | NO | `FOREIGN KEY (tenants.id) ON DELETE CASCADE`, `INDEX` | Institución vinculada para aislamiento de datos. |
+| `target_path` | `VARCHAR(255)` | NO | `DEFAULT '/cases'` | Ruta clínica de destino tras canjear el token. |
+| `cohorte_id` | `VARCHAR(50)` | SÍ | `DEFAULT 'general'` | Cohorte académica de asignación pedagógica. |
+| `restrict_domain`| `BOOLEAN` | NO | `DEFAULT 0` | Si exige que el dominio del correo coincida con el tenant. |
+| `expires_at` | `SafeDateTime` | NO | `INDEX` | Marca temporal UTC en la que expira la validez del link. |
+| `max_uses` | `INTEGER` | NO | `DEFAULT 1` | Número máximo de canjes admitidos (1 para uso único o $N$ para cohorte). |
+| `used_count` | `INTEGER` | NO | `DEFAULT 0` | Conteo de veces que ha sido canjeado exitosamente. |
+| `is_revoked` | `BOOLEAN` | NO | `DEFAULT 0`, `INDEX` | Bandera de revocación manual inmediata por el administrador. |
+| `created_by_user_id`| `VARCHAR(100)`| NO | `FOREIGN KEY (users.id) ON DELETE CASCADE` | Administrador emisor del enlace para auditoría. |
+| `created_at` | `SafeDateTime` | NO | `DEFAULT CURRENT_TIMESTAMP` | Marca temporal UTC de creación. |
+
+* **Índices de Rendimiento y Seguridad:**
+  1. `ix_magic_token_hash`: Búsqueda instantánea $O(1)$ durante el canje público.
+  2. `ix_magic_tenant_active`: `(tenant_id, is_revoked)` para listados ágiles en consola administrativa.
+  3. `ix_magic_expires`: `(expires_at)` para depuración y descarte de tokens vencidos.
+
 ---
 
 ## 4. Scripts Determinísticos de Migración y Validación de Esquema
 
-Para garantizar la evolución continua sin pérdida de datos ni regresiones, la plataforma cuenta con dos scripts de migración transaccional:
+Para garantizar la evolución continua sin pérdida de datos ni regresiones, la plataforma cuenta con scripts de migración transaccional:
 1. `scripts/migrate_history_to_ateneo_clinical.py`:
    - Migración inicial de JSON hacia SQLite relacional, desglosando fases y Faithfulness Scores con deduplicación.
 2. `scripts/migrate_auth_telemetry_v2.py`:
    - Migración idempotente integral (Fases 1 a 5): valida columnas de auditoría en `users`, tabla `user_sessions`, columnas de inferencia en `evaluation_history` y tabla `learning_activity_events`.
    - Ejecuta `PRAGMA foreign_key_check` y `PRAGMA integrity_check`, garantizando la retención íntegra de las evaluaciones preexistentes y salas colaborativas.
+3. `scripts/migrate_magic_links.py`:
+   - Migración idempotente de la Fase 1 de Magic Links: crea la tabla `magic_link_tokens` y sus índices criptográficos, validando la integridad física y retención absoluta de registros.
 
 ---
 

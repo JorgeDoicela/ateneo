@@ -1149,3 +1149,43 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
     * Backend: 4/4 tests en `test_learning_events.py` aprobados; 3/3 tests en `test_telemetry.py` aprobados; 6/6 tests en `test_auth_security.py` aprobados; 22/22 endpoints en `test_api_endpoints.py` aprobados.
     * Frontend: 25/25 suites y 117/117 tests en Vitest aprobados al 100%; compilación de producción en Vite (`npm run build`) completada con éxito en 10.20s (PWA precache de 32 recursos, 671.51 KiB).
     * Plan Maestro de Profesionalización de Identidad, Sesiones y Telemetría Clínica completado y certificado al 100% en sus 5 fases.
+* **Ejecución y Certificación de la Fase 1: Persistencia Relacional y Migración de Magic Links (2026-10-12):**
+  - **Base de Datos & DDL:**
+    * Entidad relacional `MagicLinkTokenModel` en `modules/auth/models.py` (`magic_link_tokens` con `token_hash` SHA-256 único, `email`, `recipient_name`, `rol`, `tenant_id`, `target_path`, `cohorte_id`, `restrict_domain`, `expires_at`, `max_uses`, `used_count`, `is_revoked`, `created_by_user_id` y `created_at`).
+    * Índices de rendimiento y seguridad: `ix_magic_token_hash`, `ix_magic_tenant_active` e `ix_magic_expires`.
+    * Creado y ejecutado el script maestro determinístico de migración `scripts/migrate_magic_links.py`: aplicado sobre `ateneo_clinical.db` con validación de idempotencia doble, verificación de `PRAGMA integrity_check` = `[('ok',)]`, `PRAGMA foreign_key_check` = `[]` y preservación íntegra de registros (52 evaluaciones, 124 salas, 25 usuarios).
+  - **Capa de Repositorio:**
+    * Implementado `MagicLinkRepository` en `modules/auth/repository.py` con operaciones `create`, `get_by_id`, `get_by_hash`, `list_by_tenant`, `revoke` y `update`.
+    * Registro de metadata en `core/database.init_database()`.
+  - **Pruebas Unitarias Automatizadas:**
+    * Suite de persistencia `backend/tests/test_magic_links_repository.py`: 5/5 pruebas aprobadas al 100% (persistencia de modelo, búsqueda por hash SHA-256, filtrado por tenant, conteo atómico de usos y revocación en caliente).
+* **Ejecución y Certificación de la Fase 2: Lógica de Dominio y Endpoints de Magic Links (2026-10-12):**
+  - **Contratos Pydantic (`models/schemas.py`):**
+    * Modelos `MagicLinkCreateRequest`, `MagicLinkResponse`, `MagicLinkConsumeRequest` y `MagicLinkConsumeResponse` implementados con validación estricta de sintaxis de correo sin dependencias externas innecesarias.
+  - **Servicio de Dominio (`modules/auth/service.py`):**
+    * `create_magic_link`: Genera `raw_token` (`secrets.token_urlsafe(32)`), calcula y persiste `token_hash` (`hashlib.sha256`) y construye la URL directa.
+    * `consume_magic_link`: Búsqueda indexada $O(1)$ por hash, verificación de vigencia y usos, resolución o provisión JIT de usuario en tenant, incremento atómico de `used_count`, emisión de JWT con claim `jti` persistido en `user_sessions`.
+    * `list_magic_links` y `revoke_magic_link`: Gestión institucional para el Administrador.
+  - **Controladores y Rutas (`routers/auth.py`):**
+    * Endpoints expuestos: `POST /api/auth/magic-links` (201 Created, RBAC Admin), `GET /api/auth/magic-links` (200 OK, RBAC Admin), `DELETE /api/auth/magic-links/{link_id}` (200 OK, RBAC Admin) y `POST /api/auth/magic-links/consume` (200 OK, Público, Rate-Limited).
+  - **Validación Automatizada (100% PASS):**
+    * Suite de integración `backend/tests/test_magic_links_endpoints.py`: 7/7 pruebas aprobadas (bloqueo RBAC a no-admins, emisión nominativa, canje con provisión de rol y target_path, control de agotamiento por max_uses, requerimiento de correo en enlaces grupales, canje grupal exitoso y revocación en caliente).
+* **Ejecución y Certificación de la Fase 3: Integración Frontend y Consola de Administración (2026-10-12):**
+  - **Tipados y Validación Zod:**
+    * Interfaces `MagicLinkCreatePayload`, `MagicLinkRecord`, `MagicLinkConsumePayload` y `MagicLinkConsumeResult` en `types/index.ts`.
+    * Esquemas Zod en tiempo de ejecución: `MagicLinkCreateSchema`, `MagicLinkRecordSchema` y `MagicLinkConsumeSchema` en `core/validation/schemas.ts`.
+  - **Módulo de Red y Store:**
+    * Métodos `createMagicLink`, `listMagicLinks`, `revokeMagicLink` y `consumeMagicLink` implementados en `authApi.ts`.
+    * Operación atómica `setAuth(user, token)` incorporada en `useAuthStore.ts` con persistencia en `localStorage`.
+  - **Página de Aterrizaje y Canje (`modules/auth/pages/MagicLogin.tsx`):**
+    * Detección de token en URL, canje automático nominativo sin clics, formulario elegante con Floating Labels si el enlace es de cohorte grupal, control de errores amigable sin emojis y redirección al destino clínico configurado.
+    * Rutas `/auth/magic-login` y `/magic-login` registradas en `AppRoutes.tsx`.
+  - **Consola de Administración (`modules/admin/components/MagicLinkGeneratorCard.tsx`):**
+    * Formulario reactivo completo en `AdminDashboard.tsx` para configurar rol, audiencia, vigencia (TTL), cupo de canjes, destino clínico y restricción de dominio.
+    * Modal con URL generada, botón de copia rápida al portapapeles y tabla de auditoría con revocación en caliente en tiempo real.
+  - **Validación Automatizada Consolidada (100% PASS):**
+    * Frontend: Nueva suite `MagicLinks.test.tsx` aprobada al 100% (4/4 tests PASS); suite global de Vitest con 26/26 suites y 121/121 tests PASS.
+    * Compilación de producción en Vite (`npm run build`) exitosa en 5.40s (PWA precache de 35 entradas, 697.17 KiB).
+
+
+

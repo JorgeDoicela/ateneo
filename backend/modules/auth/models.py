@@ -65,3 +65,31 @@ class UserSessionModel(Base):
     expires_at = Column(SafeDateTime, nullable=False)
     created_at = Column(SafeDateTime, server_default=func.now(), nullable=False)
 
+
+class MagicLinkTokenModel(Base):
+    """
+    Entidad persistida para la emisión, validación y control de Magic Links e Invitaciones.
+    Almacena únicamente el hash SHA-256 del token plano para prevenir compromisos de seguridad
+    en caso de exportación o fuga de base de datos.
+    """
+    __tablename__ = "magic_link_tokens"
+
+    id = Column(String(64), primary_key=True, index=True)
+    token_hash = Column(String(64), unique=True, nullable=False, index=True)
+    email = Column(String(150), nullable=True, index=True)
+    recipient_name = Column(String(150), nullable=True)
+    rol = Column(String(50), nullable=False, default="alumno")
+    tenant_id = Column(String(50), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+    target_path = Column(String(255), nullable=False, default="/cases")
+    cohorte_id = Column(String(50), nullable=True, default="general")
+    restrict_domain = Column(Boolean, nullable=False, default=False, server_default="0")
+    
+    expires_at = Column(SafeDateTime, nullable=False, index=True)
+    max_uses = Column(Integer, nullable=False, default=1, server_default="1")
+    used_count = Column(Integer, nullable=False, default=0, server_default="0")
+    is_revoked = Column(Boolean, nullable=False, default=False, server_default="0", index=True)
+    
+    created_by_user_id = Column(String(100), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    created_at = Column(SafeDateTime, server_default=func.now(), nullable=False)
+
+

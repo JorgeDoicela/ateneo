@@ -1,7 +1,7 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from modules.auth.models import UserModel, TenantModel, UserSessionModel
+from modules.auth.models import UserModel, TenantModel, UserSessionModel, MagicLinkTokenModel
 
 
 class TenantRepository:
@@ -159,6 +159,61 @@ class UserSessionRepository:
         else:
             self.db.flush()
         return count
+
+
+class MagicLinkRepository:
+    """
+    Repositorio relacional para la emisión, consulta y revocación de Magic Links e Invitaciones.
+    Busca estrictamente por token_hash para salvaguardar la confidencialidad de los enlaces.
+    """
+    def __init__(self, db: Session):
+        self.db = db
+
+    def create(self, link: MagicLinkTokenModel, commit: bool = True) -> MagicLinkTokenModel:
+        self.db.add(link)
+        if commit:
+            self.db.commit()
+            self.db.refresh(link)
+        else:
+            self.db.flush()
+        return link
+
+    def get_by_id(self, link_id: str) -> Optional[MagicLinkTokenModel]:
+        return self.db.query(MagicLinkTokenModel).filter(MagicLinkTokenModel.id == link_id).first()
+
+    def get_by_hash(self, token_hash: str) -> Optional[MagicLinkTokenModel]:
+        return self.db.query(MagicLinkTokenModel).filter(MagicLinkTokenModel.token_hash == token_hash).first()
+
+    def list_by_tenant(
+        self, 
+        tenant_id: str, 
+        limit: int = 100, 
+        include_revoked: bool = True
+    ) -> List[MagicLinkTokenModel]:
+        query = self.db.query(MagicLinkTokenModel).filter(MagicLinkTokenModel.tenant_id == tenant_id)
+        if not include_revoked:
+            query = query.filter(MagicLinkTokenModel.is_revoked == False)
+        return query.order_by(MagicLinkTokenModel.created_at.desc()).limit(limit).all()
+
+    def revoke(self, link_id: str, commit: bool = True) -> bool:
+        link = self.get_by_id(link_id)
+        if not link:
+            return False
+        link.is_revoked = True
+        if commit:
+            self.db.commit()
+        else:
+            self.db.flush()
+        return True
+
+    def update(self, link: MagicLinkTokenModel, commit: bool = True) -> MagicLinkTokenModel:
+        if commit:
+            self.db.commit()
+            self.db.refresh(link)
+        else:
+            self.db.flush()
+        return link
+
 
 
 

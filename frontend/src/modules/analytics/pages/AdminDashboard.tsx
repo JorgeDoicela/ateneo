@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ShieldCheck, Users, Database, Server, RefreshCw, UserCheck, GraduationCap } from 'lucide-react';
 import { authApi } from '../../auth/api/authApi';
 import type { User } from '../../../types';
+import MagicLinkGeneratorCard from '../../admin/components/MagicLinkGeneratorCard';
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([]);
@@ -149,6 +150,9 @@ export default function AdminDashboard() {
           </div>
         )}
       </div>
+
+      {/* Generador y Auditoría de Magic Links */}
+      <MagicLinkGeneratorCard />
 
     </div>
   );

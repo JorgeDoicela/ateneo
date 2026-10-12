@@ -12,6 +12,7 @@ export interface AuthState {
   verifyAuth: () => Promise<void>;
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
+  setAuth: (user: User, token: string) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -31,6 +32,12 @@ export const useAuthStore = create<AuthState>()(
           }
         }
         set({ token });
+      },
+      setAuth: (user, token) => {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('ateneo_token', token);
+        }
+        set({ user, token, loading: false });
       },
 
       login: async (email: string, password: string): Promise<User> => {

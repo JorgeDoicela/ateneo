@@ -10,6 +10,7 @@ const CaseSolve = lazy(() => import('../modules/evaluation/pages/CaseSolve'));
 const AteneoRoom = lazy(() => import('../modules/collaboration/pages/AteneoRoom'));
 const Login = lazy(() => import('../modules/auth/pages/Login'));
 const Register = lazy(() => import('../modules/auth/pages/Register'));
+const MagicLogin = lazy(() => import('../modules/auth/pages/MagicLogin'));
 const AdminDashboard = lazy(() => import('../modules/analytics/pages/AdminDashboard'));
 const TeacherDashboard = lazy(() => import('../modules/analytics/pages/TeacherDashboard'));
 const ScientificBenchmarkView = lazy(() => import('../modules/analytics/components/ScientificBenchmarkView'));
@@ -30,6 +31,8 @@ export default function AppRoutes() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/auth/magic-login" element={<MagicLogin />} />
+          <Route path="/magic-login" element={<Navigate to="/auth/magic-login" replace />} />
 
           <Route
             path="/"

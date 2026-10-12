@@ -95,7 +95,7 @@ def init_database() -> None:
     """Crea todas las tablas declaradas en los modelos si aún no existen y siembra datos iniciales."""
     import json
     # Importar entidades para registrar sus esquemas en Base.metadata
-    from modules.auth.models import UserModel, TenantModel, UserSessionModel
+    from modules.auth.models import UserModel, TenantModel, UserSessionModel, MagicLinkTokenModel
     from modules.analytics_history.models import EvaluationHistoryModel
     from modules.collaboration.models import AteneoRoomModel
     from modules.adaptive.models import StudentMasteryModel, StudentSnapshotModel

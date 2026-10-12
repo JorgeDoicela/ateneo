@@ -234,3 +234,43 @@ export const LearningActivityEventRecordSchema = z.object({
   metadata: z.record(z.string(), z.unknown()).default({}),
   timestamp: z.string(),
 });
+
+// ==========================================
+// 6. Magic Links e Invitaciones Configurables
+// ==========================================
+
+export const MagicLinkCreateSchema = z.object({
+  rol: z.enum(['alumno', 'docente', 'administrador']),
+  email: z.string().email('Correo electrónico no válido').optional().or(z.literal('')),
+  recipient_name: z.string().optional(),
+  tenant_id: z.string().optional(),
+  duracion_horas: z.number().int().min(1).max(720).default(72),
+  max_uses: z.number().int().min(1).max(500).default(1),
+  target_path: z.string().default('/cases'),
+  cohorte_id: z.string().optional(),
+  restrict_domain: z.boolean().default(false),
+});
+
+export const MagicLinkRecordSchema = z.object({
+  id: z.string(),
+  magic_link_url: z.string(),
+  email: z.string().nullable().optional(),
+  recipient_name: z.string().nullable().optional(),
+  rol: z.enum(['alumno', 'docente', 'administrador']),
+  tenant_id: z.string(),
+  target_path: z.string(),
+  cohorte_id: z.string().nullable().optional(),
+  restrict_domain: z.boolean().default(false),
+  expires_at: z.string(),
+  max_uses: z.number(),
+  used_count: z.number(),
+  is_revoked: z.boolean(),
+  created_at: z.string(),
+});
+
+export const MagicLinkConsumeSchema = z.object({
+  token: z.string().min(1, 'Token requerido'),
+  email: z.string().email('Correo no válido').optional(),
+  nombre: z.string().optional(),
+});
+

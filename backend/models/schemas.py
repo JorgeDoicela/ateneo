@@ -210,4 +210,67 @@ class LearningActivityEventResponse(BaseModel):
     timestamp: str
 
 
+class MagicLinkCreateRequest(BaseModel):
+    rol: str = Field(default="alumno", description="Rol asignado: alumno, docente, administrador")
+    email: Optional[str] = Field(None, description="Email nominativo opcional")
+    recipient_name: Optional[str] = Field(None, description="Nombre referencial o etiqueta de la cohorte")
+    tenant_id: Optional[str] = Field(None, description="ID del tenant. Si es None se toma el del administrador emisor")
+    duracion_horas: int = Field(default=72, ge=1, le=720, description="Ventana de vigencia en horas (1 a 720)")
+    max_uses: int = Field(default=1, ge=1, le=500, description="Límite máximo de canjes (1 a 500)")
+    target_path: str = Field(default="/cases", description="Ruta de redirección clínica tras canjear el link")
+    cohorte_id: Optional[str] = Field(default="general", description="Cohorte académica para analítica")
+    restrict_domain: bool = Field(default=False, description="Exigir coincidencia con el dominio institucional del tenant")
+
+    @field_validator("email")
+    @classmethod
+    def validate_email_syntax(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return None
+        clean = v.strip().lower()
+        if "@" not in clean or "." not in clean.split("@")[-1]:
+            raise ValueError("El correo electrónico del destinatario no tiene un formato válido.")
+        return clean
+
+
+class MagicLinkResponse(BaseModel):
+    id: str
+    magic_link_url: str
+    email: Optional[str] = None
+    recipient_name: Optional[str] = None
+    rol: str
+    tenant_id: str
+    target_path: str
+    cohorte_id: Optional[str] = "general"
+    restrict_domain: bool = False
+    expires_at: str
+    max_uses: int
+    used_count: int
+    is_revoked: bool
+    created_at: str
+
+
+class MagicLinkConsumeRequest(BaseModel):
+    token: str = Field(..., description="Token opaco criptográfico del Magic Link")
+    email: Optional[str] = Field(None, description="Email del participante (requerido si el enlace es de cohorte anónima)")
+    nombre: Optional[str] = Field(None, description="Nombre del participante (requerido si es nuevo registro de cohorte)")
+
+    @field_validator("email")
+    @classmethod
+    def validate_consume_email_syntax(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return None
+        clean = v.strip().lower()
+        if "@" not in clean or "." not in clean.split("@")[-1]:
+            raise ValueError("El correo electrónico del participante no tiene un formato válido.")
+        return clean
+
+
+class MagicLinkConsumeResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    target_path: str
+    user: UserResponse
+
+
+
 

@@ -8,6 +8,10 @@ from models.schemas import (
     UserRole,
     RegisterRequest,
     RegisterResponse,
+    MagicLinkCreateRequest,
+    MagicLinkResponse,
+    MagicLinkConsumeRequest,
+    MagicLinkConsumeResponse,
 )
 from auth.security import get_current_user, require_roles, security_scheme, decode_access_token
 from modules.auth.dependencies import get_auth_service
@@ -98,3 +102,105 @@ async def list_users(
     auth_service: AuthService = Depends(get_auth_service)
 ):
     return auth_service.list_users()
+
+
+@router.post("/magic-links", response_model=MagicLinkResponse, status_code=status.HTTP_201_CREATED)
+async def create_magic_link(
+    req: MagicLinkCreateRequest,
+    request: Request,
+    current_user: UserResponse = Depends(require_roles([UserRole.ADMINISTRADOR])),
+    auth_service: AuthService = Depends(get_auth_service)
+):
+    """
+    Genera un Magic Link de acceso seguro e invitación configurable con hash SHA-256.
+    Exclusivo para el rol de Administrador.
+    """
+    try:
+        # Resolver base URL del frontend desde los headers o fallback
+        origin = request.headers.get("origin") or request.headers.get("referer")
+        base_frontend_url = origin.split("?")[0].rstrip("/") if origin else "http://localhost:5174"
+        return auth_service.create_magic_link(
+            admin_user_id=current_user.id,
+            admin_tenant_id=current_user.tenant_id,
+            req=req,
+            base_frontend_url=base_frontend_url
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error inesperado al generar el Magic Link: {str(e)}"
+        )
+
+
+@router.get("/magic-links", response_model=List[MagicLinkResponse])
+async def list_magic_links(
+    current_user: UserResponse = Depends(require_roles([UserRole.ADMINISTRADOR])),
+    auth_service: AuthService = Depends(get_auth_service)
+):
+    """
+    Lista los Magic Links generados en el tenant para auditoría y control de vigencia.
+    """
+    return auth_service.list_magic_links(tenant_id=current_user.tenant_id)
+
+
+@router.delete("/magic-links/{link_id}", status_code=status.HTTP_200_OK)
+async def revoke_magic_link(
+    link_id: str,
+    current_user: UserResponse = Depends(require_roles([UserRole.ADMINISTRADOR])),
+    auth_service: AuthService = Depends(get_auth_service)
+):
+    """
+    Invalida un Magic Link en caliente impidiendo futuros canjes.
+    """
+    success = auth_service.revoke_magic_link(link_id)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Magic Link no encontrado para revocación."
+        )
+    return {"mensaje": "Magic Link revocado exitosamente"}
+
+
+@router.post("/magic-links/consume", response_model=MagicLinkConsumeResponse)
+async def consume_magic_link(
+    req: MagicLinkConsumeRequest,
+    request: Request,
+    auth_service: AuthService = Depends(get_auth_service)
+):
+    """
+    Canjea un Magic Link público, autentica o aprovisiona al participante y emite un token JWT.
+    """
+    try:
+        forwarded = request.headers.get("x-forwarded-for")
+        cf_ip = request.headers.get("cf-connecting-ip")
+        real_ip = request.headers.get("x-real-ip")
+        raw_ip = cf_ip or (forwarded.split(",")[0].strip() if forwarded else None) or real_ip or (request.client.host if request.client else None)
+        client_ip = raw_ip[:45] if raw_ip else None
+        user_agent = request.headers.get("user-agent")
+
+        return auth_service.consume_magic_link(
+            req=req,
+            ip_address=client_ip,
+            user_agent=user_agent
+        )
+    except PermissionError as e:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(e)
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al canjear el Magic Link: {str(e)}"
+        )
+
