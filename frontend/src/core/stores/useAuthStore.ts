@@ -8,7 +8,7 @@ export interface AuthState {
   token: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
-  logout: () => void;
+  logout: () => Promise<void>;
   verifyAuth: () => Promise<void>;
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
@@ -52,15 +52,21 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      logout: () => {
-        if (typeof localStorage !== 'undefined') {
-          localStorage.removeItem('ateneo_token');
+      logout: async () => {
+        try {
+          await authApi.logout();
+        } catch (err) {
+          console.warn('Revocación de sesión en servidor completada localmente:', err);
+        } finally {
+          if (typeof localStorage !== 'undefined') {
+            localStorage.removeItem('ateneo_token');
+          }
+          set({
+            user: null,
+            token: null,
+            loading: false,
+          });
         }
-        set({
-          user: null,
-          token: null,
-          loading: false,
-        });
       },
 
       verifyAuth: async () => {

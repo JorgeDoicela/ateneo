@@ -16,14 +16,35 @@ export const UserSchema = z.object({
   email: z.string().email(),
   nombre: z.string().optional().default('Usuario'),
   rol: UserRoleSchema,
+  tenant_id: z.string().optional(),
   cohorte: z.string().optional(),
   creado_en: z.string().optional(),
+  last_login_at: z.string().optional(),
+  login_count: z.number().optional(),
+  email_verified: z.boolean().optional(),
+  activo: z.boolean().optional(),
 });
 
 export const LoginResponseSchema = z.object({
   access_token: z.string(),
   token_type: z.string().default('bearer'),
   user: UserSchema,
+});
+
+export const RegisterRequestSchema = z.object({
+  email: z.string().email('Debe ingresar un correo electrónico válido'),
+  password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
+  nombre: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
+  rol: UserRoleSchema.optional().default('alumno'),
+});
+
+export const RegisterResponseSchema = z.object({
+  id: z.string(),
+  email: z.string().email(),
+  nombre: z.string(),
+  rol: UserRoleSchema,
+  tenant_id: z.string(),
+  mensaje: z.string(),
 });
 
 // ==========================================
@@ -108,6 +129,10 @@ export const EvaluationResultSchema = z.object({
   competencias_deficientes: z.array(DeficientCompetencySchema).default([]),
   retroalimentacion_general: z.string().default('Evaluación completada según norma oficial.'),
   hash_verificacion: z.string().optional(),
+  llm_latency_ms: z.number().optional(),
+  llm_model_used: z.string().optional(),
+  rag_tokens_used: z.number().optional(),
+  paraclinical_studies_count: z.number().optional(),
 });
 
 export const PhaseEvaluationResultSchema = z.object({
@@ -121,6 +146,10 @@ export const PhaseEvaluationResultSchema = z.object({
   desbloquea_siguiente: z.boolean().default(true),
   siguiente_fase_disponible: z.boolean().optional(),
   es_ultima_fase: z.boolean().optional(),
+  llm_latency_ms: z.number().optional(),
+  llm_model_used: z.string().optional(),
+  rag_tokens_used: z.number().optional(),
+  paraclinical_studies_count: z.number().optional(),
 });
 
 // ==========================================
@@ -147,13 +176,25 @@ export const CoordinatorModuleRiskSchema = z.object({
   riesgo: z.enum(['Bajo', 'Medio', 'Alto', 'Crítico']),
 });
 
+export const TelemetriaIaAnalyticsSchema = z.object({
+  promedio_latencia_ms: z.number(),
+  modelo_principal: z.string(),
+  disponibilidad_servicio_pct: z.number(),
+  total_estudios_procesados: z.number(),
+  distribucion_modelos: z.record(z.string(), z.number()).optional(),
+});
+
 export const CoordinatorAnalyticsDataSchema = z.object({
   cohorte_nombre: z.string(),
   total_estudiantes_activos: z.number(),
   total_evaluaciones_registradas: z.number(),
+  promedio_score_cohorte: z.number().optional(),
+  promedio_faithfulness_score: z.number().optional(),
   insight_principal: z.string(),
   porcentaje_falla_pediatria: z.number().optional(),
   modulos_analizados: z.array(CoordinatorModuleRiskSchema),
+  top_deficiencias_institucionales: z.array(z.any()).optional(),
+  telemetria_ia: TelemetriaIaAnalyticsSchema.optional(),
 });
 
 export const ScientificBenchmarkDataSchema = z.object({
@@ -163,4 +204,33 @@ export const ScientificBenchmarkDataSchema = z.object({
   total_estudiantes_muestra: z.number(),
   mejora_promedio_puntos: z.number(),
   intervalo_confianza_95: z.tuple([z.number(), z.number()]),
+});
+
+// ==========================================
+// 5. Telemetría de Eventos de Aprendizaje (Fase 5)
+// ==========================================
+
+export const LearningEventTypeSchema = z.enum([
+  'case_opened',
+  'paraclinical_inspected',
+  'socratic_debrief_opened',
+  'tab_changed',
+  'case_reset',
+]);
+
+export const LearningActivityEventSchema = z.object({
+  case_id: z.string(),
+  event_type: LearningEventTypeSchema,
+  metadata: z.record(z.string(), z.unknown()).optional(),
+  tenant_id: z.string().optional(),
+});
+
+export const LearningActivityEventRecordSchema = z.object({
+  id: z.number(),
+  user_id: z.string(),
+  tenant_id: z.string(),
+  case_id: z.string(),
+  event_type: LearningEventTypeSchema,
+  metadata: z.record(z.string(), z.unknown()).default({}),
+  timestamp: z.string(),
 });

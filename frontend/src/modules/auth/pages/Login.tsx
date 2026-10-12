@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { AlertCircle, ChevronDown } from 'lucide-react';
 import FloatingLabelInput from '../../../core/ui/FloatingLabelInput';
@@ -94,8 +94,14 @@ export default function Login() {
             <div>
               {/* Notificación de Error */}
               {error && (
-                <div className="mb-6 p-3.5 bg-rose-50 border border-rose-200/80 rounded-[16px] flex items-start gap-2.5 text-xs text-rose-800 animate-fadeIn">
-                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                <div className={`mb-6 p-3.5 rounded-[16px] flex items-start gap-2.5 text-xs animate-fadeIn ${
+                  error.toLowerCase().includes('bloqueada')
+                    ? 'bg-amber-50 border border-amber-200 text-amber-900'
+                    : 'bg-rose-50 border border-rose-200/80 text-rose-800'
+                }`}>
+                  <AlertCircle className={`w-4 h-4 shrink-0 mt-0.5 ${
+                    error.toLowerCase().includes('bloqueada') ? 'text-amber-600' : 'text-rose-600'
+                  }`} />
                   <span className="leading-snug">{error}</span>
                 </div>
               )}
@@ -114,9 +120,12 @@ export default function Login() {
                   />
 
                   <div className="flex items-center justify-between pt-4">
-                    <span className="text-xs text-[#747775]">
-                      Dominio @ateneo.edu.ec
-                    </span>
+                    <Link
+                      to="/register"
+                      className="text-xs font-medium text-[#0b57d0] hover:underline cursor-pointer"
+                    >
+                      Crear cuenta institucional
+                    </Link>
                     <ClinicalButton
                       type="submit"
                       variant="primary"

@@ -1,7 +1,7 @@
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, desc, func
-from modules.analytics_history.models import EvaluationHistoryModel
+from modules.analytics_history.models import EvaluationHistoryModel, LearningActivityEventModel
 
 
 class HistoryRepository:
@@ -27,6 +27,9 @@ class HistoryRepository:
         if limit:
             query = query.limit(limit)
         return query.all()
+
+    def get_by_id(self, evaluation_id: int) -> Optional[EvaluationHistoryModel]:
+        return self.db.query(EvaluationHistoryModel).filter(EvaluationHistoryModel.id == evaluation_id).first()
 
     def get_by_user(self, user_identifier: str, limit: int = 50, tenant_id: Optional[str] = None) -> List[EvaluationHistoryModel]:
         query = self.db.query(EvaluationHistoryModel).filter(
@@ -105,3 +108,41 @@ class HistoryRepository:
     def delete_all(self) -> None:
         self.db.query(EvaluationHistoryModel).delete()
         self.db.commit()
+
+
+class LearningEventRepository:
+    """
+    Repositorio para persistencia y auditoría de eventos granulares de aprendizaje.
+    """
+    def __init__(self, db: Session):
+        self.db = db
+
+    def get_by_id(self, event_id: int) -> Optional[LearningActivityEventModel]:
+        return self.db.query(LearningActivityEventModel).filter(LearningActivityEventModel.id == event_id).first()
+
+    def create(self, record: LearningActivityEventModel, commit: bool = True) -> LearningActivityEventModel:
+        self.db.add(record)
+        if commit:
+            self.db.commit()
+            self.db.refresh(record)
+        else:
+            self.db.flush()
+        return record
+
+    def list_by_user(self, user_id: str, limit: int = 100, tenant_id: Optional[str] = None) -> List[LearningActivityEventModel]:
+        query = self.db.query(LearningActivityEventModel).filter(LearningActivityEventModel.user_id == user_id)
+        if tenant_id:
+            query = query.filter(LearningActivityEventModel.tenant_id == tenant_id)
+        return query.order_by(desc(LearningActivityEventModel.id)).limit(limit).all()
+
+    def list_by_case(self, case_id: str, limit: int = 100, tenant_id: Optional[str] = None) -> List[LearningActivityEventModel]:
+        query = self.db.query(LearningActivityEventModel).filter(LearningActivityEventModel.case_id == case_id)
+        if tenant_id:
+            query = query.filter(LearningActivityEventModel.tenant_id == tenant_id)
+        return query.order_by(desc(LearningActivityEventModel.id)).limit(limit).all()
+
+    def count_by_type(self, event_type: str, tenant_id: Optional[str] = None) -> int:
+        query = self.db.query(LearningActivityEventModel).filter(LearningActivityEventModel.event_type == event_type)
+        if tenant_id:
+            query = query.filter(LearningActivityEventModel.tenant_id == tenant_id)
+        return query.count()

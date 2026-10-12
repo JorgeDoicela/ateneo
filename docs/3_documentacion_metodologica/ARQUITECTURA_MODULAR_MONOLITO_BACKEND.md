@@ -126,10 +126,10 @@ backend/
 │   │   └── dependencies.py             # get_collaboration_service()
 │   │
 │   └── auth/                           # Identidad, autenticación y perfiles
-│       ├── models.py                   # Entidades UserModel y TenantModel (multi-tenancy)
-│       ├── repository.py               # UserRepository y TenantRepository
-│       ├── service.py                  # AuthService (siembra demo idempotente)
-│       └── dependencies.py             # get_auth_service(), get_user_repository()
+│       ├── models.py                   # Entidades UserModel, TenantModel y UserSessionModel (control JTI)
+│       ├── repository.py               # UserRepository, TenantRepository y UserSessionRepository
+│       ├── service.py                  # AuthService (login con auditoría IP/UA, registro multi-tenant y logout)
+│       └── dependencies.py             # get_auth_service(), get_user_session_repository(), get_user_repository()
 │
 ├── routers/                            # Endpoints HTTP delegadores ultradelgados
 │   ├── auth.py

@@ -27,7 +27,7 @@ El sistema organiza sus pruebas en 4 niveles complementarios que garantizan la i
 │ • test_api_endpoints.py (Rutas /auth, /cases, /history, /adaptive, /rooms)  │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ NIVEL 1: PRUEBAS DE FRONTEND, TIEMPO REAL Y E2E                             │
-│ • Vitest + React Testing Library (22 suites, 106 tests unitarios aprobados)  │
+│ • Vitest + React Testing Library (23 suites, 111 tests unitarios aprobados)  │
 │ • Playwright E2E Multi-Navegador (15 tests en Chrome, Edge y Mobile Pixel 5)│
 │ • test_multimodal_and_cases.py (10 casos ChromaDB, PDF ReportLab SHA-256)   │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -37,7 +37,7 @@ El sistema organiza sus pruebas en 4 niveles complementarios que garantizan la i
 
 ## 2. Catálogo de Pruebas de Frontend (Vitest + React Testing Library & Playwright)
 
-El frontend dispone de **22 suites de prueba y 106 especificaciones unitarias y de integración** en Vitest, junto con 4 suites E2E multi-navegador en Playwright (15 pruebas), que convalidan el árbol de componentes, imagenología DICOM, exámenes OSCE, tele-audio WebRTC, temas multi-tenancy, i18n tipado, observabilidad forense y estándar de diseño:
+El frontend dispone de **23 suites de prueba y 111 especificaciones unitarias y de integración** en Vitest, junto con 4 suites E2E multi-navegador en Playwright (15 pruebas), que convalidan el árbol de componentes, auto-registro multi-tenant, imagenología DICOM, exámenes OSCE, tele-audio WebRTC, temas multi-tenancy, i18n tipado, observabilidad forense y estándar de diseño:
 
 ### 2.1 Ejecución de Pruebas Unitarias e Integración (Vitest)
 ```bash
@@ -72,7 +72,8 @@ npm run typecheck
 | `src/__tests__/SkillRadarChart.test.jsx` | Radar de competencias | Renderizado vectorial SVG de 4 ejes clínicos normativos. |
 | `src/__tests__/ProtectedRoute.test.jsx` | Seguridad RBAC | Control de acceso por roles (Alumno, Docente y Administrador) y redirección segura. |
 | `src/__tests__/ImageUploadZone.test.jsx` | Fusión multimodal | Carga y previsualización de estudios diagnósticos (ECG, Rx de Tórax y Laboratorios). |
-| `src/__tests__/Login.test.jsx` | Autenticación | Flujo de autenticación en dos pasos estilo Google Accounts con campos de etiqueta flotante animada. |
+| `src/__tests__/Login.test.jsx` | Autenticación | Flujo de autenticación en dos pasos estilo Google Accounts con campos de etiqueta flotante animada y alerta de bloqueo. |
+| `src/__tests__/Register.test.jsx` | Auto-Registro | Auto-registro institucional multi-tenant, detección reactiva de universidad por dominio (UCE, USFQ) y validación de contraseñas. |
 | `src/__tests__/AdminDashboard.test.jsx` | Panel administrativo | Gestión de usuarios, sincronización de identidades y privilegios de cohorte. |
 | `src/__tests__/CoordinatorAnalytics.test.jsx` | Analítica institucional | Panel B2B de inteligencia formativa, visualización de brechas de cohorte e IBF. |
 | `src/__tests__/KnowledgeSpaceGraph.test.jsx` | Topología KST | Grafo interactivo de prerrequisitos, ordenamiento topológico y modales reactivos. |
@@ -132,7 +133,7 @@ backend/.venv/Scripts/pytest backend/tests/ -v
 | `run_faithfulness_benchmark.py` | Benchmark de anclaje normativo de las GPCs frente a fragmentos normativos | `docs/1_tablas_latex/tabla_faithfulness_paper.tex`<br>`backend/tests/resultados_faithfulness.json` |
 | `06_train_bge_m3.py` | Fine-Tuning MNRL y evaluación cuantitativa Pre vs. Post en A100 | `docs/1_tablas_latex/tabla_pre_post_fine_tuning_bge_m3.tex`<br>`backend/data/models/eval_metrics_pre_post.json` |
 | `pilot_study_analyzer.py` | Análisis inferencial del estudio piloto con ganancia de aprendizaje | `docs/2_figuras_300dpi/figura_learning_gain.png`<br>`docs/1_tablas_latex/tabla_pilot_study_paper.tex` |
-| `audit_scientific_rag.py` | Batería de 5 experimentos científicos: RAG híbrido, discriminación letal LLM, Faithfulness, streaming SSE y BKT/ZDP | `docs/3_documentacion_metodologica/INFORME_CERTIFICACION_AUDITORIA_CIENTIFICA_RAG.md`<br>`backend/data/audit_results_dump.json` |
+| `audit_scientific_rag.py` | Batería de 6 experimentos científicos con CLI (`--api-url`, `--tenant-id`, `--skip-llm`): RAG híbrido, discriminación letal LLM, Faithfulness, streaming SSE, BKT/ZDP y aislamiento Multi-Tenant | `docs/3_documentacion_metodologica/INFORME_CERTIFICACION_AUDITORIA_CIENTIFICA_RAG.md`<br>`backend/data/audit_results_dump.json` |
 
 ---
 

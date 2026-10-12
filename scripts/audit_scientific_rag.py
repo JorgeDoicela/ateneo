@@ -1,27 +1,31 @@
 """
-Arnés de Auditoría Científica y Benchmarking RAG - Plataforma Ateneo+
-Valida empíricamente la recuperación normativa (BGE-M3 + BM25 + RRF),
-la calibración del LLM frente a errores clínicos letales y la convergencia psicométrica (BKT/ZDP).
+Arnés de Auditoría Científica, Benchmarking RAG y Validación Multi-Tenant - Plataforma Ateneo+
+Valida empíricamente:
+1. Recuperación normativa ministerial (BGE-M3 + BM25 + RRF k=60).
+2. Calibración defensiva del LLM (Google Gemini) ante negligencias farmacológicas letales.
+3. Control cuantitativo de alucinaciones (Faithfulness Score).
+4. Diálogo pedagógico adaptativo socrático con streaming en vivo (SSE).
+5. Convergencia del modelo psicométrico longitudinal (BKT y ZDP en el grafo KST).
+6. Aislamiento estricto y particionado lógico Multi-Tenant.
 """
 
 import os
 import sys
 import json
 import time
+import argparse
 from typing import Dict, Any, List, Tuple
 import requests
 
-# Resolución de módulos en contenedor Docker o entorno local
+# Resolución de rutas para ejecución tanto dentro de Docker como en host local
 sys.path.insert(0, "/app")
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend")))
 
 from rag.retriever import retrieve_relevant_chunk
 
-API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000").rstrip("/")
-
 
 def run_experiment_1() -> List[Dict[str, Any]]:
-    print("=" * 80)
+    print("\n" + "=" * 80)
     print("EXPERIMENTO 1: Fidelidad y Precisión de Recuperación del RAG Híbrido (BGE-M3 + BM25)")
     print("=" * 80)
     consultas: List[Tuple[str, str, int]] = [
@@ -59,8 +63,8 @@ def run_experiment_1() -> List[Dict[str, Any]]:
     return results
 
 
-def run_experiment_2() -> Dict[str, Any]:
-    print("=" * 80)
+def run_experiment_2(api_base_url: str, tenant_id: str) -> Dict[str, Any]:
+    print("\n" + "=" * 80)
     print("EXPERIMENTO 2: Sensibilidad del Evaluador LLM ante Respuestas Clínicas Extremas")
     print("=" * 80)
     respuestas = {
@@ -89,8 +93,11 @@ def run_experiment_2() -> Dict[str, Any]:
     for tipo, conf in respuestas.items():
         print(f"\n>>> Evaluando Escenario: {tipo}...")
         resp = requests.post(
-            f"{API_BASE_URL}/api/evaluate",
-            data={"case_id": "case_preeclampsia_01", "respuesta_estudiante": conf["texto"]},
+            f"{api_base_url}/api/evaluate",
+            data={
+                "case_id": "case_preeclampsia_01",
+                "respuesta_estudiante": conf["texto"],
+            },
             timeout=120,
         )
         resp.raise_for_status()
@@ -115,15 +122,15 @@ def run_experiment_2() -> Dict[str, Any]:
     return results
 
 
-def run_experiment_3() -> Dict[str, Any]:
-    print("=" * 80)
+def run_experiment_3(api_base_url: str) -> Dict[str, Any]:
+    print("\n" + "=" * 80)
     print("EXPERIMENTO 3: Validación del Faithfulness Score (Control de Alucinaciones)")
     print("=" * 80)
-    resp = requests.get(f"{API_BASE_URL}/api/history/faithfulness-benchmark", timeout=120)
+    resp = requests.get(f"{api_base_url}/api/history/faithfulness-benchmark", timeout=120)
     resp.raise_for_status()
     data = resp.json()
 
-    print(f"Resumen del Benchmark Institucional:")
+    print("Resumen del Benchmark Institucional:")
     print(f"  Total Casos Auditados   : {data.get('total_casos_auditados')}")
     print(f"  Faithfulness Promedio   : {data.get('promedio_faithfulness_score')} ({data.get('promedio_fidelidad_porcentaje')}%)")
     print(f"  Nivel Global Anti-Alucin: {data.get('nivel_global')}")
@@ -134,8 +141,8 @@ def run_experiment_3() -> Dict[str, Any]:
     return data
 
 
-def run_experiment_4() -> Dict[str, Any]:
-    print("=" * 80)
+def run_experiment_4(api_base_url: str) -> Dict[str, Any]:
+    print("\n" + "=" * 80)
     print("EXPERIMENTO 4: Diálogo Socrático Adaptativo con Streaming en Vivo (SSE)")
     print("=" * 80)
     payload = {
@@ -151,7 +158,7 @@ def run_experiment_4() -> Dict[str, Any]:
     event_count = 0
 
     with requests.post(
-        f"{API_BASE_URL}/api/evaluate/socratic-turn",
+        f"{api_base_url}/api/evaluate/socratic-turn",
         json=payload,
         stream=True,
         timeout=120,
@@ -182,14 +189,14 @@ def run_experiment_4() -> Dict[str, Any]:
     }
 
 
-def run_experiment_5() -> Dict[str, Any]:
-    print("=" * 80)
+def run_experiment_5(api_base_url: str) -> Dict[str, Any]:
+    print("\n" + "=" * 80)
     print("EXPERIMENTO 5: Impacto Psicométrico en el Grafo de Aprendizaje (BKT y ZDP)")
     print("=" * 80)
     student_id = "usr_alumno_001"
 
     # 1. Estado de competencias cognitivas (BKT)
-    r_state = requests.get(f"{API_BASE_URL}/api/adaptive/knowledge-state?student_id={student_id}", timeout=60)
+    r_state = requests.get(f"{api_base_url}/api/adaptive/knowledge-state?student_id={student_id}", timeout=60)
     r_state.raise_for_status()
     bkt_data = r_state.json()
 
@@ -199,7 +206,7 @@ def run_experiment_5() -> Dict[str, Any]:
         print(f"  - Competencia {comp_id:30s}: Dominio {p_dominio:.4f} ({p_dominio * 100:.1f}%)")
 
     # 2. Recomendación adaptativa en la Zona de Desarrollo Próximo (ZDP)
-    r_next = requests.get(f"{API_BASE_URL}/api/adaptive/next-case?student_id={student_id}", timeout=60)
+    r_next = requests.get(f"{api_base_url}/api/adaptive/next-case?student_id={student_id}", timeout=60)
     r_next.raise_for_status()
     zdp_data = r_next.json()
 
@@ -215,21 +222,127 @@ def run_experiment_5() -> Dict[str, Any]:
     return {"bkt_state": bkt_data, "zdp_next_case": zdp_data}
 
 
-if __name__ == "__main__":
-    audit_data = {
-        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "api_base_url": API_BASE_URL,
-        "exp1": run_experiment_1(),
-        "exp2": run_experiment_2(),
-        "exp3": run_experiment_3(),
-        "exp4": run_experiment_4(),
-        "exp5": run_experiment_5(),
+def run_experiment_6_multitenant(api_base_url: str, tenant_principal: str = "tenant_default") -> Dict[str, Any]:
+    print("\n" + "=" * 80)
+    print("EXPERIMENTO 6: Aislamiento y Gobernanza Multi-Tenant")
+    print("=" * 80)
+
+    # 1. Analítica institucional en el tenant principal
+    r_main = requests.get(
+        f"{api_base_url}/api/history/coordinator-analytics?tenant_id={tenant_principal}",
+        timeout=60
+    )
+    r_main.raise_for_status()
+    data_main = r_main.json()
+    total_evals_main = data_main.get("resumen_general", {}).get("total_evaluaciones", 0)
+
+    print(f"Métricas Institucionales Tenant '{tenant_principal}':")
+    print(f"  Total Evaluaciones Registradas : {total_evals_main}")
+    print(f"  Promedio Desempeño Cohorte    : {data_main.get('resumen_general', {}).get('promedio_score', 0.0)}/10")
+
+    # 2. Aislamiento en un tenant independiente o de prueba
+    tenant_aislado = "tenant_test_isolated"
+    r_iso = requests.get(
+        f"{api_base_url}/api/history/coordinator-analytics?tenant_id={tenant_aislado}",
+        timeout=60
+    )
+    r_iso.raise_for_status()
+    data_iso = r_iso.json()
+    total_evals_iso = data_iso.get("resumen_general", {}).get("total_evaluaciones", 0)
+
+    print(f"\nMétricas Institucionales Tenant Aislado '{tenant_aislado}':")
+    print(f"  Total Evaluaciones Registradas : {total_evals_iso} (Hermetismo confirmado)")
+
+    # Verificación de aislamiento estricto
+    assert total_evals_iso == 0, f"Violación de aislamiento multi-tenant: {total_evals_iso} evaluaciones detectadas en tenant vacío."
+
+    # 3. Verificación de catálogo de casos por tenant (herencia de casos canónicos)
+    r_cases = requests.get(f"{api_base_url}/api/cases", timeout=60)
+    r_cases.raise_for_status()
+    casos = r_cases.json()
+    print(f"\nCatálogo de Casos Clínicos:")
+    print(f"  Total Casos Disponibles        : {len(casos)} (Normativos canónicos + Institucionales)")
+
+    return {
+        "tenant_principal": {
+            "tenant_id": tenant_principal,
+            "total_evaluaciones": total_evals_main,
+        },
+        "tenant_aislado": {
+            "tenant_id": tenant_aislado,
+            "total_evaluaciones": total_evals_iso,
+            "aislamiento_exitoso": True,
+        },
+        "total_casos_disponibles": len(casos),
     }
 
-    dump_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend", "data", "audit_results_dump.json"))
-    os.makedirs(os.path.dirname(dump_path), exist_ok=True)
-    with open(dump_path, "w", encoding="utf-8") as f:
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Arnés de Auditoría Científica y Benchmarking RAG - Ateneo+"
+    )
+    parser.add_argument(
+        "--api-url",
+        default=os.getenv("API_BASE_URL", "http://localhost:8000").rstrip("/"),
+        help="URL base de la API FastAPI de Ateneo+ (def: http://localhost:8000)"
+    )
+    default_output = (
+        "/app/data/audit_results_dump.json"
+        if os.path.exists("/app/data")
+        else os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend", "data", "audit_results_dump.json"))
+    )
+    parser.add_argument(
+        "--output",
+        default=default_output,
+        help="Ruta de destino del archivo JSON consolidado de auditoría"
+    )
+    parser.add_argument(
+        "--tenant-id",
+        default="tenant_default",
+        help="Identificador de la institución / tenant a auditar (def: tenant_default)"
+    )
+    parser.add_argument(
+        "--skip-llm",
+        action="store_true",
+        help="Omite experimentos dependientes de cuota de LLM externo (ejecuta RAG, BKT y Multi-Tenancy)"
+    )
+
+    args = parser.parse_args()
+    api_url = args.api_url
+    output_path = args.output
+    tenant_id = args.tenant_id
+
+    print(f"Iniciando Arnés de Auditoría Científica Ateneo+")
+    print(f"API Target   : {api_url}")
+    print(f"Tenant Target: {tenant_id}")
+    print(f"Output File  : {output_path}")
+
+    audit_data: Dict[str, Any] = {
+        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "api_base_url": api_url,
+        "tenant_id": tenant_id,
+        "exp1": run_experiment_1(),
+    }
+
+    if not args.skip_llm:
+        audit_data["exp2"] = run_experiment_2(api_url, tenant_id)
+        audit_data["exp3"] = run_experiment_3(api_url)
+        audit_data["exp4"] = run_experiment_4(api_url)
+    else:
+        print("\n[INFO] Omitiendo Experimentos 2, 3 y 4 por bandera --skip-llm.")
+
+    audit_data["exp5"] = run_experiment_5(api_url)
+    audit_data["exp6_multitenant"] = run_experiment_6_multitenant(api_url, tenant_id)
+
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
         json.dump(audit_data, f, ensure_ascii=False, indent=2)
 
-    print("\nAuditoría científica finalizada exitosamente.")
-    print(f"Resultados consolidados guardados en: {dump_path}")
+    print("\n" + "=" * 80)
+    print("Auditoría científica finalizada exitosamente (Código 0).")
+    print(f"Resultados consolidados guardados en: {output_path}")
+    print("=" * 80)
+
+
+if __name__ == "__main__":
+    main()

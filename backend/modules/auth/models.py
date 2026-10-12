@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Boolean, Text, ForeignKey, func
+from sqlalchemy import Column, String, Boolean, Integer, Text, ForeignKey, func
 from core.database import Base, SafeDateTime
 
 
@@ -41,5 +41,27 @@ class UserModel(Base):
         server_default="tenant_default",
         index=True
     )
+    last_login_at = Column(SafeDateTime, nullable=True)
+    login_count = Column(Integer, nullable=False, default=0, server_default="0")
+    failed_login_attempts = Column(Integer, nullable=False, default=0, server_default="0")
+    locked_until = Column(SafeDateTime, nullable=True)
+    email_verified = Column(Boolean, nullable=False, default=False, server_default="0")
+    created_at = Column(SafeDateTime, server_default=func.now(), nullable=False)
+
+
+class UserSessionModel(Base):
+    """
+    Entidad persistida para el control y revocación de sesiones activas (Token Blacklist / JTI).
+    Garantiza el cierre de sesión real y rastreo de accesos concurrentes por IP y User-Agent.
+    """
+    __tablename__ = "user_sessions"
+
+    id = Column(String(64), primary_key=True, index=True)  # Claim criptográfico JTI (UUID v4)
+    user_id = Column(String(100), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    tenant_id = Column(String(50), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+    ip_address = Column(String(45), nullable=True)
+    user_agent = Column(String(255), nullable=True)
+    is_revoked = Column(Boolean, nullable=False, default=False, server_default="0", index=True)
+    expires_at = Column(SafeDateTime, nullable=False)
     created_at = Column(SafeDateTime, server_default=func.now(), nullable=False)
 

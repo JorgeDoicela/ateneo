@@ -10,8 +10,10 @@ from modules.evaluation.service import EvaluationService
 from auth.security import get_optional_current_user, UserResponse
 from core.background_worker import background_worker, TaskStatus
 from services.pdf_report_generator import generate_cohort_analytics_pdf, generate_clinical_feedback_pdf
+from models.schemas import LearningActivityEventCreate, LearningActivityEventResponse
 
 router = APIRouter(prefix="/api/history", tags=["Historial y Analítica de Razonamiento"])
+analytics_router = APIRouter(prefix="/api/analytics", tags=["Telemetría de Eventos de Aprendizaje"])
 
 
 @router.get("", response_model=List[Dict[str, Any]])
@@ -194,5 +196,68 @@ async def get_faithfulness_benchmark(
     sobre casos del catálogo contra fragmentos de las GPCs del MSP delegando en EvaluationService.
     """
     return evaluation_service.get_faithfulness_benchmark(sample_size=5)
+
+
+@router.post("/events", status_code=status.HTTP_201_CREATED, response_model=LearningActivityEventResponse)
+async def record_learning_event_endpoint(
+    event_data: LearningActivityEventCreate,
+    current_user: Optional[UserResponse] = Depends(get_optional_current_user),
+    analytics_service: AnalyticsHistoryService = Depends(get_analytics_service)
+):
+    """
+    Ingesta durable de telemetría de navegación y actividades de aprendizaje.
+    Registra eventos como case_opened, paraclinical_inspected, socratic_debrief_opened.
+    """
+    user_id = current_user.id if current_user else "usr_alumno_001"
+    tenant_id = event_data.tenant_id or (current_user.tenant_id if current_user else "tenant_default")
+
+    return analytics_service.record_learning_event(
+        user_id=user_id,
+        case_id=event_data.case_id,
+        event_type=event_data.event_type,
+        metadata=event_data.metadata,
+        tenant_id=tenant_id
+    )
+
+
+@analytics_router.post("/events", status_code=status.HTTP_201_CREATED, response_model=LearningActivityEventResponse)
+async def record_analytics_event_alias(
+    event_data: LearningActivityEventCreate,
+    current_user: Optional[UserResponse] = Depends(get_optional_current_user),
+    analytics_service: AnalyticsHistoryService = Depends(get_analytics_service)
+):
+    return await record_learning_event_endpoint(event_data, current_user, analytics_service)
+
+
+@router.get("/events", response_model=List[Dict[str, Any]])
+async def list_learning_events_endpoint(
+    user_id: Optional[str] = Query(None, description="ID del usuario a filtrar"),
+    case_id: Optional[str] = Query(None, description="ID del caso clínico a filtrar"),
+    limit: int = Query(50, description="Límite de eventos retornados"),
+    current_user: Optional[UserResponse] = Depends(get_optional_current_user),
+    analytics_service: AnalyticsHistoryService = Depends(get_analytics_service)
+):
+    """
+    Consulta el historial de eventos de aprendizaje para auditoría formativa.
+    """
+    target_user = user_id or (current_user.id if current_user else "usr_alumno_001")
+    tenant_id = current_user.tenant_id if current_user else None
+    return analytics_service.list_learning_events(
+        user_id=target_user if not case_id else None,
+        case_id=case_id,
+        limit=limit,
+        tenant_id=tenant_id
+    )
+
+
+@analytics_router.get("/events", response_model=List[Dict[str, Any]])
+async def list_analytics_events_alias(
+    user_id: Optional[str] = Query(None, description="ID del usuario a filtrar"),
+    case_id: Optional[str] = Query(None, description="ID del caso clínico a filtrar"),
+    limit: int = Query(50, description="Límite de eventos retornados"),
+    current_user: Optional[UserResponse] = Depends(get_optional_current_user),
+    analytics_service: AnalyticsHistoryService = Depends(get_analytics_service)
+):
+    return await list_learning_events_endpoint(user_id, case_id, limit, current_user, analytics_service)
 
 

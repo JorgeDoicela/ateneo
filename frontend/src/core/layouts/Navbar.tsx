@@ -46,10 +46,11 @@ export default function Navbar() {
     }
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
+
 
   const getInitials = (name?: string): string => {
     if (!name) return 'U';
@@ -201,9 +202,21 @@ export default function Navbar() {
                       </div>
                       <p className="font-semibold text-sm text-[#1f1f1f] truncate">{user.nombre}</p>
                       <p className="text-xs text-[#747775] truncate">{user.email || 'alumno@ateneo.edu.ec'}</p>
-                      <span className="inline-block mt-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-sky-50 text-[#0b57d0] uppercase">
-                        {user.rol}
-                      </span>
+                      <div className="flex items-center justify-center gap-2 mt-1.5">
+                        <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-sky-50 text-[#0b57d0] uppercase">
+                          {user.rol}
+                        </span>
+                        {(user.login_count !== undefined && user.login_count > 0) && (
+                          <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-mono text-slate-500 bg-slate-100">
+                            #{user.login_count}
+                          </span>
+                        )}
+                      </div>
+                      {user.last_login_at && (
+                        <p className="text-[10px] text-slate-400 mt-2">
+                          Último acceso: {new Date(user.last_login_at).toLocaleDateString('es-EC', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      )}
                     </div>
 
                     {/* Selector de Sede Institucional (Multi-Tenancy) */}

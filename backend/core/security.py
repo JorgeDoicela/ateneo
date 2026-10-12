@@ -1,4 +1,5 @@
 import os
+import uuid
 import datetime
 from typing import Optional
 import jwt
@@ -43,8 +44,12 @@ def resolve_tenant_from_email_domain(email: str) -> str:
     return domain_map.get(domain, "tenant_default")
 
 
-def create_access_token(user: User, expires_delta: Optional[datetime.timedelta] = None) -> str:
-    """Emite un token JWT firmado criptográficamente con los claims del usuario y tenant institucional."""
+def create_access_token(
+    user: User, 
+    expires_delta: Optional[datetime.timedelta] = None,
+    jti: Optional[str] = None
+) -> str:
+    """Emite un token JWT firmado criptográficamente con los claims del usuario, tenant y jti único de sesión."""
     now = datetime.datetime.now(datetime.timezone.utc)
     if expires_delta:
         expire = now + expires_delta
@@ -52,6 +57,7 @@ def create_access_token(user: User, expires_delta: Optional[datetime.timedelta] 
         expire = now + datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
     tenant_id = getattr(user, "tenant_id", None) or resolve_tenant_from_email_domain(user.email)
+    token_jti = jti or str(uuid.uuid4())
 
     to_encode = {
         "sub": user.email,
@@ -59,6 +65,7 @@ def create_access_token(user: User, expires_delta: Optional[datetime.timedelta] 
         "nombre": user.nombre,
         "rol": user.rol.value if hasattr(user.rol, "value") else str(user.rol),
         "tenant_id": tenant_id,
+        "jti": token_jti,
         "exp": expire
     }
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
@@ -66,11 +73,12 @@ def create_access_token(user: User, expires_delta: Optional[datetime.timedelta] 
 
 
 
-def decode_access_token(token: str) -> dict:
+def decode_access_token(token: str, verify_exp: bool = True) -> dict:
     """Decodifica y valida la firma criptográfica y expiración de un token JWT."""
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], options={"verify_exp": verify_exp})
         return payload
+
     except jwt.ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

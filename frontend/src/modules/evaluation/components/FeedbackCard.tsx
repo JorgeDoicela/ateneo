@@ -22,6 +22,7 @@ import evaluationApi from '../api/evaluationApi';
 import { useAuth } from '../../../context/AuthContext';
 import { useSocraticDebriefStore } from '../store/useSocraticDebriefStore';
 import { EvaluationResult } from '../../../types';
+import useLearningTelemetry from '../../analytics/hooks/useLearningTelemetry';
 
 interface EjeConfig {
   key: string;
@@ -48,6 +49,13 @@ export default function FeedbackCard({ result, studentAnswer = '', onReset }: Fe
   const [downloadingPdf, setDownloadingPdf] = useState<boolean>(false);
   const { user } = useAuth();
   const openDebrief = useSocraticDebriefStore((state) => state.openDebrief);
+  const { trackSocraticDebriefOpened } = useLearningTelemetry();
+
+  const handleOpenDebrief = (omisionTexto: string) => {
+    const caseId = result.case_id || 'case_preeclampsia_01';
+    trackSocraticDebriefOpened(caseId, omisionTexto);
+    openDebrief(caseId, result.case_title || 'Caso Clínico Formativo', omisionTexto);
+  };
 
   if (!result) return null;
 
@@ -275,7 +283,7 @@ export default function FeedbackCard({ result, studentAnswer = '', onReset }: Fe
                 </div>
                 <button
                   type="button"
-                  onClick={() => openDebrief(result.case_id || 'case_preeclampsia_01', result.case_title || 'Caso Clínico Formativo', o)}
+                  onClick={() => handleOpenDebrief(o)}
                   className="inline-flex items-center space-x-1.5 text-[11px] font-medium text-cyan-700 hover:text-cyan-800 bg-cyan-50/80 hover:bg-cyan-100 px-3 py-1.5 rounded-lg transition-colors shrink-0 self-start sm:self-auto"
                   title="Debatir este aspecto formativo con el Tutor IA"
                 >
@@ -321,6 +329,38 @@ export default function FeedbackCard({ result, studentAnswer = '', onReset }: Fe
               <span>Ver Guía Oficial en PDF</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* 6. Auditoría y Telemetría Clínica de Inferencia */}
+      {(result.llm_latency_ms !== undefined || result.faithfulness_score !== undefined || result.llm_model_used) && (
+        <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-2.5 rounded-[20px] bg-white border border-slate-200/80 text-[11px] text-[#444746] shadow-xs">
+          <div className="flex items-center gap-2">
+            <Activity className="w-3.5 h-3.5 text-[#0b57d0]" />
+            <span className="font-semibold text-[#1f1f1f]">
+              Telemetría de Inferencia:
+            </span>
+            <span>
+              {result.llm_model_used || 'Gemini 3.8 Flash'}
+            </span>
+            {result.llm_latency_ms !== undefined && result.llm_latency_ms > 0 && (
+              <span>
+                en {(result.llm_latency_ms / 1000).toFixed(2)}s
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            {result.faithfulness_score !== undefined && (
+              <span>
+                Fidelidad Normativa: {Math.round(result.faithfulness_score * 100)}%
+              </span>
+            )}
+            {result.paraclinical_studies_count !== undefined && result.paraclinical_studies_count > 0 && (
+              <span>
+                • {result.paraclinical_studies_count} estudio(s) paraclínico(s)
+              </span>
+            )}
           </div>
         </div>
       )}

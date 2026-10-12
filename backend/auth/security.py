@@ -15,8 +15,8 @@ from core.security import (
     create_access_token,
     decode_access_token
 )
-from modules.auth.repository import UserRepository
-from modules.auth.dependencies import get_user_repository
+from modules.auth.repository import UserRepository, UserSessionRepository
+from modules.auth.dependencies import get_user_repository, get_user_session_repository
 
 security_scheme = HTTPBearer()
 optional_security_scheme = HTTPBearer(auto_error=False)
@@ -73,14 +73,26 @@ init_demo_users()
 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security_scheme),
-    user_repo: UserRepository = Depends(get_user_repository)
+    user_repo: UserRepository = Depends(get_user_repository),
+    session_repo: UserSessionRepository = Depends(get_user_session_repository)
 ) -> UserResponse:
     """
     Resuelve el usuario autenticado a partir del JWT portador, consultando
-    la persistencia relacional con inyección de dependencias estándar.
+    la persistencia relacional con inyección de dependencias estándar y
+    verificando que la sesión activa no haya sido revocada (Token Blacklist / JTI).
     """
     token = credentials.credentials
     payload = decode_access_token(token)
+    
+    # Verificación de lista negra / revocación de sesión
+    jti = payload.get("jti")
+    if jti and session_repo and session_repo.is_jti_revoked(jti):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Sesión revocada o cerrada",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
     email = payload.get("sub")
     if not email:
         raise HTTPException(
@@ -117,13 +129,31 @@ def get_current_user(
             headers={"WWW-Authenticate": "Bearer"}
         )
 
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
+    if getattr(user_record, "locked_until", None):
+        locked_dt = user_record.locked_until
+        if locked_dt.tzinfo is None:
+            locked_dt = locked_dt.replace(tzinfo=datetime.timezone.utc)
+        if locked_dt > now_utc:
+            raise HTTPException(
+                status_code=status.HTTP_423_LOCKED,
+                detail="Cuenta bloqueada temporalmente por intentos fallidos de autenticación.",
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+
+
     resolved_tenant = token_tenant_id or getattr(user_record, "tenant_id", "tenant_default") or "tenant_default"
+    last_login_iso = user_record.last_login_at.isoformat() if getattr(user_record, "last_login_at", None) else None
     return UserResponse(
         id=user_record.id,
         email=user_record.email,
         nombre=user_record.nombre,
         rol=UserRole(user_record.rol),
-        tenant_id=resolved_tenant
+        tenant_id=resolved_tenant,
+        last_login_at=last_login_iso,
+        login_count=getattr(user_record, "login_count", 0) or 0,
+        email_verified=bool(getattr(user_record, "email_verified", False)),
+        activo=user_record.activo
     )
 
 
@@ -136,7 +166,8 @@ def get_current_tenant_id(current_user: UserResponse = Depends(get_current_user)
 
 def get_optional_current_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(optional_security_scheme),
-    user_repo: UserRepository = Depends(get_user_repository)
+    user_repo: UserRepository = Depends(get_user_repository),
+    session_repo: UserSessionRepository = Depends(get_user_session_repository)
 ) -> Optional[UserResponse]:
     """
     Resuelve el usuario actual si se proporcionaron credenciales válidas,
@@ -145,9 +176,10 @@ def get_optional_current_user(
     if not credentials:
         return None
     try:
-        return get_current_user(credentials=credentials, user_repo=user_repo)
+        return get_current_user(credentials=credentials, user_repo=user_repo, session_repo=session_repo)
     except HTTPException:
         return None
+
 
 
 def require_roles(allowed_roles: List[UserRole]):

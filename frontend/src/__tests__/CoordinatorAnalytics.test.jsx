@@ -26,7 +26,14 @@ describe('Componente CoordinatorAnalytics (Panel B2B de Brechas e IBF)', () => {
           estudiantes_afectados: 15,
           total_estudiantes: 25
         }
-      ]
+      ],
+      telemetria_ia: {
+        promedio_latencia_ms: 1140,
+        modelo_principal: 'Gemini 3.8 Flash',
+        disponibilidad_servicio_pct: 99.8,
+        total_estudios_procesados: 18,
+        distribucion_modelos: { 'gemini-3.8-flash': 50 }
+      }
     };
 
     const mockIbfData = {
@@ -54,6 +61,8 @@ describe('Componente CoordinatorAnalytics (Panel B2B de Brechas e IBF)', () => {
       expect(screen.getByText(/Diagnóstico de Rendimiento Colectivo/i)).toBeInTheDocument();
       expect(screen.getByText(/Emergencias Hipertensivas/i)).toBeInTheDocument();
       expect(screen.getByText(/Cálculo de reposición hídrica intravenosa/i)).toBeInTheDocument();
+      expect(screen.getByText(/Telemetría de Inferencia Clínica y Desempeño RAG/i)).toBeInTheDocument();
+      expect(screen.getByText(/1.14s/i)).toBeInTheDocument();
     });
   });
 

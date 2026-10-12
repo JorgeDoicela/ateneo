@@ -1,5 +1,6 @@
 import json
 import re
+import time
 from typing import Dict, Any, Optional, List, Tuple
 from google import genai
 from google.genai import types
@@ -13,17 +14,19 @@ from core.logger import get_logger
 
 logger = get_logger("ateneo.rag.evaluator")
 
+
 def call_gemini_llm(
     prompt: str,
     imagenes_list: Optional[List[Tuple[bytes, str]]] = None,
     # Backward compat: si se pasa imagen singular, se convierte a lista
     imagen_bytes: Optional[bytes] = None,
-    imagen_mime: str = "image/jpeg"
-) -> str:
+    imagen_mime: str = "image/jpeg",
+    return_telemetry: bool = False
+):
     """
     Llama a la API de Google Gemini a través del ResilientLLMGateway oficial.
-    Soporta Circuit Breaker automático, fallback entre modelos configurados sin latencia fantasma
-    y Fusión Multimodal Simultánea (ECG, Rx, Labs).
+    Soporta Circuit Breaker automático, fallback entre modelos configurados sin latencia fantasma,
+    Fusión Multimodal Simultánea (ECG, Rx, Labs) y telemetría de latencia exacta.
     Lanza InferenceUnavailableException (HTTP 503 RFC 7807) ante indisponibilidad real de IA.
     """
     partes_imagenes: List[Tuple[bytes, str]] = []
@@ -36,6 +39,7 @@ def call_gemini_llm(
         logger.error("GEMINI_API_KEY no configurada. Inferencia de IA clínica no disponible.", extra={"action": "gemini_api_key_missing"})
         raise InferenceUnavailableException("GEMINI_API_KEY no configurada en el servidor clínico.")
 
+    t0 = time.perf_counter()
     try:
         result = llm_gateway.generate(
             prompt=prompt,
@@ -44,6 +48,10 @@ def call_gemini_llm(
             response_mime_type="application/json",
             temperature=0.2
         )
+        latency_ms = round((time.perf_counter() - t0) * 1000.0, 2)
+        model_used = getattr(result, "model_used", "gemini-3.8-flash")
+        if return_telemetry:
+            return result.text, latency_ms, model_used
         return result.text
     except AllModelsExhaustedException as exc:
         logger.error(f"Inferencia no disponible: {exc}", extra={"action": "llm_all_models_exhausted"})
@@ -51,6 +59,7 @@ def call_gemini_llm(
     except FatalLLMException as fatal:
         logger.error(f"Falla crítica de autenticación en LLM: {fatal}", extra={"action": "llm_fatal_auth"})
         raise InferenceUnavailableException(f"Error de autenticación o cuota con el proveedor de IA: {fatal}")
+
 
 def _repair_truncated_json(text: str) -> str:
     """
@@ -257,17 +266,39 @@ def evaluate_clinical_reasoning(
         mime_types=mime_types,
     )
 
+    t_start = time.perf_counter()
+    latency_ms = 0.0
+    model_used = "gemini-3.8-flash"
+    raw_text = ""
     try:
-        raw_text = call_gemini_llm(prompt, imagenes_list=imagenes_list)
+        raw_res = call_gemini_llm(prompt, imagenes_list=imagenes_list, return_telemetry=True)
+        if isinstance(raw_res, tuple):
+            raw_text, latency_ms, model_used = raw_res
+        else:
+            raw_text = raw_res
+            latency_ms = round((time.perf_counter() - t_start) * 1000.0, 2)
         resultado = parse_and_validate_llm_json(raw_text)
     except ValueError:
         retry_prompt = prompt + "\n\nNOTA: Asegúrate estrictamente de devolver ÚNICAMENTE el objeto JSON sin bloques de código."
-        raw_text_retry = call_gemini_llm(retry_prompt, imagenes_list=imagenes_list)
-        resultado = parse_and_validate_llm_json(raw_text_retry)
+        raw_res_retry = call_gemini_llm(retry_prompt, imagenes_list=imagenes_list, return_telemetry=True)
+        if isinstance(raw_res_retry, tuple):
+            raw_text_retry, latency_ms, model_used = raw_res_retry
+            raw_text = raw_text_retry
+        else:
+            raw_text = raw_res_retry
+            latency_ms = round((time.perf_counter() - t_start) * 1000.0, 2)
+        resultado = parse_and_validate_llm_json(raw_text)
+
+    # Inyección de Telemetría de Inferencia IA
+    resultado.llm_latency_ms = latency_ms
+    resultado.llm_model_used = model_used
+    resultado.paraclinical_studies_count = n_imagenes
+    resultado.rag_tokens_used = max(1, (len(prompt) + len(str(raw_text))) // 4)
 
     # Enriquecer y anclar fáctamente la cita normativa con la metadata y texto del fragmento RAG
     if chunk and resultado.cita_normativa:
         resultado.cita_normativa = _anchor_cita_to_chunk(resultado.cita_normativa, chunk)
+
 
     # Calcular y adjuntar Faithfulness Score (Anti-Alucinación Normativa)
     try:
@@ -341,13 +372,26 @@ def evaluate_phase_reasoning(
         mime_types=mime_types,
     )
 
+    t_start = time.perf_counter()
+    latency_ms = 0.0
+    model_used = "gemini-3.8-flash"
     try:
-        raw_text = call_gemini_llm(prompt, imagenes_list=imagenes_list)
+        raw_res = call_gemini_llm(prompt, imagenes_list=imagenes_list, return_telemetry=True)
+        if isinstance(raw_res, tuple):
+            raw_text, latency_ms, model_used = raw_res
+        else:
+            raw_text = raw_res
+            latency_ms = round((time.perf_counter() - t_start) * 1000.0, 2)
         eval_base = parse_and_validate_llm_json(raw_text)
     except Exception:
         # Fallback defensivo si ocurre error de parseo en la fase
         retry_prompt = prompt + "\n\nIMPORTANTE: Devuelve exclusivamente un objeto JSON sin caracteres Markdown."
-        raw_text_retry = call_gemini_llm(retry_prompt, imagenes_list=imagenes_list)
+        raw_res_retry = call_gemini_llm(retry_prompt, imagenes_list=imagenes_list, return_telemetry=True)
+        if isinstance(raw_res_retry, tuple):
+            raw_text_retry, latency_ms, model_used = raw_res_retry
+        else:
+            raw_text_retry = raw_res_retry
+            latency_ms = round((time.perf_counter() - t_start) * 1000.0, 2)
         eval_base = parse_and_validate_llm_json(raw_text_retry)
 
     # Construir y anclar PhaseEvaluationResult con el fragmento RAG
@@ -377,6 +421,11 @@ def evaluate_phase_reasoning(
         cita_normativa=cita,
         retroalimentacion_fase=eval_base.retroalimentacion_general,
         desbloquea_siguiente=eval_base.score >= 4.0 or fase_numero >= 3, # Desbloquea si no es reprobación total o si es la última
-        datos_fase_siguiente=datos_sig
+        datos_fase_siguiente=datos_sig,
+        llm_latency_ms=latency_ms,
+        llm_model_used=model_used,
+        rag_tokens_used=max(1, (len(prompt) + len(str(raw_text))) // 4),
+        paraclinical_studies_count=n_imagenes
     )
+
 

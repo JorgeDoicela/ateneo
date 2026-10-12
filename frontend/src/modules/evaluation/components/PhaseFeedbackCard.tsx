@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, AlertTriangle, BookOpen, Sparkles } from "lucide-react";
+import { ArrowRight, CheckCircle2, AlertTriangle, BookOpen, Sparkles, Activity } from "lucide-react";
 import { PhaseEvaluationResult } from "../../../types";
 
 export interface PhaseFeedbackCardProps {
@@ -130,6 +130,23 @@ export default function PhaseFeedbackCard({
           <p className="text-xs text-[#444746] leading-relaxed">
             {datos_fase_siguiente}
           </p>
+        </div>
+      )}
+
+      {/* Telemetría de Inferencia de la Fase */}
+      {(phaseResult.llm_latency_ms !== undefined || phaseResult.llm_model_used) && (
+        <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 rounded-[18px] bg-slate-50 border border-slate-200/70 text-[11px] text-[#444746]">
+          <div className="flex items-center gap-1.5">
+            <Activity className="w-3.5 h-3.5 text-[#0b57d0]" />
+            <span className="font-semibold text-[#1f1f1f]">Telemetría:</span>
+            <span>{phaseResult.llm_model_used || 'Gemini 3.8 Flash'}</span>
+            {phaseResult.llm_latency_ms !== undefined && phaseResult.llm_latency_ms > 0 && (
+              <span>en {(phaseResult.llm_latency_ms / 1000).toFixed(2)}s</span>
+            )}
+          </div>
+          {phaseResult.paraclinical_studies_count !== undefined && phaseResult.paraclinical_studies_count > 0 && (
+            <span>{phaseResult.paraclinical_studies_count} estudio(s) integrado(s)</span>
+          )}
         </div>
       )}
 

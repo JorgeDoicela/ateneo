@@ -111,6 +111,10 @@ class EvaluationService:
                         faithfulness_score=float(eval_dict.get("faithfulness_score", 0.0)) if eval_dict.get("faithfulness_score") is not None else None,
                         cohorte_id=eval_dict.get("cohorte_id", "general"),
                         tiempo_segundos=float(eval_dict.get("tiempo_segundos", 0.0)) if eval_dict.get("tiempo_segundos") is not None else 0.0,
+                        llm_latency_ms=float(eval_dict.get("llm_latency_ms", 0.0)) if eval_dict.get("llm_latency_ms") is not None else 0.0,
+                        llm_model_used=str(eval_dict.get("llm_model_used", "gemini-3.8-flash")),
+                        rag_tokens_used=int(eval_dict.get("rag_tokens_used", 0)) if eval_dict.get("rag_tokens_used") is not None else 0,
+                        paraclinical_studies_count=int(eval_dict.get("paraclinical_studies_count", len(resolved_images))),
                         tenant_id=resolved_tenant,
                         aciertos_json=json.dumps(eval_dict.get("aciertos", []), ensure_ascii=False),
                         omisiones_json=json.dumps(eval_dict.get("omisiones", []), ensure_ascii=False),
@@ -120,6 +124,7 @@ class EvaluationService:
                         timestamp=datetime.datetime.now(datetime.timezone.utc)
                     )
                     uow.history.create(history_record, commit=False)
+
 
 
                     # 2. Impactar el modelo psicométrico BKT y registrar snapshot en la misma transacción

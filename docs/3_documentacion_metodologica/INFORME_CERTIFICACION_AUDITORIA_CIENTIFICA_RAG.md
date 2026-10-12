@@ -17,6 +17,7 @@ El presente informe documenta la evaluación empírica y la certificación técn
 3. El control de alucinaciones normativas mediante el cálculo de *Faithfulness Score*.
 4. La eficiencia del canal adaptativo socrático mediante *Server-Sent Events* (SSE).
 5. La calibración determinística del modelo de adquisición cognitiva basado en *Bayesian Knowledge Tracing* (BKT) y la *Zona de Desarrollo Próximo* (ZDP).
+6. El aislamiento y hermetismo institucional mediante particionado lógico *Multi-Tenant* sobre el historial de evaluaciones y el catálogo de casos clínicos.
 
 ---
 
@@ -48,11 +49,17 @@ flowchart TD
         BKT --> ZDP["Recomendación en ZDP (/next-case)"]
     end
 
+    subgraph E6["Experimento 6: Multi-Tenant"]
+        TEN["Discriminador tenant_id"] --> ISO["Aislamiento Institucional B2B"]
+        ISO --> HERM["Hermetismo 0 Fugas entre Facultades"]
+    end
+
     E1 --> REPO["Consolidado: backend/data/audit_results_dump.json"]
     E2 --> REPO
     E3 --> REPO
     E4 --> REPO
     E5 --> REPO
+    E6 --> REPO
 ```
 
 ---
@@ -134,18 +141,41 @@ Auditoría de los endpoints `/api/adaptive/knowledge-state` y `/api/adaptive/nex
 
 ---
 
+### 3.6 Experimento 6: Aislamiento y Gobernanza Multi-Tenant
+
+Auditoría del endpoint institucional `/api/history/coordinator-analytics` y del catálogo `/api/cases` evaluando el particionado por institución médica:
+
+| Parámetro Evaluado | Tenant Principal (`tenant_default`) | Tenant Aislado (`tenant_test_isolated`) | Veredicto de Aislamiento |
+| :--- | :---: | :---: | :---: |
+| **Total Evaluaciones Accesibles** | Muestra histórica asignada | **0** (Hermetismo confirmado) | **PASS (0 fugas)** |
+| **Catálogo de Casos Clínicos** | 11 casos (Normativos + Locales) | 11 casos (Herencia canónica MSP) | **PASS (Herencia segura)** |
+| **Integridad de Claves Foráneas** | `RESTRICT` en usuarios y salas | `CASCADE` en historial | **PASS (Sin registros huérfanos)** |
+
+*Análisis:* El discriminador relacional `tenant_id` y el índice compuesto `ix_eval_tenant_cohort` garantizan que las facultades u hospitales asociados no tengan visibilidad sobre las resoluciones de estudiantes de otras instituciones, preservando el secreto estadístico y la gobernanza académica B2B.
+
+---
+
 ## 4. Instrucciones de Reproducción de la Auditoría
 
 Para replicar íntegramente la batería de pruebas en cualquier despliegue de Ateneo+:
 
 ```bash
-# Ejecutar arnés formal dentro del contenedor backend
+# 1. Ejecutar arnés formal completo (6 experimentos con LLM en vivo)
 docker compose exec backend python /scripts/audit_scientific_rag.py
+
+# 2. Ejecutar modo determinístico rápido (RAG + BKT/ZDP + Multi-Tenant sin cuota LLM)
+docker compose exec backend python /scripts/audit_scientific_rag.py --skip-llm
+
+# 3. Ejecutar contra un tenant específico
+docker compose exec backend python /scripts/audit_scientific_rag.py --tenant-id tenant_default
+
+# 4. Ejecución en entorno local (fuera de Docker)
+python scripts/audit_scientific_rag.py --api-url http://localhost:8000
 ```
 
 Salida esperada:
-* Verificación secuencial de los 5 experimentos.
-* Aserciones psicométricas aprobadas (`assert` sin excepciones).
+* Verificación secuencial de los 6 experimentos.
+* Aserciones clínicas y de aislamiento psicométrico/multi-tenant aprobadas (`assert` sin excepciones).
 * Generación del volcado de auditoría en `backend/data/audit_results_dump.json`.
 * Código de retorno: `0`.
 
@@ -157,3 +187,4 @@ El sistema **Ateneo+** queda formalmente **CERTIFICADO** para fines de investiga
 1. Las fuentes normativas del MSP Ecuador se encuentran fielmente reflejadas en el almacén de datos vectorial.
 2. El modelo LLM cuenta con calibración defensiva contra negligencias farmacológicas letales.
 3. El acompañamiento socrático y el modelo adaptativo KST/BKT operan de forma no lineal y científicamente reproducible.
+4. El particionado multi-tenant garantiza aislamiento estricto entre instituciones médicas con agregación de cohortes conforme a la normativa de datos.

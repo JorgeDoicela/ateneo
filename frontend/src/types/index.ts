@@ -14,14 +14,35 @@ export interface User {
   email: string;
   nombre: string;
   rol: UserRole;
+  tenant_id?: string;
   cohorte?: string;
   creado_en?: string;
+  last_login_at?: string;
+  login_count?: number;
+  email_verified?: boolean;
+  activo?: boolean;
 }
 
 export interface LoginResponse {
   access_token: string;
   token_type: string;
   user: User;
+}
+
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  nombre: string;
+  rol?: UserRole;
+}
+
+export interface RegisterResponse {
+  id: string;
+  email: string;
+  nombre: string;
+  rol: UserRole;
+  tenant_id: string;
+  mensaje: string;
 }
 
 export interface AuthContextType {
@@ -129,6 +150,10 @@ export interface EvaluationResult {
   competencias_por_eje?: AxisCompetencyItem[];
   retroalimentacion_general?: string;
   hash_verificacion?: string;
+  llm_latency_ms?: number;
+  llm_model_used?: string;
+  rag_tokens_used?: number;
+  paraclinical_studies_count?: number;
 }
 
 export interface PhaseEvaluationResult {
@@ -142,7 +167,10 @@ export interface PhaseEvaluationResult {
   desbloquea_siguiente?: boolean;
   siguiente_fase_disponible?: boolean;
   es_ultima_fase?: boolean;
+  llm_latency_ms?: number;
+  llm_model_used?: string;
 }
+
 
 // ==========================================
 // 3.1 Debriefing Socrático Multiturno
@@ -237,14 +265,25 @@ export interface InstitutionalDeficiency {
   total_estudiantes: number;
 }
 
+export interface TelemetriaIaAnalytics {
+  promedio_latencia_ms: number;
+  modelo_principal: string;
+  disponibilidad_servicio_pct: number;
+  total_estudios_procesados: number;
+  distribucion_modelos?: Record<string, number>;
+}
+
 export interface CoordinatorAnalyticsData {
   cohorte_nombre: string;
   total_estudiantes_activos: number;
   total_evaluaciones_registradas: number;
+  promedio_score_cohorte?: number;
+  promedio_faithfulness_score?: number;
   insight_principal: string;
   porcentaje_falla_pediatria?: number;
   modulos_analizados: CoordinatorModuleRisk[];
   top_deficiencias_institucionales?: InstitutionalDeficiency[];
+  telemetria_ia?: TelemetriaIaAnalytics;
 }
 
 export interface BenchmarkMetricsIr {
@@ -338,4 +377,32 @@ export interface HttpResponse<T> {
 
 export interface RequestOptions extends RequestInit {
   responseType?: 'json' | 'blob';
+}
+
+// ==========================================
+// 8. Eventos de Telemetría de Aprendizaje (Fase 5)
+// ==========================================
+
+export type LearningEventType =
+  | 'case_opened'
+  | 'paraclinical_inspected'
+  | 'socratic_debrief_opened'
+  | 'tab_changed'
+  | 'case_reset';
+
+export interface LearningActivityEvent {
+  case_id: string;
+  event_type: LearningEventType;
+  metadata?: Record<string, unknown>;
+  tenant_id?: string;
+}
+
+export interface LearningActivityEventRecord {
+  id: number;
+  user_id: string;
+  tenant_id: string;
+  case_id: string;
+  event_type: LearningEventType;
+  metadata: Record<string, unknown>;
+  timestamp: string;
 }

@@ -9,6 +9,7 @@ const CaseList = lazy(() => import('../modules/cases/pages/CaseList'));
 const CaseSolve = lazy(() => import('../modules/evaluation/pages/CaseSolve'));
 const AteneoRoom = lazy(() => import('../modules/collaboration/pages/AteneoRoom'));
 const Login = lazy(() => import('../modules/auth/pages/Login'));
+const Register = lazy(() => import('../modules/auth/pages/Register'));
 const AdminDashboard = lazy(() => import('../modules/analytics/pages/AdminDashboard'));
 const TeacherDashboard = lazy(() => import('../modules/analytics/pages/TeacherDashboard'));
 const ScientificBenchmarkView = lazy(() => import('../modules/analytics/components/ScientificBenchmarkView'));
@@ -28,6 +29,7 @@ export default function AppRoutes() {
       <Suspense fallback={<RouteLoader />}>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
           <Route
             path="/"

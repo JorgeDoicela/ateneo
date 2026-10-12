@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShieldCheck, Sparkles, AlertTriangle } from 'lucide-react';
+import { ShieldCheck, Sparkles, AlertTriangle, Activity, Cpu, Server, Clock } from 'lucide-react';
 import { analyticsApi } from '../api/analyticsApi';
 import type { CoordinatorAnalyticsData, IbfCohortData } from '../../../types';
 
@@ -302,6 +302,96 @@ export default function CoordinatorAnalytics() {
           </table>
         </div>
       </div>
+
+      {/* Telemetría e Infraestructura de Inferencia Clínica */}
+      {analytics.telemetria_ia && (
+        <div className="bg-white rounded-[28px] p-6 sm:p-8 shadow-xs border-0 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
+            <div>
+              <div className="flex items-center gap-2 text-xs font-semibold text-[#0b57d0] uppercase tracking-wider">
+                <Activity className="w-4 h-4 text-[#0b57d0]" />
+                <span>Auditoría de Sistemas y Observabilidad</span>
+              </div>
+              <h3 className="text-lg font-normal text-[#1f1f1f] font-heading mt-0.5">
+                Telemetría de Inferencia Clínica y Desempeño RAG
+              </h3>
+            </div>
+            <span className="text-xs font-medium text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 self-start sm:self-auto">
+              Servicio Operativo • {analytics.telemetria_ia.disponibilidad_servicio_pct}% Uptime
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Latencia Promedio */}
+            <div className="bg-[#f0f4f9] p-5 rounded-[20px] space-y-2">
+              <div className="flex items-center gap-2 text-xs text-[#444746] font-medium">
+                <Clock className="w-4 h-4 text-[#0b57d0]" />
+                <span>Latencia Promedio</span>
+              </div>
+              <div className="text-2xl font-semibold text-[#1f1f1f]">
+                {(analytics.telemetria_ia.promedio_latencia_ms / 1000).toFixed(2)}s
+              </div>
+              <p className="text-[11px] text-[#747775]">
+                {Math.round(analytics.telemetria_ia.promedio_latencia_ms)} ms por evaluación formativa
+              </p>
+            </div>
+
+            {/* Modelo Principal */}
+            <div className="bg-[#f0f4f9] p-5 rounded-[20px] space-y-2">
+              <div className="flex items-center gap-2 text-xs text-[#444746] font-medium">
+                <Cpu className="w-4 h-4 text-[#0b57d0]" />
+                <span>Motor Principal</span>
+              </div>
+              <div className="text-2xl font-semibold text-[#1f1f1f]">
+                {analytics.telemetria_ia.modelo_principal}
+              </div>
+              <p className="text-[11px] text-[#747775]">
+                Inferencia con grounding en guías MSP
+              </p>
+            </div>
+
+            {/* Disponibilidad */}
+            <div className="bg-[#f0f4f9] p-5 rounded-[20px] space-y-2">
+              <div className="flex items-center gap-2 text-xs text-[#444746] font-medium">
+                <Server className="w-4 h-4 text-[#0b57d0]" />
+                <span>Disponibilidad RAG</span>
+              </div>
+              <div className="text-2xl font-semibold text-[#1f1f1f]">
+                {analytics.telemetria_ia.disponibilidad_servicio_pct}%
+              </div>
+              <p className="text-[11px] text-[#747775]">
+                Sin pérdidas de sesión en 24h
+              </p>
+            </div>
+
+            {/* Estudios Paraclínicos Procesados */}
+            <div className="bg-[#f0f4f9] p-5 rounded-[20px] space-y-2">
+              <div className="flex items-center gap-2 text-xs text-[#444746] font-medium">
+                <Activity className="w-4 h-4 text-[#0b57d0]" />
+                <span>Estudios Paraclínicos</span>
+              </div>
+              <div className="text-2xl font-semibold text-[#1f1f1f]">
+                {analytics.telemetria_ia.total_estudios_procesados}
+              </div>
+              <p className="text-[11px] text-[#747775]">
+                Imágenes y reportes analizados
+              </p>
+            </div>
+          </div>
+
+          {/* Distribución de Modelos */}
+          {analytics.telemetria_ia.distribucion_modelos && Object.keys(analytics.telemetria_ia.distribucion_modelos).length > 0 && (
+            <div className="pt-2 flex flex-wrap items-center gap-3 text-xs text-[#444746]">
+              <span className="font-semibold text-[#1f1f1f]">Distribución de Inferencia:</span>
+              {Object.entries(analytics.telemetria_ia.distribucion_modelos).map(([mod, count]) => (
+                <span key={mod} className="px-3 py-1 rounded-full bg-slate-100 text-[#1f1f1f] border border-slate-200">
+                  {mod}: {count} dictámenes
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
     </div>
   );

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
   ArrowLeft, 
@@ -21,6 +21,7 @@ import PhaseFeedbackCard from '../components/PhaseFeedbackCard';
 import SocraticDebriefModal from '../components/SocraticDebriefModal';
 import ClinicalStudyViewer from '../components/ClinicalStudyViewer';
 import ClinicalButton from '../../../core/ui/ClinicalButton';
+import useLearningTelemetry from '../../analytics/hooks/useLearningTelemetry';
 
 const DicomStudyViewer = lazy(() => import('../components/DicomStudyViewer'));
 
@@ -53,6 +54,13 @@ export default function CaseSolve() {
   } = useCaseSolver(id);
 
   const [studyViewerTab, setStudyViewerTab] = useState<'standard' | 'dicom'>('standard');
+  const { trackCaseOpened } = useLearningTelemetry();
+
+  useEffect(() => {
+    if (caso?.id) {
+      trackCaseOpened(caso.id, { titulo: caso.titulo, guia: caso.guia_asociada });
+    }
+  }, [caso?.id, trackCaseOpened]);
 
   if (loading) {
     return (

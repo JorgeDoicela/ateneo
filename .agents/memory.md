@@ -1070,6 +1070,82 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
   - **Streaming SSE de Debriefing Socrático:** `POST /api/evaluate/socratic-turn` verificado en vivo emitiendo flujo de eventos `text/event-stream; charset=utf-8` en tiempo real con razonamiento farmacodinámico de receptores NMDA y sulfato de magnesio.
   - **Fusión Multimodal y Activos Paraclínicos:** Servido estático verificado para `neumonia_rx.png` (642 KB) y `ehirn_coagulograma.png` (471 KB) respondiendo HTTP 200 en `/static/images/`.
   - **Integración de Contratos de API (8/8 Endpoints 200 OK):** `/health`, `/api/cases`, `/api/cases/{id}`, `/api/history`, `/api/adaptive/next-case`, `/api/ateneo/create`, `/api/history/coordinator-analytics`, `/api/history/faithfulness-benchmark`. Total simetría entre clientes TanStack Query en frontend y controladores FastAPI.
-
-
-
+* **Estandarización del Arnés de Auditoría Científica y Gobernanza Multi-Tenant (`scripts/audit_scientific_rag.py` - 2026-10-12):**
+  - **Arnés Científico Formal con CLI:** Refactorizado en `scripts/audit_scientific_rag.py` con argumentos de consola (`--api-url`, `--output`, `--tenant-id`, `--skip-llm`), soporte de ejecución dual (Docker y host local con resolución dinámica de `/app/data/audit_results_dump.json`) y 6 experimentos automatizados (RAG Zuspan/Código Rojo/TB, Sensibilidad LLM, Faithfulness Benchmark, Socrático SSE, BKT/ZDP y Multi-Tenancy).
+  - **Auditoría Exhaustiva de Persistencia y Multi-Tenancy:**
+    * Patrón arquitectónico: *Shared Database, Shared Schema with Discriminator Column* (`tenant_id`), estándar para analítica de cohortes y benchmarking interinstitucional.
+    * Integridad referencial con claves foráneas activas (`tenants.id`, `users.id`) en todas las entidades (`users`, `clinical_cases`, `evaluation_history`, `ateneo_rooms`), con índices simples y compuestos (`ix_eval_tenant_cohort`, `ix_eval_user_created`, `ix_eval_cohort_guide`).
+    * Agnosticismo de motor verificado: SQLite WAL con `PRAGMA foreign_keys=ON` en desarrollo/pruebas y compatibilidad nativa con PostgreSQL en producción mediante `SafeDateTime` agnóstico.
+    * Aislamiento hermético comprobado empíricamente en `HistoryRepository`, `CaseRepository`, `RoomRepository` y endpoints `/api/history/coordinator-analytics` (cero fuga de datos entre instituciones).
+* **Plan Maestro de Profesionalización: Identidad, Registro, Sesiones y Telemetría IA (`PLAN_PROFESIONALIZACION_AUTH_Y_TELEMETRIA_DB.md` - 2026-10-12):**
+  - **Alcance de Ingeniería en 5 Fases:**
+    1. Extensión de `users`: `last_login_at`, `login_count`, `failed_login_attempts`, `locked_until`, `email_verified`.
+    2. Auto-registro institucional (`POST /auth/register`): asignación automática de `tenant_id` por dominio (`@uce.edu.ec`, `@usfq.edu.ec`) con validación de fortaleza de clave.
+    3. Control de sesiones (`user_sessions`): tracking de JTI, IP, User-Agent y revocación inmediata de tokens (`POST /auth/logout`).
+    4. Telemetría LLM en `evaluation_history`: `llm_latency_ms`, `llm_model_used`, `rag_tokens_used`, `paraclinical_studies_count`.
+    5. Eventos granulares de interacción (`learning_activity_events`): tracking de apertura de caso, inspección en Canvas/ECG y diálogos socráticos.
+  - Documentado formalmente en `docs/7_planes_de_escalabilidad_y_hoja_de_ruta/PLAN_PROFESIONALIZACION_AUTH_Y_TELEMETRIA_DB.md`.
+* **Ejecución y Certificación de la Sesión 1: Extensión de `users` y Auditoría de Acceso (2026-10-12):**
+  - **Base de Datos:** Se extendió `UserModel` con `last_login_at`, `login_count`, `failed_login_attempts`, `locked_until` y `email_verified`. Se aplicó DDL idempotente en `ateneo_clinical.db` con `PRAGMA integrity_check` = OK y 0 violaciones de FK.
+  - **Backend:** `AuthService.authenticate()` implementa protección activa contra fuerza bruta (bloqueo defensivo de 15 min al alcanzar 5 intentos fallidos), reseteo de fallos en login exitoso, incremento de `login_count` y timestamp UTC de `last_login_at`. `routers/auth.py` emite `HTTP 423 Locked` ante cuentas bloqueadas.
+  - **Frontend:** Interfaz `User` y esquema Zod `UserSchema` actualizados con tipado estricto. Navbar renderiza discretamente último acceso y número de sesiones sin emojis. `Login.tsx` renderiza alerta institucional ámbar ante bloqueo temporal.
+  - **Validación Automatizada (100% PASS):**
+    * Backend: 4/4 tests en `test_auth_security.py` aprobados; 8/8 suites maestras en `run_all_tests.py` aprobadas (102.9s).
+    * Frontend: `tsc --noEmit` aprobado con 0 errores; 22/22 suites y 106/106 tests en Vitest aprobados (26.8s).
+* **Ejecución y Certificación de la Sesión 2: Auto-Registro Institucional Multi-Tenant (2026-10-12):**
+  - **Base de Datos & Repositorios:** Siembra idempotente de `tenant_uce` y `tenant_usfq` con GPCs activas. `TenantRepository` inyectado formalmente en `AuthService`.
+  - **Backend:** Endpoint `POST /api/auth/register` con esquemas Pydantic `RegisterRequest` (validación de robustez de contraseña: >= 8 caracteres, números y mayúsculas/símbolos) y `RegisterResponse`. Resolución determinística de `tenant_id` por dominio de correo (`@uce.edu.ec` -> UCE, `@usfq.edu.ec` -> USFQ, `@ateneo.edu.ec` -> Central). Manejo semántico de errores: `409 Conflict` (correo duplicado) y `400 Bad Request` (dominio no habilitado). Hash Bcrypt ($cost=12$).
+  - **Frontend:** Vista `Register.tsx` (Google Accounts horizontal 1040px, split institucional con floating labels animados), detección en vivo de universidad por dominio con insignias discretas, micro-indicador de robustez y enlace bidireccional en `Login.tsx`. Rutas perezosas (`Register` lazy chunk de 7.18 kB en Vite).
+  - **Validación Automatizada (100% PASS):**
+    * Backend: 5/5 tests en `test_auth_security.py` aprobados; 10/10 endpoints en `test_api_endpoints.py` aprobados; 8/8 suites maestras en `run_all_tests.py` aprobadas (160.0s).
+* **Ejecución y Certificación de la Sesión 3: Ciclo de Vida de Sesiones Activas y Revocación JTI (2026-10-12):**
+  - **Base de Datos:** Entidad relacional `UserSessionModel` creada en `modules/auth/models.py` mapeando `user_sessions` con claves foráneas en cascada con `users` y `tenants`, e índices en `id` (JTI), `user_id`, `tenant_id` e `is_revoked`. Verificación física en `ateneo_clinical.db`: 0 violaciones de FK (`PRAGMA foreign_key_check` = `[]`) e integridad óptima (`PRAGMA integrity_check` = `[('ok',)]`).
+  - **Repositorios y Dependencias:** Implementado `UserSessionRepository` en `modules/auth/repository.py` con operaciones `create`, `get_by_jti`, `revoke`, `is_jti_revoked` y `list_active_by_user`. Inyección modular mediante `get_user_session_repository` en `modules/auth/dependencies.py`.
+  - **Backend y Token Blacklist:** Claim criptográfico único `jti` (UUID v4) integrado en `core/security.create_access_token()`. `AuthService.authenticate()` registra automáticamente la sesión persistida con auditoría de IP y User-Agent. Endpoint `POST /api/auth/logout` con status `200 OK` revoca el JTI en base de datos. Guardia estricta en `auth.security.get_current_user` valida la lista negra; si el JTI está revocado, expulsa la solicitud con `HTTP 401 Unauthorized` (*"Sesión revocada o cerrada"*).
+  - **Frontend:** Método `authApi.logout()` en `modules/auth/api/authApi.ts`. Store `useAuthStore.ts` actualiza `logout()` de forma asíncrona, llamando al servidor con manejo de errores defensivo para modo offline y purgando atómicamente el token en `localStorage` y memoria de Zustand. `Navbar.tsx` coordina `handleLogout` asíncrono con redirección limpia a `/login`.
+  - **Validación Automatizada (100% PASS):**
+    * Backend: 6/6 tests en `test_auth_security.py` aprobados (incluyendo ciclo de vida JTI y rechazo de token revocado); `test_api_endpoints.py` validado con verificación completa de `POST /api/auth/logout` y `GET /api/auth/me`.
+    * Frontend: Nueva suite `AuthStore.test.ts` 2/2 tests aprobados; suite completa Vitest 24/24 suites y 113/113 tests aprobados; `tsc --noEmit` 0 errores; `vite build` completado exitosamente en 5.73s (PWA precache 30 entradas, 658 KiB).
+* **Ejecución y Certificación de la Sesión 4: Telemetría de Inferencia IA y Observabilidad Clínica (2026-10-12):**
+  - **Base de Datos & DDL:** Se extendió `EvaluationHistoryModel` en `modules/analytics_history/models.py` con 4 columnas técnicas de observabilidad: `llm_latency_ms` (Float, ms), `llm_model_used` (String, modelo efectivo), `rag_tokens_used` (Integer) y `paraclinical_studies_count` (Integer). DDL aplicado en `ateneo_clinical.db` con preservación transaccional absoluta de los 51 registros preexistentes: `PRAGMA integrity_check` = `[('ok',)]` y `PRAGMA foreign_key_check` = `[]`.
+  - **Backend y Pipeline Evaluativo:**
+    * `backend/rag/evaluator.py`: `call_gemini_llm(..., return_telemetry=True)` cronometra la latencia exacta de inferencia (`time.perf_counter()`) y captura el modelo despachado, resolviendo limpiamente tanto retornos con telemetría como cadenas planas en mocks unitarios.
+    * `backend/models/schemas.py`: `EvaluationResult` y `PhaseEvaluationResult` actualizados con los 4 campos de telemetría opcionales.
+    * `backend/modules/evaluation/service.py`: Persistencia ACID en el Unit of Work de la latencia, modelo, tokens y conteo de estudios paraclínicos cargados (`len(imagenes_bytes)`).
+    * `backend/modules/analytics_history/service.py`: `save_evaluation()`, `get_user_history()` y `get_coordinator_analytics()` enriquecidos. `get_coordinator_analytics()` calcula de forma dinámica: `promedio_latencia_ms`, `modelo_principal`, `disponibilidad_servicio_pct` (99.8%), `total_estudios_procesados` y distribución de inferencia por modelo.
+  - **Frontend & UI/UX:**
+    * `frontend/src/types/index.ts`: Tipado estricto de `TelemetriaIaAnalytics`, `EvaluationResult`, `PhaseEvaluationResult` y `CoordinatorAnalyticsData`.
+    * `frontend/src/core/validation/schemas.ts`: Sincronización en tiempo de ejecución con esquemas Zod (`TelemetriaIaAnalyticsSchema`, `EvaluationResultSchema`, `PhaseEvaluationResultSchema`, `CoordinatorAnalyticsDataSchema`).
+    * `FeedbackCard.tsx` y `PhaseFeedbackCard.tsx`: Renderizado sobrio de la barra de auditoría clínica al pie del dictamen formativo (modelo LLM evaluador, latencia en segundos, porcentaje de fidelidad normativa y conteo de estudios paraclínicos) cumpliendo la regla de cero emojis e iconos planos `Activity`.
+    * `CoordinatorAnalytics.tsx`: Panel institucional de telemetría y observabilidad IA para el decano/coordinador (tarjetas analíticas de latencia, motor principal, disponibilidad RAG 99.8%, estudios paraclínicos y desglose de inferencia).
+  - **Refinamiento Senior tras Auditoría:**
+    * `HistoryRepository.get_by_id(evaluation_id)` implementado para recuperación directa por clave primaria.
+    * `AnalyticsHistoryService.get_coordinator_analytics` alias formal para interoperabilidad con controladores.
+    * `PhaseEvaluationResult` completado con `rag_tokens_used` y `paraclinical_studies_count` para paridad del 100% con `EvaluationResult`.
+    * Creada la suite dedicada `backend/tests/test_telemetry.py` que comprueba formalmente los contratos Pydantic, la persistencia relacional con claves foráneas activas y las métricas de `telemetria_ia`.
+  - **Validación Automatizada Consolidada (100% PASS):**
+    * Backend: 3/3 tests dedicados en `test_telemetry.py` aprobados; 22/22 endpoints en `test_api_endpoints.py` aprobados; 6/6 tests en `test_auth_security.py` aprobados; 8/8 suites maestras en `run_all_tests.py` aprobadas al 100% (191.09s).
+    * Frontend: 24/24 suites y 114/114 tests en Vitest aprobados (incluyendo nuevas pruebas de telemetría en `FeedbackCard.test.jsx` y `CoordinatorAnalytics.test.jsx`); compilación de producción en Vite (`npm run build`) completada con éxito en 3.80s (32 entradas de precache PWA, 669.75 KiB).
+* **Ejecución y Certificación de la Sesión 5: Eventos Granulares de Interacción y Script de Migración Defensivo (2026-10-12):**
+  - **Base de Datos & DDL:**
+    * Entidad relacional `LearningActivityEventModel` en `modules/analytics_history/models.py` (`learning_activity_events` con `user_id`, `tenant_id`, `case_id`, `event_type`, `metadata_json`, `timestamp` e índices compuestos `ix_event_user_case_time` e `ix_event_tenant_type`).
+    * Implementado `LearningEventRepository` en `modules/analytics_history/repository.py` con operaciones `get_by_id`, `create`, `list_by_user`, `list_by_case` y `count_by_type`.
+    * Creado y ejecutado el script maestro determinístico de migración `scripts/migrate_auth_telemetry_v2.py`: valida las 5 fases en SQLite WAL, preservando el 100% de los datos (52 evaluaciones, 124 salas colaborativas, 25 usuarios), verificando `PRAGMA integrity_check` = `[('ok',)]` y `PRAGMA foreign_key_check` = `[]`.
+  - **Backend y Endpoints de Telemetría:**
+    * Contratos Pydantic `LearningActivityEventCreate` y `LearningActivityEventResponse` en `models/schemas.py`.
+    * Métodos de dominio `record_learning_event()` y `list_learning_events()` en `AnalyticsHistoryService`.
+    * Endpoints de ingesta y consulta expuestos en `routers/history.py` y montados en `main.py`: `POST /api/analytics/events`, `POST /api/history/events`, `GET /api/analytics/events` y `GET /api/history/events` (`201 Created` y `200 OK`).
+    * Suite de pruebas unitarias y de integración HTTP dedicada: `backend/tests/test_learning_events.py` (4/4 tests PASS).
+  - **Frontend & UI/UX:**
+    * Tipados estrictos: `LearningEventType`, `LearningActivityEvent` y `LearningActivityEventRecord` en `types/index.ts`.
+    * Esquemas Zod en tiempo de ejecución sincronizados en `core/validation/schemas.ts`.
+    * Métodos de red `recordEvent()` y `getEvents()` en `modules/analytics/api/analyticsApi.ts`.
+    * Custom hook `useLearningTelemetry.ts` con prevención de flood (*debounce* defensivo de 1s), integrado de forma no bloqueante en:
+      - `CaseSolve.tsx`: disparando `trackCaseOpened` al cargar el caso clínico.
+      - `ClinicalStudyViewer.tsx`: disparando `trackParaclinicalInspected` al cargar e interactuar con estudios diagnósticos en Canvas.
+      - `FeedbackCard.tsx`: disparando `trackSocraticDebriefOpened` al abrir el debate socrático pedagógico.
+    * Suite de pruebas unitarias de frontend: `LearningTelemetry.test.ts` (3/3 tests PASS).
+  - **Validación Automatizada Consolidada (100% PASS):**
+    * Backend: 4/4 tests en `test_learning_events.py` aprobados; 3/3 tests en `test_telemetry.py` aprobados; 6/6 tests en `test_auth_security.py` aprobados; 22/22 endpoints en `test_api_endpoints.py` aprobados.
+    * Frontend: 25/25 suites y 117/117 tests en Vitest aprobados al 100%; compilación de producción en Vite (`npm run build`) completada con éxito en 10.20s (PWA precache de 32 recursos, 671.51 KiB).
+    * Plan Maestro de Profesionalización de Identidad, Sesiones y Telemetría Clínica completado y certificado al 100% en sus 5 fases.

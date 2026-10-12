@@ -12,6 +12,7 @@ import {
   Eye, 
   Move
 } from 'lucide-react';
+import useLearningTelemetry from '../../analytics/hooks/useLearningTelemetry';
 
 export interface ClinicalStudyViewerProps {
   imageUrl: string;
@@ -47,6 +48,13 @@ export const ClinicalStudyViewer: React.FC<ClinicalStudyViewerProps> = ({
   const [showEcgGrid, setShowEcgGrid] = useState<boolean>(studyType === 'ecg');
   const [showFiltersPanel, setShowFiltersPanel] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const { trackParaclinicalInspected } = useLearningTelemetry();
+
+  useEffect(() => {
+    if (imageUrl) {
+      trackParaclinicalInspected('paraclinical_current', title, { studyType, imageUrl });
+    }
+  }, [imageUrl, title, studyType, trackParaclinicalInspected]);
 
   // Carga de la imagen en memoria
   useEffect(() => {

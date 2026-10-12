@@ -1,0 +1,192 @@
+{
+  "timestamp": "2026-10-12T19:03:39Z",
+  "api_base_url": "http://localhost:8000",
+  "tenant_id": "tenant_default",
+  "exp1": [
+    {
+      "query": "Esquema Zuspan sulfato de magnesio dosis ataque y mantenimiento",
+      "filtro": "preeclampsia",
+      "chunk_id": "gpc_MSP_Trastornos-hipertensivos-del-embarazo-con-portada-3_chunk_0080",
+      "guia_fuente": "Guia de Practica Clinica: Trastornos Hipertensivos del Embarazo",
+      "pagina_real": 40,
+      "pagina_esperada": 40,
+      "seccion": "12.8 Tratamiento preventivo para la eclampsia",
+      "rrf_score": 0.03227,
+      "snippet": "[Tabla 1]\n|Puntos de buena práctica para el tratamiento preventivo de la eclampsia|Col2|\n|---|---|\n|✓|En caso de contraindicación para el uso del sulfato de magnesio se puede utilizar como alternativa<br>fenitoína de 15 a 20 mg/kg de peso, a no más de 50 mg/minutos como dosis de impregnación. Una<br>dosis adicional de carga se puede administrar a r"
+    },
+    {
+      "query": "Atonia uterina codigo rojo dosis oxitocina misoprostol",
+      "filtro": "hemorragia_posparto",
+      "chunk_id": "gpc_Guía-de-hemorragia-postparto_chunk_0036",
+      "guia_fuente": "Guia de Practica Clinica: Prevencion y Manejo de la Hemorragia Postparto (Codigo Rojo)",
+      "pagina_real": 27,
+      "pagina_esperada": 27,
+      "seccion": "4.\t Describir una secuencia ordenada de intervenciones eficaces para el tratamiento de la",
+      "rrf_score": 0.03178,
+      "snippet": "[Tabla 2]\n|Misoprostol|Col2|\n|---|---|\n|ATC|G02AD06|\n|Indicación avalada en esta<br>guía|Prevención y tratamiento de la hemorragia posparto|\n|Forma farmacéutica y<br>concentración|Tableta 200 microgramos|\n|Dosis|Prevención de la hemorragia posparto: 600 mcg VO por una sola vez.<br>Tratamiento de la hemorragia posparto: 800 mcg sublingual.|\n|Precauc"
+    },
+    {
+      "query": "Tratamiento tuberculosis sensible fase inicial y consolidacion 2HRZE",
+      "filtro": "tuberculosis",
+      "chunk_id": "gpc_GP_Tuberculosis-1_chunk_0066",
+      "guia_fuente": "Guia de Practica Clinica: Prevencion, Diagnostico, Tratamiento y Control de la Tuberculosis (2da Edicion)",
+      "pagina_real": 56,
+      "pagina_esperada": 56,
+      "seccion": "14.3 Tratamiento de la TB",
+      "rrf_score": 0.03227,
+      "snippet": "Tratamiento para casos nuevos con TB pulmonar y extrapulmonar sensible\n\n[Tabla 1]\n|En los casos nuevos que a través de PSD presentan sensibilidad<br>comprobada por lo menos a R y/o H se recomienda el esquema<br>2HRZE/4HR. Estos incluyen:<br>1. Casos TB pulmonar bacteriológicamente positiva.<br>2. Casos TB pulmonar por diagnóstico clínico.<br>3. Cas"
+    }
+  ],
+  "exp5": {
+    "bkt_state": {
+      "student_id": "usr_alumno_001",
+      "knowledge_state": {
+        "semiologia_anamnesis": 0.2429,
+        "diagnostico_diferencial": 0.2256,
+        "examenes_complementarios": 0.2234,
+        "correlacion_multimodal": 0.2744,
+        "diagnostico_final": 0.2031,
+        "plan_terapeutico_msp": 0.2308,
+        "seguimiento_prevencion": 0.204
+      },
+      "topology": {
+        "nodes": [
+          {
+            "id": "semiologia_anamnesis",
+            "nombre": "Anamnesis y Semiología Clínica",
+            "eje_principal": "diagnóstico",
+            "descripcion": "Recolección estructurada de síntomas, antecedentes y signos de alarma.",
+            "orden": 1
+          },
+          {
+            "id": "diagnostico_diferencial",
+            "nombre": "Diagnóstico Diferencial y Presuntivo",
+            "eje_principal": "diagnóstico",
+            "descripcion": "Estratificación de hipótesis diagnósticas y descarte de patologías imitadoras.",
+            "orden": 2
+          },
+          {
+            "id": "examenes_complementarios",
+            "nombre": "Selección de Estudios Paraclínicos",
+            "eje_principal": "diagnóstico",
+            "descripcion": "Indicación justificada de estudios de laboratorio, gabinete e imagen.",
+            "orden": 3
+          },
+          {
+            "id": "correlacion_multimodal",
+            "nombre": "Interpretación y Correlación Multimodal",
+            "eje_principal": "diagnóstico",
+            "descripcion": "Lectura integrada de trazados ECG, radiografías y analítica frente a la clínica.",
+            "orden": 4
+          },
+          {
+            "id": "diagnostico_final",
+            "nombre": "Diagnóstico Definitivo y Severidad",
+            "eje_principal": "diagnóstico",
+            "descripcion": "Confirmación nosológica y estadificación de gravedad según la GPC del MSP.",
+            "orden": 5
+          },
+          {
+            "id": "plan_terapeutico_msp",
+            "nombre": "Terapéutica Farmacológica y Conducta",
+            "eje_principal": "tratamiento",
+            "descripcion": "Prescripción de primera línea, dosificación exacta por kg/peso y fluidoterapia normada.",
+            "orden": 6
+          },
+          {
+            "id": "seguimiento_prevencion",
+            "nombre": "Monitoreo, Prevención y Criterios de Alta",
+            "eje_principal": "seguimiento",
+            "descripcion": "Protocolos de control ambulatorio, prevención terciaria y vigilancia de complicaciones.",
+            "orden": 7
+          }
+        ],
+        "edges": [
+          {
+            "source": "semiologia_anamnesis",
+            "target": "diagnostico_diferencial"
+          },
+          {
+            "source": "diagnostico_diferencial",
+            "target": "examenes_complementarios"
+          },
+          {
+            "source": "examenes_complementarios",
+            "target": "correlacion_multimodal"
+          },
+          {
+            "source": "correlacion_multimodal",
+            "target": "diagnostico_final"
+          },
+          {
+            "source": "diagnostico_diferencial",
+            "target": "diagnostico_final"
+          },
+          {
+            "source": "diagnostico_final",
+            "target": "plan_terapeutico_msp"
+          },
+          {
+            "source": "plan_terapeutico_msp",
+            "target": "seguimiento_prevencion"
+          }
+        ]
+      }
+    },
+    "zdp_next_case": {
+      "case": {
+        "id": "case_preeclampsia_01",
+        "guia_asociada": "MSP_Trastornos-hipertensivos-del-embarazo-con-portada-3.pdf",
+        "titulo": "Gestante con Trastorno Hipertensivo y Signos de Criterio de Severidad",
+        "enunciado": "Gestante de 32 semanas por FUM, 28 años de edad, acude al servicio de urgencias por presentar cefalea holocraneana intensa de inicio reciente, fosfenos y epigastralgia en barra. Examen físico: PA 165/110 mmHg tomada en dos ocasiones separadas por 15 minutos en decúbito lateral izquierdo. Reflejos osteotendinosos exaltados (+++/++++). Examen de orina: Proteinuria cualitativa con tirilla de +++.",
+        "pregunta": "Identifique el diagnóstico específico según la GPC de Trastornos Hipertensivos del MSP Ecuador, establezca el manejo farmacológico inmediato para la prevención de eclampsia (Sulfato de Magnesio: esquema Zuspan con dosis de ataque de 4g IV en 20 minutos y mantenimiento de 1g/h) y la conducta antihipertensiva de emergencia (Nifedipino oral o Hidralazina IV).",
+        "imagen_url": null,
+        "nivel_esperado": "pregrado_avanzado",
+        "fragmento_gpc_ideal_id": "gpc_MSP_Trastornos-hipertensivos-del-embarazo-con-portada-3_chunk_0082",
+        "modo_simulacion": "single_turn",
+        "fases": null,
+        "competencias_activadas": [
+          "semiologia_anamnesis",
+          "diagnostico_final",
+          "plan_terapeutico_msp"
+        ],
+        "tenant_id": "tenant_default",
+        "activo": true
+      },
+      "competencia_objetivo": {
+        "id": "semiologia_anamnesis",
+        "nombre": "Anamnesis y Semiología Clínica",
+        "eje_principal": "diagnóstico",
+        "descripcion": "Recolección estructurada de síntomas, antecedentes y signos de alarma.",
+        "p_dominio": 0.2429
+      },
+      "justificacion_pedagogica": "Ateneo+ recomienda este caso para afianzar tus competencias fundamentales en 'Anamnesis y Semiología Clínica' (dominio actual: 24%).",
+      "zdp_competencias": [
+        "semiologia_anamnesis"
+      ],
+      "knowledge_state": {
+        "semiologia_anamnesis": 0.2429,
+        "diagnostico_diferencial": 0.2256,
+        "examenes_complementarios": 0.2234,
+        "correlacion_multimodal": 0.2744,
+        "diagnostico_final": 0.2031,
+        "plan_terapeutico_msp": 0.2308,
+        "seguimiento_prevencion": 0.204
+      },
+      "nivel_dominio_general": "Nivel Inicial (En formación)",
+      "promedio_dominio_global": 0.229
+    }
+  },
+  "exp6_multitenant": {
+    "tenant_principal": {
+      "tenant_id": "tenant_default",
+      "total_evaluaciones": 0
+    },
+    "tenant_aislado": {
+      "tenant_id": "tenant_test_isolated",
+      "total_evaluaciones": 0,
+      "aislamiento_exitoso": true
+    },
+    "total_casos_disponibles": 11
+  }
+}

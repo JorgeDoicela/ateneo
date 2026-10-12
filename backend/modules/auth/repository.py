@@ -1,7 +1,7 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from modules.auth.models import UserModel, TenantModel
+from modules.auth.models import UserModel, TenantModel, UserSessionModel
 
 
 class TenantRepository:
@@ -95,5 +95,71 @@ class UserRepository:
         else:
             self.db.flush()
         return user
+
+
+class UserSessionRepository:
+    """
+    Repositorio relacional para ciclo de vida de sesiones activas y lista negra de tokens JWT (JTI).
+    Permite auditar accesos concurrentes, revocación inmediata en logout y control de sesiones por usuario.
+    """
+    def __init__(self, db: Session):
+        self.db = db
+
+    def create(self, session: UserSessionModel, commit: bool = True) -> UserSessionModel:
+        self.db.add(session)
+        if commit:
+            self.db.commit()
+            self.db.refresh(session)
+        else:
+            self.db.flush()
+        return session
+
+    def get_by_jti(self, jti: str) -> Optional[UserSessionModel]:
+        return self.db.query(UserSessionModel).filter(UserSessionModel.id == jti).first()
+
+    def revoke(self, jti: str, commit: bool = True) -> bool:
+        session = self.get_by_jti(jti)
+        if not session:
+            return False
+        session.is_revoked = True
+        if commit:
+            self.db.commit()
+        else:
+            self.db.flush()
+        return True
+
+    def is_jti_revoked(self, jti: str) -> bool:
+        session = self.get_by_jti(jti)
+        if not session:
+            return False
+        return bool(session.is_revoked)
+
+    def list_active_by_user(self, user_id: str) -> List[UserSessionModel]:
+        return (
+            self.db.query(UserSessionModel)
+            .filter(
+                UserSessionModel.user_id == user_id,
+                UserSessionModel.is_revoked == False
+            )
+            .all()
+        )
+
+    def revoke_all_for_user(self, user_id: str, commit: bool = True) -> int:
+        """Invalida masivamente todas las sesiones activas de un usuario ante cambio de credenciales o bloqueo."""
+        count = (
+            self.db.query(UserSessionModel)
+            .filter(
+                UserSessionModel.user_id == user_id,
+                UserSessionModel.is_revoked == False
+            )
+            .update({"is_revoked": True})
+        )
+        if commit:
+            self.db.commit()
+        else:
+            self.db.flush()
+        return count
+
+
 
 

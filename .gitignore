@@ -25,6 +25,7 @@ ENV/
 *.log
 *.db-wal
 *.db-shm
+backend/data/evaluation_history.db
 
 # ==========================================
 # 3. BASE VECTORIAL Y PESOS GIGANTES (>100MB)

@@ -51,6 +51,11 @@ class EvaluationResult(BaseModel):
     total_claims: Optional[int] = Field(None, description="Total de afirmaciones clínicas evaluadas")
     grounded_claims: Optional[int] = Field(None, description="Afirmaciones verificadas en el corpus normativo")
     grounding_level: Optional[str] = Field(None, description="Nivel de grounding normativo: Alto / Moderado / Bajo")
+    # Telemetría de Inferencia IA y Observabilidad
+    llm_latency_ms: Optional[float] = Field(None, description="Latencia de inferencia del LLM en milisegundos")
+    llm_model_used: Optional[str] = Field("gemini-3.8-flash", description="Modelo LLM que generó el dictamen clínico")
+    rag_tokens_used: Optional[int] = Field(0, description="Tokens consumidos en prompt y generación")
+    paraclinical_studies_count: Optional[int] = Field(0, description="Cantidad de estudios paraclínicos (imágenes/labs) evaluados")
 
 class EvaluationRequest(BaseModel):
     case_id: str = Field(..., description="ID del caso clínico evaluado")
@@ -75,6 +80,11 @@ class PhaseEvaluationResult(BaseModel):
     retroalimentacion_fase: str = Field(..., description="Retroalimentación formativa de la fase")
     desbloquea_siguiente: bool = Field(default=True, description="Indica si se aprueba avanzar a la siguiente fase")
     datos_fase_siguiente: Optional[dict] = Field(None, description="Datos adicionales revelados para la próxima fase")
+    llm_latency_ms: Optional[float] = Field(None, description="Latencia de inferencia en milisegundos")
+    llm_model_used: Optional[str] = Field("gemini-3.8-flash", description="Modelo LLM utilizado")
+    rag_tokens_used: Optional[int] = Field(0, description="Tokens consumidos en prompt y generación")
+    paraclinical_studies_count: Optional[int] = Field(0, description="Cantidad de estudios paraclínicos evaluados")
+
 
 class ClinicalCaseSchema(BaseModel):
     id: str
@@ -118,6 +128,11 @@ class User(BaseModel):
     hashed_password: str
     activo: bool = True
     tenant_id: str = "tenant_default"
+    last_login_at: Optional[str] = None
+    login_count: Optional[int] = 0
+    failed_login_attempts: Optional[int] = 0
+    locked_until: Optional[str] = None
+    email_verified: Optional[bool] = False
 
 
 class LoginRequest(BaseModel):
@@ -131,12 +146,68 @@ class UserResponse(BaseModel):
     nombre: str
     rol: UserRole
     tenant_id: str = "tenant_default"
+    last_login_at: Optional[str] = None
+    login_count: Optional[int] = 0
+    email_verified: Optional[bool] = False
+    activo: Optional[bool] = True
 
 
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserResponse
+
+
+class RegisterRequest(BaseModel):
+    email: str = Field(..., description="Correo institucional universitario u hospitalario")
+    password: str = Field(..., min_length=8, description="Contraseña de al menos 8 caracteres con números y símbolos")
+    nombre: str = Field(..., min_length=3, description="Nombres y apellidos completos del facultativo")
+    rol: Optional[UserRole] = Field(default=UserRole.ALUMNO, description="Rol institucional")
+
+    @field_validator("email")
+    @classmethod
+    def validate_email_format(cls, v: str) -> str:
+        clean = v.strip().lower()
+        if "@" not in clean or "." not in clean.split("@")[-1]:
+            raise ValueError("El correo electrónico debe ser una dirección institucional válida.")
+        return clean
+
+    @field_validator("password")
+    @classmethod
+    def validate_password_strength(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError("La contraseña debe tener al menos 8 caracteres.")
+        has_digit = any(c.isdigit() for c in v)
+        has_upper_or_symbol = any(c.isupper() or not c.isalnum() for c in v)
+        if not (has_digit and has_upper_or_symbol):
+            raise ValueError("La contraseña debe contener al menos un número y una letra mayúscula o símbolo especial.")
+        return v
+
+
+class RegisterResponse(BaseModel):
+    id: str
+    email: str
+    nombre: str
+    rol: UserRole
+    tenant_id: str
+    mensaje: str
+
+
+class LearningActivityEventCreate(BaseModel):
+    case_id: str = Field(..., description="ID del caso clínico en interacción")
+    event_type: str = Field(..., description="Tipo de evento: case_opened, paraclinical_inspected, socratic_debrief_opened, etc.")
+    metadata: Optional[dict] = Field(default_factory=dict, description="Metadata contextual del evento")
+    tenant_id: Optional[str] = Field(None, description="ID del tenant o institución médica")
+
+
+class LearningActivityEventResponse(BaseModel):
+    id: int
+    user_id: str
+    tenant_id: str
+    case_id: str
+    event_type: str
+    metadata: dict
+    timestamp: str
 
 
 

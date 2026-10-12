@@ -89,6 +89,7 @@ graph TD
 
         subgraph Mod_Auth [Autenticación (auth/)]
             LoginPage["Login"]
+            RegisterPage["Register"]
             AuthApi["authApi"]
         end
     end
@@ -107,6 +108,7 @@ graph TD
     Guard --> AdminPage
     Guard --> BenchmarkPage
     Router --> LoginPage
+    Router --> RegisterPage
 
     CasePage --> CaseHook
     CaseHook --> CaseApi
@@ -159,7 +161,8 @@ frontend/src/
 │   │   ├── store/useAuthStore.ts
 │   │   ├── schemas.ts                      # Validación Zod en tiempo de ejecución
 │   │   ├── components/ProtectedRoute.tsx
-│   │   └── pages/Login.tsx
+│   │   ├── pages/Login.tsx
+│   │   └── pages/Register.tsx
 │   ├── cases/                              # Catálogo y filtrado de casos clínicos normativos
 │   │   ├── api/casesApi.ts
 │   │   ├── hooks/useCases.ts
@@ -216,9 +219,10 @@ frontend/src/
 ### 5.1 Módulo `auth` (Seguridad y Control de Acceso RBAC)
 * **Responsabilidad:** Inicio de sesión en dos pasos estilo Google Workspace, almacenamiento seguro del token JWT en `localStorage`, y protección de rutas según el rol del usuario (`student`, `teacher`, `admin`).
 * **Componentes Principales:**
-  - `Login.tsx`: Formulario con validación de correo institucional y contraseña mediante `FloatingLabelInput`.
+  - `Login.tsx`: Formulario con validación de correo institucional y contraseña mediante `FloatingLabelInput`, enlace a registro y alerta por bloqueo temporal.
+  - `Register.tsx`: Formulario de auto-registro institucional con detección en tiempo real de universidad u hospital según el dominio (`@uce.edu.ec`, `@usfq.edu.ec`, `@ateneo.edu.ec`), validación de robustez de contraseña y enlace bidireccional a login.
   - `ProtectedRoute.tsx`: Componente guardián que verifica autenticación y nivel de rol autorizado antes de renderizar la vista hija.
-* **Cliente API:** `authApi.login(email, password)`, `authApi.logout()`, `authApi.getCurrentUser()`.
+* **Cliente API:** `authApi.login(email, password)`, `authApi.register(data)`, `authApi.getMe()`, `authApi.getUsers()`.
 
 ### 5.2 Módulo `cases` (Catálogo Clínico)
 * **Responsabilidad:** Carga, búsqueda semántica y filtrado por especialidad médica de los 10 casos clínicos canónicos GPC del MSP.

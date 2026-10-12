@@ -1,34 +1,39 @@
 {
+  "timestamp": "2026-10-12T18:53:34Z",
+  "api_base_url": "http://localhost:8000",
   "exp1": [
     {
       "query": "Esquema Zuspan sulfato de magnesio dosis ataque y mantenimiento",
       "filtro": "preeclampsia",
       "chunk_id": "gpc_MSP_Trastornos-hipertensivos-del-embarazo-con-portada-3_chunk_0080",
       "guia_fuente": "Guia de Practica Clinica: Trastornos Hipertensivos del Embarazo",
-      "pagina": 40,
+      "pagina_real": 40,
+      "pagina_esperada": 40,
       "seccion": "12.8 Tratamiento preventivo para la eclampsia",
       "rrf_score": 0.03227,
-      "snippet": "[Tabla 1]\n|Puntos de buena práctica para el tratamiento preventivo de la eclampsia|Col2|\n|---|---|\n|✓|En caso de contraindicación para el uso del sulfato de magnesio se puede utilizar como alternativa<br>fenitoína de 15 a 20 mg/kg de peso, a no más de 50 mg/minutos como dosis de impregnación. Una<br>dosis adicional de carga se puede administrar a razón de 10 mg/kg vía  intravenosa, si después de<b"
+      "snippet": "[Tabla 1]\n|Puntos de buena práctica para el tratamiento preventivo de la eclampsia|Col2|\n|---|---|\n|✓|En caso de contraindicación para el uso del sulfato de magnesio se puede utilizar como alternativa<br>fenitoína de 15 a 20 mg/kg de peso, a no más de 50 mg/minutos como dosis de impregnación. Una<br>dosis adicional de carga se puede administrar a r"
     },
     {
       "query": "Atonia uterina codigo rojo dosis oxitocina misoprostol",
       "filtro": "hemorragia_posparto",
       "chunk_id": "gpc_Guía-de-hemorragia-postparto_chunk_0036",
       "guia_fuente": "Guia de Practica Clinica: Prevencion y Manejo de la Hemorragia Postparto (Codigo Rojo)",
-      "pagina": 27,
+      "pagina_real": 27,
+      "pagina_esperada": 27,
       "seccion": "4.\t Describir una secuencia ordenada de intervenciones eficaces para el tratamiento de la",
       "rrf_score": 0.03178,
-      "snippet": "[Tabla 2]\n|Misoprostol|Col2|\n|---|---|\n|ATC|G02AD06|\n|Indicación avalada en esta<br>guía|Prevención y tratamiento de la hemorragia posparto|\n|Forma farmacéutica y<br>concentración|Tableta 200 microgramos|\n|Dosis|Prevención de la hemorragia posparto: 600 mcg VO por una sola vez.<br>Tratamiento de la hemorragia posparto: 800 mcg sublingual.|\n|Precauciones|- En inducción de labor de parto, debe asegu"
+      "snippet": "[Tabla 2]\n|Misoprostol|Col2|\n|---|---|\n|ATC|G02AD06|\n|Indicación avalada en esta<br>guía|Prevención y tratamiento de la hemorragia posparto|\n|Forma farmacéutica y<br>concentración|Tableta 200 microgramos|\n|Dosis|Prevención de la hemorragia posparto: 600 mcg VO por una sola vez.<br>Tratamiento de la hemorragia posparto: 800 mcg sublingual.|\n|Precauc"
     },
     {
       "query": "Tratamiento tuberculosis sensible fase inicial y consolidacion 2HRZE",
       "filtro": "tuberculosis",
       "chunk_id": "gpc_GP_Tuberculosis-1_chunk_0066",
       "guia_fuente": "Guia de Practica Clinica: Prevencion, Diagnostico, Tratamiento y Control de la Tuberculosis (2da Edicion)",
-      "pagina": 56,
+      "pagina_real": 56,
+      "pagina_esperada": 56,
       "seccion": "14.3 Tratamiento de la TB",
       "rrf_score": 0.03227,
-      "snippet": "Tratamiento para casos nuevos con TB pulmonar y extrapulmonar sensible\n\n[Tabla 1]\n|En los casos nuevos que a través de PSD presentan sensibilidad<br>comprobada por lo menos a R y/o H se recomienda el esquema<br>2HRZE/4HR. Estos incluyen:<br>1. Casos TB pulmonar bacteriológicamente positiva.<br>2. Casos TB pulmonar por diagnóstico clínico.<br>3. Casos TB extrapulmonar; excepto del sistema nervioso<"
+      "snippet": "Tratamiento para casos nuevos con TB pulmonar y extrapulmonar sensible\n\n[Tabla 1]\n|En los casos nuevos que a través de PSD presentan sensibilidad<br>comprobada por lo menos a R y/o H se recomienda el esquema<br>2HRZE/4HR. Estos incluyen:<br>1. Casos TB pulmonar bacteriológicamente positiva.<br>2. Casos TB pulmonar por diagnóstico clínico.<br>3. Cas"
     }
   ],
   "exp2": {
@@ -36,18 +41,18 @@
       "score": 8.5,
       "score_max": 10,
       "aciertos": [
-        "Identificación precisa del diagnóstico: Preeclampsia con Criterios de Severidad.",
-        "Prescripción correcta del sulfato de magnesio mediante esquema Zuspan (dosis de impregnación de 4 g IV en 20 minutos y mantenimiento a 1 g/hora en infusión continua).",
-        "Indicación adecuada de terapia antihipertensiva de emergencia con nifedipino oral a dosis de 10 mg cada 20 minutos."
+        "Identificación precisa del diagnóstico de Preeclampsia con Criterios de Severidad ante cifras tensionales severas y síntomas premonitorios.",
+        "Prescripción correcta del sulfato de magnesio bajo esquema Zuspan: dosis de impregnación de 4 g IV en 20 minutos y mantenimiento a 1 g/h en infusión continua.",
+        "Elección adecuada de Nifedipino 10 mg vía oral cada 20 minutos como terapia antihipertensiva de rescate/emergencia."
       ],
       "omisiones": [
-        "No mencionó la recomendación de control estricto de diuresis horaria mediante la colocación de sonda vesical a permanencia durante la infusión de sulfato de magnesio.",
-        "No especificó alternativas farmacológicas (ej. fenitoína) en caso de contraindicación o toxicidad por sulfato de magnesio."
+        "Omisión de la colocación de sonda vesical a permanencia para el control estricto de diuresis horaria, medida mandataria durante el uso de sulfato de magnesio según la GPC.",
+        "Omisión de alternativas terapéuticas (ej. fenitoína) o precauciones ante posible contraindicación o toxicidad por sulfato de magnesio."
       ],
       "competencias_deficientes": [
         {
           "eje": "seguimiento",
-          "descripcion": "Omisión de la monitorización hemodinámica y de excreción renal (control estricto de diuresis horaria con sonda vesical) indispensable para prevenir la intoxicación por sulfato de magnesio según la norma técnica."
+          "descripcion": "No especifica la monitorización estricta de la diuresis horaria mediante cateterismo vesical para prevenir la intoxicación por sulfato de magnesio, tal como lo establece la norma oficial."
         }
       ],
       "cita_normativa": {
@@ -56,39 +61,38 @@
         "pagina": 40,
         "texto_relevante": "[Tabla 1]\n|Puntos de buena práctica para el tratamiento preventivo de la eclampsia|Col2|\n|---|---|\n|✓|En caso de contraindicación para el uso del sulfato de magnesio se puede utilizar como alternativa<br>fenitoína de 15 a 20 mg/kg de peso, a no más de 50 mg/minutos como dosis de impregnación. Una<br>dosis adicional de..."
       },
-      "retroalimentacion_general": "Excelente razonamiento diagnóstico y terapéutico inmediato, cumpliendo con precisión las dosis de sulfato de magnesio y el manejo antihipertensivo de emergencia. Sin embargo, es fundamental integrar siempre el componente de seguridad y seguimiento normado por el MSP, particularmente la monitorización estricta de la diuresis horaria mediante cateterismo vesical para evitar toxicidad por magnesio.",
+      "retroalimentacion_general": "Excelente formulación diagnóstica y terapéutica para el manejo agudo de la preeclampsia con criterios de severidad, con dosificación precisa de sulfato de magnesio y nifedipino. Recuerde que la administración de sulfato de magnesio exige de forma mandatoria la colocación de sonda vesical para vigilancia horaria de diuresis y prevención de toxicidad según la normativa del MSP.",
       "faithfulness_score": 0.8,
       "total_claims": 5,
       "grounded_claims": 4,
       "grounding_level": "Alto Grounding Normativo (Anti-Alucinación)"
     },
     "B_Peligrosa": {
-      "score": 1.1,
+      "score": 1.5,
       "score_max": 10,
       "aciertos": [],
       "omisiones": [
-        "Identificación y formulación del diagnóstico específico de Preeclampsia con criterios de severidad.",
-        "Administración reglamentaria de sulfato de magnesio con dosis de impregnación (4 g IV diluidos para pasar en 20 minutos) y mantenimiento (1 g/hora).",
-        "Respetar el límite de dosis máxima segura de sulfato de magnesio, la cual no debe exceder los 8 g sumando bolos adicionales y dosis de impregnación.",
-        "Indicación de terapia antihipertensiva de emergencia (Nifedipino oral o Hidralazina IV) ante cifras de presión arterial severas (≥ 160/110 mmHg).",
-        "Monitorización clínica de signos de toxicidad por magnesio (reflejo patelar, frecuencia respiratoria y diuresis horaria)."
+        "Identificación del diagnóstico de preeclampsia con criterios de severidad.",
+        "Prescripción del esquema normado de sulfato de magnesio (dosis segura diluida; no exceder límites máximos acumulados).",
+        "Indicación de terapia antihipertensiva de emergencia ante cifras tensionales ≥ 160/110 mmHg.",
+        "Monitorización estricta de signos de intoxicación por magnesio (reflejo rotuliano, frecuencia respiratoria, diuresis)."
       ],
       "competencias_deficientes": [
         {
           "eje": "diagnóstico",
-          "descripcion": "Omite por completo el diagnóstico sindrómico y de severidad acorde a la clínica y cifras tensionales de la paciente."
+          "descripcion": "No identifica el cuadro clínico correspondiente a un trastorno hipertensivo del embarazo con criterios de severidad."
         },
         {
           "eje": "tratamiento",
-          "descripcion": "Prescribe una dosis potencialmente letal de sulfato de magnesio (20 g en bolo directo IV sin dilución), superando ampliamente el límite normado de 8 g acumulados y generando riesgo inminente de paro cardiorrespiratorio; además, omite el antihipertensivo en una emergencia hipertensiva."
+          "descripcion": "Prescribe una dosis potencialmente letal de sulfato de magnesio (20 g en bolo directo IV sin diluir), sobrepasando ampliamente los límites de seguridad normados y desestimando el uso mandatorio de antihipertensivos de acción rápida."
         },
         {
           "eje": "prevención",
-          "descripcion": "Desconoce los esquemas normados para prevención de eclampsia y prevención de complicaciones cerebrovasculares derivadas de la hipertensión severa no controlada."
+          "descripcion": "Omite la profilaxis adecuada de eclampsia según esquemas estandarizados y no previene la morbimortalidad materna por crisis hipertensiva."
         },
         {
           "eje": "seguimiento",
-          "descripcion": "No plantea vigilancia hemodinámica, control de diuresis ni monitoreo de reflejos osteotendinosos y frecuencia respiratoria para el control de la toxicidad por magnesio."
+          "descripcion": "No contempla la vigilancia clínica de toxicidad por magnesio ni el control de la respuesta hemodinámica materna."
         }
       ],
       "cita_normativa": {
@@ -97,38 +101,38 @@
         "pagina": 42,
         "texto_relevante": "[Tabla 1]\n|Fuerza de la<br>recomendación|Recomendaciones para el tratamiento de convulsiones recurrentes|\n|---|---|\n|C|Las convulsiones recurrentes con tratamiento intravenoso deben tratarse con un<br>bolo adicional de 2 g de sulfato de magnesio en 20 minutos y un incremento de<br>la infusión de mantenimiento a 2 g o 3..."
       },
-      "retroalimentacion_general": "Su propuesta terapéutica presenta un riesgo iatrogénico crítico y potencialmente letal al indicar 20 g de sulfato de magnesio en bolo directo, lo cual excede por completo la dosis máxima normada de 8 g y causaría toxicidad inmediata y paro cardiorrespiratorio. Además, es un error grave omitir el tratamiento antihipertensivo frente a cifras tensionales de 165/110 mmHg con síntomas de afectación neurológica. Debe repasar con urgencia los esquemas de Zuspan y el manejo de crisis hipertensivas en obstetricia según la normativa del MSP.",
-      "faithfulness_score": 0.6,
-      "total_claims": 5,
-      "grounded_claims": 3,
-      "grounding_level": "Moderado Grounding Normativo"
+      "retroalimentacion_general": "La conducta propuesta representa un riesgo iatrogénico crítico por sobredosis masiva de sulfato de magnesio, la cual puede provocar paro cardiorrespiratorio inmediato. Asimismo, es incorrecto prescindir de la terapia antihipertensiva de emergencia ante presiones de 165/110 mmHg. Es prioritario revisar de forma urgente la dosificación estricta de la GPC y los protocolos de seguridad farmacológica.",
+      "faithfulness_score": 0.5,
+      "total_claims": 4,
+      "grounded_claims": 2,
+      "grounding_level": "Bajo Grounding (Riesgo de Deriva)"
     },
     "C_Evasiva": {
       "score": 1.5,
       "score_max": 10,
       "aciertos": [],
       "omisiones": [
-        "No identifica el diagnóstico de preeclampsia con signos de severidad o riesgo inminente de eclampsia frente a una crisis hipertensiva y síntomas neurológicos.",
-        "Omite la indicación urgente de sulfato de magnesio para la prevención de convulsiones eclámpticas y la colocación de un acceso venoso seguro.",
-        "No establece el manejo antihipertensivo de emergencia para el control de la crisis hipertensiva (PA 165/110 mmHg).",
-        "Indica analgesia menor (paracetamol) y reposo simple, subestimando una emergencia obstétrica crítica con alto riesgo materno-fetal."
+        "No identifica el diagnóstico de preeclampsia con criterios de severidad / riesgo inminente de eclampsia ante una cifra tensional de 165/110 mmHg, hiperreflexia y síntomas premonitorios.",
+        "Omite la indicación urgente de neuroprotección materna y profilaxis anticonvulsiva con sulfato de magnesio.",
+        "Omite la terapia antihipertensiva de emergencia (nifedipino oral o hidralazina IV) para el manejo de la crisis hipertensiva.",
+        "Omite medidas básicas de soporte vital y protección materna (vía aérea, decúbito lateral izquierdo, oxigenación) orientadas a prevenir y manejar complicaciones convulsivas."
       ],
       "competencias_deficientes": [
         {
           "eje": "diagnóstico",
-          "descripcion": "Fallo en reconocer una emergencia obstétrica (preeclampsia con criterios de severidad/inminencia de eclampsia), catalogando la condición erróneamente como una simple cefalea."
+          "descripcion": "Confunde un cuadro obstétrico crítico y de emergencia hipertensiva con una cefalea común, obviando los signos de severidad y el riesgo de eclampsia."
         },
         {
           "eje": "tratamiento",
-          "descripcion": "Instauración de una conducta inadecuada con paracetamol y reposo en sala, omitiendo la administración de sulfato de magnesio y antihipertensivos de acción rápida."
+          "descripcion": "Prescribe analgesia aislada e ineficaz (paracetamol) en lugar de iniciar la terapia antihipertensiva de urgencia y la administración de sulfato de magnesio."
         },
         {
           "eje": "prevención",
-          "descripcion": "Ausencia de prevención farmacológica de convulsiones eclámpticas y falta de medidas de protección ante complicaciones graves."
+          "descripcion": "Omite la profilaxis de crisis convulsivas (eclampsia) con sulfato de magnesio y las medidas de protección materna (vía aérea y posición)."
         },
         {
           "eje": "seguimiento",
-          "descripcion": "Omisión de monitoreo materno-fetal continuo, control estricto de la presión arterial, oximetría y vigilancia de reflejos osteotendinosos."
+          "descripcion": "Indica reposo en sala sin monitorización continua de signos vitales, oximetría de pulso, estado neurológico ni vigilancia fetal estricta."
         }
       ],
       "cita_normativa": {
@@ -137,11 +141,11 @@
         "pagina": 44,
         "texto_relevante": "[Tabla 3]\n|Puntos de buena práctica para el manejo de la eclampsia, consideraciones especiales|Col2|\n|---|---|\n|✓|Durante la convulsión inicial, se recomienda proteger a la paciente, proteger la vía aérea, evitar las<br>lesiones y; colocar a la mujer sobre su lado izquierdo, en lo posible colocar una cánula de guedel,<..."
       },
-      "retroalimentacion_general": "La respuesta evidencia una brecha crítica al no identificar una emergencia obstétrica con riesgo de eclampsia, proponiendo un manejo sintomático con paracetamol que pone en grave riesgo la vida de la paciente. Es imperativo reconocer los signos de severidad en gestantes hipertensas y aplicar de inmediato la colocación de una vía venosa para administrar sulfato de magnesio según el protocolo del MSP. Se sugiere revisar exhaustivamente los esquemas de manejo de crisis hipertensiva y prevención de eclampsia en la normativa nacional.",
-      "faithfulness_score": 0.5,
+      "retroalimentacion_general": "La respuesta es clínicamente deficiente e implica un alto riesgo iatrogénico al catalogar como cefalea aislada una preeclampsia severa en crisis hipertensiva. Frente a cifras tensionales severas y síntomas premonitorios, la normativa exige instaurar inmediatamente medidas de protección materna, sulfato de magnesio para prevención de eclampsia y manejo antihipertensivo de emergencia. Debe revisarse de forma prioritaria el protocolo de Código Rojo/Trastornos Hipertensivos del MSP.",
+      "faithfulness_score": 0.75,
       "total_claims": 4,
-      "grounded_claims": 2,
-      "grounding_level": "Bajo Grounding (Riesgo de Deriva)"
+      "grounded_claims": 3,
+      "grounding_level": "Moderado Grounding Normativo"
     }
   },
   "exp3": {
@@ -188,10 +192,10 @@
     ]
   },
   "exp4": {
-    "ttft": 0.382840633392334,
-    "total_time": 8.875753402709961,
-    "event_count": 15,
-    "generated_text": "{\"event\": \"start\", \"guia\": \"Guia de Practica Clinica: Trastornos Hipertensivos del Embarazo\", \"pagina\": 20}{\"token\": \"Es una interrogante fundamental que nos obliga a analizar la fisiopat\"}{\"token\": \"olog\\u00eda hemodin\\u00e1mica del cuadro. Aunque la paciente con preeclampsia pueda presentar extravasaci\\u00f3n de l\\u00edquido hacia el espacio intersticial e\"}{\"token\": \" incluso edema perif\\u00e9rico, el estado vascular intravascular real es de hipovolemia relativa y hemoconcentraci\\u00f3n, secundario\"}{\"token\": \" a la disfunci\\u00f3n endotelial sist\\u00e9mica, el aumento de la permeabilidad capilar y el vasoespasmo arteri\"}{\"token\": \"olar generalizado. \\n\\nAl administrar un diur\\u00e9tico en este contexto de volumen plasm\\u00e1tico eficaz ya depletado, se\"}{\"token\": \" provocar\\u00eda una reducci\\u00f3n cr\\u00edtica adicional del gasto card\\u00edaco y de la perfusi\\u00f3n uteroplacental. Este descenso abrupto del\"}{\"token\": \" flujo sangu\\u00edneo a nivel de la microvasculatura placentaria puede desencadenar sufrimiento fetal agudo o desprendimiento prematuro de placenta\"}{\"token\": \" normoinserta. Por ello, la normativa t\\u00e9cnica del Ministerio de Salud P\\u00fablica restringe el uso de diur\\u00e9ticos casi\"}{\"token\": \" exclusivamente a una complicaci\\u00f3n espec\\u00edfica: la presencia de edema agudo de pulm\\u00f3n.\\n\\nTomando en cuenta que el objetivo\"}{\"token\": \" primario ante una crisis hipertensiva (PA \\u2265 160/110 mmHg) en una gestante con criterios\"}{\"token\": \" de severidad es prevenir complicaciones cerebrovasculares maternas sin comprometer el flujo fetal, \\u00bfcu\\u00e1les son los f\\u00e1rmacos antihi\"}{\"token\": \"pertensivos de primera l\\u00ednea recomendados para el control de la emergencia y qu\\u00e9 esquema profil\\u00e1ctico simult\\u00e1neo debemos iniciar para\"}{\"token\": \" las manifestaciones neurol\\u00f3gicas que presenta la paciente?\"}{\"done\": true, \"cita_normativa\": {\"guia\": \"Guia de Practica Clinica: Trastornos Hipertensivos del Embarazo\", \"pagina\": 20}}"
+    "ttft": 0.010263204574584961,
+    "total_time": 9.38673996925354,
+    "event_count": 14,
+    "generated_text": "{\"event\": \"start\", \"guia\": \"Guia de Practica Clinica: Trastornos Hipertensivos del Embarazo\", \"pagina\": 20}{\"token\": \"Para responder a su inquietud, debemos analizar el estado hemodin\\u00e1mico subyacente en la preeclampsia. A diferencia\"}{\"token\": \" de lo que podr\\u00eda sugerir la retenci\\u00f3n h\\u00eddrica perif\\u00e9rica, esta patolog\\u00eda se caracteriza por una disfunci\\u00f3n endotelial\"}{\"token\": \" sist\\u00e9mica y vasoconstricci\\u00f3n arteriolar que provocan fuga capilar hacia el espacio extravascular y, en consecuencia,\"}{\"token\": \" una marcada contracci\\u00f3n del volumen intravascular efectivo con hemoconcentraci\\u00f3n.\\n\\nLa administraci\\u00f3n de diur\\u00e9ticos en este escenario reduce a\\u00fan\"}{\"token\": \" m\\u00e1s el volumen plasm\\u00e1tico circulante. Esta depleci\\u00f3n iatrog\\u00e9nica compromete de forma cr\\u00edtica la perfusi\\u00f3n de\"}{\"token\": \" \\u00f3rganos diana y, de manera primordial, el flujo sangu\\u00edneo uteroplacentario, lo cual eleva el riesgo de\"}{\"token\": \" deterioro fetal agudo. Por este motivo, la Gu\\u00eda de Pr\\u00e1ctica Cl\\u00ednica del Ministerio de Salud P\\u00fablica restringe y\"}{\"token\": \" contraindica el uso de diur\\u00e9ticos en la preeclampsia, reservando su indicaci\\u00f3n \\u00fanicamente para situaciones excepcionales de\"}{\"token\": \" sobrecarga h\\u00eddrica manifiesta, como el edema agudo de pulm\\u00f3n.\\n\\nTomando en cuenta que nuestra paciente\"}{\"token\": \" presenta cifras de 165/110 mmHg acompa\\u00f1adas de s\\u00edntomas premonitorios de eclampsia, \\u00bfcu\\u00e1les son\"}{\"token\": \" los f\\u00e1rmacos antihipertensivos de primera l\\u00ednea indicados por la normativa nacional para el manejo de esta crisis y\"}{\"token\": \" qu\\u00e9 metas de presi\\u00f3n arterial debemos plantearnos para no comprometer la perfusi\\u00f3n placentaria?\"}{\"done\": true, \"cita_normativa\": {\"guia\": \"Guia de Practica Clinica: Trastornos Hipertensivos del Embarazo\", \"pagina\": 20}}"
   },
   "exp5": {
     "bkt_state": {

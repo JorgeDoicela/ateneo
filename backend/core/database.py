@@ -95,7 +95,7 @@ def init_database() -> None:
     """Crea todas las tablas declaradas en los modelos si aún no existen y siembra datos iniciales."""
     import json
     # Importar entidades para registrar sus esquemas en Base.metadata
-    from modules.auth.models import UserModel, TenantModel
+    from modules.auth.models import UserModel, TenantModel, UserSessionModel
     from modules.analytics_history.models import EvaluationHistoryModel
     from modules.collaboration.models import AteneoRoomModel
     from modules.adaptive.models import StudentMasteryModel, StudentSnapshotModel
@@ -108,22 +108,42 @@ def init_database() -> None:
         from modules.auth.repository import UserRepository, TenantRepository
         from modules.auth.service import AuthService
         tenant_repo = TenantRepository(db)
-        if tenant_repo.count() == 0:
-            default_tenant = TenantModel(
-                id="tenant_default",
-                codigo="ateneo_central",
-                nombre_institucional="Ateneo+ Sede Central (MSP Ecuador)",
-                dominio_email="ateneo.edu.ec",
-                gpc_activas_json=json.dumps([
-                    "GPC_Hipertension_Arterial_MSP_2019",
-                    "GPC_Diabetes_Mellitus_Tipo_2_MSP_2017",
-                    "GPC_Neumonia_Adquirida_Comunidad_Pediatria_MSP_2019"
-                ], ensure_ascii=False),
-                activo=True
-            )
-            tenant_repo.create(default_tenant)
+        # Siembra defensiva e idempotente de tenants institucionales
+        default_tenants = [
+            {
+                "id": "tenant_default",
+                "codigo": "ateneo_central",
+                "nombre_institucional": "Ateneo+ Sede Central (MSP Ecuador)",
+                "dominio_email": "ateneo.edu.ec",
+                "gpc": ["GPC_Hipertension_Arterial_MSP_2019", "GPC_Diabetes_Mellitus_Tipo_2_MSP_2017", "GPC_Neumonia_Adquirida_Comunidad_Pediatria_MSP_2019"]
+            },
+            {
+                "id": "tenant_uce",
+                "codigo": "uce",
+                "nombre_institucional": "Universidad Central del Ecuador (Facultad de Ciencias Médicas)",
+                "dominio_email": "uce.edu.ec",
+                "gpc": ["GPC_Hipertension_Arterial_MSP_2019", "GPC_Diabetes_Mellitus_Tipo_2_MSP_2017"]
+            },
+            {
+                "id": "tenant_usfq",
+                "codigo": "usfq",
+                "nombre_institucional": "Universidad San Francisco de Quito (Colegio de Ciencias de la Salud)",
+                "dominio_email": "usfq.edu.ec",
+                "gpc": ["GPC_Hipertension_Arterial_MSP_2019", "GPC_Diabetes_Mellitus_Tipo_2_MSP_2017"]
+            }
+        ]
+        for t_data in default_tenants:
+            if not tenant_repo.get_by_id(t_data["id"]):
+                tenant_repo.create(TenantModel(
+                    id=t_data["id"],
+                    codigo=t_data["codigo"],
+                    nombre_institucional=t_data["nombre_institucional"],
+                    dominio_email=t_data["dominio_email"],
+                    gpc_activas_json=json.dumps(t_data["gpc"], ensure_ascii=False),
+                    activo=True
+                ))
 
         user_repo = UserRepository(db)
-        auth_service = AuthService(user_repo)
+        auth_service = AuthService(user_repo, tenant_repo)
         auth_service.seed_demo_users_if_needed()
 
