@@ -12,6 +12,9 @@ const Login = lazy(() => import('../modules/auth/pages/Login'));
 const Register = lazy(() => import('../modules/auth/pages/Register'));
 const MagicLogin = lazy(() => import('../modules/auth/pages/MagicLogin'));
 const AdminDashboard = lazy(() => import('../modules/analytics/pages/AdminDashboard'));
+const AdminLayout = lazy(() => import('../modules/admin/pages/AdminLayout'));
+const AdminUsersPage = lazy(() => import('../modules/admin/pages/AdminUsersPage'));
+const AdminMagicLinksPage = lazy(() => import('../modules/admin/pages/AdminMagicLinksPage'));
 const TeacherDashboard = lazy(() => import('../modules/analytics/pages/TeacherDashboard'));
 const ScientificBenchmarkView = lazy(() => import('../modules/analytics/components/ScientificBenchmarkView'));
 
@@ -74,10 +77,14 @@ export default function AppRoutes() {
             path="/admin"
             element={
               <ProtectedRoute allowedRoles={['administrador']}>
-                <AdminDashboard />
+                <AdminLayout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route index element={<Navigate to="/admin/users" replace />} />
+            <Route path="users" element={<AdminUsersPage />} />
+            <Route path="magic-links" element={<AdminMagicLinksPage />} />
+          </Route>
 
           <Route
             path="/teacher"

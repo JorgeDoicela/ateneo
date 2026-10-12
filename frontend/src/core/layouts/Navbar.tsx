@@ -13,7 +13,8 @@ import {
   WifiOff,
   RefreshCw,
   Building2,
-  Globe
+  Globe,
+  Link2
 } from 'lucide-react';
 import { useConnectivitySync } from '../storage/useConnectivitySync';
 import { useTheme } from '../theme/ThemeProvider';
@@ -166,8 +167,12 @@ export default function Navbar() {
 
               {user.rol === 'administrador' && (
                 <Link
-                  to="/admin"
-                  className="hidden sm:flex items-center gap-1 text-[#444746] hover:text-[#1f1f1f] px-2 py-1"
+                  to="/admin/users"
+                  className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-colors ${
+                    location.pathname.startsWith('/admin')
+                      ? 'bg-purple-50 text-purple-700 font-semibold'
+                      : 'text-[#444746] hover:text-[#1f1f1f] hover:bg-slate-100'
+                  }`}
                 >
                   <ShieldCheck className="w-4 h-4 text-purple-600" />
                   <span>Admin</span>
@@ -272,6 +277,30 @@ export default function Navbar() {
                         <span className="font-medium text-slate-600 truncate max-w-[150px]">{authority.sistemaClasificacion} ({authority.pais})</span>
                       </div>
                     </div>
+
+                    {user.rol === 'administrador' && (
+                      <div className="py-2 border-b border-slate-100 space-y-1">
+                        <span className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-2 pb-0.5">
+                          Administración
+                        </span>
+                        <Link
+                          to="/admin/users"
+                          onClick={() => setShowProfileMenu(false)}
+                          className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                        >
+                          <ShieldCheck className="w-3.5 h-3.5 text-purple-600" />
+                          <span>Usuarios y Roles</span>
+                        </Link>
+                        <Link
+                          to="/admin/magic-links"
+                          onClick={() => setShowProfileMenu(false)}
+                          className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                        >
+                          <Link2 className="w-3.5 h-3.5 text-cyan-600" />
+                          <span>Magic Links e Invitaciones</span>
+                        </Link>
+                      </div>
+                    )}
 
                     <div className="pt-2">
                       <button

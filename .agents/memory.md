@@ -1185,7 +1185,19 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
     * Modal con URL generada, botón de copia rápida al portapapeles y tabla de auditoría con revocación en caliente en tiempo real.
   - **Validación Automatizada Consolidada (100% PASS):**
     * Frontend: Nueva suite `MagicLinks.test.tsx` aprobada al 100% (4/4 tests PASS); suite global de Vitest con 26/26 suites y 121/121 tests PASS.
-    * Compilación de producción en Vite (`npm run build`) exitosa en 5.40s (PWA precache de 35 entradas, 697.17 KiB).
-
-
-
+    * Compilación de producción en Vite (`npm run build`) exitosa en 5.40s (PWA precache de 35 entradas, 697.17 KiB).* **Arquitectura Modular de Subrutas y Desacoplamiento de Consola de Administración (2026-10-12):**
+  - **Aislamiento por Dominio de Responsabilidad Única:**
+    * Se eliminó el acoplamiento monolítico donde `MagicLinkGeneratorCard` estaba incrustado en el fondo de `AdminDashboard.tsx`.
+    * Se formalizó el módulo `modules/admin/` con estructura propia:
+      - `modules/admin/pages/AdminLayout.tsx`: Contenedor maestro con encabezado contextual común y barra de pestañas (Tabs Material 3 Canvas con `NavLink` hacia `/admin/users` y `/admin/magic-links`).
+      - `modules/admin/pages/AdminUsersPage.tsx`: Vista dedicada al directorio institucional, gestión de roles RBAC y monitor de infraestructura (ChromaDB, FastAPI, LLM).
+      - `modules/admin/pages/AdminMagicLinksPage.tsx`: Vista dedicada para emisión, configuración granular y auditoría de Magic Links e Invitaciones Institucionales.
+  - **Enrutamiento Jerárquico en React Router v6 (`AppRoutes.tsx`):**
+    * Subrutas declarativas bajo `/admin` con `<Route index element={<Navigate to="/admin/users" replace />} />`, `/admin/users` y `/admin/magic-links`.
+    * Code-splitting optimizado por subrutas con `React.lazy`.
+  - **Navegación Global (`Navbar.tsx`):**
+    * Botón `Admin` con estado activo dinámico `location.pathname.startsWith('/admin')`.
+    * Menú desplegable de perfil institucional con enlaces directos para "Usuarios y Roles" y "Magic Links e Invitaciones".
+  - **Certificación de Calidad (100% PASS):**
+    * Compilación `npm run build` en 6.18s sin errores ni warnings (chunks independientes: `AdminLayout`, `AdminUsersPage`, `AdminMagicLinksPage`).
+    * 26/26 suites y 121/121 tests en Vitest aprobados al 100%.
