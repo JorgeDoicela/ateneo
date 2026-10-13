@@ -11,7 +11,7 @@ import {
   Activity, 
   Download, 
   Loader2,
-  Sparkles,
+  ShieldCheck,
   ArrowRight,
   LucideIcon,
   MessageSquare
@@ -171,7 +171,7 @@ export default function FeedbackCard({ result, studentAnswer = '', onReset }: Fe
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 text-xs font-medium text-[#0b57d0] mb-1">
-              <Sparkles className="w-4 h-4" />
+              <ShieldCheck className="w-4 h-4" />
               <span>Dictamen Formativo Contrastado con MSP</span>
             </div>
             <h2 className="text-2xl font-normal text-[#1f1f1f] font-heading">
@@ -229,10 +229,10 @@ export default function FeedbackCard({ result, studentAnswer = '', onReset }: Fe
               <ShieldAlert className="w-4 h-4 text-blue-600 shrink-0" />
               <div>
                 <p className="text-xs font-medium text-blue-700 uppercase tracking-wider">
-                  Diferenciador Científico 3 — Anti-Alucinación Normativa
+                  Verificación de Fidelidad Normativa
                 </p>
                 <h3 className="text-sm font-semibold text-slate-900 font-heading">
-                  Faithfulness Score (Grounding MSP)
+                  Fidelidad con la Guía de Práctica Clínica (MSP)
                 </h3>
               </div>
             </div>

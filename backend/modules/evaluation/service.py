@@ -129,7 +129,11 @@ class EvaluationService:
 
                     # 2. Impactar el modelo psicométrico BKT y registrar snapshot en la misma transacción
                     if self.adaptive_service and hasattr(uow, "adaptive"):
-                        competencias = getattr(case, "competencias_evaluadas", []) or []
+                        competencias = (
+                            getattr(case, "competencias_activadas", None)
+                            or getattr(case, "competencias_evaluadas", None)
+                            or ["semiologia_anamnesis", "diagnostico_final", "plan_terapeutico_msp"]
+                        )
                         score_val = getattr(eval_result, "score", 0.0)
 
                         from adaptive.knowledge_tracer import (

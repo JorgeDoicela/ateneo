@@ -24,7 +24,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#f0f4f9] flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#f0f4f9] flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 relative overflow-x-clip">
       {/* Halos de Luz Ambiental (Aurora de IA Ateneo+: Cyan, Azul, Violeta) para refracción Glassmorphism */}
       <div 
         className="pointer-events-none fixed -top-32 -left-32 w-[28rem] h-[28rem] bg-gradient-to-br from-cyan-400/20 via-blue-500/15 to-transparent rounded-full blur-3xl"

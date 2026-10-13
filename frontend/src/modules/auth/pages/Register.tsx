@@ -135,7 +135,7 @@ export default function Register() {
                 Crea tu cuenta institucional
               </h1>
               <p className="text-sm font-normal text-[#444746] mt-2 leading-relaxed">
-                Plataforma de evaluación clínica y simulación formativa con Inteligencia Artificial anclada a las Guías del Ministerio de Salud Pública de Ecuador.
+                Plataforma de evaluación clínica y simulación formativa basada en las Guías de Práctica Clínica del Ministerio de Salud Pública de Ecuador.
               </p>
             </div>
 

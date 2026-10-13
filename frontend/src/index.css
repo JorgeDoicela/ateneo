@@ -327,3 +327,27 @@
   }
 }
 
+/* Animación de Barrido Líquido Tricolor Ateneo+ (Liquid Wave Sweep hacia la derecha) */
+@keyframes liquidWaveRight {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.animate-liquid-wave {
+  background-size: 200% 100%;
+  animation: liquidWaveRight 5s linear infinite;
+}
+
+/* En dispositivos táctiles (smartphones/tablets sin cursor físico), el halo permanece visible de forma equilibrada */
+@media (hover: none) {
+  .touch-ambient-glow {
+    opacity: 0.62;
+  }
+}
+
+
+

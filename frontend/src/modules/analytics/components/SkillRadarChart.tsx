@@ -1,4 +1,3 @@
-import { Target, Activity } from 'lucide-react';
 import type { AxisCompetencyItem } from '../../../types';
 
 export interface SkillRadarChartProps {
@@ -65,16 +64,13 @@ export default function SkillRadarChart({ competenciasPorEje = [] }: SkillRadarC
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-        <div className="flex items-center gap-2">
-          <Target className="w-5 h-5 text-[#0b57d0] shrink-0" />
-          <div>
-            <h3 className="text-base font-normal text-[#1f1f1f] font-heading">
-              Radar de Competencias Clínicas (4 Ejes GPC)
-            </h3>
-            <p className="text-xs text-[#747775]">
-              Consistencia frente a la norma oficial del MSP Ecuador
-            </p>
-          </div>
+        <div>
+          <h3 className="text-base font-normal text-[#1f1f1f] font-heading">
+            Radar de Competencias Clínicas (4 Ejes GPC)
+          </h3>
+          <p className="text-xs text-[#747775]">
+            Consistencia frente a la norma oficial del MSP Ecuador
+          </p>
         </div>
         <span className="text-xs font-medium bg-sky-50 text-[#0b57d0] px-3 py-1 rounded-full">
           Analítica 4 Ejes
@@ -161,8 +157,7 @@ export default function SkillRadarChart({ competenciasPorEje = [] }: SkillRadarC
         </div>
 
         <div className="w-full md:w-1/2 space-y-3">
-          <div className="text-xs font-medium text-[#444746] flex items-center gap-1.5">
-            <Activity className="w-4 h-4 text-[#0b57d0]" />
+          <div className="text-xs font-medium text-[#444746]">
             <span>Nivel de Dominio por Eje Clínico</span>
           </div>
 

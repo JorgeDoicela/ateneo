@@ -16,6 +16,25 @@ router = APIRouter(prefix="/api/history", tags=["Historial y Analítica de Razon
 analytics_router = APIRouter(prefix="/api/analytics", tags=["Telemetría de Eventos de Aprendizaje"])
 
 
+def _resolve_history_target_user(current_user: Optional[UserResponse], user_id: Optional[str]) -> str:
+    """
+    Resuelve el identificador de usuario para historial y analítica:
+    - Para alumnos: aísla forzosamente su propio user_id de sesión.
+    - Para docentes/admin: permite filtrar por alumno específico o consultar su propio perfil.
+    - Para clientes sin autenticar: fallback con user_id o demo.
+    """
+    clean_user_id = user_id.strip() if user_id and user_id.strip() else None
+    if current_user:
+        user_role = getattr(current_user, "rol", None)
+        role_val = getattr(user_role, "value", user_role) if user_role else None
+        if role_val == "alumno":
+            return current_user.id
+        if clean_user_id:
+            return clean_user_id
+        return current_user.id
+    return clean_user_id or "usr_alumno_001"
+
+
 @router.get("", response_model=List[Dict[str, Any]])
 async def get_history(
     user_id: Optional[str] = Query(None, description="ID o email del usuario opcional"),
@@ -26,7 +45,7 @@ async def get_history(
     """
     Retorna la lista del historial de evaluaciones del estudiante.
     """
-    target_user = user_id or (current_user.email if current_user else "usr_alumno_001")
+    target_user = _resolve_history_target_user(current_user, user_id)
     resolved_tenant = tenant_id or (current_user.tenant_id if current_user else None)
     return analytics_service.get_user_history(target_user, tenant_id=resolved_tenant)
 
@@ -44,7 +63,7 @@ async def get_trends(
     - Lista de patrones de omisiones más frecuentes.
     - Radar de competencias por eje clínico.
     """
-    target_user = user_id or (current_user.email if current_user else "usr_alumno_001")
+    target_user = _resolve_history_target_user(current_user, user_id)
     resolved_tenant = tenant_id or (current_user.tenant_id if current_user else None)
     return analytics_service.get_student_advanced_analytics(target_user, tenant_id=resolved_tenant)
 

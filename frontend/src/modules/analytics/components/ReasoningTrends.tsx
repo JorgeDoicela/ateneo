@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { TrendingUp, AlertTriangle, Activity, Filter } from 'lucide-react';
+import { Filter, Activity } from 'lucide-react';
 import analyticsApi from '../api/analyticsApi';
 import SkillRadarChart from './SkillRadarChart';
 import type { AxisCompetencyItem } from '../../../types';
@@ -102,10 +102,9 @@ export default function ReasoningTrends() {
   if (!trends || trends.total_evaluaciones === 0) {
     return (
       <div className="bg-white rounded-[28px] p-12 shadow-xs border-0 text-center space-y-4 max-w-lg mx-auto">
-        <TrendingUp className="w-8 h-8 text-[#0b57d0] mx-auto opacity-70" />
         <h3 className="text-lg font-normal text-[#1f1f1f] font-heading">Sin historial suficiente</h3>
         <p className="text-xs text-[#747775] leading-relaxed">
-          Completa tus primeros casos clínicos para desbloquear la gráfica de progresión por GPC y el análisis inteligente de tu desempeño formativo.
+          Completa tus primeros casos clínicos para desbloquear la gráfica de progresión por GPC y el análisis estructurado de tu desempeño formativo.
         </p>
       </div>
     );
@@ -146,19 +145,16 @@ export default function ReasoningTrends() {
       
       {/* Tarjeta de Advertencia Formativa: PUNTO DÉBIL */}
       <div className="bg-white rounded-[28px] p-6 sm:p-8 shadow-xs border-0 space-y-4">
-        <div className="flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-          <div className="space-y-1 flex-1">
-            <span className="text-xs font-medium text-amber-800 bg-amber-50 px-3 py-1 rounded-full inline-block">
-              Diagnóstico Formativo RAG
-            </span>
-            <h3 className="text-lg sm:text-xl font-normal text-[#1f1f1f] font-heading pt-1">
-              {punto_debil_principal}
-            </h3>
-            <p className="text-xs text-[#444746] leading-relaxed">
-              Patrón detectado al contrastar tus respuestas previas contra la normativa oficial del MSP Ecuador.
-            </p>
-          </div>
+        <div className="space-y-1">
+          <span className="text-xs font-medium text-amber-800 bg-amber-50 px-3 py-1 rounded-full inline-block">
+            Diagnóstico Formativo Normativo
+          </span>
+          <h3 className="text-lg sm:text-xl font-normal text-[#1f1f1f] font-heading pt-1">
+            {punto_debil_principal}
+          </h3>
+          <p className="text-xs text-[#444746] leading-relaxed">
+            Patrón detectado al contrastar tus respuestas previas contra la normativa oficial del MSP Ecuador.
+          </p>
         </div>
 
         {/* Lista de Omisiones Recurrentes */}
@@ -192,8 +188,7 @@ export default function ReasoningTrends() {
       <div className="bg-white rounded-[28px] p-6 sm:p-8 shadow-xs border-0 space-y-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div>
-            <div className="flex items-center gap-2 text-xs font-medium text-[#0b57d0] mb-1">
-              <TrendingUp className="w-4 h-4" />
+            <div className="text-xs font-medium text-[#0b57d0] mb-1">
               <span>Progresión Longitudinal</span>
             </div>
             <h3 className="text-xl font-normal text-[#1f1f1f] font-heading">

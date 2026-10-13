@@ -8,11 +8,65 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
 
 * **Paradigma Visual:** "Clínico Minimalista, Precisión Diagnóstica & IA de Vanguardia".
 * **Fondo y Tarjetas:** Canvas `#f0f4f9` Material 3, tarjetas blancas amplias `rounded-[28px]` sin borde.
-* **Prohibición de Cajas de Iconos:** Iconos `lucide-react` planos y limpios directamente sobre el lienzo.
+* **Prohibición de Cajas de Iconos y Píldoras de Fondo Coloreado:**
+  - Iconos `lucide-react` planos y limpios directamente sobre el lienzo.
+  - Etiquetas normativas y de estado (GPC, metadatos de casos) en texto plano tipográfico directo (`text-xs font-semibold`), sin píldoras con fondos coloreados (`bg-rose-50`, `bg-sky-50`) ni bordes artificiales envolventes.
+  - Eliminados los relojes e indicadores de tiempo estimado fijos (`Clock`, `12-15 min`) en las tarjetas de casos (`CaseCard.tsx`), reduciendo la sobrecarga de elementos y preservando una jerarquía visual limpia.
+  - **Purga de Iconos SVG Decorativos en Analítica ([`/analytics`](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/frontend/src/modules/analytics/pages/StudentAnalyticsPage.tsx)):** Eliminados los iconos SVG decorativos (`Activity`, `TrendingUp`, `AlertTriangle`, `Target`) de las cabeceras, tarjeta de punto débil, tarjeta de radar y gráfica longitudinal, consolidando un diseño tipográfico sobrio, académico y clínico.
 * **Gradiente de Marca:** Cyan Clínico (`#06b6d4`), Azul Royal (`#2563eb`), Violeta IA (`#7c3aed`).
 * **Layout Split-Screen:** 50% caso clínico (GPC, imágenes Rx/ECG/Labs) y 50% resolución evaluativa.
-* **Segregación RBAC en Menú de Perfil (Navbar):** Sede institucional de solo lectura fija para alumnos y docentes (evita saltos arbitrarios de tenant). Selector de cambio de sede restringido exclusivamente a administradores. Eliminación de telemetría interna de diseño (`Contraste WCAG`) de los menús de usuario final y adición de accesos pedagógicos directos (`Casos Clínicos`, `Rendimiento y Benchmark`) para el rol Alumno.
+* **Segregación RBAC en Menú de Perfil (Navbar):** Menú compacto y sobrio bajo diseño minimalista de identidad:
+  - Cabecera horizontal compacta con Avatar, Nombre, Correo, Chip de Rol y Sede institucional discreta en una sola línea.
+  - Eliminados el contador técnico `#login_count` y la fecha de último acceso.
+  - Eliminada la sección redundante *"Mi Aprendizaje"* para el rol Alumno (la navegación de casos y desempeño vive de forma primaria en la cabecera).
+  - Selector de cambio de sede restringido a administradores.
+  - Selector de idioma en formato inline compacto.
+  - Accesos de consola de gestión estrictamente segregados por rol (Docente: Casos/Salas y Analítica; Administrador: Usuarios, Magic Links y Benchmark Científico).
+  - Eliminación de telemetría interna de diseño (`Contraste WCAG`) de los menús de usuario final.
 * **Liquid Glassmorphism & Paleta de IA Oficial:** Integración de la tríada cromática oficial de `ateneo.png` (Cyan `#06b6d4`, Azul `#2563eb`, Violeta `#7c3aed`). Halos aurorales ambientales de refracción (`pointer-events-none fixed blur-3xl`) en `AppLayout` a baja opacidad (10-20%) para dotar de profundidad viva al canvas `#f0f4f9`. Tarjeta adaptativa KST/BKT en cristal líquido (`bg-white/90 backdrop-blur-xl border-white/80`), barra de búsqueda en cristal esmerilado con foco interactivo (`bg-white/70 backdrop-blur-md`), botones institucionales de acción (`ClinicalButton`) con acabado de cristal y selector de vista en cristal translúcido.
+* **Desacoplamiento de Analítica Formativa a Ruta Canónica (`/analytics`):**
+  - **Causa Raíz:** `CaseList.tsx` albergaba un toggle en memoria (`navSection: 'cases' | 'trends'`) para renderizar condicionalmente `ReasoningTrends.tsx`. Esto violaba el Principio de Responsabilidad Única e impedía el deep-linking o guardado en marcadores.
+  - **Solución Arquitectónica:** Se creó la página canónica `StudentAnalyticsPage.tsx` (`frontend/src/modules/analytics/pages/StudentAnalyticsPage.tsx`) con su propio encabezado institucional y botón de retorno al catálogo. Se registró la ruta `/analytics` (y alias `/performance`) bajo `ProtectedRoute` con `lazy loading` en `AppRoutes.tsx`.
+  - **Jerarquía Pura de Botones y Cero Duplicidad:**
+    - Se eliminó el botón duplicado *"Mi Desempeño"* de la cabecera del catálogo de casos.
+    - Se reubicó *"Unirse a Sala"* a la barra de navegación superior ([`Navbar.tsx`](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/frontend/src/core/layouts/Navbar.tsx)), al lado de la navegación principal, desacoplado mediante el modal reutilizable [`JoinRoomModal.tsx`](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/frontend/src/modules/collaboration/components/JoinRoomModal.tsx).
+    - **Conmutación Dinámica y Simétrica en Navbar ([`Navbar.tsx`](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/frontend/src/core/layouts/Navbar.tsx)):** Al navegar a `/analytics` (o `/performance`), el botón superior muta automáticamente a *"Catálogo"* con icono médico `BookOpen` y enlace de retorno a `/cases`, permitiendo alternar fluidamente entre el catálogo y el análisis de desempeño sin parches ni botones flotantes ad-hoc.
+    - La cabecera del catálogo de casos ([`CaseList.tsx`](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/frontend/src/modules/cases/pages/CaseList.tsx)) quedó 100% limpia de botones secundarios, conservando únicamente el título tipográfico y la descripción clínica.
+    - Se consolida *"Resolver Caso"* en la tarjeta recomendada como el único Call-to-Action (CTA) primario dominante de la vista.
+* **Estandarización Terminológica y Reducción de Carga Cognitiva:**
+  - **Causa Raíz:** La tarjeta adaptativa acumulaba 6 capas de texto, jerga psicométrica (*ZDP*, *KST/BKT*), párrafos repetitivos de recomendación y leyendas de marketing debajo del botón.
+  - **Solución:** Se redujo la tarjeta a sus elementos estrictamente esenciales:
+    - Encabezado directo: *"Caso Recomendado"* con *"avance global %"*.
+    - Objetivo unificado en una sola línea: *"Objetivo a entrenar: [Competencia] (X%)"*, eliminando siglas crípticas y párrafos redundantes.
+    - Metadatos compactos: Especialidad, dificultad y fases en formato plano sin redundancias.
+    - Call-to-Action limpio y contundente: *"Resolver Caso"* sin leyendas de relleno inferiores.
+    - Enlace secundario claro: *"Ver Ruta de Competencias"*.
+* **Segregación RBAC del Benchmark Científico (`/benchmark`):**
+  - Las métricas de Information Retrieval (IR) y fidelidad (`Hit@1`, `MRR@5`, `Latencia`, `LaTeX`) pertenecen a la auditoría técnica del pipeline RAG.
+  - Se restringió la ruta `/benchmark` en `AppRoutes.tsx` exclusivamente al rol `administrador` (`allowedRoles={['administrador']}`).
+  - Se eliminó del Navbar público de alumnos y docentes, ubicándolo únicamente en el menú de perfil institucional de administradores y en su barra de navegación cuando tienen sesión activa de administración.
+* **Purga Rigurosa de Lenguaje Marketero e Inflado (Rol Estudiante):**
+  - **Causa Raíz:** Existían rezagos de lenguaje comercial, publicitario y de pitch ("Simulador Clínico Avanzado", "Diferenciador Científico 3", "Resolución Acelerada", "análisis inteligente", iconos Sparkles en áreas clínicas) incompatibles con el estándar de simulación médica formal.
+  - **Solución Estrictamente Frontend (Cero Impacto Backend):**
+    - `CaseList.tsx`: Eliminada la línea completa del badge superior (`Simulación Clínica Formativa • Normativa Oficial MSP Ecuador`) dejando únicamente el espaciado limpio hacia el título principal `h1`; subtítulo conciso y formal.
+    - `AdaptiveNextCase.tsx`: Eliminados todos los iconos SVG (`Sparkles`, `Compass`, `ChevronRight`, `Target`, `Layers`, `ArrowRight`), consolidando una tarjeta tipográfica minimalista, sobria y sin ruido visual decorativo.
+    - `CaseSolve.tsx`: Encabezado actualizado a *"Simulación de Caso Clínico • Ateneo+"* con icono `Activity`; visor de imagen etiquetado como *"Estudio Convencional"* en lugar de *"Resolución Acelerada"*.
+    - `FeedbackCard.tsx`: Reemplazado `"Diferenciador Científico 3 — Anti-Alucinación Normativa"` por *"Verificación de Fidelidad Normativa"*; `"Faithfulness Score (Grounding MSP)"` reemplazado por *"Fidelidad con la Guía de Práctica Clínica (MSP)"*; icono `Sparkles` sustituido por `ShieldCheck`.
+    - `ReasoningTrends.tsx`: Reemplazado `"análisis inteligente"` por *"análisis estructurado"*; `"Diagnóstico Formativo RAG"` reemplazado por *"Diagnóstico Formativo Normativo"*.
+    - `StudentAnalyticsPage.tsx`: Reemplazado `"Diagnóstico formativo RAG"` por *"Diagnóstico formativo estructurado"*; icono `Sparkles` sustituido por `Activity`.
+    - `Login.tsx` / `Register.tsx`: Eliminada la coletilla comercial *"con Inteligencia Artificial"* en los subtítulos institucionales en favor de *"basada en las Guías de Práctica Clínica del MSP Ecuador"*.
+    - Validación: 122/122 pruebas unitarias pasando al 100% en Vitest y TypeScript sin errores.
+* **Vinculación Integral de Identidad en Currículo Adaptativo BKT/KST y Base de Datos Relacional:**
+  - **Causa Raíz del 23% Uniforme:**
+    1. En `frontend/src/modules/adaptive/api/adaptiveApi.ts`, los métodos de consulta adaptativa (`getNextCase`, `getKnowledgeState`, `getLearningPath`) tenían el parámetro con valor por defecto hardcodeado `studentId: string = 'usr_alumno_001'`.
+    2. `AdaptiveNextCase.tsx` y `KnowledgeSpaceGraph.tsx` invocaban la API sin proveer el ID de usuario autenticado en sesión (`useAuth()`), forzando en cada petición el query parameter `?student_id=usr_alumno_001`.
+    3. En `backend/routers/adaptive.py`, la resolución hacía `target_id = student_id or (current_user.id if current_user else "usr_alumno_001")`, dando prioridad al query parameter sobre el token Bearer JWT de la sesión, impidiendo que el backend consultara la base de datos para el usuario real.
+    4. El valor de 23% (~23.57%) corresponde matemáticamente a la media de las probabilidades iniciales a priori $L_0$ de las 7 competencias clínicas KST antes de registrar evaluaciones en base de datos. Al estar quemado el identificador `'usr_alumno_001'`, cualquier usuario (incluyendo los que ingresaban por Magic Links o autenticación regular) leía el mismo registro.
+  - **Solución Arquitectónica (Cero Parches):**
+    1. **Frontend:** Se eliminó el parámetro quemado por defecto en `adaptiveApi.ts` (`studentId?: string`). Si no se provee, no se inyecta query parameter para permitir que el backend resuelva el usuario desde el JWT. Se conectaron `AdaptiveNextCase.tsx`, `KnowledgeSpaceGraph.tsx` y `useAdaptiveCurriculum.ts` a `useAuth()` pasando `user?.id` e incluyendo `user?.id` en las dependencias reactivas del `useEffect` / TanStack Query.
+    2. **Backend & RBAC Seguro:** En `backend/routers/adaptive.py` y `backend/routers/history.py`, se implementaron las funciones `_resolve_target_student_id` y `_resolve_history_target_user`. Si el usuario autenticado tiene rol `alumno`, se fuerza estrictamente `current_user.id` (eliminando riesgo de IDOR y garantizando aislamiento en base de datos por estudiante). Para docentes y administradores, se permite inspeccionar alumnos específicos pasando `student_id`.
+    3. **Persistencia Transaccional UoW:** Cada evaluación en `EvaluationService.evaluate_reasoning` impacta y persiste la actualización bayesiana (BKT) por alumno en `StudentMasteryModel`, `StudentSnapshotModel` y `EvaluationHistoryModel` en SQLite/PostgreSQL.
+    4. **Validación:** 122/122 pruebas en Vitest aprobadas, 0 errores en TypeScript `tsc --noEmit` y suite de pruebas de integración HTTP del backend aprobadas al 100%.
 * **Cero emojis** en toda la interfaz y documentación.
 
 ---
@@ -1305,6 +1359,17 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
   - **Erradicación de Bloqueo de SQLite (`database is locked` en Evaluación):**
     * Causa Raíz: En `EvaluationService.evaluate_reasoning`, mientras `uow` mantenía una transacción abierta con escritura en `EvaluationHistoryModel`, se invocaba `adaptive_service.get_knowledge_state(user_id)`, el cual abría una sesión SQLAlchemy independiente e intentaba escribir con `commit=True` en `StudentMasteryModel`. Dos conexiones compitiendo por el mismo archivo SQLite causaban deadlock tras 5s.
     * Corrección Definitiva: Se unificó la lectura y actualización psicométrica bajo la misma sesión de `uow.adaptive`. En `backend/core/database.py`, se aumentaron los timeouts de conexión SQLite a 60s (`timeout=60.0`) y se configuró `PRAGMA busy_timeout=60000;`. El endpoint `/health` responde en 0.5 ms y la persistencia de evaluaciones es 100% atómica.
-
-
+  - **Calibración de Resplandor en Hover en Tarjeta KST Adaptativa (2026-10-13):**
+    * Se implementó la animación de barrido líquido horizontal continuo hacia la derecha (`@keyframes liquidWaveRight` en `index.css` a través de `.animate-liquid-wave`), desplazando el gradiente tricolor cíclico en bucle suave perimetral (`background-size: 200% 100%`).
+    * Al reposo en escritorio opera con aura tenue del 30% (`opacity-30`) y en hover se enciende al 75% (`group-hover:opacity-75`).
+    * En dispositivos móviles táctiles (`@media (hover: none)` vía `.touch-ambient-glow`), el halo fluye permanentemente visible al 62%, intensificándose al 95% con micro-presión táctil (`active:scale-[0.995]`) al tocar la pantalla.
+    * Se sincronizó la misma solución en `CaseCard.tsx` (cuadrícula y lista): en PC permanece limpio en reposo (`opacity-0`) e ilumina con suavidad al 65% (`group-hover:opacity-65`) con barrido líquido perimetral; en móviles táctiles opera con flujo ambiente sutil e intensificación al 85% con micro-presión táctil (`active:scale-[0.995]`).
+  - **Modularización y Fijación Superior Desacoplada del Navbar (2026-10-13):**
+    * Se eliminó el acoplamiento monolítico de casi 400 líneas en `Navbar.tsx`, extrayendo tres subcomponentes atómicos con responsabilidad única en `core/layouts/components/`:
+      - `GlobalSearchBar.tsx`: Cápsula de búsqueda de cristal líquido con control de queries URL `?q=...` y debouncing.
+      - `UserProfileDropdown.tsx`: Menú modal de identidad institucional, tenant/sede RBAC, selector de idioma y sesión con detección de click-outside.
+      - `ConnectivityBadge.tsx`: Indicador de red clínica y sincronización hospitalaria en background.
+    * `Navbar.tsx` se transformó en un orquestador declarativo y limpio de ~110 líneas fijado en la parte superior (`sticky top-0 z-50 bg-white/85 backdrop-blur-md`).
+    * En `AppLayout.tsx` se reemplazó `overflow-x-hidden` por `overflow-x-clip`, garantizando que el contenedor padre no cree un contexto de scroll aislado y que la barra permanezca 100% fija sin importar el scroll del usuario.
+    * 122/122 pruebas unitarias en Vitest aprobadas al 100%.
 

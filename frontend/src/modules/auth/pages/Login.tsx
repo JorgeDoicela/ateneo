@@ -78,7 +78,7 @@ export default function Login() {
                 Accede a tu cuenta
               </h1>
               <p className="text-sm font-normal text-[#444746] mt-2 leading-relaxed">
-                Simulador Clínico & Evaluación Médica con IA basada en Guías de Práctica Clínica del MSP Ecuador
+                Simulador Clínico y Evaluación Médica basada en Guías de Práctica Clínica del MSP Ecuador
               </p>
             </div>
 

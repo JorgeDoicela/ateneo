@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Dict, Any, List, Optional
 from adaptive.knowledge_space import knowledge_space
 from adaptive.knowledge_tracer import (
@@ -14,6 +15,8 @@ from adaptive.knowledge_tracer import (
 from adaptive.curriculum_engine import select_optimal_next_case
 from modules.adaptive.repository import AdaptiveRepository
 from modules.analytics_history.repository import HistoryRepository
+
+logger = logging.getLogger(__name__)
 
 
 class AdaptiveCurriculumService:
@@ -65,13 +68,16 @@ class AdaptiveCurriculumService:
 
             # Guardar proyección en base de datos si el repositorio está activo
             if self.repository:
-                self.repository.save_mastery(student_id, state)
-                self.repository.add_snapshot(
-                    user_id=student_id,
-                    session_num=0,
-                    score=0.0,
-                    state=state
-                )
+                try:
+                    self.repository.save_mastery(student_id, state)
+                    self.repository.add_snapshot(
+                        user_id=student_id,
+                        session_num=0,
+                        score=0.0,
+                        state=state
+                    )
+                except Exception as db_err:
+                    logger.warning("[AdaptiveCurriculumService] No se pudo persistir proyección inicial para %s: %s", student_id, db_err)
 
         # 3. Fallback a caché algorítmico L1 si no hay infraestructura de base de datos
         if state is None:
@@ -122,15 +128,18 @@ class AdaptiveCurriculumService:
         set_student_knowledge_state(student_id, state)
 
         if self.repository:
-            self.repository.save_mastery(student_id, state)
-            existing_snapshots = self.repository.get_snapshots(student_id)
-            next_session = len(existing_snapshots)
-            self.repository.add_snapshot(
-                user_id=student_id,
-                session_num=next_session,
-                score=score,
-                state=state
-            )
+            try:
+                self.repository.save_mastery(student_id, state)
+                existing_snapshots = self.repository.get_snapshots(student_id)
+                next_session = len(existing_snapshots)
+                self.repository.add_snapshot(
+                    user_id=student_id,
+                    session_num=next_session,
+                    score=score,
+                    state=state
+                )
+            except Exception as db_err:
+                logger.warning("[AdaptiveCurriculumService] Error al persistir impacto evaluativo para %s: %s", student_id, db_err)
 
         return state
 

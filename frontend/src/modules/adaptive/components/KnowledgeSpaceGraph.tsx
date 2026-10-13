@@ -1,6 +1,7 @@
 import React, { useState, useEffect, ComponentType } from 'react';
 import { X, Compass, CheckCircle2, Clock, Lock, ArrowDown } from 'lucide-react';
 import { adaptiveApi } from '../api/adaptiveApi';
+import { useAuth } from '../../../context/AuthContext';
 import type { KnowledgeStateResponse } from '../../../types';
 
 export interface KnowledgeSpaceGraphProps {
@@ -17,6 +18,7 @@ interface NodeStatus {
 }
 
 export default function KnowledgeSpaceGraph({ isOpen, onClose }: KnowledgeSpaceGraphProps) {
+  const { user } = useAuth();
   const [data, setData] = useState<KnowledgeStateResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -26,7 +28,7 @@ export default function KnowledgeSpaceGraph({ isOpen, onClose }: KnowledgeSpaceG
     async function loadGraph() {
       try {
         setLoading(true);
-        const res = await adaptiveApi.getKnowledgeState();
+        const res = await adaptiveApi.getKnowledgeState(user?.id);
         if (isMounted) setData(res);
       } catch (err) {
         console.error('Error cargando estado KST:', err);
@@ -36,7 +38,7 @@ export default function KnowledgeSpaceGraph({ isOpen, onClose }: KnowledgeSpaceG
     }
     loadGraph();
     return () => { isMounted = false; };
-  }, [isOpen]);
+  }, [isOpen, user?.id]);
 
   if (!isOpen) return null;
 
@@ -81,10 +83,10 @@ export default function KnowledgeSpaceGraph({ isOpen, onClose }: KnowledgeSpaceG
             <Compass className="w-6 h-6 text-blue-600" />
             <div>
               <h2 className="text-xl font-bold font-heading text-slate-900 tracking-tight">
-                Espacio de Conocimiento Clínico (KST & BKT)
+                Ruta de Competencias Clínicas
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                Grafo de dependencias de prerrequisitos y probabilidad continua de dominio por competencia
+                Secuencia formativa de prerrequisitos y probabilidad continua de dominio por competencia
               </p>
             </div>
           </div>
@@ -114,7 +116,7 @@ export default function KnowledgeSpaceGraph({ isOpen, onClose }: KnowledgeSpaceG
         {/* Content / Graph Nodes */}
         {loading ? (
           <div className="py-12 text-center text-slate-400 animate-pulse text-sm">
-            Cargando topología del grafo y probabilidades BKT...
+            Cargando ruta de competencias y nivel de dominio...
           </div>
         ) : (
           <div className="space-y-4">

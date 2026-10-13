@@ -40,9 +40,9 @@ describe('Componente AdaptiveNextCase (KST & BKT)', () => {
       expect(screen.getByText(/Crisis Hipertensiva en el Servicio de Urgencias/i)).toBeInTheDocument();
     });
 
-    expect(screen.getByText(/Currículo Adaptativo KST & BKT/i)).toBeInTheDocument();
+    expect(screen.getByText(/Caso Recomendado/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Diagnóstico Diferencial/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Zona de Desarrollo Próximo/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Objetivo a entrenar/i).length).toBeGreaterThan(0);
   });
 
   it('debe invocar onSelectCase al pulsar el botón de resolver caso recomendado', async () => {
@@ -51,10 +51,10 @@ describe('Componente AdaptiveNextCase (KST & BKT)', () => {
     render(<AdaptiveNextCase onSelectCase={mockSelect} onToggleGraph={() => {}} />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Resolver Caso Recomendado/i)).toBeInTheDocument();
+      expect(screen.getByText(/Resolver Caso/i)).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText(/Resolver Caso Recomendado/i));
+    fireEvent.click(screen.getByText(/Resolver Caso/i));
     expect(mockSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'case_hta_01' }));
   });
 });

@@ -18,6 +18,7 @@ const TeacherLayout = lazy(() => import('../modules/teacher/pages/TeacherLayout'
 const TeacherCasesPage = lazy(() => import('../modules/teacher/pages/TeacherCasesPage'));
 const TeacherAnalyticsPage = lazy(() => import('../modules/teacher/pages/TeacherAnalyticsPage'));
 const ScientificBenchmarkView = lazy(() => import('../modules/analytics/components/ScientificBenchmarkView'));
+const StudentAnalyticsPage = lazy(() => import('../modules/analytics/pages/StudentAnalyticsPage'));
 
 function RouteLoader() {
   return (
@@ -86,8 +87,26 @@ export default function AppRoutes() {
           <Route
             path="/benchmark"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['administrador']}>
                 <ScientificBenchmarkView />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/analytics"
+            element={
+              <ProtectedRoute>
+                <StudentAnalyticsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/performance"
+            element={
+              <ProtectedRoute>
+                <Navigate to="/analytics" replace />
               </ProtectedRoute>
             }
           />
@@ -95,7 +114,7 @@ export default function AppRoutes() {
           <Route
             path="/analytics/benchmark"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['administrador']}>
                 <Navigate to="/benchmark" replace />
               </ProtectedRoute>
             }

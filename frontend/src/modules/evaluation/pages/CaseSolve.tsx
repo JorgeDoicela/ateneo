@@ -7,7 +7,6 @@ import {
   FileImage, 
   Stethoscope, 
   Activity, 
-  Sparkles,
   HelpCircle,
   Layers
 } from 'lucide-react';
@@ -107,8 +106,8 @@ export default function CaseSolve() {
           </Link>
           <div>
             <div className="flex items-center gap-2 text-xs font-medium text-[#0b57d0]">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Entorno de Simulación Médica • Ateneo+</span>
+              <Activity className="w-3.5 h-3.5" />
+              <span>Simulación de Caso Clínico • Ateneo+</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-normal text-[#1f1f1f] font-heading tracking-tight">
               {caso?.titulo}
@@ -116,11 +115,12 @@ export default function CaseSolve() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          <span className="text-xs font-medium bg-sky-50 text-[#0b57d0] px-3 py-1 rounded-full border border-sky-200/80">
+        <div className="flex items-center gap-2 self-start sm:self-auto text-xs">
+          <span className="font-semibold text-[#0b57d0]">
             {caso?.guia_asociada || 'GPC MSP'}
           </span>
-          <span className="text-xs text-[#747775] bg-[#f0f4f9] px-3 py-1 rounded-full">
+          <span className="text-slate-300 font-light">•</span>
+          <span className="text-[#747775] font-medium">
             Dificultad: {caso?.dificultad || 'Intermedia'}
           </span>
         </div>
@@ -213,7 +213,7 @@ export default function CaseSolve() {
                 </div>
 
                 <span className="text-[11px] text-[#747775]">
-                  {studyViewerTab === 'dicom' ? 'PACS WADO-RS' : 'Resolución Acelerada'}
+                  {studyViewerTab === 'dicom' ? 'PACS WADO-RS' : 'Estudio Convencional'}
                 </span>
               </div>
 

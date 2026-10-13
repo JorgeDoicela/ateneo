@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Sparkles, ArrowRight, Target, Compass, ChevronRight, Layers } from 'lucide-react';
 import { adaptiveApi } from '../api/adaptiveApi';
+import { useAuth } from '../../../context/AuthContext';
 import type { ZDPRecommendation, ClinicalCase } from '../../../types';
 
 export interface AdaptiveNextCaseProps {
@@ -9,6 +9,7 @@ export interface AdaptiveNextCaseProps {
 }
 
 export default function AdaptiveNextCase({ onSelectCase, onToggleGraph }: AdaptiveNextCaseProps) {
+  const { user } = useAuth();
   const [recommendation, setRecommendation] = useState<ZDPRecommendation | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -16,7 +17,8 @@ export default function AdaptiveNextCase({ onSelectCase, onToggleGraph }: Adapti
     let isMounted = true;
     async function loadRecommendation() {
       try {
-        const data = await adaptiveApi.getNextCase();
+        setLoading(true);
+        const data = await adaptiveApi.getNextCase(user?.id);
         if (isMounted) {
           setRecommendation(data);
         }
@@ -28,7 +30,7 @@ export default function AdaptiveNextCase({ onSelectCase, onToggleGraph }: Adapti
     }
     loadRecommendation();
     return () => { isMounted = false; };
-  }, []);
+  }, [user?.id]);
 
   if (loading) {
     return (
@@ -44,50 +46,46 @@ export default function AdaptiveNextCase({ onSelectCase, onToggleGraph }: Adapti
     return null;
   }
 
-  const { case: clinicalCase, competencia_objetivo, justificacion_pedagogica, nivel_dominio_general, promedio_dominio_global } = recommendation;
+  const { case: clinicalCase, competencia_objetivo, promedio_dominio_global } = recommendation;
   const pPct = Math.round((competencia_objetivo?.p_dominio || 0.4) * 100);
 
   return (
     <div className="relative w-full mb-8 group">
-      {/* Halo Ambiental Sutil (Colores de Marca Ateneo+: Cyan, Azul, Violeta IA) */}
+      {/* Halo de Iluminación Ambiental Líquido con Barrido hacia la Derecha (Adaptativo Móvil/Escritorio) */}
       <div 
-        className="absolute -inset-1 bg-gradient-to-r from-cyan-500/20 via-blue-600/20 to-violet-600/20 rounded-[30px] blur-xl opacity-60 group-hover:opacity-90 transition duration-500 pointer-events-none" 
+        className="absolute -inset-1.5 bg-[linear-gradient(90deg,rgba(6,182,212,0.35)_0%,rgba(37,99,235,0.3)_33%,rgba(124,58,237,0.35)_66%,rgba(6,182,212,0.35)_100%)] animate-liquid-wave rounded-[32px] blur-xl opacity-30 touch-ambient-glow group-hover:opacity-75 group-active:opacity-95 transition-opacity duration-300 pointer-events-none" 
         aria-hidden="true"
       />
 
       {/* Tarjeta de Cristal Líquido (Liquid Glassmorphism) */}
-      <div className="relative w-full bg-white/90 backdrop-blur-xl rounded-[28px] border border-white/80 shadow-sm p-6 md:p-8 transition-all duration-300">
+      <div className="relative w-full bg-white/90 backdrop-blur-xl rounded-[28px] border border-white/80 shadow-sm p-6 md:p-8 transition-all duration-300 active:scale-[0.995]">
         {/* Encabezado Superior */}
-        <div className="flex flex-wrap items-center justify-between gap-4 pb-5 border-b border-slate-100">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <Sparkles className="w-4 h-4 text-blue-600 shrink-0" />
-            <span className="text-xs font-bold uppercase tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 via-blue-600 to-violet-600">
-              Currículo Adaptativo KST & BKT
+        <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-100">
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <span className="font-bold uppercase tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 via-blue-600 to-violet-600">
+              Caso Recomendado
             </span>
             <span className="text-slate-300 font-light">•</span>
-            <span className="text-xs text-slate-500 font-medium">
-              {nivel_dominio_general} ({Math.round(promedio_dominio_global * 100)}% de dominio)
+            <span className="text-slate-500 font-medium">
+              {Math.round(promedio_dominio_global * 100)}% de avance global
             </span>
           </div>
 
           {onToggleGraph && (
             <button
               onClick={onToggleGraph}
-              className="text-xs font-semibold text-slate-700 hover:text-blue-600 flex items-center space-x-1.5 transition-colors cursor-pointer"
+              className="text-xs font-semibold text-slate-700 hover:text-blue-600 transition-colors cursor-pointer"
             >
-              <Compass className="w-4 h-4 text-slate-500" />
-              <span>Ver Mapa de Conocimiento KST</span>
-              <ChevronRight className="w-3.5 h-3.5" />
+              <span>Ver Ruta de Competencias</span>
             </button>
           )}
         </div>
 
         {/* Cuerpo Principal */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center pt-5">
-          <div className="lg:col-span-8 space-y-3">
-            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wider">
-              <Target className="w-4 h-4 text-cyan-600 shrink-0" />
-              <span className="text-slate-500">Zona de Desarrollo Próximo (ZDP):</span>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center pt-4">
+          <div className="lg:col-span-8 space-y-2.5">
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span className="text-slate-500 font-medium">Objetivo a entrenar:</span>
               <span className="text-slate-900 font-bold capitalize">
                 {competencia_objetivo?.nombre} ({pPct}%)
               </span>
@@ -97,20 +95,15 @@ export default function AdaptiveNextCase({ onSelectCase, onToggleGraph }: Adapti
               {clinicalCase.titulo}
             </h3>
 
-            <p className="text-sm text-slate-600 leading-relaxed">
-              {justificacion_pedagogica}
-            </p>
-
-            <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-slate-600">
-              <span>Especialidad: <strong className="text-slate-900 font-semibold">{clinicalCase.especialidad || 'Medicina General'}</strong></span>
+            <div className="flex flex-wrap items-center gap-3 pt-0.5 text-xs text-slate-600">
+              <span className="font-medium text-slate-700">{clinicalCase.especialidad || 'Medicina General'}</span>
               <span className="text-slate-300 font-light">•</span>
-              <span>Dificultad: <strong className="text-slate-900 font-semibold">{clinicalCase.dificultad || 'Intermedia'}</strong></span>
+              <span className="font-medium text-slate-700">Dificultad {clinicalCase.dificultad || 'Intermedia'}</span>
               {clinicalCase.fases && (
                 <>
                   <span className="text-slate-300 font-light">•</span>
-                  <span className="text-blue-700 font-semibold inline-flex items-center gap-1.5">
-                    <Layers className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>Simulación en 3 Fases Clínicas</span>
+                  <span className="text-blue-700 font-semibold">
+                    3 Fases Clínicas
                   </span>
                 </>
               )}
@@ -120,14 +113,10 @@ export default function AdaptiveNextCase({ onSelectCase, onToggleGraph }: Adapti
           <div className="lg:col-span-4 flex flex-col items-start lg:items-end justify-center">
             <button
               onClick={() => onSelectCase(clinicalCase)}
-              className="w-full lg:w-auto inline-flex items-center justify-center space-x-2.5 px-6 py-3.5 rounded-[18px] bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:via-blue-500 hover:to-indigo-500 text-white text-sm font-semibold shadow-md shadow-blue-600/20 hover:shadow-lg hover:shadow-indigo-600/30 transition-all duration-300 active:scale-[0.98] cursor-pointer"
+              className="w-full lg:w-auto inline-flex items-center justify-center px-6 py-3.5 rounded-[18px] bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:via-blue-500 hover:to-indigo-500 text-white text-sm font-semibold shadow-md shadow-blue-600/20 hover:shadow-lg hover:shadow-indigo-600/30 transition-all duration-300 active:scale-[0.98] cursor-pointer"
             >
-              <span>Resolver Caso Recomendado</span>
-              <ArrowRight className="w-4 h-4" />
+              <span>Resolver Caso</span>
             </button>
-            <span className="text-[11px] text-slate-500 mt-2 font-medium">
-              Selección optimizada para maximizar tu ganancia de aprendizaje
-            </span>
           </div>
         </div>
       </div>

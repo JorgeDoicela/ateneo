@@ -1,20 +1,14 @@
-import { useState, FormEvent } from 'react';
+import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Stethoscope, 
-  Sparkles, 
-  Users, 
-  TrendingUp, 
-  AlertCircle,
-  X
+  AlertCircle 
 } from 'lucide-react';
 import useCases, { resolveGpcMeta } from '../hooks/useCases';
 import CaseCard from '../components/CaseCard';
 import CaseFilterTabs from '../components/CaseFilterTabs';
 import AdaptiveNextCase from '../../adaptive/components/AdaptiveNextCase';
 import KnowledgeSpaceGraph from '../../adaptive/components/KnowledgeSpaceGraph';
-import ReasoningTrends from '../../analytics/components/ReasoningTrends';
-import ClinicalButton from '../../../core/ui/ClinicalButton';
 
 export default function CaseList() {
   const navigate = useNavigate();
@@ -35,74 +29,26 @@ export default function CaseList() {
     categories,
   } = useCases(globalSearchQuery);
 
-  // Navegación de secciones del Workspace
-  const [navSection, setNavSection] = useState<'cases' | 'trends'>('cases');
-  const [showJoinModal, setShowJoinModal] = useState<boolean>(false);
   const [showKstGraph, setShowKstGraph] = useState<boolean>(false);
-  const [roomInput, setRoomInput] = useState<string>('');
-  const [joinError, setJoinError] = useState<string | null>(null);
-
-  const handleJoinRoom = (e: FormEvent) => {
-    e.preventDefault();
-    if (!roomInput.trim()) return;
-    const cleanCode = roomInput.trim().toUpperCase();
-    navigate(`/ateneo/${cleanCode}`);
-  };
 
   return (
     <div className="space-y-8 animate-fadeIn pb-16">
       
-      {/* 1. Header Principal & Acceso a Sala Colaborativa */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
-        <div>
-          <div className="flex items-center gap-2 text-xs mb-2.5">
-            <Sparkles className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 font-bold">
-              Simulador Clínico Avanzado
-            </span>
-            <span className="text-slate-300 font-light">•</span>
-            <span className="text-slate-500 font-medium">Normativa Oficial MSP Ecuador</span>
-          </div>
-          <h1 className="text-[28px] sm:text-[34px] font-normal tracking-tight text-[#1f1f1f] font-heading">
-            Casos de Simulación Clínica
-          </h1>
-          <p className="text-sm font-normal text-[#444746] mt-1 max-w-2xl leading-relaxed">
-            Entrena tu juicio terapéutico, diagnóstico y de urgencia con casos basados en Guías de Práctica Clínica nacionales e inteligencia artificial de evaluación formativa.
-          </p>
-        </div>
-
-        {/* Acciones de Sala & Tendencias */}
-        <div className="flex items-center gap-3">
-          <ClinicalButton
-            variant={navSection === 'trends' ? 'primary' : 'secondary'}
-            onClick={() => setNavSection(navSection === 'cases' ? 'trends' : 'cases')}
-            icon={TrendingUp}
-          >
-            {navSection === 'cases' ? 'Mi Desempeño' : 'Ver Catálogo'}
-          </ClinicalButton>
-
-          <ClinicalButton
-            variant="outline"
-            onClick={() => setShowJoinModal(true)}
-            icon={Users}
-          >
-            Unirse a Sala
-          </ClinicalButton>
-        </div>
+      {/* 1. Header Principal */}
+      <div className="pb-2 pt-2">
+        <h1 className="text-[28px] sm:text-[34px] font-normal tracking-tight text-[#1f1f1f] font-heading">
+          Casos de Simulación Clínica
+        </h1>
+        <p className="text-sm font-normal text-[#444746] mt-1 max-w-2xl leading-relaxed">
+          Casos estructurados según Guías de Práctica Clínica del MSP Ecuador para la evaluación formativa del razonamiento clínico.
+        </p>
       </div>
 
-      {/* 2. Sección de Desempeño y Tendencias */}
-      {navSection === 'trends' ? (
-        <div className="space-y-6">
-          <ReasoningTrends />
-        </div>
-      ) : (
-        <>
-          {/* 3. Motor Adaptativo ZDP (KST + BKT) */}
-          <AdaptiveNextCase
-            onSelectCase={(clinicalCase) => navigate(`/cases/${clinicalCase.id}`)}
-            onToggleGraph={() => setShowKstGraph(true)}
-          />
+      {/* 2. Motor Adaptativo ZDP (KST + BKT) */}
+      <AdaptiveNextCase
+        onSelectCase={(clinicalCase) => navigate(`/cases/${clinicalCase.id}`)}
+        onToggleGraph={() => setShowKstGraph(true)}
+      />
 
           {/* 4. Barra de Filtros, Categorías y Pestañas */}
           <CaseFilterTabs
@@ -158,64 +104,6 @@ export default function CaseList() {
               ))}
             </div>
           )}
-        </>
-      )}
-
-      {/* Modal: Unirse a Sala Colaborativa */}
-      {showJoinModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-white rounded-[28px] shadow-xl border-0 max-w-md w-full p-6 sm:p-8 space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <div className="flex items-center gap-2.5">
-                <Users className="w-5 h-5 text-[#0b57d0]" />
-                <h3 className="text-lg font-normal text-[#1f1f1f] font-heading">
-                  Unirse a Sala de Ateneo
-                </h3>
-              </div>
-              <button
-                onClick={() => { setShowJoinModal(false); setJoinError(null); }}
-                className="p-1.5 rounded-full hover:bg-slate-100 text-[#747775] cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleJoinRoom} className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-[#444746] mb-1.5">
-                  Código de Sala (6 u 8 caracteres)
-                </label>
-                <input
-                  type="text"
-                  placeholder="ej. ATENEO-8Q8Y"
-                  value={roomInput}
-                  onChange={(e) => setRoomInput(e.target.value.toUpperCase())}
-                  required
-                  autoFocus
-                  className="w-full px-4 py-3 bg-[#f0f4f9] rounded-[16px] text-sm font-mono uppercase text-[#1f1f1f] border border-slate-200/80 focus:outline-none focus:border-[#0b57d0]"
-                />
-              </div>
-
-              {joinError && (
-                <p className="text-xs text-rose-600 font-medium">{joinError}</p>
-              )}
-
-              <div className="flex items-center justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowJoinModal(false)}
-                  className="px-4 py-2 text-xs font-medium text-[#444746] hover:text-[#1f1f1f] cursor-pointer"
-                >
-                  Cancelar
-                </button>
-                <ClinicalButton type="submit" variant="primary" size="md">
-                  Ingresar a la Sala
-                </ClinicalButton>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* Modal: Grafo de Espacio de Conocimiento (KST) */}
       <KnowledgeSpaceGraph

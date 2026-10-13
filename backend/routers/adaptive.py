@@ -6,6 +6,24 @@ from modules.adaptive.service import AdaptiveCurriculumService
 
 router = APIRouter(prefix="/api/adaptive", tags=["Currículo Adaptativo e Inteligencia ITS"])
 
+def _resolve_target_student_id(current_user: Optional[UserResponse], student_id: Optional[str]) -> str:
+    """
+    Resuelve el ID del estudiante para el currículo adaptativo garantizando:
+    1. Si el usuario está autenticado como alumno, se fuerza su propio ID para evitar IDOR y suplantación.
+    2. Si el usuario es docente o administrador, puede inspeccionar a un alumno específico o consultar su perfil.
+    3. Si no hay sesión activa (cliente anónimo/test), permite student_id o cae en fallback demo.
+    """
+    clean_id = student_id.strip() if student_id and student_id.strip() else None
+    if current_user:
+        user_role = getattr(current_user, "rol", None)
+        role_val = getattr(user_role, "value", user_role) if user_role else None
+        if role_val == "alumno":
+            return current_user.id
+        if clean_id:
+            return clean_id
+        return current_user.id
+    return clean_id or "usr_alumno_001"
+
 @router.get("/next-case", response_model=Dict[str, Any])
 async def get_adaptive_next_case(
     student_id: Optional[str] = Query(None, description="ID del estudiante"),
@@ -15,7 +33,7 @@ async def get_adaptive_next_case(
     """
     Retorna la recomendación proactiva del caso clínico óptimo según KST, BKT y la ZDP de Vygotsky.
     """
-    target_id = student_id or (current_user.id if current_user else "usr_alumno_001")
+    target_id = _resolve_target_student_id(current_user, student_id)
     return adaptive_service.get_optimal_next_case(target_id)
 
 @router.get("/knowledge-state", response_model=Dict[str, Any])
@@ -27,7 +45,7 @@ async def get_adaptive_knowledge_state(
     """
     Retorna el estado de dominio continuo de las 7 competencias clínicas del grafo KST.
     """
-    target_id = student_id or (current_user.id if current_user else "usr_alumno_001")
+    target_id = _resolve_target_student_id(current_user, student_id)
     return adaptive_service.get_knowledge_state(target_id)
 
 @router.get("/learning-path", response_model=List[Dict[str, Any]])
@@ -39,7 +57,7 @@ async def get_adaptive_learning_path(
     """
     Retorna la trayectoria longitudinal de aprendizaje del estudiante (snapshots BKT).
     """
-    target_id = student_id or (current_user.id if current_user else "usr_alumno_001")
+    target_id = _resolve_target_student_id(current_user, student_id)
     return adaptive_service.get_learning_path(target_id)
 
 @router.get("/topology", response_model=Dict[str, Any])
