@@ -1273,3 +1273,9 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
     * Certificación Empírica de Inferencia Gemini 3.8 Flash: Ejecutado `POST /api/evaluate` en caso de preeclampsia (`case_preeclampsia_01`) obteniendo dictamen estructurado en 11.6s (7.5/10, citas normativas vinculadas a GPC MSP, Faithfulness Score 0.6, 0 alucinaciones).
     * Certificación Empírica de Streaming Socrático SSE: Ejecutado `POST /api/evaluate/socratic-turn` con retorno de tokens en tiempo real, citando las guías de preeclampsia del MSP y desafiando al estudiante en puntos de corte de diuresis y reflejos osteotendinosos.
     * Certificación de BGE-M3 Fine-Tuned y ChromaDB v2: 7,052 fragmentos normativos MSP activos, generación de tensores de 1,024 dimensiones en ~222 ms y 100% de consistencia en 6 dominios clínicos reales.
+* **Auditoría Senior y Sincronización Fast-Forward (2026-10-13):**
+  - **Sincronización:** Rama `main` actualizada con `origin/main` (9 commits fast-forwarded: `8b0cca2` a `f6a7cbc`), preservando rama de respaldo `backup-pre-pull`.
+  - **Base de Datos y Persistencia:** Cero alteraciones de esquema en SQLite `ateneo_clinical.db`. Verificación física de `chroma_db_v2/chroma.sqlite3` (`PRAGMA integrity_check = ('ok',)` y 7,052 vectores canónicos en `gpc_msp_v2`).
+  - **Pipeline RAG y Telemetría:** Validación exitosa de auto-sanitización, enriquecimiento de metadatos forenses (`chunks_corpus_v2.json`) y suite de retriever/diferenciadores (12/12 PASS en `test_retriever_pipeline.py` y `test_paper_differentiators.py`). Endpoint `POST /api/telemetry/rum` verificado con HTTP 200.
+  - **Frontend:** TypeScript estricto con 0 errores en `npm run typecheck`, 26 suites y 121/121 tests aprobados en Vitest (`npm run test`), y compilación de producción exitosa en 8.45s (`dist/sw.js` generado).
+
