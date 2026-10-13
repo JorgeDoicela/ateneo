@@ -100,62 +100,96 @@ def rebuild_chroma_fts5(chroma_db_dir: Path) -> bool:
         return False
 
 
-def setup_artifacts(source_path: Path) -> bool:
+def download_from_hf(repo_id: str, target_dir: Path, repo_type: str = "model") -> bool:
+    """Descarga automáticamente artefactos de Hugging Face Hub sin requerir descargas manuales."""
+    try:
+        from huggingface_hub import snapshot_download
+        print(f"-> Descargando {repo_id} ({repo_type}) desde Hugging Face Hub...")
+        snapshot_download(
+            repo_id=repo_id,
+            repo_type=repo_type,
+            local_dir=str(target_dir),
+            local_dir_use_symlinks=False
+        )
+        print(f"   [OK] Descarga de Hugging Face completada en {target_dir}")
+        return True
+    except ImportError:
+        print("   [ERROR] huggingface_hub no está instalado. Ejecute: pip install huggingface_hub")
+        return False
+    except Exception as e:
+        print(f"   [ERROR] Falló la descarga de Hugging Face ({repo_id}): {e}")
+        return False
+
+
+def setup_artifacts(source_path: Path, hf_model: str = "", hf_chroma: str = "") -> bool:
     print("=" * 70)
     print(" ATENEO+ — APROVISIONAMIENTO AUTOMÁTICO DE ARTEFACTOS MLOps")
     print("=" * 70)
-    print(f"Directorio de origen: {source_path}")
-    print(f"Destino de datos:     {BACKEND_DATA_DIR}\n")
+    if hf_model:
+        print(f"Modelo Hugging Face:    {hf_model}")
+    if hf_chroma:
+        print(f"ChromaDB Hugging Face:  {hf_chroma}")
+    print(f"Directorio de origen:   {source_path}")
+    print(f"Destino de datos:       {BACKEND_DATA_DIR}\n")
 
     os.makedirs(MODELS_DIR, exist_ok=True)
     os.makedirs(CHROMA_DIR, exist_ok=True)
 
-    # 1. Buscar archivos fuente
-    tar_model = None
-    zip_chroma = None
-
-    if source_path.is_file():
-        if "bge-m3" in source_path.name and source_path.name.endswith(".tar.gz"):
-            tar_model = source_path
-        elif "chroma" in source_path.name and source_path.name.endswith(".zip"):
-            zip_chroma = source_path
-    elif source_path.is_dir():
-        for f in source_path.glob("*"):
-            if "bge-m3" in f.name and f.name.endswith(".tar.gz"):
-                tar_model = f
-            elif "chroma" in f.name and f.name.endswith(".zip"):
-                zip_chroma = f
-
-    # 2. Descomprimir Modelo
     target_model_dir = MODELS_DIR / "ateneo-bge-m3-ecuador-v2"
-    if tar_model and tar_model.exists():
-        print(f"-> Descomprimiendo modelo desde {tar_model.name}...")
-        with tarfile.open(tar_model, "r:gz") as tar:
-            tar.extractall(path=BACKEND_DATA_DIR)
-        print("   [OK] Modelo descomprimido con éxito.")
-    elif target_model_dir.exists():
-        print("-> Directorio de modelo ya existe. Procediendo a sanitización...")
+
+    # 1. Modelo: Hugging Face o Archivo Local
+    if hf_model:
+        download_from_hf(hf_model, target_model_dir, repo_type="model")
     else:
-        print("-> [INFO] No se encontró archivo .tar.gz de modelo para descomprimir.")
+        tar_model = None
+        if source_path.is_file() and "bge-m3" in source_path.name and source_path.name.endswith(".tar.gz"):
+            tar_model = source_path
+        elif source_path.is_dir():
+            for f in source_path.glob("*"):
+                if "bge-m3" in f.name and f.name.endswith(".tar.gz"):
+                    tar_model = f
+                    break
+
+        if tar_model and tar_model.exists():
+            print(f"-> Descomprimiendo modelo desde {tar_model.name}...")
+            with tarfile.open(tar_model, "r:gz") as tar:
+                tar.extractall(path=BACKEND_DATA_DIR)
+            print("   [OK] Modelo descomprimido con éxito.")
+        elif target_model_dir.exists():
+            print("-> Directorio de modelo ya existe. Procediendo a sanitización...")
+        else:
+            print("-> [INFO] No se encontró modelo local ni especificación Hugging Face.")
 
     if target_model_dir.exists():
         sanitize_model_configs(target_model_dir)
 
-    # 3. Descomprimir ChromaDB
-    if zip_chroma and zip_chroma.exists():
-        print(f"\n-> Descomprimiendo base vectorial desde {zip_chroma.name}...")
-        with zipfile.ZipFile(zip_chroma, "r") as z:
-            z.extractall(path=BACKEND_DATA_DIR)
-        print("   [OK] ChromaDB v2 descomprimido con éxito.")
-    elif (CHROMA_DIR / "chroma.sqlite3").exists():
-        print("\n-> ChromaDB ya existe en backend/data/chroma_db_v2.")
+    # 2. ChromaDB: Hugging Face o Archivo Local
+    if hf_chroma:
+        download_from_hf(hf_chroma, CHROMA_DIR, repo_type="dataset")
     else:
-        print("\n-> [INFO] No se encontró archivo .zip de ChromaDB para descomprimir.")
+        zip_chroma = None
+        if source_path.is_file() and "chroma" in source_path.name and source_path.name.endswith(".zip"):
+            zip_chroma = source_path
+        elif source_path.is_dir():
+            for f in source_path.glob("*"):
+                if "chroma" in f.name and f.name.endswith(".zip"):
+                    zip_chroma = f
+                    break
+
+        if zip_chroma and zip_chroma.exists():
+            print(f"\n-> Descomprimiendo base vectorial desde {zip_chroma.name}...")
+            with zipfile.ZipFile(zip_chroma, "r") as z:
+                z.extractall(path=BACKEND_DATA_DIR)
+            print("   [OK] ChromaDB v2 descomprimido con éxito.")
+        elif (CHROMA_DIR / "chroma.sqlite3").exists():
+            print("\n-> ChromaDB ya existe en backend/data/chroma_db_v2.")
+        else:
+            print("\n-> [INFO] No se encontró archivo .zip de ChromaDB para descomprimir.")
 
     if (CHROMA_DIR / "chroma.sqlite3").exists():
         rebuild_chroma_fts5(CHROMA_DIR)
 
-    # 4. Asegurar .gitkeep
+    # 3. Asegurar .gitkeep
     gitkeep = CHROMA_DIR / ".gitkeep"
     if not gitkeep.exists():
         with open(gitkeep, "w", encoding="utf-8") as f:
@@ -171,6 +205,8 @@ def setup_artifacts(source_path: Path) -> bool:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Aprovisionar artefactos MLOps en Ateneo+")
     parser.add_argument("source", nargs="?", default="", help="Ruta al directorio de descargas o archivo de artefacto")
+    parser.add_argument("--hf-model", default="", help="Repo ID de Hugging Face para el modelo (ej: usuario/ateneo-bge-m3-ecuador-v2)")
+    parser.add_argument("--hf-chroma", default="", help="Repo ID de Hugging Face para la base ChromaDB v2")
     args = parser.parse_args()
 
     search_path = Path(args.source) if args.source else Path.home() / "Descargas"
@@ -179,4 +215,5 @@ if __name__ == "__main__":
     if not search_path.exists():
         search_path = BACKEND_DATA_DIR
 
-    setup_artifacts(search_path)
+    setup_artifacts(search_path, hf_model=args.hf_model, hf_chroma=args.hf_chroma)
+

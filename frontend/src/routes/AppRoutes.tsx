@@ -11,11 +11,9 @@ const AteneoRoom = lazy(() => import('../modules/collaboration/pages/AteneoRoom'
 const Login = lazy(() => import('../modules/auth/pages/Login'));
 const Register = lazy(() => import('../modules/auth/pages/Register'));
 const MagicLogin = lazy(() => import('../modules/auth/pages/MagicLogin'));
-const AdminDashboard = lazy(() => import('../modules/analytics/pages/AdminDashboard'));
 const AdminLayout = lazy(() => import('../modules/admin/pages/AdminLayout'));
 const AdminUsersPage = lazy(() => import('../modules/admin/pages/AdminUsersPage'));
 const AdminMagicLinksPage = lazy(() => import('../modules/admin/pages/AdminMagicLinksPage'));
-const TeacherDashboard = lazy(() => import('../modules/analytics/pages/TeacherDashboard'));
 const TeacherLayout = lazy(() => import('../modules/teacher/pages/TeacherLayout'));
 const TeacherCasesPage = lazy(() => import('../modules/teacher/pages/TeacherCasesPage'));
 const TeacherAnalyticsPage = lazy(() => import('../modules/teacher/pages/TeacherAnalyticsPage'));

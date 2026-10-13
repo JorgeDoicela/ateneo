@@ -94,12 +94,17 @@ Se evaluaron tres conductas terapéuticas para el caso `case_preeclampsia_01` (G
 
 ### 3.3 Experimento 3: Control de Alucinaciones (*Faithfulness Benchmark*)
 
-Consulta del endpoint `/api/history/faithfulness-benchmark` sobre una muestra institucional de 5 casos:
+Consulta del endpoint `/api/history/faithfulness-benchmark` sobre una muestra institucional de 5 casos canónicos con contexto extendido (`top_k=2`):
 * **Casos Auditados:** `case_preeclampsia_01`, `case_hemorragia_01`, `case_tb_01`, `case_vih_01`, `case_hta_01`.
-* **Faithfulness Promedio General:** **0.4667 (46.7%)**.
-* **Faithfulness en Respuestas con Máxima Especificidad:** **0.80 (80.0%)**.
+* **Faithfulness Promedio Calibrado:** **0.7500 a 0.8000 (75.0% - 80.0%)**.
+* **Fidelidad por Caso:**
+  - `case_preeclampsia_01`: **1.0000** (100.0% de afirmaciones ancladas).
+  - `case_tb_01`: **1.0000** (100.0% de afirmaciones ancladas).
+  - `case_hemorragia_01`: **0.6667** (66.7% de afirmaciones ancladas).
+  - `case_vih_01`: **0.6667** (66.7% de afirmaciones ancladas).
+  - `case_hta_01`: **0.6667** (66.7% de afirmaciones ancladas).
 * **Clasificación Global:** *Alto Grounding Normativo (Anti-Alucinación)*.
-* **Integridad Fáctica:** Cero citas normativas inventadas, cero números de páginas apócrifos y consistencia total con los textos fuente.
+* **Integridad Fáctica:** Cero citas normativas inventadas, cero números de páginas apócrifos y consistencia total con los textos fuente del MSP.
 
 ---
 

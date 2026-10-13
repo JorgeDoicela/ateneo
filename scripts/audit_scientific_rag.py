@@ -166,12 +166,20 @@ def run_experiment_4(api_base_url: str) -> Dict[str, Any]:
         r.raise_for_status()
         for line in r.iter_lines(decode_unicode=True):
             if line and line.startswith("data: "):
-                content = line[6:]
+                content = line[6:].strip()
+                if content == "[DONE]":
+                    break
                 if first_token_time is None:
                     first_token_time = time.time() - start_time
-                streamed_text += content
+                try:
+                    ev = json.loads(content)
+                    tok = ev.get("token", "")
+                    streamed_text += tok
+                    print(tok, end="", flush=True)
+                except Exception:
+                    streamed_text += content
+                    print(content, end="", flush=True)
                 event_count += 1
-                print(content, end="", flush=True)
 
     total_time = time.time() - start_time
     print("\n" + "-" * 40)

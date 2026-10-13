@@ -451,6 +451,8 @@ Evaluación comparativa rigurosa en guías completas no vistas durante el entren
   * [Arquitectura de Resiliencia de IA y Configuración 12-Factor](docs/3_documentacion_metodologica/ARQUITECTURA_RESILIENTE_LLM_Y_CONFIGURACION.md)
   * [Arquitectura RAG Híbrida y Fine-Tuning](docs/3_documentacion_metodologica/ARQUITECTURA_RAG_Y_FINE_TUNING.md)
   * [Metodología Experimental, Reproducibilidad y Tablas LaTeX](docs/3_documentacion_metodologica/METODOLOGIA_Y_REPRODUCIBILIDAD_EXPERIMENTALES.md)
+  * [Protocolo Maestro de Reproducibilidad Científica Experimental](docs/3_documentacion_metodologica/PROTOCOLO_REPRODUCIBILIDAD_CIENTIFICA_EXPERIMENTOS.md)
+  * [Informe de Certificación de Auditoría Científica RAG](docs/3_documentacion_metodologica/INFORME_CERTIFICACION_AUDITORIA_CIENTIFICA_RAG.md)
   * [Manual de Pruebas Automatizadas y Benchmarks](docs/3_documentacion_metodologica/MANUAL_DE_PRUEBAS_Y_BENCHMARKS.md)
 * **Planes de Escalabilidad y Hoja de Ruta Operativa:** Consultar [`docs/7_planes_de_escalabilidad_y_hoja_de_ruta/`](docs/7_planes_de_escalabilidad_y_hoja_de_ruta/) para el [Plan Maestro de Reestructuración del Pipeline de IA v2 (100% Corpus Ecuador)](docs/7_planes_de_escalabilidad_y_hoja_de_ruta/PLAN_REESTRUCTURACION_PIPELINE_IA.md), la [Hoja de Ruta de 21 Sesiones](docs/7_planes_de_escalabilidad_y_hoja_de_ruta/HOJA_DE_RUTA_EJECUCION_SESIONES.md) y los planes maestros de [Base de Datos](docs/7_planes_de_escalabilidad_y_hoja_de_ruta/PLAN_ESCALABILIDAD_BASE_DE_DATOS.md), [Backend](docs/7_planes_de_escalabilidad_y_hoja_de_ruta/PLAN_ESCALABILIDAD_BACKEND.md) y [Frontend](docs/7_planes_de_escalabilidad_y_hoja_de_ruta/PLAN_ESCALABILIDAD_FRONTEND.md).
 

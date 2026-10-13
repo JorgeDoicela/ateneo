@@ -169,6 +169,8 @@ export interface PhaseEvaluationResult {
   es_ultima_fase?: boolean;
   llm_latency_ms?: number;
   llm_model_used?: string;
+  rag_tokens_used?: number;
+  paraclinical_studies_count?: number;
 }
 
 

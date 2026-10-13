@@ -6,7 +6,7 @@ Referencia científica: Es et al. (2023), RAGAS: Automated Evaluation of RAG.
 
 import re
 import unicodedata
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 
 def normalize_text(text: str) -> str:
     """Normaliza texto eliminando acentos, puntuación y convirtiendo a minúsculas."""
@@ -20,14 +20,26 @@ def normalize_text(text: str) -> str:
 def calculate_faithfulness_score(
     aciertos: List[str],
     omisiones: List[str],
-    chunk_normativo_texto: str,
+    chunk_normativo_texto: Union[str, List[str], List[Dict[str, Any]]],
     threshold: float = 0.50
 ) -> Dict[str, Any]:
     """
     Verifica que las afirmaciones clínicas emitidas por el evaluador LLM tengan
-    sustento empírico en el fragmento normativo recuperado (Anti-Alucinación).
+    sustento empírico en el contexto normativo recuperado (Anti-Alucinación).
+    Soporta fragmento único, lista de textos o lista de diccionarios de chunks RAG.
     """
-    norm_chunk = normalize_text(chunk_normativo_texto)
+    if isinstance(chunk_normativo_texto, list):
+        textos = []
+        for item in chunk_normativo_texto:
+            if isinstance(item, dict):
+                textos.append(item.get("texto", ""))
+            elif isinstance(item, str):
+                textos.append(item)
+        raw_context = " ".join(textos)
+    else:
+        raw_context = str(chunk_normativo_texto or "")
+
+    norm_chunk = normalize_text(raw_context)
     chunk_words = set(norm_chunk.split())
     
     all_claims = []

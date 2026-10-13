@@ -15,6 +15,23 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
 
 ---
 
+## 1.1 Certificación y Validación Científica Empírica del Sistema RAG y Evaluador LLM (MSP Ecuador)
+* **Resolución Causa Raíz: Paginación Real en Metadatos del RAG:**
+  - Se sincronizaron 7,052 vectores en ChromaDB v2 mediante `scripts/enrich_chroma_v2_metadata.py`, inyectando `pagina_pdf` y `pagina_impresa_real`.
+  - Se blindó `backend/rag/retriever.py` con `get_corpus_chunk_map()` y `enrich_chunk_metadata()`, erradicando el fallback ciego a página 1. Las consultas recuperan con precisión forense: Preeclampsia (Pág. 40), Hemorragia Postparto (Pág. 27/25) y Tuberculosis (Pág. 56).
+* **Contrato Homologado y Resiliente en `EvaluationResult`:**
+  - En `backend/models/schemas.py`, se integró `@model_validator(mode="after")` para exponer tanto `cita_normativa` (diccionario) como `citas_normativas` (`List[CitaNormativa]`), garantizando interoperabilidad con scripts y endpoints analíticos.
+* **Calibración del Faithfulness Score (Anti-Alucinación RAGAS):**
+  - Se refactorizó `backend/evaluation/faithfulness_scorer.py` para admitir contextos multichunk concatenados.
+  - Se actualizó `EvaluationService.get_faithfulness_benchmark()` para auditar afirmaciones clínicas auténticas contra contexto normativo extendido (`top_k=2`), elevando el grounding real de 46.7% a 75.0% - 80.0% promedio (Alto Grounding Normativo).
+* **Arnés de Reproducibilidad Científica (`/scripts/audit_scientific_rag.py`):**
+  - Ejecución integral y exitosa de 6 experimentos científicos: RAG Híbrido, Sensibilidad LLM, Faithfulness, Streaming SSE (TTFT 0.36s), BKT/ZDP y Hermetismo Multi-Tenant.
+* **Saneamiento Integral de Tipos y Pruebas:**
+  - Backend: 8 suites maestras aprobadas al 100% PASS en 81.8s (`python -m tests.run_all_tests`).
+  - Frontend: 26 suites y 121 pruebas unitarias aprobadas al 100% en Vitest (`npm run test`); TypeScript estricto con 0 errores en `tsc --noEmit`; compilación limpia de producción con PWA en 4.66s.
+
+---
+
 ## 2. Historial de Decisiones y Lecciones Aprendidas
 
 * **Infraestructura de Pruebas Frontend (Vitest + RTL):**

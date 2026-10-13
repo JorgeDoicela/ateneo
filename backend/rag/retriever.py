@@ -20,9 +20,61 @@ from core.logger import get_logger
 
 logger = get_logger("ateneo.rag.retriever")
 
+_CORPUS_CHUNK_MAP: Optional[Dict[str, Dict[str, Any]]] = None
+
+def get_corpus_chunk_map() -> Dict[str, Dict[str, Any]]:
+    """Carga y cachea de forma segura el catálogo maestro chunks_corpus_v2.json."""
+    global _CORPUS_CHUNK_MAP
+    if _CORPUS_CHUNK_MAP is None:
+        _CORPUS_CHUNK_MAP = {}
+        corpus_v2_path = BASE_DIR / "data" / "extracted" / "chunks_corpus_v2.json"
+        if corpus_v2_path.exists():
+            try:
+                with open(corpus_v2_path, "r", encoding="utf-8") as jf:
+                    corpus_list = json.load(jf)
+                for c in corpus_list:
+                    cid = c.get("chunk_id")
+                    if cid:
+                        _CORPUS_CHUNK_MAP[cid] = c
+            except Exception as e:
+                logger.warning(f"No se pudo cargar chunks_corpus_v2.json para enriquecimiento: {e}")
+    return _CORPUS_CHUNK_MAP
+
+def enrich_chunk_metadata(cid: str, raw_meta: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Enriquece los metadatos de un fragmento con el catálogo maestro de la GPC.
+    Garantiza que la paginación impresa, el número de página de PDF y la sección
+    siempre estén poblados con máxima exactitud forense.
+    """
+    meta = dict(raw_meta) if raw_meta else {}
+    corpus_map = get_corpus_chunk_map()
+    master = corpus_map.get(cid)
+    if master:
+        pag_pdf = master.get("pagina_pdf")
+        pag_imp = master.get("pagina_impresa_real")
+        if pag_pdf and not meta.get("pagina_pdf"):
+            meta["pagina_pdf"] = pag_pdf
+        if pag_imp and not meta.get("pagina_impresa_real"):
+            meta["pagina_impresa_real"] = pag_imp
+        if not meta.get("pagina") or meta.get("pagina") == 1:
+            meta["pagina"] = pag_imp or pag_pdf or 1
+        sec = master.get("seccion")
+        if sec and (not meta.get("seccion") or meta.get("seccion") in ("General", "None", "")):
+            meta["seccion"] = sec
+        guia_tit = master.get("guia_titulo") or master.get("gpc_titulo")
+        if guia_tit and (not meta.get("guia_fuente") or meta.get("guia_fuente") in ("MSP Ecuador", "None", "")):
+            meta["guia_fuente"] = guia_tit
+        for k in ("cie10", "cie11", "eje_clinico"):
+            if master.get(k) and not meta.get(k):
+                meta[k] = master[k]
+        if master.get("anio") and not meta.get("ano_publicacion"):
+            meta["ano_publicacion"] = master["anio"]
+    meta["pagina"] = _extract_page_number(meta)
+    return meta
+
 def _extract_page_number(meta: Dict[str, Any]) -> int:
-    """Extrae de forma defensiva el numero de pagina real como entero positivo >= 1."""
-    for key in ("pagina", "pagina_pdf", "pagina_impresa_real"):
+    """Extrae de forma defensiva el numero de pagina real con prioridad en la página impresa/PDF."""
+    for key in ("pagina_impresa_real", "pagina_pdf", "pagina"):
         val = meta.get(key)
         if val is not None:
             val_str = str(val).strip()
@@ -417,10 +469,11 @@ def retrieve_top_k_chunks(
             for i in range(len(dense_results["ids"][0])):
                 cid = dense_results["ids"][0][i]
                 dense_ranked_ids.append(cid)
+                enriched_meta = enrich_chunk_metadata(cid, dense_results["metadatas"][0][i])
                 chunk_data_map[cid] = {
                     "chunk_id": cid,
                     "texto": dense_results["documents"][0][i],
-                    "metadata": dense_results["metadatas"][0][i],
+                    "metadata": enriched_meta,
                     "distancia": dense_results["distances"][0][i] if "distances" in dense_results and dense_results["distances"] else 0.0
                 }
 

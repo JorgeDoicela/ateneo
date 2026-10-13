@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 from typing import List, Optional
 
 class EjeClinico(str, Enum):
@@ -45,7 +45,14 @@ class EvaluationResult(BaseModel):
         description="Lista de competencias deficientes categorizadas por eje clínico (diagnóstico, tratamiento, prevención, seguimiento)"
     )
     cita_normativa: CitaNormativa = Field(..., description="Referencia explícita a la norma MSP")
+    citas_normativas: Optional[List[CitaNormativa]] = Field(default=None, description="Colección retrocompatible de citas normativas ancladas")
     retroalimentacion_general: str = Field(..., description="Retroalimentación formativa y constructiva para el estudiante")
+
+    @model_validator(mode="after")
+    def populate_citas_normativas(self):
+        if not self.citas_normativas and self.cita_normativa:
+            self.citas_normativas = [self.cita_normativa]
+        return self
     # Faithfulness Score — Diferenciador Científico 3 (Anti-Alucinación Normativa)
     faithfulness_score: Optional[float] = Field(None, description="Proporción de afirmaciones clínicas respaldadas por el fragmento normativo recuperado")
     total_claims: Optional[int] = Field(None, description="Total de afirmaciones clínicas evaluadas")

@@ -37,7 +37,7 @@ export function useLearningTelemetry() {
         await analyticsApi.recordEvent(eventPayload);
       } catch (err) {
         // En observabilidad de cliente, las excepciones de red no interrumpen la interacción
-        if (typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production') {
+        if (import.meta.env?.DEV) {
           console.debug('[Telemetry] Evento no entregado (modo offline o fallback):', err);
         }
       }

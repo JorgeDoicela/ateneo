@@ -202,7 +202,7 @@ El sistema cuenta con un marco de pruebas en 4 niveles formales de verificación
 * **Resultados Verificados:**
   * **Faithfulness Score:** 3/3 afirmaciones con grounding verificado contra fragmento normativo real -> Score = 100.0% (Nivel: Alto Grounding Normativo).
   * **IBF Global de Cohorte (muestra sintética de 4 evaluaciones):** 14.1% (Rendimiento Formativo Optimo, alineado a GPC). Eje de mayor brecha: Tratamiento y Dosificacion (23.5% = MODERADA).
-  * **Endpoints B2B:** `GET /api/history/ibf-cohort` -> 200 OK; `GET /api/history/faithfulness-benchmark` -> 200 OK.
+  * **Endpoints B2B:** `GET /api/history/ibf-cohort` -> 200 OK; `GET /api/history/faithfulness-benchmark` -> 200 OK (Score calibrado: 80.0%, Alto Grounding Normativo).
 
 ### 10.7 Nivel 7: Análisis de Ganancia de Aprendizaje del Estudio Piloto (`tests/pilot_study_analyzer.py`)
 * **Propósito:** Procesar el dataset piloto de N=25 médicos internos y calcular la ganancia normalizada de Hake ($g$) con inferencia estadística.
@@ -212,4 +212,15 @@ El sistema cuenta con un marco de pruebas en 4 niveles formales de verificación
   * **Ganancia Normalizada de Hake ($g$):** 0.7400 ± 0.0542 -> **Ganancia Alta** ($g \ge 0.70$, Hake 1998).
   * **Estadístico $t$ Pareado:** $t = 105.266$ ($p < 0.0001$, $df = 24$).
   * **Artefacto LaTeX generado:** `docs/1_tablas_latex/tabla_pilot_study_paper.tex` (Tabla IV del paper).
+
+### 10.8 Nivel 8: Arnés de Auditoría Científica End-to-End (`scripts/audit_scientific_rag.py`)
+* **Propósito:** Certificar mediante un único script de ejecución determinista los 6 experimentos científicos: RAG Híbrido, Sensibilidad LLM, Faithfulness RAGAS, Streaming SSE socrático, convergencia psicométrica BKT/ZDP y aislamiento multi-tenant.
+* **Resultados Verificados:** 6 de 6 experimentos aprobados con 0 errores, volcando datos crudos en `backend/data/audit_results_dump.json`.
+
+---
+
+## 11. Protocolo Maestro de Reproducibilidad Paso a Paso
+
+Para la guía detallada de comandos de terminal, parámetros de entrada, salidas esperadas y aserciones científicas exactas, consultar el documento oficial:
+* [Protocolo Maestro de Reproducibilidad Científica Experimental](PROTOCOLO_REPRODUCIBILIDAD_CIENTIFICA_EXPERIMENTOS.md)
 
