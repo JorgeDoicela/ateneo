@@ -17,11 +17,22 @@ Permite a cualquier investigador, revisor médico o evaluador de publicaciones c
 * **Gateway LLM:** Google Gemini (`gemini-3.8-flash` primario con Circuit Breaker y fallback jerárquico resiliente).
 * **Base de Datos Relacional:** SQLite en modo WAL (*Write-Ahead Logging*) con integridad referencial estricta.
 
-### 1.2 Verificación de Disponibilidad del Entorno
+### 1.2 Aprovisionamiento Automático de Artefactos MLOps (Hugging Face Hub)
+Para replicar el entorno desde cero en una nueva máquina, descargue los artefactos certificados directamente desde Hugging Face Hub con un solo comando:
+
+```bash
+python3 scripts/setup_mlops_artifacts.py
+```
+
+* **Modelo BGE-M3 Fine-Tuned:** [`doiceladev/ateneo-bge-m3-ecuador-v2`](https://huggingface.co/doiceladev/ateneo-bge-m3-ecuador-v2) (~2.27 GB).
+* **Base Vectorial ChromaDB v2:** [`doiceladev/ateneo-chroma-v2`](https://huggingface.co/doiceladev/ateneo-chroma-v2) (7,052 fragmentos normativos del MSP).
+
+### 1.3 Verificación de Disponibilidad del Entorno
 Antes de ejecutar los experimentos, compruebe que los contenedores se encuentren activos y saludables:
 
 ```bash
 docker compose ps
+
 ```
 
 Salida esperada:

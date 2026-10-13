@@ -115,7 +115,19 @@ Edita `.env` para configurar las credenciales y el enrutamiento de modelos:
 | `*` | Acepta cualquier origen | Cloudflare Tunnel, AWS, demos públicas |
 | `https://ateneo.tudominio.com` | Solo ese dominio exacto | Producción con dominio propio |
 
+### 3.2.1 Aprovisionamiento Automático de Artefactos MLOps (Hugging Face Hub)
+
+El modelo denso fine-tuned BGE-M3 y la base vectorial ChromaDB v2 residen oficialmente en Hugging Face Hub. Para descargarlos, verificarlos y dejarlos listos para Docker en un solo comando:
+
+```bash
+python3 scripts/setup_mlops_artifacts.py
+```
+
+* **Modelo Oficial:** [`doiceladev/ateneo-bge-m3-ecuador-v2`](https://huggingface.co/doiceladev/ateneo-bge-m3-ecuador-v2) (~2.27 GB).
+* **Dataset / Base Oficial:** [`doiceladev/ateneo-chroma-v2`](https://huggingface.co/doiceladev/ateneo-chroma-v2) (7,052 fragmentos normativos del MSP).
+
 ### 3.3 Levantar los Contenedores
+
 
 ```bash
 # Primera vez o tras cambios en el código:

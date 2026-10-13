@@ -126,7 +126,7 @@ def download_from_hf(repo_id: str, target_dir: Path, repo_type: str = "model") -
         return False
 
 
-def setup_artifacts(source_path: Path, hf_model: str = "", hf_chroma: str = "") -> bool:
+def setup_artifacts(source_path: Path, hf_model: str = "", hf_chroma: str = "", force: bool = False) -> bool:
     print("=" * 70)
     print(" ATENEO+ — APROVISIONAMIENTO AUTOMÁTICO DE ARTEFACTOS MLOps")
     print("=" * 70)
@@ -143,7 +143,9 @@ def setup_artifacts(source_path: Path, hf_model: str = "", hf_chroma: str = "") 
     target_model_dir = MODELS_DIR / "ateneo-bge-m3-ecuador-v2"
 
     # 1. Modelo: Hugging Face o Archivo Local
-    if hf_model:
+    if target_model_dir.exists() and (target_model_dir / "model.safetensors").exists() and not force:
+        print("-> Modelo BGE-M3 ya existe localmente. Omitiendo descarga...")
+    elif hf_model:
         download_from_hf(hf_model, target_model_dir, repo_type="model")
     else:
         tar_model = None
@@ -169,7 +171,9 @@ def setup_artifacts(source_path: Path, hf_model: str = "", hf_chroma: str = "") 
         sanitize_model_configs(target_model_dir)
 
     # 2. ChromaDB: Hugging Face o Archivo Local
-    if hf_chroma:
+    if (CHROMA_DIR / "chroma.sqlite3").exists() and not force:
+        print("-> ChromaDB v2 ya existe localmente. Omitiendo descarga...")
+    elif hf_chroma:
         download_target = BACKEND_DATA_DIR / "hf_chroma_tmp"
         if download_from_hf(hf_chroma, download_target, repo_type="dataset"):
             found_zip = list(download_target.glob("*.zip"))
@@ -180,7 +184,6 @@ def setup_artifacts(source_path: Path, hf_model: str = "", hf_chroma: str = "") 
                         z.extractall(path=BACKEND_DATA_DIR)
                     print("   [OK] ChromaDB v2 descomprimido con éxito.")
             else:
-                # Si los archivos se subieron sin comprimir
                 if (download_target / "chroma.sqlite3").exists():
                     import shutil
                     for item in download_target.iterdir():
@@ -224,8 +227,9 @@ def setup_artifacts(source_path: Path, hf_model: str = "", hf_chroma: str = "") 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Aprovisionar artefactos MLOps en Ateneo+")
     parser.add_argument("source", nargs="?", default="", help="Ruta al directorio de descargas o archivo de artefacto")
-    parser.add_argument("--hf-model", default="", help="Repo ID de Hugging Face para el modelo (ej: usuario/ateneo-bge-m3-ecuador-v2)")
-    parser.add_argument("--hf-chroma", default="", help="Repo ID de Hugging Face para la base ChromaDB v2")
+    parser.add_argument("--hf-model", default="doiceladev/ateneo-bge-m3-ecuador-v2", help="Repo ID de Hugging Face para el modelo")
+    parser.add_argument("--hf-chroma", default="doiceladev/ateneo-chroma-v2", help="Repo ID de Hugging Face para la base ChromaDB v2")
+    parser.add_argument("--force", action="store_true", help="Forzar re-descarga aunque los archivos existan")
     args = parser.parse_args()
 
     search_path = Path(args.source) if args.source else Path.home() / "Descargas"
@@ -234,5 +238,6 @@ if __name__ == "__main__":
     if not search_path.exists():
         search_path = BACKEND_DATA_DIR
 
-    setup_artifacts(search_path, hf_model=args.hf_model, hf_chroma=args.hf_chroma)
+    setup_artifacts(search_path, hf_model=args.hf_model, hf_chroma=args.hf_chroma, force=args.force)
+
 
