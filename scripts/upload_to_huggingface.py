@@ -20,8 +20,12 @@ import zipfile
 import argparse
 from pathlib import Path
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
-BACKEND_DATA_DIR = ROOT_DIR / "backend" / "data"
+if Path("/app/data").exists() and (Path("/app/data/chroma_db_v2").exists() or Path("/app/data/models").exists()):
+    BACKEND_DATA_DIR = Path("/app/data")
+else:
+    ROOT_DIR = Path(__file__).resolve().parent.parent
+    BACKEND_DATA_DIR = ROOT_DIR / "backend" / "data"
+
 MODEL_DIR = BACKEND_DATA_DIR / "models" / "ateneo-bge-m3-ecuador-v2"
 CHROMA_DIR = BACKEND_DATA_DIR / "chroma_db_v2"
 

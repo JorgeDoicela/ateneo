@@ -20,11 +20,16 @@ import json
 import argparse
 from pathlib import Path
 
-# Resolver raíz del repositorio
-ROOT_DIR = Path(__file__).resolve().parent.parent
-BACKEND_DATA_DIR = ROOT_DIR / "backend" / "data"
+# Resolver raíz del repositorio y almacenamiento de datos
+if Path("/app/data").exists():
+    BACKEND_DATA_DIR = Path("/app/data")
+else:
+    ROOT_DIR = Path(__file__).resolve().parent.parent
+    BACKEND_DATA_DIR = ROOT_DIR / "backend" / "data"
+
 MODELS_DIR = BACKEND_DATA_DIR / "models"
 CHROMA_DIR = BACKEND_DATA_DIR / "chroma_db_v2"
+
 
 
 def sanitize_model_configs(model_dir: Path) -> None:
@@ -165,7 +170,21 @@ def setup_artifacts(source_path: Path, hf_model: str = "", hf_chroma: str = "") 
 
     # 2. ChromaDB: Hugging Face o Archivo Local
     if hf_chroma:
-        download_from_hf(hf_chroma, CHROMA_DIR, repo_type="dataset")
+        download_target = BACKEND_DATA_DIR / "hf_chroma_tmp"
+        if download_from_hf(hf_chroma, download_target, repo_type="dataset"):
+            found_zip = list(download_target.glob("*.zip"))
+            if found_zip:
+                for zf in found_zip:
+                    print(f"\n-> Descomprimiendo {zf.name} descargado desde Hugging Face...")
+                    with zipfile.ZipFile(zf, "r") as z:
+                        z.extractall(path=BACKEND_DATA_DIR)
+                    print("   [OK] ChromaDB v2 descomprimido con éxito.")
+            else:
+                # Si los archivos se subieron sin comprimir
+                if (download_target / "chroma.sqlite3").exists():
+                    import shutil
+                    for item in download_target.iterdir():
+                        shutil.move(str(item), str(CHROMA_DIR / item.name))
     else:
         zip_chroma = None
         if source_path.is_file() and "chroma" in source_path.name and source_path.name.endswith(".zip"):
