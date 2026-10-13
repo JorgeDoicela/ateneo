@@ -82,7 +82,18 @@ Algoritmo de auditoría que comprueba que cada acierto u omisión generado por l
 
 El entorno completo (Backend FastAPI + Frontend React/Vite + Base Vectorial ChromaDB + Pesos Fine-Tuned + SQLite) se ejecuta de forma contenerizada:
 
-### 3.1 Configuración Previa: Variables de Entorno (Única Fuente de Verdad)
+### 3.1 Aprovisionamiento de Artefactos MLOps (Modelo y Base Vectorial)
+
+Debido al límite de 100 MB de GitHub, los artefactos pesados (`ateneo-bge-m3-ecuador-v2.tar.gz` de 1.80 GB y `chroma_db_v2_ateneo.zip` de 61.47 MB) se distribuyen desacoplados. Para aprovisionarlos en cualquier máquina o servidor con un solo comando:
+
+```bash
+# Ejecutar script maestro indicando la ruta donde se descargaron los archivos
+python scripts/setup_mlops_artifacts.py /ruta/a/Descargas
+```
+
+El script descomprime los archivos en `backend/data/`, normaliza los metadatos de configuración y certifica la integridad de ChromaDB (`7,052` vectores). *(Ver guía completa en [`docs/6_despliegue_y_operaciones/GUIA_APROVISIONAMIENTO_MLOPS_Y_DESPLIEGUE_SERVIDOR.md`](./docs/6_despliegue_y_operaciones/GUIA_APROVISIONAMIENTO_MLOPS_Y_DESPLIEGUE_SERVIDOR.md))*.
+
+### 3.2 Configuración Previa: Variables de Entorno (Única Fuente de Verdad)
 
 Copia el archivo de plantilla ubicado en la raíz del proyecto y completa tu API Key de Google Gemini:
 
@@ -100,11 +111,11 @@ Edita `.env` para configurar las credenciales y el enrutamiento de modelos:
 
 | Valor de `ALLOWED_ORIGINS` | Comportamiento | Cuándo usarlo |
 | :--- | :--- | :--- |
-| *(vacío)* | Solo `localhost` y red local `192.168.x.x` | Pruebas seguras en LAN |
+| `http://localhost:5174,http://127.0.0.1:5174` | Solo `localhost` en puerto publicado | Pruebas locales estándar en Docker |
 | `*` | Acepta cualquier origen | Cloudflare Tunnel, AWS, demos públicas |
 | `https://ateneo.tudominio.com` | Solo ese dominio exacto | Producción con dominio propio |
 
-### 3.2 Levantar los Contenedores
+### 3.3 Levantar los Contenedores
 
 ```bash
 # Primera vez o tras cambios en el código:
@@ -114,10 +125,10 @@ docker compose up -d --build
 docker compose up -d
 ```
 
-### 3.3 URLs de Acceso
+### 3.4 URLs de Acceso
 
 #### Modo Local (solo tu máquina):
-* **Frontend:** [`http://localhost:5173`](http://localhost:5173)
+* **Frontend:** [`http://localhost:5174`](http://localhost:5174)
 * **Swagger UI:** [`http://localhost:8000/docs`](http://localhost:8000/docs)
 * **Healthcheck:** [`http://localhost:8000/health`](http://localhost:8000/health)
 
@@ -125,7 +136,7 @@ docker compose up -d
 
 Obtén la IP de tu máquina con `ipconfig` (Windows) o `ip a` (Linux). Ejemplo con IP `192.168.7.202`:
 
-* **Frontend:** `http://192.168.7.202:5173`
+* **Frontend:** `http://192.168.7.202:5174`
 * **Swagger UI:** `http://192.168.7.202:8000/docs`
 
 > **Nota Windows:** Asegúrate de abrir los puertos en el Firewall:
