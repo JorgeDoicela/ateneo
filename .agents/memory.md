@@ -1225,6 +1225,25 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
   - **Inferencia LLM:** `gemini-3.8-flash` activo en vivo con Google GenAI SDK. Cascada de relevo con Circuit Breaker (`CLOSED`, `OPEN`, `HALF_OPEN`) y cooldown de 300s. Blindaje contra prompt injections con 11/11 vectores neutralizados (100% PASS en `test_prompt_security.py`).
   - **Algoritmos Psicométricos y Estudio Piloto:** Grafo KST (7 competencias), motor BKT probabilístico puro sin I/O, cálculo de ZDP y ganancia de Hake normalizada $g = 0.7400 \pm 0.0542$ (*High Gain*, $p < 0.0001$). Tabla formal exportada a `docs/1_tablas_latex/tabla_pilot_study_paper.tex`.
   - **Frontend:** Build limpio en 3.94s con PWA precache (45 entradas, 716 KiB). 26 suites y 121/121 pruebas unitarias e integración en PASS (100%). Cero emojis en interfaz y componentes.
-
-
-
+* **Integración y Certificación de Artefactos MLOps Descargados (/goal - 2026-10-12):**
+  - **Origen de Insumos:** Insumos generados en pipeline MLOps externo (GPU NVIDIA A100 / Colab) y descargados por el desarrollador en `/home/jorge/Descargas/`:
+    * `ateneo-bge-m3-ecuador-v2.tar.gz` (1.80 GB comprimido).
+    * `chroma_db_v2_ateneo.zip` (61.47 MB comprimido).
+  - **Despliegue y Arquitectura de Persistencia:**
+    * Base Vectorial: Extraída en `backend/data/chroma_db_v2/` (83.07 MB). Contiene la colección canónica `gpc_msp_v2` con exactamente 7,052 vectores de 1,024 dimensiones e índice HNSW persistente (`0ea6b081-a73a-448c-99b3-1079e1f47caa`). Se ejecutó reconstrucción del índice invertido FTS5 (`embedding_fulltext_search rebuild`) certificando `PRAGMA integrity_check = [('ok',)]`. Se preservó `.gitkeep` estandarizado.
+    * Modelo de Embeddings Afinado: Extraído en `backend/data/models/ateneo-bge-m3-ecuador-v2/` (2.27 GB). Contiene `model.safetensors`, `config.json` (`xlm-roberta`), `tokenizer.json` (17.10 MB), `modules.json` (pipeline `Transformer` -> `Pooling` -> `Normalize`), `sentence_bert_config.json`, y directorios `1_Pooling/` y `2_Normalize/`.
+  - **Conmutación Automática y Verificación de Configuración:**
+    * `backend/core/config.py`: `_has_valid_v2_model` evaluado en `True`, resolviendo automáticamente `EMBEDDING_MODEL_NAME` a `backend/data/models/ateneo-bge-m3-ecuador-v2`.
+    * `.env`: Mapea `CHROMA_PERSIST_PATH=./data/chroma_db_v2` y `CHROMA_COLLECTION_NAME=gpc_msp_v2`.
+    * Verificación tripartita 1:1 validada: 7,052 fragmentos en `chunks_corpus_v2.json` == 7,052 vectores en `gpc_msp_v2` == 7,052 documentos en `bm25_index_v2.pkl`.
+    * `.gitignore`: Filtro estricto auditado; los binarios de más de 100 MB (`safetensors`, índices HNSW y `chroma.sqlite3`) se mantienen ignorados por Git sin riesgo de contaminación del repositorio.
+  - **Alineación de Compatibilidad SentenceTransformers y Certificación en Vivo:**
+    * Causa Raíz: El modelo afinado en Google Colab exportó esquemas experimentales (`sentence_transformers.base.modules...`, `transformer_task` en `sentence_bert_config.json`, y `embedding_dimension` en `1_Pooling/config.json`).
+    * Corrección Definitiva: Se estandarizó `modules.json` con namespaces oficiales (`sentence_transformers.models`), `sentence_bert_config.json` con parámetros estándar SBERT (`max_seq_length: 8192, do_lower_case: false`), y `1_Pooling/config.json` con `word_embedding_dimension: 1024`.
+    * Certificación de Inferencia y RAG: `SentenceTransformer` genera embeddings densos de 1,024 dimensiones con 0 errores. Recuperación RAG híbrida contra `chroma_db_v2` validada con casos reales de preeclampsia y sulfato de magnesio.
+    * Estado Operativo de Contenedores: `ateneo-backend-1` en estado `healthy` (FastAPI en `http://localhost:8000`), `ateneo-frontend-1` en estado activo (React PWA en `http://localhost:5174`).
+    * Batería de Pruebas Maestras (`python -m tests.run_all_tests`): 8/8 suites aprobadas al 100% PASS en 119.78 segundos dentro del contenedor.
+  - **Corrección de Conectividad Navegador y Telemetría RUM (2026-10-12):**
+    * Causa Raíz 1 (`ERR_NAME_NOT_RESOLVED` a `http://backend:8000`): En `docker-compose.yml`, el servicio `frontend` tenía inyectado `VITE_API_URL=http://backend:8000`. Como el código SPA de React se ejecuta en el navegador del host y no dentro de Docker, el navegador no podía resolver el hostname de Docker `backend`. Se ajustó `httpClient.ts` de forma defensiva para sustituir hostnames internos de Docker por el host del navegador, se añadió `BACKEND_PROXY_URL=http://backend:8000` para el proxy de Vite en `vite.config.ts`, y se agregaron `http://localhost:5174` y `http://127.0.0.1:5174` a `ALLOWED_ORIGINS` en `.env`.
+    * Causa Raíz 2 (HTTP 404 en `/api/telemetry/rum`): El cliente RUM (`telemetry.ts`) enviaba métricas de Core Web Vitals y errores a `/api/telemetry/rum`, pero el backend carecía de dicho endpoint. Se creó `backend/routers/telemetry.py` con `POST /api/telemetry/rum` retornando HTTP 200 con logging estructurado.
+    * Verificación: 26/26 suites y 121/121 tests de frontend PASS en Vitest; login y telemetría funcionando al 100% tanto en llamadas directas con CORS como a través del proxy de Vite.

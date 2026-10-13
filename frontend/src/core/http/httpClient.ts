@@ -2,15 +2,21 @@ import type { HttpResponse, RequestOptions } from '../../types';
 import { telemetry } from '../observability/telemetry';
 
 export const getBaseApiUrl = (): string => {
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
-  }
   if (typeof window !== 'undefined') {
+    const envUrl = import.meta.env.VITE_API_URL;
+    // Si la variable contiene un host interno de red Docker (como 'backend'),
+    // en el navegador del usuario debe mapearse al host del navegador.
+    if (envUrl && !envUrl.includes('://backend')) {
+      return envUrl;
+    }
     if (window.location.protocol === 'https:') {
       return '';
     }
-    const host = window.location.hostname;
+    const host = window.location.hostname || 'localhost';
     return `http://${host}:8000`;
+  }
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
   }
   return 'http://localhost:8000';
 };

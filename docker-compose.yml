@@ -34,8 +34,10 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+    env_file:
+      - .env
     environment:
-      - VITE_API_URL=http://backend:8000
+      - BACKEND_PROXY_URL=http://backend:8000
     depends_on:
       backend:
         condition: service_healthy

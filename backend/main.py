@@ -22,6 +22,7 @@ from routers.history import router as history_router, analytics_router
 from routers.collaboration import router as collaboration_router
 from routers.adaptive import router as adaptive_router
 from routers.health import router as health_router
+from routers.telemetry import router as telemetry_router
 
 from contextlib import asynccontextmanager
 from core.config import settings
@@ -107,6 +108,7 @@ app.include_router(analytics_router)
 app.include_router(collaboration_router)
 app.include_router(adaptive_router)
 app.include_router(health_router)
+app.include_router(telemetry_router)
 
 if __name__ == "__main__":
     import uvicorn
