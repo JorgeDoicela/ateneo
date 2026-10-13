@@ -14,7 +14,8 @@ import {
   Building2,
   Globe,
   Link2,
-  BarChart3
+  BarChart3,
+  BookOpen
 } from 'lucide-react';
 import { useConnectivitySync } from '../storage/useConnectivitySync';
 import { useTheme } from '../theme/ThemeProvider';
@@ -62,7 +63,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="bg-white border-b border-slate-200/80 sticky top-0 z-50">
+    <header className="bg-white/85 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-50 transition-colors">
       <div className="w-full max-w-[1680px] mx-auto px-4 sm:px-8 lg:px-12 h-16 flex items-center justify-between gap-4">
         
         {/* 1. Logo & Marca Ateneo+ */}
@@ -84,8 +85,8 @@ export default function Navbar() {
         {/* 2. Barra de Búsqueda (solo disponible para usuarios autenticados fuera del flujo de autenticación) */}
         {!isAuthRoute && user && (
           <div className="w-full max-w-2xl mx-auto hidden md:flex items-center">
-            <div className="w-full bg-[#eaf1fb] hover:bg-[#e1eaf8] focus-within:bg-white focus-within:shadow-md focus-within:ring-1 focus-within:ring-slate-300 rounded-full px-4 py-2 transition-all flex items-center gap-3 border border-transparent">
-              <Search className="w-4 h-4 text-[#747775] shrink-0" />
+            <div className="w-full bg-white/70 hover:bg-white/90 backdrop-blur-md focus-within:bg-white focus-within:shadow-md focus-within:shadow-indigo-500/5 focus-within:ring-2 focus-within:ring-blue-500/20 rounded-full px-4 py-2 transition-all flex items-center gap-3 border border-slate-200/60 focus-within:border-blue-400">
+              <Search className="w-4 h-4 text-blue-600/70 shrink-0" />
               <input
                 type="text"
                 placeholder="Buscar en Ateneo: casos clínicos, síntomas, diagnósticos o GPC MSP..."
@@ -214,41 +215,52 @@ export default function Navbar() {
                       )}
                     </div>
 
-                    {/* Selector de Sede Institucional (Multi-Tenancy) */}
-                    <div className="py-3 border-b border-slate-100">
-                      <label 
-                        htmlFor="tenant-selector" 
-                        className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5"
-                      >
-                        <Building2 className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Sede Institucional</span>
-                      </label>
-                      <select
-                        id="tenant-selector"
-                        value={tenantId}
-                        onChange={(e) => setTenantId(e.target.value as TenantId)}
-                        className="w-full text-xs font-medium bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-                      >
-                        {availableTenants.map((t) => (
-                          <option key={t.id} value={t.id}>
-                            {t.nombreInstitucion} ({t.siglas})
-                          </option>
-                        ))}
-                      </select>
-                      <div className="flex items-center justify-between mt-1.5 text-[10px] text-slate-400">
-                        <span>Contraste WCAG:</span>
-                        <span className="font-mono text-emerald-600 font-semibold">{tenant.ratioContrasteWcag.toFixed(1)}:1 (AA)</span>
+                    {/* Sede Institucional (Multi-Tenancy con control RBAC) */}
+                    {user.rol === 'administrador' ? (
+                      <div className="py-3 border-b border-slate-100">
+                        <label 
+                          htmlFor="tenant-selector" 
+                          className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5"
+                        >
+                          <Building2 className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Sede Institucional</span>
+                        </label>
+                        <select
+                          id="tenant-selector"
+                          value={tenantId}
+                          onChange={(e) => setTenantId(e.target.value as TenantId)}
+                          className="w-full text-xs font-medium bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                        >
+                          {availableTenants.map((t) => (
+                            <option key={t.id} value={t.id}>
+                              {t.nombreInstitucion} ({t.siglas})
+                            </option>
+                          ))}
+                        </select>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="py-3 border-b border-slate-100">
+                        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                          <Building2 className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Sede Institucional</span>
+                        </div>
+                        <p className="text-xs font-medium text-slate-800 truncate" title={tenant.nombreInstitucion}>
+                          {tenant.nombreInstitucion}
+                        </p>
+                        <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+                          {tenant.siglas} • {tenant.region}
+                        </p>
+                      </div>
+                    )}
 
-                    {/* Selector de Idioma y Taxonomía Nosológica (i18n) */}
+                    {/* Selector de Idioma */}
                     <div className="py-3 border-b border-slate-100">
                       <label 
                         htmlFor="locale-selector" 
                         className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5"
                       >
                         <Globe className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Idioma y Taxonomía</span>
+                        <span>Idioma</span>
                       </label>
                       <select
                         id="locale-selector"
@@ -262,11 +274,31 @@ export default function Navbar() {
                           </option>
                         ))}
                       </select>
-                      <div className="flex items-center justify-between mt-1.5 text-[10px] text-slate-400">
-                        <span>Norma Nosológica:</span>
-                        <span className="font-medium text-slate-600 truncate max-w-[150px]">{authority.sistemaClasificacion} ({authority.pais})</span>
-                      </div>
                     </div>
+
+                    {user.rol === 'alumno' && (
+                      <div className="py-2 border-b border-slate-100 space-y-1">
+                        <span className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-2 pb-0.5">
+                          Mi Aprendizaje
+                        </span>
+                        <Link
+                          to="/cases"
+                          onClick={() => setShowProfileMenu(false)}
+                          className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                        >
+                          <BookOpen className="w-3.5 h-3.5 text-sky-600" />
+                          <span>Casos Clínicos</span>
+                        </Link>
+                        <Link
+                          to="/benchmark"
+                          onClick={() => setShowProfileMenu(false)}
+                          className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                        >
+                          <Award className="w-3.5 h-3.5 text-[#0b57d0]" />
+                          <span>Rendimiento y Benchmark</span>
+                        </Link>
+                      </div>
+                    )}
 
                     {user.rol === 'administrador' && (
                       <div className="py-2 border-b border-slate-100 space-y-1">

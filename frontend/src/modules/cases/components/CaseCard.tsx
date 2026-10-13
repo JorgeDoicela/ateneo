@@ -21,7 +21,7 @@ export default function CaseCard({ caso, gpcMeta, viewMode = 'grid' }: CaseCardP
     return (
       <Link
         to={`/cases/${caso.id}`}
-        className="block bg-white rounded-[20px] p-5 shadow-xs border border-transparent hover:border-blue-200 transition-all duration-200 group"
+        className="block bg-white rounded-[20px] p-5 shadow-xs border border-slate-200/50 hover:border-blue-300/80 hover:shadow-md hover:shadow-indigo-500/5 transition-all duration-300 group"
       >
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1.5 flex-1 min-w-0">
@@ -49,7 +49,7 @@ export default function CaseCard({ caso, gpcMeta, viewMode = 'grid' }: CaseCardP
               <Clock className="w-3.5 h-3.5" />
               {timeEst}
             </span>
-            <div className="w-8 h-8 rounded-full bg-[#f0f4f9] group-hover:bg-[#0b57d0] group-hover:text-white flex items-center justify-center transition-colors">
+            <div className="w-8 h-8 rounded-full bg-[#f0f4f9] group-hover:bg-gradient-to-tr group-hover:from-cyan-600 group-hover:to-indigo-600 group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-xs">
               <ArrowRight className="w-4 h-4" />
             </div>
           </div>
@@ -61,7 +61,7 @@ export default function CaseCard({ caso, gpcMeta, viewMode = 'grid' }: CaseCardP
   return (
     <Link
       to={`/cases/${caso.id}`}
-      className="flex flex-col bg-white rounded-[28px] p-6 shadow-xs border border-transparent hover:border-blue-200 transition-all duration-200 group justify-between"
+      className="flex flex-col bg-white rounded-[28px] p-6 shadow-xs border border-slate-200/50 hover:border-blue-300/80 hover:shadow-lg hover:shadow-indigo-500/5 hover:-translate-y-0.5 transition-all duration-300 group justify-between"
     >
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-2">
@@ -96,7 +96,7 @@ export default function CaseCard({ caso, gpcMeta, viewMode = 'grid' }: CaseCardP
           </span>
         )}
 
-        <div className="w-8 h-8 rounded-full bg-[#f0f4f9] group-hover:bg-[#0b57d0] group-hover:text-white flex items-center justify-center transition-colors">
+        <div className="w-8 h-8 rounded-full bg-[#f0f4f9] group-hover:bg-gradient-to-tr group-hover:from-cyan-600 group-hover:to-indigo-600 group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-xs">
           <ArrowRight className="w-4 h-4" />
         </div>
       </div>

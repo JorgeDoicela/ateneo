@@ -24,10 +24,24 @@ export default function AppLayout({ children }: AppLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#f0f4f9] flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900">
+    <div className="min-h-screen bg-[#f0f4f9] flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 relative overflow-x-hidden">
+      {/* Halos de Luz Ambiental (Aurora de IA Ateneo+: Cyan, Azul, Violeta) para refracción Glassmorphism */}
+      <div 
+        className="pointer-events-none fixed -top-32 -left-32 w-[28rem] h-[28rem] bg-gradient-to-br from-cyan-400/20 via-blue-500/15 to-transparent rounded-full blur-3xl"
+        aria-hidden="true"
+      />
+      <div 
+        className="pointer-events-none fixed top-1/4 -right-32 w-[32rem] h-[32rem] bg-gradient-to-tl from-violet-500/15 via-indigo-500/12 to-transparent rounded-full blur-3xl"
+        aria-hidden="true"
+      />
+      <div 
+        className="pointer-events-none fixed bottom-10 left-1/3 w-[26rem] h-[26rem] bg-gradient-to-tr from-cyan-400/10 via-blue-500/10 to-transparent rounded-full blur-3xl"
+        aria-hidden="true"
+      />
+
       <Navbar />
 
-      <main className="w-full max-w-[1680px] mx-auto px-4 sm:px-8 lg:px-12 py-8 flex-1">
+      <main className="w-full max-w-[1680px] mx-auto px-4 sm:px-8 lg:px-12 py-8 flex-1 relative z-10">
         {children}
       </main>
 

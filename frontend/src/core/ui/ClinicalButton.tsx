@@ -38,11 +38,11 @@ export default function ClinicalButton({
   };
 
   const variantStyles: Record<ClinicalButtonVariant, string> = {
-    primary: 'bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:via-blue-500 hover:to-indigo-500 text-white shadow-xs hover:shadow-sm active:scale-[0.98]',
-    secondary: 'bg-[#f0f4f9] hover:bg-slate-200/80 text-[#1f1f1f] border border-slate-200/80',
-    outline: 'bg-white hover:bg-slate-50 text-[#0b57d0] border border-slate-300 hover:border-[#0b57d0]',
-    danger: 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200',
-    text: 'bg-transparent hover:bg-slate-100 text-[#444746] hover:text-[#1f1f1f]',
+    primary: 'bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:via-blue-500 hover:to-indigo-500 text-white shadow-sm hover:shadow-md hover:shadow-blue-500/20 active:scale-[0.98]',
+    secondary: 'bg-white/80 backdrop-blur-md hover:bg-white text-slate-800 border border-slate-200/80 hover:border-slate-300 shadow-xs hover:shadow-sm active:scale-[0.98]',
+    outline: 'bg-white/70 backdrop-blur-md hover:bg-white text-blue-700 border border-blue-200/80 hover:border-blue-400 shadow-xs hover:shadow-sm active:scale-[0.98]',
+    danger: 'bg-rose-50/80 backdrop-blur-md hover:bg-rose-100 text-rose-700 border border-rose-200/80 active:scale-[0.98]',
+    text: 'bg-transparent hover:bg-white/60 backdrop-blur-xs text-slate-700 hover:text-slate-900',
   };
 
   return (

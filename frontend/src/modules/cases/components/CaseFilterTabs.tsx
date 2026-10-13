@@ -56,14 +56,14 @@ export default function CaseFilterTabs({
         </div>
 
         {/* Selector de Vista (Grid vs List) */}
-        <div className="flex items-center gap-1 bg-[#f0f4f9] p-1 rounded-full border border-slate-200/80 self-end sm:self-auto">
+        <div className="flex items-center gap-1 bg-white/70 backdrop-blur-md p-1 rounded-full border border-slate-200/80 shadow-xs self-end sm:self-auto">
           <button
             onClick={() => onChangeViewMode('grid')}
             title="Vista en Cuadrícula"
-            className={`p-1.5 rounded-full transition-colors cursor-pointer ${
+            className={`p-1.5 rounded-full transition-all cursor-pointer ${
               viewMode === 'grid'
-                ? 'bg-white shadow-xs text-[#0b57d0]'
-                : 'text-[#747775] hover:text-[#1f1f1f]'
+                ? 'bg-white shadow-xs text-blue-600 font-semibold'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             <LayoutGrid className="w-4 h-4" />
@@ -71,10 +71,10 @@ export default function CaseFilterTabs({
           <button
             onClick={() => onChangeViewMode('list')}
             title="Vista en Lista"
-            className={`p-1.5 rounded-full transition-colors cursor-pointer ${
+            className={`p-1.5 rounded-full transition-all cursor-pointer ${
               viewMode === 'list'
-                ? 'bg-white shadow-xs text-[#0b57d0]'
-                : 'text-[#747775] hover:text-[#1f1f1f]'
+                ? 'bg-white shadow-xs text-blue-600 font-semibold'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             <List className="w-4 h-4" />
@@ -88,10 +88,10 @@ export default function CaseFilterTabs({
           <button
             key={cat.id}
             onClick={() => onSelectCategory(cat.id)}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 cursor-pointer ${
               selectedCategory === cat.id
-                ? 'bg-[#0b57d0] text-white shadow-xs'
-                : 'bg-white text-[#444746] border border-slate-200/80 hover:bg-slate-50 hover:text-[#1f1f1f]'
+                ? 'bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-500/25 font-semibold'
+                : 'bg-white/90 backdrop-blur-xs text-slate-700 border border-slate-200/80 hover:bg-white hover:border-slate-300 hover:text-slate-900'
             }`}
           >
             {cat.label}

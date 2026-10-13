@@ -55,9 +55,13 @@ export default function CaseList() {
       {/* 1. Header Principal & Acceso a Sala Colaborativa */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
         <div>
-          <div className="flex items-center gap-2 text-xs font-medium text-[#0b57d0] mb-2">
-            <Sparkles className="w-4 h-4" />
-            <span>Simulador Clínico Avanzado • Normativa Oficial MSP Ecuador</span>
+          <div className="flex items-center gap-2 text-xs mb-2.5">
+            <Sparkles className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 font-bold">
+              Simulador Clínico Avanzado
+            </span>
+            <span className="text-slate-300 font-light">•</span>
+            <span className="text-slate-500 font-medium">Normativa Oficial MSP Ecuador</span>
           </div>
           <h1 className="text-[28px] sm:text-[34px] font-normal tracking-tight text-[#1f1f1f] font-heading">
             Casos de Simulación Clínica

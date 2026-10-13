@@ -11,6 +11,8 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
 * **Prohibición de Cajas de Iconos:** Iconos `lucide-react` planos y limpios directamente sobre el lienzo.
 * **Gradiente de Marca:** Cyan Clínico (`#06b6d4`), Azul Royal (`#2563eb`), Violeta IA (`#7c3aed`).
 * **Layout Split-Screen:** 50% caso clínico (GPC, imágenes Rx/ECG/Labs) y 50% resolución evaluativa.
+* **Segregación RBAC en Menú de Perfil (Navbar):** Sede institucional de solo lectura fija para alumnos y docentes (evita saltos arbitrarios de tenant). Selector de cambio de sede restringido exclusivamente a administradores. Eliminación de telemetría interna de diseño (`Contraste WCAG`) de los menús de usuario final y adición de accesos pedagógicos directos (`Casos Clínicos`, `Rendimiento y Benchmark`) para el rol Alumno.
+* **Liquid Glassmorphism & Paleta de IA Oficial:** Integración de la tríada cromática oficial de `ateneo.png` (Cyan `#06b6d4`, Azul `#2563eb`, Violeta `#7c3aed`). Halos aurorales ambientales de refracción (`pointer-events-none fixed blur-3xl`) en `AppLayout` a baja opacidad (10-20%) para dotar de profundidad viva al canvas `#f0f4f9`. Tarjeta adaptativa KST/BKT en cristal líquido (`bg-white/90 backdrop-blur-xl border-white/80`), barra de búsqueda en cristal esmerilado con foco interactivo (`bg-white/70 backdrop-blur-md`), botones institucionales de acción (`ClinicalButton`) con acabado de cristal y selector de vista en cristal translúcido.
 * **Cero emojis** en toda la interfaz y documentación.
 
 ---
