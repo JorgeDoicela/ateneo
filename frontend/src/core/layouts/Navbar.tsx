@@ -9,7 +9,6 @@ import {
   SlidersHorizontal, 
   X, 
   LogOut,
-  Wifi,
   WifiOff,
   RefreshCw,
   Building2,
@@ -35,6 +34,8 @@ export default function Navbar() {
 
   const searchQuery = searchParams.get('q') || '';
 
+  const isAuthRoute = ['/login', '/register', '/auth/magic-login'].some(p => location.pathname.startsWith(p));
+
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     if (location.pathname !== '/') {
@@ -53,7 +54,6 @@ export default function Navbar() {
     navigate('/login');
   };
 
-
   const getInitials = (name?: string): string => {
     if (!name) return 'U';
     const parts = name.trim().split(' ');
@@ -70,55 +70,48 @@ export default function Navbar() {
           <Link to="/" className="flex items-center gap-2.5 group">
             <img
               src="/ateneo.png"
-              alt="Ateneo+"
+              alt="Ateneo+ Logo"
               className="w-7 h-7 object-contain group-hover:scale-105 transition-transform"
             />
-            <div className="flex items-baseline gap-1.5">
-              <span className="font-heading font-black text-xl tracking-tight text-slate-900">
-                ATENEO<span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600">+</span>
-              </span>
-              {tenant.siglas && (
-                <span 
-                  className="hidden sm:inline-block text-[10px] font-bold tracking-wider px-1.5 py-0.5 rounded text-white uppercase ml-1 shadow-xs"
-                  style={{ backgroundColor: tenant.colores.brandPrimary }}
-                  title={tenant.nombreInstitucion}
-                >
-                  {tenant.siglas}
-                </span>
-              )}
-            </div>
+            <img
+              src="/nombre.png"
+              alt="Ateneo+"
+              className="h-5 sm:h-6 w-auto object-contain group-hover:opacity-95 transition-opacity"
+            />
           </Link>
         </div>
 
-        {/* 2. Barra de Búsqueda */}
-        <div className="w-full max-w-2xl mx-auto hidden md:flex items-center">
-          <div className="w-full bg-[#eaf1fb] hover:bg-[#e1eaf8] focus-within:bg-white focus-within:shadow-md focus-within:ring-1 focus-within:ring-slate-300 rounded-full px-4 py-2 transition-all flex items-center gap-3 border border-transparent">
-            <Search className="w-4 h-4 text-[#747775] shrink-0" />
-            <input
-              type="text"
-              placeholder="Buscar en Ateneo: casos clínicos, síntomas, diagnósticos o GPC MSP..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className="w-full bg-transparent text-xs sm:text-sm text-[#1f1f1f] focus:outline-none placeholder:text-[#747775]"
-            />
-            {searchQuery && (
+        {/* 2. Barra de Búsqueda (solo disponible para usuarios autenticados fuera del flujo de autenticación) */}
+        {!isAuthRoute && user && (
+          <div className="w-full max-w-2xl mx-auto hidden md:flex items-center">
+            <div className="w-full bg-[#eaf1fb] hover:bg-[#e1eaf8] focus-within:bg-white focus-within:shadow-md focus-within:ring-1 focus-within:ring-slate-300 rounded-full px-4 py-2 transition-all flex items-center gap-3 border border-transparent">
+              <Search className="w-4 h-4 text-[#747775] shrink-0" />
+              <input
+                type="text"
+                placeholder="Buscar en Ateneo: casos clínicos, síntomas, diagnósticos o GPC MSP..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="w-full bg-transparent text-xs sm:text-sm text-[#1f1f1f] focus:outline-none placeholder:text-[#747775]"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchParams({})}
+                  className="text-xs text-[#747775] hover:text-[#1f1f1f] p-1 rounded-full hover:bg-slate-200/60 transition-colors cursor-pointer"
+                  title="Limpiar búsqueda"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
               <button
-                onClick={() => setSearchParams({})}
-                className="text-xs text-[#747775] hover:text-[#1f1f1f] p-1 rounded-full hover:bg-slate-200/60 transition-colors cursor-pointer"
-                title="Limpiar búsqueda"
+                title="Filtros de Búsqueda"
+                onClick={() => navigate('/?filter=open')}
+                className="p-1 text-[#747775] hover:text-[#1f1f1f] rounded-full hover:bg-slate-200/60 transition-colors cursor-pointer shrink-0"
               >
-                <X className="w-3.5 h-3.5" />
+                <SlidersHorizontal className="w-4 h-4" />
               </button>
-            )}
-            <button
-              title="Filtros de Búsqueda"
-              onClick={() => navigate('/?filter=open')}
-              className="p-1 text-[#747775] hover:text-[#1f1f1f] rounded-full hover:bg-slate-200/60 transition-colors cursor-pointer shrink-0"
-            >
-              <SlidersHorizontal className="w-4 h-4" />
-            </button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* 3. Navegación, Conectividad y Perfil */}
         <div className="flex items-center gap-3 text-xs font-medium text-[#444746] shrink-0">
@@ -141,15 +134,7 @@ export default function Navbar() {
               <RefreshCw className={`w-3.5 h-3.5 text-indigo-600 ${isSyncing ? 'animate-spin' : ''}`} />
               <span>{pendingCount} pendiente{pendingCount > 1 ? 's' : ''}</span>
             </button>
-          ) : (
-            <div 
-              className="hidden lg:flex items-center gap-1.5 text-emerald-700 font-medium px-2 py-1"
-              title="Conexión en línea activa con el clúster clínico"
-            >
-              <Wifi className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-              <span className="text-[11px]">En línea</span>
-            </div>
-          )}
+          ) : null}
 
           {user ? (
             <>
@@ -344,6 +329,13 @@ export default function Navbar() {
                 )}
               </div>
             </>
+          ) : location.pathname === '/login' ? (
+            <Link
+              to="/register"
+              className="px-4 py-2 text-[#0b57d0] hover:bg-blue-50 rounded-full text-xs font-medium transition-colors"
+            >
+              Crear cuenta
+            </Link>
           ) : (
             <Link
               to="/login"

@@ -114,7 +114,7 @@ export default function Register() {
   };
 
   return (
-    <div className="w-full min-h-[calc(100vh-160px)] flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8">
+    <div className="w-full flex flex-col items-center justify-center">
       <div className="w-full max-w-[1040px] bg-white rounded-[28px] p-8 sm:p-12 min-h-[460px] shadow-xs border-0 transition-all duration-300 flex flex-col justify-between">
         
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-stretch flex-1">

@@ -57,7 +57,7 @@ export default function Login() {
   };
 
   return (
-    <div className="w-full min-h-[calc(100vh-160px)] flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8">
+    <div className="w-full flex flex-col items-center justify-center">
       <div className="w-full max-w-[1040px] bg-white rounded-[28px] p-8 sm:p-12 min-h-[420px] shadow-xs border-0 transition-all duration-300 flex flex-col justify-between">
         
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-stretch flex-1">
@@ -90,7 +90,7 @@ export default function Login() {
           </div>
 
           {/* Columna Derecha (7 cols): Formulario Flotante en 2 Pasos */}
-          <div className="md:col-span-7 flex flex-col justify-between pt-4 md:pt-14">
+          <div className="md:col-span-7 flex flex-col justify-between pt-6 md:pt-24">
             <div>
               {/* Notificación de Error */}
               {error && (
@@ -119,12 +119,12 @@ export default function Login() {
                     autoFocus
                   />
 
-                  <div className="flex items-center justify-between pt-4">
+                  <div className="flex items-center justify-end gap-3 pt-4">
                     <Link
                       to="/register"
-                      className="text-xs font-medium text-[#0b57d0] hover:underline cursor-pointer"
+                      className="px-4 py-2.5 text-sm font-semibold text-[#0b57d0] hover:text-[#0842a0] hover:bg-blue-50/60 rounded-full transition-colors cursor-pointer"
                     >
-                      Crear cuenta institucional
+                      Crear cuenta
                     </Link>
                     <ClinicalButton
                       type="submit"
@@ -172,11 +172,11 @@ export default function Login() {
                     </label>
                   </div>
 
-                  <div className="flex items-center justify-between pt-4">
+                  <div className="flex items-center justify-end gap-3 pt-4">
                     <button
                       type="button"
                       onClick={() => { setStep(1); setError(null); }}
-                      className="text-xs font-medium text-[#0b57d0] hover:underline cursor-pointer"
+                      className="px-4 py-2.5 text-sm font-semibold text-[#0b57d0] hover:text-[#0842a0] hover:bg-blue-50/60 rounded-full transition-colors cursor-pointer"
                     >
                       Volver
                     </button>

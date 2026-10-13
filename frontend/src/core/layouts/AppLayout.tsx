@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import { HeartPulse } from 'lucide-react';
 
@@ -7,6 +8,21 @@ export interface AppLayoutProps {
 }
 
 export default function AppLayout({ children }: AppLayoutProps) {
+  const location = useLocation();
+  const isAuthRoute = ['/login', '/register', '/auth/magic-login', '/magic-login'].some(p =>
+    location.pathname.startsWith(p)
+  );
+
+  if (isAuthRoute) {
+    return (
+      <div className="min-h-screen bg-[#f0f4f9] flex flex-col justify-center items-center font-sans selection:bg-blue-100 selection:text-blue-900 p-4 sm:p-6">
+        <main className="w-full flex items-center justify-center">
+          {children}
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#f0f4f9] flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900">
       <Navbar />
