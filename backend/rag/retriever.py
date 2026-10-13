@@ -30,16 +30,87 @@ def _extract_page_number(meta: Dict[str, Any]) -> int:
                     return parsed
     return 1
 
-# Compatibilidad defensiva para rutas de importación heredadas de sentence_transformers
-if "sentence_transformers.base" not in sys.modules:
-    import types
-    base_mod = types.ModuleType("sentence_transformers.base")
-    base_mod.modules = sentence_transformers.models
-    sys.modules["sentence_transformers.base"] = base_mod
-    sys.modules["sentence_transformers.base.modules"] = sentence_transformers.models
-    sys.modules["sentence_transformers.base.modules.transformer"] = sentence_transformers.models
-    sys.modules["sentence_transformers.sentence_transformer"] = sentence_transformers
-    sys.modules["sentence_transformers.sentence_transformer.modules"] = sentence_transformers.models
+def _sanitize_model_metadata_if_needed(model_path_str: str) -> None:
+    """
+    Normaliza de forma idempotente los metadatos del modelo fine-tuned si proviene de
+    exportaciones de Colab con esquemas no estándar de sentence-transformers.
+    Garantiza que cualquier descompresión cruda arranque de inmediato sin intervención manual.
+    """
+    model_dir = Path(model_path_str)
+    if not model_dir.is_dir():
+        return
+
+    # 1. Normalizar modules.json
+    modules_file = model_dir / "modules.json"
+    if modules_file.exists():
+        try:
+            with open(modules_file, "r", encoding="utf-8") as f:
+                content = f.read()
+            if "sentence_transformers.base" in content or "sentence_transformers.sentence_transformer" in content:
+                data = json.loads(content)
+                for item in data:
+                    t = item.get("type", "")
+                    if "Transformer" in t:
+                        item["type"] = "sentence_transformers.models.Transformer"
+                    elif "Pooling" in t:
+                        item["type"] = "sentence_transformers.models.Pooling"
+                    elif "Normalize" in t:
+                        item["type"] = "sentence_transformers.models.Normalize"
+                with open(modules_file, "w", encoding="utf-8") as f:
+                    json.dump(data, f, indent=2)
+        except Exception as e:
+            logger.warning(f"No se pudo normalizar modules.json: {e}")
+
+    # 2. Normalizar sentence_bert_config.json
+    sbert_config = model_dir / "sentence_bert_config.json"
+    if sbert_config.exists():
+        try:
+            with open(sbert_config, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if "transformer_task" in data or "modality_config" in data:
+                clean_data = {
+                    "max_seq_length": data.get("max_seq_length", 8192),
+                    "do_lower_case": data.get("do_lower_case", False)
+                }
+                with open(sbert_config, "w", encoding="utf-8") as f:
+                    json.dump(clean_data, f, indent=2)
+        except Exception as e:
+            logger.warning(f"No se pudo normalizar sentence_bert_config.json: {e}")
+
+    # 3. Normalizar 1_Pooling/config.json
+    pooling_config = model_dir / "1_Pooling" / "config.json"
+    if pooling_config.exists():
+        try:
+            with open(pooling_config, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if "embedding_dimension" in data and "word_embedding_dimension" not in data:
+                data["word_embedding_dimension"] = data.pop("embedding_dimension")
+                with open(pooling_config, "w", encoding="utf-8") as f:
+                    json.dump(data, f, indent=2)
+        except Exception as e:
+            logger.warning(f"No se pudo normalizar 1_Pooling/config.json: {e}")
+
+
+def _ensure_chroma_sqlite_integrity(persist_path: str) -> None:
+    """
+    Verifica y repara preventivamente la integridad del índice FTS5 en ChromaDB SQLite.
+    """
+    sqlite_file = Path(persist_path) / "chroma.sqlite3"
+    if sqlite_file.exists():
+        try:
+            import sqlite3
+            conn = sqlite3.connect(str(sqlite_file))
+            cur = conn.cursor()
+            cur.execute("PRAGMA integrity_check;")
+            res = cur.fetchone()
+            if res and "malformed" in str(res[0]):
+                logger.info("Detectado índice FTS5 desincronizado en ChromaDB; reconstruyendo índice...")
+                cur.execute("INSERT INTO embedding_fulltext_search(embedding_fulltext_search) VALUES('rebuild');")
+                conn.commit()
+            conn.close()
+        except Exception as e:
+            logger.warning(f"Verificación preventiva de ChromaDB SQLite omitida: {e}")
+
 
 _MODEL_CACHE = {}
 _CHROMA_CLIENT = None
@@ -50,6 +121,7 @@ def get_embedding_model(model_name: str = EMBEDDING_MODEL_NAME) -> SentenceTrans
     global _MODEL_CACHE
     if model_name not in _MODEL_CACHE:
         logger.info(f"Cargando modelo de embeddings ({model_name})...", extra={"action": "load_embedding_model_start", "model_name": model_name})
+        _sanitize_model_metadata_if_needed(model_name)
         _MODEL_CACHE[model_name] = SentenceTransformer(model_name)
         logger.info(f"Modelo de embeddings '{model_name}' listo.", extra={"action": "load_embedding_model_done", "model_name": model_name})
     return _MODEL_CACHE[model_name]
@@ -58,6 +130,7 @@ def get_embedding_model(model_name: str = EMBEDDING_MODEL_NAME) -> SentenceTrans
 def get_chroma_client(persist_path: str = CHROMA_PERSIST_PATH) -> chromadb.PersistentClient:
     global _CHROMA_CLIENT
     if _CHROMA_CLIENT is None:
+        _ensure_chroma_sqlite_integrity(persist_path)
         import os
         os.makedirs(persist_path, exist_ok=True)
         _CHROMA_CLIENT = chromadb.PersistentClient(
