@@ -10,9 +10,11 @@ import type {
   RegisterRequest, 
   RegisterResponse,
   MagicLinkCreatePayload,
+  MagicLinkBatchCreatePayload,
   MagicLinkRecord,
   MagicLinkConsumePayload,
-  MagicLinkConsumeResult
+  MagicLinkConsumeResult,
+  MagicLinkVerifyResult
 } from '../../../types';
 
 /**
@@ -64,6 +66,11 @@ export const authApi = {
     return res.data;
   },
 
+  async createMagicLinksBatch(data: MagicLinkBatchCreatePayload): Promise<MagicLinkRecord[]> {
+    const res = await httpClient.post<MagicLinkRecord[]>('/api/auth/magic-links/batch', data);
+    return res.data;
+  },
+
   async listMagicLinks(): Promise<MagicLinkRecord[]> {
     const res = await httpClient.get<MagicLinkRecord[]>('/api/auth/magic-links');
     return res.data;
@@ -71,6 +78,21 @@ export const authApi = {
 
   async revokeMagicLink(linkId: string): Promise<{ mensaje: string }> {
     const res = await httpClient.delete<{ mensaje: string }>(`/api/auth/magic-links/${linkId}`);
+    return res.data;
+  },
+
+  async purgeMagicLink(linkId: string): Promise<{ mensaje: string }> {
+    const res = await httpClient.delete<{ mensaje: string }>(`/api/auth/magic-links/${linkId}/purge`);
+    return res.data;
+  },
+
+  async purgeRevokedLinks(): Promise<{ mensaje: string; eliminados: number }> {
+    const res = await httpClient.post<{ mensaje: string; eliminados: number }>('/api/auth/magic-links/purge-revoked');
+    return res.data;
+  },
+
+  async verifyMagicLink(token: string): Promise<MagicLinkVerifyResult> {
+    const res = await httpClient.get<MagicLinkVerifyResult>(`/api/auth/magic-links/verify?token=${encodeURIComponent(token)}`);
     return res.data;
   },
 

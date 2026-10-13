@@ -19,9 +19,11 @@ from models.schemas import (
     RegisterRequest,
     RegisterResponse,
     MagicLinkCreateRequest,
+    MagicLinkBatchCreateRequest,
     MagicLinkResponse,
     MagicLinkConsumeRequest,
     MagicLinkConsumeResponse,
+    MagicLinkVerifyResponse,
 )
 from modules.auth.models import UserModel, UserSessionModel, MagicLinkTokenModel
 from modules.auth.repository import (
@@ -357,6 +359,18 @@ class AuthService:
 
         email_clean = req.email.strip().lower() if req.email else None
 
+        # Si no se envió un correo externo y es un enlace para una persona nominativa o reutilizable (ej: "Estudiante 1"),
+        # se auto-aprovisiona una identidad institucional fija para que todos sus reingresos preserven la misma cuenta
+        is_cohort_group = (req.max_uses > 1) and (not req.es_reutilizable) and (
+            (req.cohorte_id and req.cohorte_id != "general") or (req.recipient_name and req.recipient_name.lower().startswith("cohorte"))
+        )
+
+        if not email_clean and not is_cohort_group:
+            label = req.recipient_name if req.recipient_name else req.rol
+            clean_slug = "".join(c for c in label.lower() if c.isalnum())[:15] or req.rol.lower()
+            tenant_domain = tenant.dominio_email or "ateneo.edu.ec"
+            email_clean = f"{clean_slug}.{uuid.uuid4().hex[:6]}@{tenant_domain}"
+
         link_record = MagicLinkTokenModel(
             id=str(uuid.uuid4()),
             token_hash=token_hash,
@@ -393,6 +407,139 @@ class AuthService:
             used_count=created.used_count,
             is_revoked=created.is_revoked,
             created_at=created.created_at.isoformat() if hasattr(created.created_at, "isoformat") else str(created.created_at)
+        )
+
+    def create_magic_links_batch(
+        self,
+        admin_user_id: str,
+        admin_tenant_id: str,
+        req: MagicLinkBatchCreateRequest,
+        base_frontend_url: str = "http://localhost:5174"
+    ) -> List[MagicLinkResponse]:
+        """
+        Genera atómicamente un lote de Magic Links configurables con tokens independientes,
+        nombres correlativos y persistencia en una sola transacción.
+        """
+        target_tenant_id = req.tenant_id or admin_tenant_id
+        tenant = self.tenant_repository.get_by_id(target_tenant_id)
+        if not tenant:
+            raise ValueError(f"Institución médica con ID '{target_tenant_id}' no encontrada.")
+
+        tenant_domain = tenant.dominio_email or "ateneo.edu.ec"
+        clean_prefix = req.base_name.strip() if req.base_name else (
+            "Estudiante" if req.rol == "alumno" else "Docente" if req.rol == "docente" else "Administrador"
+        )
+
+        now_utc = datetime.datetime.now(datetime.timezone.utc)
+        expires_at = now_utc + datetime.timedelta(hours=req.duracion_horas)
+
+        tokens_to_create: List[MagicLinkTokenModel] = []
+        raw_tokens_map: dict = {}
+
+        for i in range(req.count):
+            current_num = req.start_index + i
+            recipient_name = f"{clean_prefix} {current_num}"
+
+            raw_token = secrets.token_urlsafe(32)
+            token_hash = hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
+            link_id = str(uuid.uuid4())
+            raw_tokens_map[link_id] = raw_token
+
+            clean_slug = "".join(c for c in clean_prefix.lower() if c.isalnum())[:12] or req.rol.lower()
+            email_clean = f"{clean_slug}{current_num}.{uuid.uuid4().hex[:5]}@{tenant_domain}"
+
+            tokens_to_create.append(
+                MagicLinkTokenModel(
+                    id=link_id,
+                    token_hash=token_hash,
+                    email=email_clean,
+                    recipient_name=recipient_name,
+                    rol=req.rol.strip().lower(),
+                    tenant_id=target_tenant_id,
+                    target_path=req.target_path.strip() or ("/teacher/cases" if req.rol == "docente" else "/cases"),
+                    cohorte_id=req.cohorte_id.strip() if req.cohorte_id else "general",
+                    restrict_domain=bool(req.restrict_domain),
+                    expires_at=expires_at,
+                    max_uses=req.max_uses,
+                    used_count=0,
+                    is_revoked=False,
+                    created_by_user_id=admin_user_id,
+                    created_at=now_utc
+                )
+            )
+
+        created_links = self.magic_link_repository.create_batch(tokens_to_create)
+
+        results: List[MagicLinkResponse] = []
+        for created in created_links:
+            raw_tok = raw_tokens_map.get(created.id, "")
+            magic_url = f"{base_frontend_url.rstrip('/')}/auth/magic-login?token={raw_tok}"
+            results.append(
+                MagicLinkResponse(
+                    id=created.id,
+                    magic_link_url=magic_url,
+                    email=created.email,
+                    recipient_name=created.recipient_name,
+                    rol=created.rol,
+                    tenant_id=created.tenant_id,
+                    target_path=created.target_path,
+                    cohorte_id=created.cohorte_id,
+                    restrict_domain=created.restrict_domain,
+                    expires_at=created.expires_at.isoformat() if hasattr(created.expires_at, "isoformat") else str(created.expires_at),
+                    max_uses=created.max_uses,
+                    used_count=created.used_count,
+                    is_revoked=created.is_revoked,
+                    created_at=created.created_at.isoformat() if hasattr(created.created_at, "isoformat") else str(created.created_at)
+                )
+            )
+        return results
+
+    def verify_magic_link(self, token: str) -> MagicLinkVerifyResponse:
+        """
+        Verifica criptográficamente un Magic Link sin consumirlo ni incrementar su contador de usos.
+        Permite mostrar al usuario la información del acceso (rol, destino, invitación) antes de confirmar el ingreso.
+        """
+        token_clean = token.strip()
+        if not token_clean:
+            raise ValueError("El token de acceso es obligatorio.")
+
+        token_hash = hashlib.sha256(token_clean.encode("utf-8")).hexdigest()
+        link_record = self.magic_link_repository.get_by_hash(token_hash)
+
+        if not link_record:
+            raise PermissionError("Enlace de acceso no válido o inexistente.")
+
+        if link_record.is_revoked:
+            raise PermissionError("Este enlace de acceso ha sido revocado por un administrador.")
+
+        if link_record.used_count >= link_record.max_uses:
+            raise PermissionError("Este enlace ha alcanzado el límite máximo de usos permitidos.")
+
+        now_utc = datetime.datetime.now(datetime.timezone.utc)
+        exp = link_record.expires_at
+        if exp.tzinfo is None:
+            exp = exp.replace(tzinfo=datetime.timezone.utc)
+
+        if exp < now_utc:
+            raise PermissionError("El enlace de acceso ha expirado.")
+
+        is_cohort = (link_record.max_uses > 1) and (
+            (link_record.cohorte_id and link_record.cohorte_id != "general") or
+            (link_record.recipient_name and link_record.recipient_name.lower().startswith("cohorte"))
+        )
+        requires_identity = (not link_record.email) and is_cohort
+        tenant = self.tenant_repository.get_by_id(link_record.tenant_id)
+        tenant_name = tenant.nombre_institucional if tenant else None
+
+        return MagicLinkVerifyResponse(
+            is_valid=True,
+            rol=link_record.rol,
+            recipient_name=link_record.recipient_name,
+            target_path=link_record.target_path,
+            requires_identity=requires_identity,
+            email=link_record.email,
+            expires_at=link_record.expires_at.isoformat() if hasattr(link_record.expires_at, "isoformat") else str(link_record.expires_at),
+            tenant_name=tenant_name
         )
 
     def consume_magic_link(
@@ -434,12 +581,23 @@ class AuthService:
         resolved_name = link_record.recipient_name
 
         if not resolved_email:
-            # Enlace grupal de cohorte: requiere email del participante
-            if not req.email:
+            if req.email:
+                resolved_email = str(req.email).strip().lower()
+                if req.nombre:
+                    resolved_name = req.nombre.strip()
+            elif link_record.max_uses == 1 or (link_record.recipient_name and not link_record.recipient_name.lower().startswith("cohorte")):
+                tenant = self.tenant_repository.get_by_id(link_record.tenant_id)
+                domain = tenant.dominio_email if tenant and tenant.dominio_email else "ateneo.edu.ec"
+                label = link_record.recipient_name or link_record.rol
+                clean_slug = "".join(c for c in label.lower() if c.isalnum())[:15] or link_record.rol.lower()
+                resolved_name = link_record.recipient_name or f"{link_record.rol.capitalize()} Invitado"
+                resolved_email = f"{clean_slug}.{link_record.id[:6]}@{domain}"
+                # Persistimos para garantizar que futuros reingresos al mismo enlace reutilicen la misma cuenta
+                link_record.email = resolved_email
+                self.magic_link_repository.update(link_record)
+            else:
+                # Enlace grupal de cohorte (max_uses > 1): requiere email del participante para diferenciar evaluaciones
                 raise ValueError("Este enlace de cohorte requiere ingresar su correo electrónico.")
-            resolved_email = str(req.email).strip().lower()
-            if req.nombre:
-                resolved_name = req.nombre.strip()
 
         # Validación opcional de restricción de dominio institucional
         if link_record.restrict_domain:
@@ -550,5 +708,11 @@ class AuthService:
 
     def revoke_magic_link(self, link_id: str) -> bool:
         return self.magic_link_repository.revoke(link_id)
+
+    def delete_magic_link(self, link_id: str) -> bool:
+        return self.magic_link_repository.delete(link_id)
+
+    def purge_revoked_magic_links(self, tenant_id: str) -> int:
+        return self.magic_link_repository.purge_revoked(tenant_id)
 
 

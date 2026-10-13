@@ -8,7 +8,7 @@ from core.config import settings
 engine_kwargs = {}
 
 if settings.is_sqlite:
-    engine_kwargs["connect_args"] = {"check_same_thread": False}
+    engine_kwargs["connect_args"] = {"check_same_thread": False, "timeout": 60.0}
 else:
     # Optimización para PostgreSQL u otros motores en producción
     engine_kwargs["pool_size"] = 10
@@ -17,7 +17,7 @@ else:
 
 engine = create_engine(settings.database_url, **engine_kwargs)
 
-# Si es SQLite, activar modo WAL (Write-Ahead Logging) para máxima concurrencia
+# Si es SQLite, activar modo WAL y busy_timeout para máxima concurrencia sin bloqueos
 if settings.is_sqlite:
     @event.listens_for(engine, "connect")
     def set_sqlite_pragma(dbapi_connection, connection_record):
@@ -26,6 +26,7 @@ if settings.is_sqlite:
             cursor.execute("PRAGMA journal_mode=WAL")
         except Exception:
             cursor.execute("PRAGMA journal_mode=DELETE")
+        cursor.execute("PRAGMA busy_timeout=60000")
         cursor.execute("PRAGMA synchronous=NORMAL")
         cursor.execute("PRAGMA foreign_keys=ON")
         cursor.close()

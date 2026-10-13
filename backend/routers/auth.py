@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Depends, Request
+from fastapi import APIRouter, HTTPException, status, Depends, Request, Query
 from fastapi.security import HTTPAuthorizationCredentials
 from typing import List
 from models.schemas import (
@@ -9,9 +9,11 @@ from models.schemas import (
     RegisterRequest,
     RegisterResponse,
     MagicLinkCreateRequest,
+    MagicLinkBatchCreateRequest,
     MagicLinkResponse,
     MagicLinkConsumeRequest,
     MagicLinkConsumeResponse,
+    MagicLinkVerifyResponse,
 )
 from auth.security import get_current_user, require_roles, security_scheme, decode_access_token
 from modules.auth.dependencies import get_auth_service
@@ -116,14 +118,16 @@ async def create_magic_link(
     Exclusivo para el rol de Administrador.
     """
     try:
-        # Resolver base URL del frontend desde los headers o fallback
+        # Resolver base URL del frontend desde req.base_url, headers o fallback
         origin = request.headers.get("origin") or request.headers.get("referer")
-        base_frontend_url = origin.split("?")[0].rstrip("/") if origin else "http://localhost:5174"
+        detected_url = origin.split("?")[0].rstrip("/") if origin else "http://localhost:5174"
+        effective_base_url = req.base_url.rstrip("/") if req.base_url else detected_url
+
         return auth_service.create_magic_link(
             admin_user_id=current_user.id,
             admin_tenant_id=current_user.tenant_id,
             req=req,
-            base_frontend_url=base_frontend_url
+            base_frontend_url=effective_base_url
         )
     except ValueError as e:
         raise HTTPException(
@@ -134,6 +138,39 @@ async def create_magic_link(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error inesperado al generar el Magic Link: {str(e)}"
+        )
+
+
+@router.post("/magic-links/batch", response_model=List[MagicLinkResponse], status_code=status.HTTP_201_CREATED)
+async def create_magic_links_batch(
+    req: MagicLinkBatchCreateRequest,
+    request: Request,
+    current_user: UserResponse = Depends(require_roles([UserRole.ADMINISTRADOR])),
+    auth_service: AuthService = Depends(get_auth_service)
+):
+    """
+    Genera atómicamente un lote completo de Magic Links con nombres correlativos e identidades provisionadas.
+    """
+    try:
+        origin = request.headers.get("origin") or request.headers.get("referer")
+        detected_url = origin.split("?")[0].rstrip("/") if origin else "http://localhost:5174"
+        effective_base_url = req.base_url.rstrip("/") if req.base_url else detected_url
+
+        return auth_service.create_magic_links_batch(
+            admin_user_id=current_user.id,
+            admin_tenant_id=current_user.tenant_id,
+            req=req,
+            base_frontend_url=effective_base_url
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error inesperado al generar el lote de Magic Links: {str(e)}"
         )
 
 
@@ -164,6 +201,63 @@ async def revoke_magic_link(
             detail="Magic Link no encontrado para revocación."
         )
     return {"mensaje": "Magic Link revocado exitosamente"}
+
+
+@router.delete("/magic-links/{link_id}/purge", status_code=status.HTTP_200_OK)
+async def purge_magic_link(
+    link_id: str,
+    current_user: UserResponse = Depends(require_roles([UserRole.ADMINISTRADOR])),
+    auth_service: AuthService = Depends(get_auth_service)
+):
+    """
+    Elimina físicamente un Magic Link revocado o agotado de la base de datos para mantener el historial limpio.
+    """
+    success = auth_service.delete_magic_link(link_id)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Magic Link no encontrado para eliminación."
+        )
+    return {"mensaje": "Magic Link eliminado definitivamente"}
+
+
+@router.post("/magic-links/purge-revoked", status_code=status.HTTP_200_OK)
+async def purge_revoked_magic_links(
+    current_user: UserResponse = Depends(require_roles([UserRole.ADMINISTRADOR])),
+    auth_service: AuthService = Depends(get_auth_service)
+):
+    """
+    Limpia en lote todos los Magic Links revocados en el tenant.
+    """
+    deleted_count = auth_service.purge_revoked_magic_links(tenant_id=current_user.tenant_id)
+    return {"mensaje": f"Se eliminaron {deleted_count} enlaces revocados", "eliminados": deleted_count}
+
+
+@router.get("/magic-links/verify", response_model=MagicLinkVerifyResponse)
+async def verify_magic_link(
+    token: str = Query(..., description="Token del Magic Link para verificación previa"),
+    auth_service: AuthService = Depends(get_auth_service)
+):
+    """
+    Verifica los metadatos y validez de un Magic Link antes de su canje para mostrar la pantalla de confirmación.
+    """
+    try:
+        return auth_service.verify_magic_link(token)
+    except PermissionError as e:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(e)
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al verificar el enlace: {str(e)}"
+        )
 
 
 @router.post("/magic-links/consume", response_model=MagicLinkConsumeResponse)

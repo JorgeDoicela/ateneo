@@ -423,6 +423,23 @@ export interface MagicLinkCreatePayload {
   target_path: string;
   cohorte_id?: string;
   restrict_domain?: boolean;
+  base_url?: string;
+  es_reutilizable?: boolean;
+}
+
+export interface MagicLinkBatchCreatePayload {
+  rol: 'alumno' | 'docente' | 'administrador';
+  base_name: string;
+  start_index: number;
+  count: number;
+  tenant_id?: string;
+  duracion_horas: number;
+  max_uses: number;
+  target_path: string;
+  cohorte_id?: string;
+  restrict_domain?: boolean;
+  base_url?: string;
+  es_reutilizable?: boolean;
 }
 
 export interface MagicLinkRecord {
@@ -454,4 +471,16 @@ export interface MagicLinkConsumeResult {
   target_path: string;
   user: User;
 }
+
+export interface MagicLinkVerifyResult {
+  is_valid: boolean;
+  rol: string;
+  recipient_name?: string;
+  target_path: string;
+  requires_identity: boolean;
+  email?: string;
+  expires_at: string;
+  tenant_name?: string;
+}
+
 

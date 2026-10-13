@@ -3,14 +3,16 @@ import { telemetry } from '../observability/telemetry';
 
 export const getBaseApiUrl = (): string => {
   if (typeof window !== 'undefined') {
+    // Si estamos navegando por HTTPS o desde un host público (como ateneo.doicela.dev),
+    // usar SIEMPRE ruta relativa vacía ('') para que las peticiones viajen por el mismo dominio/proxy
+    // sin violar Mixed Content ni activar el prompt de Private Network Access (PNA) del navegador.
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (window.location.protocol === 'https:' || !isLocalhost) {
+      return '';
+    }
     const envUrl = import.meta.env.VITE_API_URL;
-    // Si la variable contiene un host interno de red Docker (como 'backend'),
-    // en el navegador del usuario debe mapearse al host del navegador.
     if (envUrl && !envUrl.includes('://backend')) {
       return envUrl;
-    }
-    if (window.location.protocol === 'https:') {
-      return '';
     }
     const host = window.location.hostname || 'localhost';
     return `http://${host}:8000`;

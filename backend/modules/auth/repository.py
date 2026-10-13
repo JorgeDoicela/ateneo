@@ -214,6 +214,38 @@ class MagicLinkRepository:
             self.db.flush()
         return link
 
+    def create_batch(self, links: List[MagicLinkTokenModel], commit: bool = True) -> List[MagicLinkTokenModel]:
+        self.db.add_all(links)
+        if commit:
+            self.db.commit()
+            for l in links:
+                self.db.refresh(l)
+        else:
+            self.db.flush()
+        return links
+
+    def delete(self, link_id: str, commit: bool = True) -> bool:
+        link = self.get_by_id(link_id)
+        if not link:
+            return False
+        self.db.delete(link)
+        if commit:
+            self.db.commit()
+        else:
+            self.db.flush()
+        return True
+
+    def purge_revoked(self, tenant_id: str, commit: bool = True) -> int:
+        deleted = self.db.query(MagicLinkTokenModel).filter(
+            MagicLinkTokenModel.tenant_id == tenant_id,
+            MagicLinkTokenModel.is_revoked == True
+        ).delete(synchronize_session=False)
+        if commit:
+            self.db.commit()
+        else:
+            self.db.flush()
+        return deleted
+
 
 
 

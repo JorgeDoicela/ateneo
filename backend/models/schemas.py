@@ -227,6 +227,8 @@ class MagicLinkCreateRequest(BaseModel):
     target_path: str = Field(default="/cases", description="Ruta de redirección clínica tras canjear el link")
     cohorte_id: Optional[str] = Field(default="general", description="Cohorte académica para analítica")
     restrict_domain: bool = Field(default=False, description="Exigir coincidencia con el dominio institucional del tenant")
+    base_url: Optional[str] = Field(None, description="URL base pública del frontend para construir el link")
+    es_reutilizable: bool = Field(default=False, description="Permite múltiples accesos a la misma cuenta del participante durante la vigencia")
 
     @field_validator("email")
     @classmethod
@@ -237,6 +239,21 @@ class MagicLinkCreateRequest(BaseModel):
         if "@" not in clean or "." not in clean.split("@")[-1]:
             raise ValueError("El correo electrónico del destinatario no tiene un formato válido.")
         return clean
+
+
+class MagicLinkBatchCreateRequest(BaseModel):
+    rol: str = Field(default="alumno", description="Rol asignado: alumno, docente, administrador")
+    base_name: str = Field(default="Estudiante", description="Prefijo o nombre base para los enlaces")
+    start_index: int = Field(default=1, ge=1, le=9999, description="Número inicial de la secuencia (ej: 1)")
+    count: int = Field(default=3, ge=1, le=50, description="Cantidad de enlaces a generar en el lote (1 a 50)")
+    tenant_id: Optional[str] = Field(None, description="ID del tenant emisor")
+    duracion_horas: int = Field(default=168, ge=1, le=720, description="Ventana de vigencia en horas")
+    max_uses: int = Field(default=100, ge=1, le=500, description="Límite máximo de usos")
+    target_path: str = Field(default="/cases", description="Destino clínico tras ingresar")
+    cohorte_id: Optional[str] = Field(default="general", description="Cohorte de analítica")
+    restrict_domain: bool = Field(default=False, description="Exigir correo institucional del tenant")
+    base_url: Optional[str] = Field(None, description="URL pública del frontend")
+    es_reutilizable: bool = Field(default=True, description="Multi-ingreso continuo conservando la misma cuenta de usuario")
 
 
 class MagicLinkResponse(BaseModel):
@@ -277,6 +294,18 @@ class MagicLinkConsumeResponse(BaseModel):
     token_type: str = "bearer"
     target_path: str
     user: UserResponse
+
+
+class MagicLinkVerifyResponse(BaseModel):
+    is_valid: bool
+    rol: str
+    recipient_name: Optional[str] = None
+    target_path: str
+    requires_identity: bool
+    email: Optional[str] = None
+    expires_at: str
+    tenant_name: Optional[str] = None
+
 
 
 

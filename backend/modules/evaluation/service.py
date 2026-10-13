@@ -128,15 +128,22 @@ class EvaluationService:
 
 
                     # 2. Impactar el modelo psicométrico BKT y registrar snapshot en la misma transacción
-                    if self.adaptive_service:
+                    if self.adaptive_service and hasattr(uow, "adaptive"):
                         competencias = getattr(case, "competencias_evaluadas", []) or []
                         score_val = getattr(eval_result, "score", 0.0)
 
-                        current_state_data = self.adaptive_service.get_knowledge_state(user_id)
-                        state = current_state_data["knowledge_state"].copy()
+                        from adaptive.knowledge_tracer import (
+                            bayesian_update, 
+                            BKT_PARAMETERS, 
+                            set_student_knowledge_state, 
+                            get_initial_knowledge_state
+                        )
+
+                        # Consultar estado directamente en la misma sesión del UoW para evitar sesiones cruzadas y bloqueos de SQLite
+                        persisted_state = uow.adaptive.get_mastery(user_id)
+                        state = persisted_state.copy() if persisted_state else get_initial_knowledge_state().copy()
                         is_correct = score_val >= 7.0
 
-                        from adaptive.knowledge_tracer import bayesian_update, BKT_PARAMETERS, set_student_knowledge_state
                         for comp_id in competencias:
                             if comp_id in BKT_PARAMETERS:
                                 state[comp_id] = bayesian_update(state[comp_id], is_correct, BKT_PARAMETERS[comp_id])
