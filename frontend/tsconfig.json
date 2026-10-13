@@ -24,7 +24,7 @@
     "allowJs": true,
     "checkJs": false,
     "forceConsistentCasingInFileNames": true,
-    "types": ["@testing-library/jest-dom"],
+
 
     /* Paths */
     "paths": {
