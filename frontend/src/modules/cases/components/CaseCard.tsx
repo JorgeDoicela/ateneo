@@ -26,30 +26,30 @@ export default function CaseCard({ caso, gpcMeta, viewMode = 'grid' }: CaseCardP
 
         <Link
           to={`/cases/${caso.id}`}
-          className="relative block bg-white/95 backdrop-blur-xl rounded-[20px] p-5 shadow-xs border border-white/80 group-hover:border-white/90 group-hover:-translate-y-0.5 active:scale-[0.995] transition-all duration-300 focus:outline-none"
+          className="relative block bg-white/95 backdrop-blur-xl rounded-[20px] p-4 sm:p-5 shadow-xs border border-white/80 group-hover:border-white/90 group-hover:-translate-y-0.5 active:scale-[0.995] transition-all duration-300 focus:outline-none"
         >
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="space-y-1.5 flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className={`text-xs font-semibold ${isUrgent ? 'text-rose-700' : 'text-[#0b57d0]'}`}>
+          <div className="flex items-center justify-between gap-3 sm:gap-4">
+            <div className="space-y-1 sm:space-y-1.5 flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <span className={`text-[11px] sm:text-xs font-semibold ${isUrgent ? 'text-rose-700' : 'text-[#0b57d0]'}`}>
                   {labelGpc}
                 </span>
                 {caso.fases && (
-                  <span className="text-[11px] font-medium text-[#0b57d0] inline-flex items-center gap-1">
+                  <span className="text-[10px] sm:text-[11px] font-medium text-[#0b57d0] inline-flex items-center gap-1">
                     <Layers className="w-3 h-3" />
                     3 Fases
                   </span>
                 )}
               </div>
-              <h3 className="text-base font-normal text-[#1f1f1f] group-hover:text-[#0b57d0] transition-colors truncate font-heading">
+              <h3 className="text-sm sm:text-base font-normal text-[#1f1f1f] group-hover:text-[#0b57d0] transition-colors line-clamp-2 sm:truncate font-heading leading-snug">
                 {caso.titulo}
               </h3>
-              <p className="text-xs text-[#747775] line-clamp-1 leading-relaxed">
+              <p className="text-xs text-[#444746] line-clamp-2 sm:line-clamp-1 leading-relaxed">
                 {caso.enunciado || caso.caso_preambulo}
               </p>
             </div>
 
-            <div className="flex items-center shrink-0">
+            <div className="flex items-center shrink-0 self-center">
               <div className="w-8 h-8 rounded-full bg-[#f0f4f9] group-hover:bg-gradient-to-tr group-hover:from-cyan-600 group-hover:to-indigo-600 group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-xs">
                 <ArrowRight className="w-4 h-4" />
               </div>

@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Ateneo - Evaluación de Razonamiento Clínico',
-        short_name: 'Ateneo RAG',
-        description: 'Evaluación del razonamiento clínico de estudiantes mediante RAG con GPCs del MSP Ecuador',
+        name: 'Ateneo+ — Simulador Clínico Multimodal',
+        short_name: 'Ateneo+',
+        description: 'Simulador clínico multimodal y evaluación formativa médica con IA y RAG (MSP Ecuador)',
         theme_color: '#0f172a',
         background_color: '#0f172a',
         display: 'standalone',
@@ -36,6 +36,9 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
     allowedHosts: true,
+    watch: {
+      usePolling: true,
+    },
     proxy: {
       '/api': {
         target: process.env.BACKEND_PROXY_URL || process.env.VITE_API_URL || 'http://localhost:8000',

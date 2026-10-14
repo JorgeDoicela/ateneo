@@ -1,4 +1,5 @@
-import { LayoutGrid, List, Zap } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { LayoutGrid, List, Zap, Filter, ChevronDown, Check } from 'lucide-react';
 import type { CategoryOption, ClassificationTab, ViewMode } from '../hooks/useCases';
 
 export interface CaseFilterTabsProps {
@@ -15,6 +16,8 @@ export interface CaseFilterTabsProps {
 
 /**
  * CaseFilterTabs — Barra de pestañas y categorías de casos
+ * Móvil: Selector desplegable vertical intuitivo para evitar pérdida de opciones fuera de pantalla.
+ * Escritorio: Fila de chips horizontales de acceso directo con un clic.
  */
 export default function CaseFilterTabs({
   categories,
@@ -26,37 +29,65 @@ export default function CaseFilterTabs({
   onChangeViewMode,
   totalCasesCount,
 }: CaseFilterTabsProps) {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const activeCategory = categories.find((c) => c.id === selectedCategory);
+  const activeCategoryLabel = activeCategory ? activeCategory.label : 'Todos los Casos';
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setIsDropdownOpen(false);
+      }
+    }
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isDropdownOpen]);
+
   return (
     <div className="space-y-4">
-      {/* Pestañas de Clasificación General */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80">
-        <div className="flex items-center gap-6">
+      {/* 1. Pestañas de Clasificación General y Selector de Vista */}
+      <div className="flex items-center justify-between gap-3 pb-2 border-b border-slate-200/80">
+        <div className="flex items-center gap-3 sm:gap-6 overflow-x-auto no-scrollbar shrink min-w-0">
           <button
             onClick={() => onSelectClassificationTab('all')}
-            className={`pb-2 text-sm font-medium transition-colors cursor-pointer ${
+            className={`pb-2 text-xs sm:text-sm font-medium whitespace-nowrap transition-colors cursor-pointer shrink-0 ${
               classificationTab === 'all'
-                ? 'border-b-2 border-[#0b57d0] text-[#0b57d0] font-semibold -mb-[1px]'
+                ? 'border-b-2 border-[#0b57d0] text-[#0b57d0] font-semibold -mb-[9px]'
                 : 'text-[#444746] hover:text-[#1f1f1f]'
             }`}
           >
-            Todos los Casos ({totalCasesCount})
+            <span>Todos los Casos ({totalCasesCount})</span>
           </button>
 
           <button
             onClick={() => onSelectClassificationTab('urgent')}
-            className={`pb-2 text-sm font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
+            className={`pb-2 text-xs sm:text-sm font-medium flex items-center gap-1.5 whitespace-nowrap transition-colors cursor-pointer shrink-0 ${
               classificationTab === 'urgent'
-                ? 'border-b-2 border-rose-600 text-rose-700 font-semibold -mb-[1px]'
+                ? 'border-b-2 border-rose-600 text-rose-700 font-semibold -mb-[9px]'
                 : 'text-[#444746] hover:text-[#1f1f1f]'
             }`}
           >
-            <Zap className="w-3.5 h-3.5 text-rose-600" />
-            <span>Código Rojo / Urgencias</span>
+            <Zap className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+            <span className="hidden sm:inline">Código Rojo / Urgencias</span>
+            <span className="sm:hidden">Código Rojo</span>
           </button>
         </div>
 
         {/* Selector de Vista (Grid vs List) */}
-        <div className="flex items-center gap-1 bg-white/70 backdrop-blur-md p-1 rounded-full border border-slate-200/80 shadow-xs self-end sm:self-auto">
+        <div className="flex items-center gap-1 bg-white/70 backdrop-blur-md p-1 rounded-full border border-slate-200/80 shadow-xs shrink-0">
           <button
             onClick={() => onChangeViewMode('grid')}
             title="Vista en Cuadrícula"
@@ -66,7 +97,7 @@ export default function CaseFilterTabs({
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <LayoutGrid className="w-4 h-4" />
+            <LayoutGrid className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
           <button
             onClick={() => onChangeViewMode('list')}
@@ -77,18 +108,65 @@ export default function CaseFilterTabs({
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <List className="w-4 h-4" />
+            <List className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
         </div>
       </div>
 
-      {/* Chips de Especialidades Médicas */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+      {/* 2. Selector Desplegable de Especialidades en Dispositivos Móviles (< sm) */}
+      <div className="relative sm:hidden" ref={dropdownRef}>
+        <button
+          type="button"
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          aria-expanded={isDropdownOpen}
+          className="w-full flex items-center justify-between px-4 py-2.5 rounded-[18px] bg-white border border-slate-200/80 shadow-xs text-xs font-medium text-[#1f1f1f] hover:bg-slate-50 transition-colors cursor-pointer"
+        >
+          <div className="flex items-center gap-2 truncate pr-2">
+            <Filter className="w-3.5 h-3.5 text-[#0b57d0] shrink-0" />
+            <span className="text-[#747775] shrink-0">Especialidad:</span>
+            <span className="font-semibold text-[#0b57d0] truncate">{activeCategoryLabel}</span>
+          </div>
+          <ChevronDown
+            className={`w-4 h-4 text-[#747775] shrink-0 transition-transform duration-200 ${
+              isDropdownOpen ? 'rotate-180 text-[#0b57d0]' : ''
+            }`}
+          />
+        </button>
+
+        {isDropdownOpen && (
+          <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-[22px] shadow-xl border border-slate-100 py-2 z-30 animate-fadeIn max-h-72 overflow-y-auto">
+            {categories.map((cat) => {
+              const isSelected = selectedCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => {
+                    onSelectCategory(cat.id);
+                    setIsDropdownOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-4 py-2.5 text-xs text-left transition-colors cursor-pointer ${
+                    isSelected
+                      ? 'bg-blue-50/80 text-[#0b57d0] font-semibold'
+                      : 'text-[#444746] hover:bg-slate-50 hover:text-[#1f1f1f]'
+                  }`}
+                >
+                  <span className="truncate pr-2">{cat.label}</span>
+                  {isSelected && <Check className="w-4 h-4 text-[#0b57d0] shrink-0" />}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* 3. Chips de Especialidades Médicas en Escritorio (>= sm) */}
+      <div className="hidden sm:flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar touch-pan-x">
         {categories.map((cat) => (
           <button
             key={cat.id}
             onClick={() => onSelectCategory(cat.id)}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 cursor-pointer ${
+            className={`px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 cursor-pointer ${
               selectedCategory === cat.id
                 ? 'bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-500/25 font-semibold'
                 : 'bg-white/90 backdrop-blur-xs text-slate-700 border border-slate-200/80 hover:bg-white hover:border-slate-300 hover:text-slate-900'

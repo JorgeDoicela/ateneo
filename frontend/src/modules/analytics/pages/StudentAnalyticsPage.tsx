@@ -12,8 +12,19 @@ export default function StudentAnalyticsPage() {
 
   return (
     <div className="space-y-8 animate-fadeIn pb-16">
-      {/* 1. Header Principal de Analítica Formativa */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2 pt-2">
+      {/* 1. Navegación Superior y Header Principal */}
+      <div className="space-y-3 pb-2 pt-1">
+        <div>
+          <ClinicalButton
+            variant="secondary"
+            size="sm"
+            onClick={() => navigate('/cases')}
+            icon={ArrowLeft}
+          >
+            Volver al Catálogo
+          </ClinicalButton>
+        </div>
+
         <div>
           <h1 className="text-[28px] sm:text-[34px] font-normal tracking-tight text-[#1f1f1f] font-heading">
             Mi Desempeño y Tendencias
@@ -21,17 +32,6 @@ export default function StudentAnalyticsPage() {
           <p className="text-sm font-normal text-[#444746] mt-1 max-w-2xl leading-relaxed">
             Diagnóstico formativo estructurado, radar de competencias clínicas y análisis longitudinal de brechas frente a las Guías de Práctica Clínica.
           </p>
-        </div>
-
-        {/* Acciones Rápidas */}
-        <div className="flex items-center gap-3">
-          <ClinicalButton
-            variant="secondary"
-            onClick={() => navigate('/cases')}
-            icon={ArrowLeft}
-          >
-            Volver al Catálogo
-          </ClinicalButton>
         </div>
       </div>
 

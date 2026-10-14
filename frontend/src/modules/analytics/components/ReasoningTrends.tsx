@@ -144,7 +144,7 @@ export default function ReasoningTrends() {
     <div className="space-y-8 animate-fadeIn pb-12">
       
       {/* Tarjeta de Advertencia Formativa: PUNTO DÉBIL */}
-      <div className="bg-white rounded-[28px] p-6 sm:p-8 shadow-xs border-0 space-y-4">
+      <div className="bg-white rounded-[24px] sm:rounded-[28px] p-5 sm:p-7 md:p-8 shadow-xs border-0 space-y-4">
         <div className="space-y-1">
           <span className="text-xs font-medium text-amber-800 bg-amber-50 px-3 py-1 rounded-full inline-block">
             Diagnóstico Formativo Normativo
@@ -153,7 +153,7 @@ export default function ReasoningTrends() {
             {punto_debil_principal}
           </h3>
           <p className="text-xs text-[#444746] leading-relaxed">
-            Patrón detectado al contrastar tus respuestas previas contra la normativa oficial del MSP Ecuador.
+            Patrón detectado al contrastar tus respuestas previas contra las Guías de Práctica Clínica (GPC Ecuador).
           </p>
         </div>
 
@@ -212,7 +212,7 @@ export default function ReasoningTrends() {
         </div>
 
         {pointsSVG.length > 0 ? (
-          <div className="w-full overflow-x-auto">
+          <div className="w-full overflow-x-auto no-scrollbar touch-pan-x">
             <div className="min-w-[500px]">
               <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-auto font-sans">
                 {[0, 2.5, 5.0, 7.5, 10.0].map((val) => {

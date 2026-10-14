@@ -8,7 +8,9 @@ import {
   UserCheck, 
   BarChart3, 
   Award,
-  LogOut 
+  LogOut,
+  ChevronDown,
+  Check
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { useTheme } from '../../theme/ThemeProvider';
@@ -27,12 +29,14 @@ export default function UserProfileDropdown() {
   const { t, locale, changeLocale, supportedLocales } = useI18n();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isLangOpen, setIsLangOpen] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsOpen(false);
+        setIsLangOpen(false);
       }
     }
     if (isOpen) {
@@ -62,14 +66,14 @@ export default function UserProfileDropdown() {
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-9 h-9 rounded-full bg-gradient-to-tr from-cyan-600 to-indigo-600 text-white font-semibold text-xs flex items-center justify-center shadow-xs hover:ring-2 hover:ring-[#0b57d0]/40 transition-all cursor-pointer"
+        className="w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-full bg-gradient-to-tr from-cyan-600 to-indigo-600 text-white font-semibold text-xs flex items-center justify-center shadow-xs hover:ring-2 hover:ring-[#0b57d0]/40 transition-all cursor-pointer"
         title={user.nombre}
       >
         {getInitials(user.nombre)}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-72 bg-white rounded-[24px] shadow-xl border border-slate-200/80 p-4 z-50 animate-fadeIn">
+        <div className="absolute right-0 mt-2 w-72 max-w-[calc(100vw-1.5rem)] bg-white rounded-[24px] shadow-xl border border-slate-200/80 p-4 z-50 animate-fadeIn">
           {/* 1. Cabecera de Identidad Compacta y Horizontal */}
           <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-600 to-indigo-600 text-white font-semibold text-xs flex items-center justify-center shrink-0 shadow-xs">
@@ -172,24 +176,45 @@ export default function UserProfileDropdown() {
             </div>
           )}
 
-          {/* 5. Selector de Idioma Compacto e Inline */}
-          <div className="flex items-center justify-between py-2 border-b border-slate-100 text-xs">
-            <span className="flex items-center gap-1.5 text-slate-500 font-medium">
-              <Globe className="w-3.5 h-3.5 text-slate-400" />
-              Idioma
-            </span>
-            <select
-              id="locale-selector"
-              value={locale}
-              onChange={(e) => changeLocale(e.target.value as SupportedLocale)}
-              className="text-xs font-medium bg-transparent text-slate-700 focus:outline-none cursor-pointer pr-1"
+          {/* 5. Selector de Idioma Customizado (Cero controles nativos del SO) */}
+          <div className="py-2 border-b border-slate-100 text-xs space-y-1.5">
+            <button
+              type="button"
+              onClick={() => setIsLangOpen(!isLangOpen)}
+              className="w-full flex items-center justify-between py-1 text-slate-700 hover:text-blue-600 transition-colors cursor-pointer group"
             >
-              {supportedLocales.map((locItem) => (
-                <option key={locItem.code} value={locItem.code}>
-                  {locItem.label}
-                </option>
-              ))}
-            </select>
+              <span className="flex items-center gap-1.5 text-slate-500 font-medium">
+                <Globe className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                Idioma
+              </span>
+              <span className="flex items-center gap-1 font-semibold text-slate-700 group-hover:text-blue-600">
+                <span>{supportedLocales.find(l => l.code === locale)?.label || locale}</span>
+                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isLangOpen ? 'rotate-180 text-blue-600' : ''}`} />
+              </span>
+            </button>
+
+            {isLangOpen && (
+              <div className="pt-1 pb-1 space-y-1 animate-fadeIn bg-slate-50/70 rounded-xl p-1.5 border border-slate-100">
+                {supportedLocales.map((locItem) => (
+                  <button
+                    key={locItem.code}
+                    type="button"
+                    onClick={() => {
+                      changeLocale(locItem.code as SupportedLocale);
+                      setIsLangOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
+                      locale === locItem.code
+                        ? 'bg-blue-50 text-blue-700 font-semibold'
+                        : 'text-slate-600 hover:bg-white hover:text-slate-900'
+                    }`}
+                  >
+                    <span>{locItem.label}</span>
+                    {locale === locItem.code && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* 6. Botón Cerrar Sesión */}

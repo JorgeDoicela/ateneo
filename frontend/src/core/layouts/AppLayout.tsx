@@ -49,10 +49,10 @@ export default function AppLayout({ children }: AppLayoutProps) {
         <div className="w-full max-w-[1680px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <HeartPulse className="w-4 h-4 text-[#0b57d0]" />
-            <span>ATENEO+ • Simulador Clínico Basado en RAG Híbrido & Normativa Oficial MSP Ecuador</span>
+            <span>ATENEO+ • Simulador Clínico Basado en Guías de Práctica Clínica (GPC Ecuador)</span>
           </div>
           <div className="flex items-center gap-4 text-[11px]">
-            <span>GPC Ecuador 2026</span>
+            <span>GPC Ecuador</span>
             <span>•</span>
             <span>Inteligencia Artificial Clínica</span>
           </div>

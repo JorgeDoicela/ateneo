@@ -66,6 +66,17 @@ export function resolveGpcMeta(guia?: string): GpcMeta {
   };
 }
 
+/**
+ * Normaliza cadenas clínicas eliminando acentos/tildes, espacios redundantes y convirtiendo a minúsculas.
+ */
+export function normalizeSearchText(text: string): string {
+  return (text || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
 export interface CategoryOption {
   id: string;
   label: string;
@@ -140,11 +151,11 @@ export function useCases(searchQuery: string = '') {
 
       // Filtro por búsqueda
       if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase().trim();
-        const titulo = (c.titulo || '').toLowerCase();
-        const guia = (c.guia_asociada || '').toLowerCase();
-        const enunciado = (c.enunciado || c.caso_preambulo || '').toLowerCase();
-        return titulo.includes(q) || guia.includes(q) || enunciado.includes(q);
+        const queryTerms = normalizeSearchText(searchQuery).split(/\s+/).filter(Boolean);
+        const corpus = normalizeSearchText(
+          `${c.titulo || ''} ${c.guia_asociada || ''} ${gpcMeta.label || ''} ${gpcMeta.category || ''} ${c.especialidad || ''} ${c.enunciado || c.caso_preambulo || ''} ${c.pregunta || ''} ${(c.competencias_activadas || []).join(' ')} ${c.dificultad || ''}`
+        );
+        return queryTerms.every((term) => corpus.includes(term));
       }
 
       return true;

@@ -1,4 +1,5 @@
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { Users, X } from 'lucide-react';
 import ClinicalButton from '../../../core/ui/ClinicalButton';
@@ -9,12 +10,27 @@ export interface JoinRoomModalProps {
 }
 
 /**
- * JoinRoomModal — Modal autónomo para ingresar a una Sala de Ateneo Colaborativa por código
+ * JoinRoomModal — Modal autónomo para ingresar a una Sala de Ateneo Colaborativa por código.
+ * Renderizado vía React Portal hacia document.body para desacoplar el posicionamiento
+ * de cualquier stacking context o backdrop-filter del Navbar.
  */
 export default function JoinRoomModal({ isOpen, onClose }: JoinRoomModalProps) {
   const navigate = useNavigate();
   const [roomInput, setRoomInput] = useState('');
   const [joinError, setJoinError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -37,9 +53,18 @@ export default function JoinRoomModal({ isOpen, onClose }: JoinRoomModalProps) {
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
-      <div className="bg-white rounded-[28px] shadow-xl border-0 max-w-md w-full p-6 sm:p-8 space-y-6">
+  return createPortal(
+    <div 
+      className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
+      onClick={handleClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="join-room-title"
+    >
+      <div 
+        className="bg-white rounded-[28px] shadow-2xl border border-slate-100 max-w-md w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 space-y-6 animate-scaleUp"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between border-b border-slate-100 pb-4">
           <div className="flex items-center gap-2.5">
             <Users className="w-5 h-5 text-[#0b57d0]" />
@@ -89,6 +114,7 @@ export default function JoinRoomModal({ isOpen, onClose }: JoinRoomModalProps) {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

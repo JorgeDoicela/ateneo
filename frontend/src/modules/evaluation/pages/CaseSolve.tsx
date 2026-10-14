@@ -161,7 +161,7 @@ export default function CaseSolve() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
           {/* Panel Izquierdo: Enunciado Clínico y Hallazgos */}
-          <div className="lg:col-span-6 bg-white rounded-[28px] p-6 sm:p-8 shadow-xs border-0 space-y-6">
+          <div className="lg:col-span-6 bg-white rounded-[24px] sm:rounded-[28px] p-5 sm:p-7 md:p-8 shadow-xs border-0 space-y-6">
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-xs font-medium text-[#444746]">
                 <Stethoscope className="w-4 h-4 text-[#0b57d0]" />
@@ -256,7 +256,7 @@ export default function CaseSolve() {
           </div>
 
           {/* Panel Derecho: Área de Resolución Diagnóstica */}
-          <div className="lg:col-span-6 bg-white rounded-[28px] p-6 sm:p-8 shadow-xs border-0 space-y-6">
+          <div className="lg:col-span-6 bg-white rounded-[24px] sm:rounded-[28px] p-5 sm:p-7 md:p-8 shadow-xs border-0 space-y-6">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
               <div className="space-y-0.5">
                 <h3 className="text-base font-normal text-[#1f1f1f] font-heading">
@@ -305,8 +305,8 @@ export default function CaseSolve() {
                 </div>
               )}
 
-              <div className="flex items-center justify-between pt-2">
-                <span className="text-[11px] text-[#747775]">
+              <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                <span className="text-[11px] text-[#747775] text-center sm:text-left">
                   {respuesta.trim().split(/\s+/).filter(Boolean).length} palabras
                 </span>
 
@@ -314,6 +314,7 @@ export default function CaseSolve() {
                   type="submit"
                   variant="primary"
                   size="md"
+                  className="w-full sm:w-auto min-h-[44px]"
                   loading={evaluating}
                   disabled={!respuesta.trim() || evaluating}
                   icon={Send}
