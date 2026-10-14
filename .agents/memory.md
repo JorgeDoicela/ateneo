@@ -15,6 +15,7 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
 * **Delimitación de Alcance Clínico y Terminológico (GPC Ecuador):**
   - Queda prohibido usar denominaciones genéricas o infladas como *"Normativa Oficial del MSP"* o *"Todo el MSP"*, que inducen al error de considerar que la plataforma abarca trámites o regulaciones administrativas ministeriales.
   - La nomenclatura canónica obligatoria es estrictamente: **Guías de Práctica Clínica (GPC Ecuador)** o **GPC Ecuador**.
+  - **Membretes y Reportes PDF:** Todo membrete, subtítulo y pie de dictamen (en `pdf_report_generator.py`) debe indicar estrictamente `SIMULADOR CLÍNICO MULTIMODAL & RAG FORMATIVO • GPC ECUADOR` y sellos criptográficos `ATENEO-GPC-*`, erradicando el rótulo general `MSP ECUADOR`.
 * **Fuentes Únicas de Verdad:**
   - Backend: `backend/core/config.py` (`settings.app_name = "Ateneo+"`, `settings.app_version = "1.0.0"`).
   - Frontend: `frontend/package.json` (`"name": "ateneo-frontend"`, `"version": "1.0.0"`).
