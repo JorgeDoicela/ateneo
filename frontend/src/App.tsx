@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './core/theme/ThemeProvider';
 import AppRoutes from './routes/AppRoutes';
 import queryClient from './core/query/queryClient';
+import ScrollToTop from './core/router/ScrollToTop';
 
 export default function App() {
   return (
@@ -11,6 +12,7 @@ export default function App() {
       <AuthProvider>
         <ThemeProvider>
           <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <ScrollToTop />
             <AppRoutes />
           </BrowserRouter>
         </ThemeProvider>

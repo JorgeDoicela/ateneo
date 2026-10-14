@@ -25,6 +25,12 @@ export default function TeacherDashboard() {
     loadData();
   }, []);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+    }
+  }, [activeTab]);
+
   const handleCreateAteneoRoom = async (caseId: string) => {
     setCreatingRoomId(caseId);
     try {

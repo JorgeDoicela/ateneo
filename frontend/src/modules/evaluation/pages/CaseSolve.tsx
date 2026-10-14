@@ -62,6 +62,19 @@ export default function CaseSolve() {
     }
   }, [caso?.id, trackCaseOpened]);
 
+  // Asegurar que al cargar el caso o al cambiar de fase/feedback la vista inicie en el tope absoluto
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+    }
+  }, [caso?.id]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    }
+  }, [currentPhase, showingPhaseFeedback, Boolean(resultado)]);
+
   if (loading) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-4">

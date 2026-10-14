@@ -1437,6 +1437,22 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
       - `UserProfileDropdown.tsx`: Menú modal de identidad institucional, tenant/sede RBAC, selector de idioma y sesión con detección de click-outside.
       - `ConnectivityBadge.tsx`: Indicador de red clínica y sincronización hospitalaria en background.
     * `Navbar.tsx` se transformó en un orquestador declarativo y limpio de ~110 líneas fijado en la parte superior (`sticky top-0 z-50 bg-white/85 backdrop-blur-md`).
-    * En `AppLayout.tsx` se reemplazó `overflow-x-hidden` por `overflow-x-clip`, garantizando que el contenedor padre no cree un contexto de scroll aislado y que la barra permanezca 100% fija sin importar el scroll del usuario.
-    * 122/122 pruebas unitarias en Vitest aprobadas al 100%.
-
+* **Restauración de Scroll en Navegación y Transiciones de Estado (Scroll Restoration - Senior):**
+  - **Causa Raíz de Desorientación:**
+    1. En Single-Page Applications (SPA) con React Router, el navegador retiene `window.scrollY` en memoria al cambiar de ruta virtual. Si un usuario se desplazaba por el catálogo `/cases` hasta el caso 8 (ej. 900px de scroll) y hacía clic en "Resolver", al cargarse `/cases/case_xxx` la nueva página heredaba `scrollY = 900px`. En dispositivos móviles, esto situaba la vista directamente sobre el cuadro de texto y el botón de enviar diagnóstico al fondo, ocultando por completo la cabecera, la presentación clínica del paciente y los signos vitales.
+    2. Asimismo, en transiciones de estado internas de un caso clínico (`CaseSolve.tsx`), al avanzar de fase, mostrar el feedback formativo o emitir el dictamen final, el scroll permanecía anclado en la posición del formulario anterior en lugar de situar el foco visual en la nueva información clínica o retroalimentación.
+  - **Solución Arquitectónica Definitiva (Cero Parches):**
+    1. *Router Scroll Controller (`ScrollToTop.tsx`):* Se creó el componente `frontend/src/core/router/ScrollToTop.tsx` montado directamente dentro de `<BrowserRouter>` en `App.tsx`.
+       - Desactiva explícitamente la restauración automática del historial del navegador mediante `window.history.scrollRestoration = 'manual'`, evitando que el motor popstate del browser sobreescriba la posición de forma impredecible.
+       - Escucha reactivamente los cambios de `pathname` y `search` mediante `useLocation()`.
+       - Realiza `window.scrollTo({ top: 0, left: 0, behavior: 'instant' })` inmediatamente ante cada cambio de ruta (respetando hashes si existen).
+    2. *Scroll por Hitos Clínicos en `CaseSolve.tsx`:*
+       - Al cargar o conmutar de caso (`caso?.id`), restaura de inmediato a `(0, 0)`.
+       - Al cambiar de fase clínica (`currentPhase`), al mostrar u ocultar la retroalimentación de fase (`showingPhaseFeedback`), o al emitir el dictamen final (`resultado`), ejecuta `window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })`, garantizando que el estudiante lea siempre el nuevo escenario clínico o la retroalimentación formativa desde su inicio.
+    3. *Scroll por Conmutación de Pestañas y Filtros:*
+       - `TeacherDashboard.tsx`: Al alternar entre la pestaña de Casos Clínicos y Analítica de Cohorte (`activeTab`).
+       - `CaseList.tsx`: Al filtrar por especialidad clínica (`selectedCategory`) o pestaña de clasificación (`classificationTab`).
+    4. *Batería de Pruebas Unitarias y Certificación:*
+       - Se implementó `frontend/src/__tests__/ScrollToTop.test.tsx` validando la asignación de `scrollRestoration = 'manual'` y la invocación de `scrollTo` con `{ top: 0, left: 0, behavior: 'instant' }`.
+       - Cobertura completa de 29 archivos de prueba (139/139 pruebas unitarias aprobadas al 100% en Vitest).
+       - Cero errores en TypeScript estricto (`tsc --noEmit`).

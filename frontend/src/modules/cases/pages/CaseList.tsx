@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Stethoscope, 
@@ -30,6 +30,12 @@ export default function CaseList() {
   } = useCases(globalSearchQuery);
 
   const [showKstGraph, setShowKstGraph] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+    }
+  }, [selectedCategory, classificationTab]);
 
   return (
     <div className="space-y-8 animate-fadeIn pb-16">
