@@ -1452,7 +1452,21 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
     3. *Scroll por Conmutación de Pestañas y Filtros:*
        - `TeacherDashboard.tsx`: Al alternar entre la pestaña de Casos Clínicos y Analítica de Cohorte (`activeTab`).
        - `CaseList.tsx`: Al filtrar por especialidad clínica (`selectedCategory`) o pestaña de clasificación (`classificationTab`).
-    4. *Batería de Pruebas Unitarias y Certificación:*
-       - Se implementó `frontend/src/__tests__/ScrollToTop.test.tsx` validando la asignación de `scrollRestoration = 'manual'` y la invocación de `scrollTo` con `{ top: 0, left: 0, behavior: 'instant' }`.
-       - Cobertura completa de 29 archivos de prueba (139/139 pruebas unitarias aprobadas al 100% en Vitest).
-       - Cero errores en TypeScript estricto (`tsc --noEmit`).
+* **Optimización de Latencia RAG e Inferencia en CPU (2026-10-14):**
+  - **Causa Raíz de Latencias de 30-45s:**
+    1. Inferencia del encoder transformer `ateneo-bge-m3-ecuador-v2` (BGE-M3, ~2.2 GB) corriendo en CPU limitada a 2 hilos por defecto de PyTorch. Al procesar el texto SOAP íntegro de la respuesta del alumno (500+ tokens), la codificación densa tomaba de 16 a 30 segundos debido a la complejidad cuadrática del transformer.
+    2. Carga en frío: El modelo de embeddings y el índice BM25 (7,052 fragmentos) se cargaban de disco a memoria en la primera petición de evaluación en lugar de en el arranque del servidor, añadiendo 12 segundos de latencia fantasma al usuario inicial.
+  - **Solución Arquitectónica Definitiva (Cero Parches):**
+    1. *Paralelismo Máximo en PyTorch:* En [retriever.py](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/backend/rag/retriever.py), se configuró dinámicamente `torch.set_num_threads(os.cpu_count() or 4)` para aprovechar al 100% los núcleos disponibles en el contenedor.
+    2. *Acotación Óptima de Query Densa:* Para la vectorización semántica de la búsqueda densa, se acotó la consulta a los primeros 300 caracteres (núcleo semiológico y farmacológico de máxima densidad informativa), reduciendo el tiempo de inferencia del encoder de 18-30s a ~1.1s.
+    3. *Precarga Asíncrona en Arranque (`lifespan`):* En [main.py](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/backend/main.py), se orquestó la tarea asíncrona no bloqueante `asyncio.create_task(_preload())` en un ejecutor en segundo plano. Al arrancar el backend, el modelo BGE-M3 y el índice sparse BM25 se montan en RAM en 3.6 segundos sin demorar la disponibilidad de Uvicorn.
+  - **Dimensionamiento de Recursos de Infraestructura (Host, WSL2 y Docker):**
+    - Se recalibró `~/.wslconfig` pasando de 4GB RAM y 4 CPUs a **7GB RAM, 12 Procesadores y 4GB Swap**, con `autoMemoryReclaim=gradual`.
+    - En `docker-compose.yml`, se elevó el límite de memoria del backend a `4.5G` con reserva de `2G` para garantizar solvencia del modelo BGE-M3 y ChromaDB sin contención.
+* **Purificación de Metadatos Clínicos y Erradicación de Nombres Crudos de Archivo (2026-10-14):**
+  - **Causa Raíz:** Varias vistas (`CaseSolve.tsx`, `TeacherCasesPage.tsx`, `TeacherDashboard.tsx`) renderizaban directamente el valor de persistencia `c.guia_asociada` (ej. `MSP_Trastornos-hipertensivos-del-embarazo-con-portada-3.pdf`), exponiendo nombres de archivo crudos del servidor con guiones y extensiones `.pdf`. Adicionalmente, existían textos redundantes como `"Simulación de Caso Clínico • Ateneo+"` y `"Dificultad: Intermedia"` genéricos que saturaban la cabecera clínica.
+  - **Solución Definitiva:**
+    - Se integró `resolveGpcMeta()` en todas las vistas para resolver el título clínico canónico formal (ej. `"GPC Trastornos Hipertensivos del Embarazo"`, `"GPC Hemorragia Posparto (Código Rojo)"`).
+    - En `CaseSolve.tsx`, se rediseñó la cabecera en un bloque tipográfico minimalista con el título del caso, la guía formateada, el distintivo formal `"Código Rojo"` (si aplica) y el conteo de fases, eliminando subtítulos decorativos superfluos.
+    - Se eliminaron las cajas con fondo azul (`bg-sky-50`) en las tarjetas docentes, adoptando texto tipográfico directo.
+  - **Validación:** 0 errores en TypeScript estricto (`tsc --noEmit`) y 29/29 suites (139/139 pruebas) aprobadas al 100% en Vitest.

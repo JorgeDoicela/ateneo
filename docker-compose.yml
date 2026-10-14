@@ -22,7 +22,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 3G
+          memory: 4.5G
+        reservations:
+          memory: 2G
     restart: unless-stopped
 
   frontend:

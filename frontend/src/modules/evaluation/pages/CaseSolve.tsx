@@ -22,6 +22,7 @@ import ClinicalStudyViewer from '../components/ClinicalStudyViewer';
 import ClinicalButton from '../../../core/ui/ClinicalButton';
 import useLearningTelemetry from '../../analytics/hooks/useLearningTelemetry';
 import { FEATURE_FLAGS } from '../../../core/config/featureFlags';
+import { resolveGpcMeta } from '../../cases/hooks/useCases';
 
 const DicomStudyViewer = lazy(() => import('../components/DicomStudyViewer'));
 
@@ -109,36 +110,42 @@ export default function CaseSolve() {
     <div className="space-y-6 animate-fadeIn pb-16">
       
       {/* 1. Header de Simulación */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80">
-        <div className="flex items-center gap-3">
-          <Link
-            to="/"
-            className="p-2 rounded-full hover:bg-slate-100 text-[#444746] transition-colors"
-            title="Volver al catálogo"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <div>
-            <div className="flex items-center gap-2 text-xs font-medium text-[#0b57d0]">
-              <Activity className="w-3.5 h-3.5" />
-              <span>Simulación de Caso Clínico • Ateneo+</span>
+      {(() => {
+        const gpcMeta = resolveGpcMeta(caso?.guia_asociada || caso?.gpc_referencia);
+        return (
+          <div className="flex items-start sm:items-center justify-between gap-4 pb-3 border-b border-slate-200/80">
+            <div className="flex items-center gap-3 min-w-0">
+              <Link
+                to="/"
+                className="p-2 -ml-2 rounded-full hover:bg-slate-100 text-[#444746] transition-colors shrink-0"
+                title="Volver al catálogo"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+              <div className="space-y-0.5 min-w-0">
+                <h1 className="text-lg sm:text-xl md:text-2xl font-normal text-[#1f1f1f] font-heading tracking-tight leading-snug">
+                  {caso?.titulo}
+                </h1>
+                <div className="flex flex-wrap items-center gap-2 text-xs">
+                  <span className={`font-semibold ${gpcMeta.isUrgent ? 'text-rose-700' : 'text-[#0b57d0]'}`}>
+                    {gpcMeta.label}
+                  </span>
+                  {gpcMeta.isUrgent && (
+                    <span className="text-[11px] font-semibold text-rose-700">
+                      • Código Rojo
+                    </span>
+                  )}
+                  {caso?.fases && (
+                    <span className="text-slate-400 font-normal">
+                      • {caso.fases.length} Fases
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
-            <h1 className="text-xl sm:text-2xl font-normal text-[#1f1f1f] font-heading tracking-tight">
-              {caso?.titulo}
-            </h1>
           </div>
-        </div>
-
-        <div className="flex items-center gap-2 self-start sm:self-auto text-xs">
-          <span className="font-semibold text-[#0b57d0]">
-            {caso?.guia_asociada || 'GPC Ecuador'}
-          </span>
-          <span className="text-slate-300 font-light">•</span>
-          <span className="text-[#747775] font-medium">
-            Dificultad: {caso?.dificultad || 'Intermedia'}
-          </span>
-        </div>
-      </div>
+        );
+      })()}
 
       {/* 2. Barra de Progreso Secuencial por Fases */}
       {isPhaseMode && !resultado && (

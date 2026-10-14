@@ -6,6 +6,7 @@ import collaborationApi from '../../collaboration/api/collaborationApi';
 import CoordinatorAnalytics from '../components/CoordinatorAnalytics';
 import ClinicalButton from '../../../core/ui/ClinicalButton';
 import type { ExtendedClinicalCase } from '../../cases/hooks/useCases';
+import { resolveGpcMeta } from '../../cases/hooks/useCases';
 
 export default function TeacherDashboard() {
   const [cases, setCases] = useState<ExtendedClinicalCase[]>([]);
@@ -117,10 +118,12 @@ export default function TeacherDashboard() {
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium bg-sky-50 text-[#0b57d0] px-2.5 py-1 rounded-full">
-                      {c.guia_asociada || c.gpc_referencia}
+                    <span className={`text-xs font-semibold ${resolveGpcMeta(c.guia_asociada || c.gpc_referencia).isUrgent ? 'text-rose-700' : 'text-[#0b57d0]'}`}>
+                      {resolveGpcMeta(c.guia_asociada || c.gpc_referencia).label}
                     </span>
-                    <span className="text-[11px] text-[#747775]">{c.dificultad || 'Intermedio'}</span>
+                    {c.fases && (
+                      <span className="text-[11px] text-[#747775] font-medium">{c.fases.length} Fases</span>
+                    )}
                   </div>
                   <h3 className="text-base font-normal text-[#1f1f1f] font-heading line-clamp-2">
                     {c.titulo}

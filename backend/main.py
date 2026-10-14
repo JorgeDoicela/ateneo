@@ -38,12 +38,20 @@ async def lifespan(app: FastAPI):
     init_database()
     logger.info("Servidor FastAPI de Ateneo iniciado correctamente.", extra={"action": "server_started"})
     import asyncio
-    def _preload():
+    async def _preload():
         try:
-            from rag.retriever import get_embedding_model
-            get_embedding_model()
+            # Ejecutar en thread pool para no bloquear el bucle de eventos asíncrono
+            loop = asyncio.get_running_loop()
+            def _load_sync():
+                from rag.retriever import get_embedding_model, get_bm25_index
+                get_embedding_model()
+                get_bm25_index()
+            await loop.run_in_executor(None, _load_sync)
+            logger.info("Precarga en segundo plano de embeddings y BM25 completada.", extra={"action": "preload_done"})
         except Exception as e:
             logger.error(f"Error al precargar modelo de embeddings: {e}", extra={"action": "embedding_preload_error"})
+
+    asyncio.create_task(_preload())
     from core.background_worker import background_worker
     background_worker.start()
     yield
