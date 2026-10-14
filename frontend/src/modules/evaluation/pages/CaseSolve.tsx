@@ -20,6 +20,7 @@ import PhaseFeedbackCard from '../components/PhaseFeedbackCard';
 import SocraticDebriefModal from '../components/SocraticDebriefModal';
 import ClinicalStudyViewer from '../components/ClinicalStudyViewer';
 import ClinicalButton from '../../../core/ui/ClinicalButton';
+import { ClinicalMarkdownRenderer } from '../../../core/ui/ClinicalMarkdownRenderer';
 import useLearningTelemetry from '../../analytics/hooks/useLearningTelemetry';
 import { FEATURE_FLAGS } from '../../../core/config/featureFlags';
 import { resolveGpcMeta } from '../../cases/hooks/useCases';
@@ -190,15 +191,19 @@ export default function CaseSolve() {
               </div>
               <h2 className="text-lg font-normal text-[#1f1f1f] font-heading leading-snug">
                 {isPhaseMode && activePhaseData
-                  ? activePhaseData.titulo_fase
+                  ? (activePhaseData.titulo_fase || activePhaseData.titulo)
                   : caso?.titulo}
               </h2>
             </div>
 
-            <div className="p-4 bg-[#f0f4f9] rounded-[20px] text-xs sm:text-sm text-[#1f1f1f] leading-relaxed whitespace-pre-wrap">
-              {isPhaseMode && activePhaseData
-                ? activePhaseData.escenario_clinico
-                : caso?.enunciado}
+            <div className="p-4 bg-[#f0f4f9] rounded-[20px] text-xs sm:text-sm text-[#1f1f1f] leading-relaxed">
+              <ClinicalMarkdownRenderer
+                content={
+                  isPhaseMode && activePhaseData
+                    ? (activePhaseData.escenario_clinico || [activePhaseData.descripcion, activePhaseData.datos_revelados].filter(Boolean).join('\n\n'))
+                    : caso?.enunciado
+                }
+              />
             </div>
 
             {/* Visor Diagnóstico de Estudio Paraclínico Acelerado (Estándar 2D y DICOM Multicorte) */}
@@ -263,16 +268,21 @@ export default function CaseSolve() {
             </div>
 
             {/* Pregunta Orientadora */}
-            <div className="p-4 bg-sky-50/60 rounded-[20px] border border-sky-100 space-y-1">
+            <div className="p-4 bg-sky-50/60 rounded-[20px] border border-sky-100 space-y-1.5">
               <span className="text-xs font-semibold text-[#0b57d0] flex items-center gap-1.5">
                 <HelpCircle className="w-3.5 h-3.5" />
                 Interrogante Formativa
               </span>
-              <p className="text-xs sm:text-sm text-[#1f1f1f] leading-relaxed font-medium">
-                {isPhaseMode && activePhaseData
-                  ? activePhaseData.pregunta_orientadora
-                  : caso?.pregunta || 'Plantee su juicio diagnóstico, exámenes prioritarios y esquema terapéutico de acuerdo a la GPC oficial de Ecuador.'}
-              </p>
+              <div className="text-xs sm:text-sm text-[#1f1f1f] leading-relaxed">
+                <ClinicalMarkdownRenderer
+                  compact
+                  content={
+                    (isPhaseMode && activePhaseData
+                      ? (activePhaseData.pregunta_orientadora || activePhaseData.pregunta_evaluativa || activePhaseData.pregunta_fase)
+                      : caso?.pregunta) || 'Plantee su juicio diagnóstico, exámenes prioritarios y esquema terapéutico de acuerdo a la GPC oficial de Ecuador.'
+                  }
+                />
+              </div>
             </div>
           </div>
 

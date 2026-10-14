@@ -1470,3 +1470,13 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
     - En `CaseSolve.tsx`, se rediseñó la cabecera en un bloque tipográfico minimalista con el título del caso, la guía formateada, el distintivo formal `"Código Rojo"` (si aplica) y el conteo de fases, eliminando subtítulos decorativos superfluos.
     - Se eliminaron las cajas con fondo azul (`bg-sky-50`) en las tarjetas docentes, adoptando texto tipográfico directo.
   - **Validación:** 0 errores en TypeScript estricto (`tsc --noEmit`) y 29/29 suites (139/139 pruebas) aprobadas al 100% en Vitest.
+* **Estandarización Universal de Casos Clínicos con Markdown (`ClinicalMarkdownRenderer`):**
+  - **Causa Raíz:** Los casos clínicos históricos en `backend/cases_data/cases.json` almacenaban bloques monolíticos de texto plano sin jerarquía visual. Al renderizarse en la interfaz, los signos vitales, paraclínicos, evolución temporal e interrogantes formativas se mostraban apelmazados en un solo párrafo, dificultando la lectura rápida y el discernimiento semiológico bajo presión.
+  - **Solución Arquitectónica Definitiva (Cero Parches):**
+    1. *Renderizado AST Reactivo (`ClinicalMarkdownRenderer.tsx`):* Integrado de forma universal en [CaseSolve.tsx](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/frontend/src/modules/evaluation/pages/CaseSolve.tsx) tanto para la presentación del cuadro clínico (`escenario_clinico` / `enunciado` / `datos_revelados`) como para la interrogante formativa (`pregunta_orientadora` / `pregunta_evaluativa` / `pregunta`), con soporte de modo `compact`.
+    2. *Estructuración de Datos Médicos en `cases.json`:* Se migraron y estructuraron los 10 casos clínicos del repositorio (incluyendo casos en multi-fase y casos directos) bajo sintaxis Markdown estándar:
+       - Resaltado semiológico en negrita (`**Signos vitales:**`, `**Laboratorio y Paraclínicos:**`, `**Examen físico:**`).
+       - Listas con viñetas para desglosar parámetros fisiológicos y constantes vitales por línea.
+       - Interrogantes formativas enumeradas (`1.`, `2.`, `3.`) para guiar la respuesta diagnóstica estructurada del alumno.
+    3. *Compatibilidad Retroactiva y Resiliencia en Tipos:* `CaseSolve.tsx` resuelve automáticamente las variantes de nombres de campos (`titulo_fase` o `titulo`, `escenario_clinico` o concatenación de `descripcion` y `datos_revelados`, `pregunta_orientadora` o `pregunta_evaluativa`), garantizando que cualquier caso futuro o importado desde base de datos se presente con el estándar visual óptimo sin errores de renderizado.
+
