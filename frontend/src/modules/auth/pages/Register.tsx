@@ -1,8 +1,9 @@
-import { useState, useMemo, FormEvent } from 'react';
+import { useState, useMemo, useEffect, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AlertCircle, CheckCircle2, Building2 } from 'lucide-react';
 import FloatingLabelInput from '../../../core/ui/FloatingLabelInput';
 import ClinicalButton from '../../../core/ui/ClinicalButton';
+import { useAuth } from '../../../context/AuthContext';
 import { authApi } from '../api/authApi';
 import type { RegisterRequest } from '../../../types';
 
@@ -25,12 +26,13 @@ const INSTITUTIONAL_DOMAINS: Record<string, DetectedTenant> = {
   },
   'ateneo.edu.ec': {
     codigo: 'ateneo_central',
-    nombre: 'Ateneo+ Sede Central (MSP Ecuador)',
+    nombre: 'Ateneo+ Sede Central (GPC Ecuador)',
     siglas: 'ATENEO+'
   }
 };
 
 export default function Register() {
+  const { user: currentUser, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   const [nombre, setNombre] = useState<string>('');
@@ -41,6 +43,19 @@ export default function Register() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [registeredSuccess, setRegisteredSuccess] = useState<string | null>(null);
+
+  // Redirección si ya existe una sesión autenticada activa
+  useEffect(() => {
+    if (currentUser && !authLoading) {
+      if (currentUser.rol === 'administrador') {
+        navigate('/admin', { replace: true });
+      } else if (currentUser.rol === 'docente') {
+        navigate('/teacher', { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
+    }
+  }, [currentUser, authLoading, navigate]);
 
   // Detección reactiva de sede institucional por dominio de correo
   const detectedTenant = useMemo<DetectedTenant | null>(() => {
@@ -140,7 +155,7 @@ export default function Register() {
             </div>
 
             <div className="hidden md:flex items-center gap-4 text-xs text-[#747775] pt-6 border-t border-slate-100">
-              <span>Normativa MSP 2026</span>
+              <span>Normativa GPC Ecuador</span>
               <span>•</span>
               <span>Registro Institucional</span>
             </div>

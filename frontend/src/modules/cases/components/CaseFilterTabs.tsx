@@ -81,8 +81,7 @@ export default function CaseFilterTabs({
             }`}
           >
             <Zap className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-            <span className="hidden sm:inline">Código Rojo / Urgencias</span>
-            <span className="sm:hidden">Código Rojo</span>
+            <span>Código Rojo / Urgencias</span>
           </button>
         </div>
 
@@ -114,7 +113,7 @@ export default function CaseFilterTabs({
       </div>
 
       {/* 2. Selector Desplegable de Especialidades en Dispositivos Móviles (< sm) */}
-      <div className="relative sm:hidden" ref={dropdownRef}>
+      <div className="relative block sm:hidden" ref={dropdownRef}>
         <button
           type="button"
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}

@@ -283,7 +283,7 @@ export function useCaseSolver(caseId?: string) {
         aciertos: allAciertos,
         omisiones: allOmisiones,
         competencias_deficientes: [],
-        retroalimentacion_general: `Simulación clínica multicomponente completada exitosamente a través de las ${totalPhases} fases normativas de la GPC del MSP.`,
+        retroalimentacion_general: `Simulación clínica multicomponente completada exitosamente a través de las ${totalPhases} fases normativas de la GPC de Ecuador.`,
       };
 
       setResultado(finalOutcome);

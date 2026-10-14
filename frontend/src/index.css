@@ -429,3 +429,18 @@
   transform-origin: right center;
 }
 
+/* Utilidades de Visibilidad Responsive Estricta (Blindaje contra desbordamientos) */
+@media (min-width: 640px) {
+  .sm\:hidden {
+    display: none !important;
+  }
+}
+@media (max-width: 639px) {
+  .sm\:flex,
+  .sm\:inline,
+  .sm\:block {
+    display: none !important;
+  }
+}
+
+

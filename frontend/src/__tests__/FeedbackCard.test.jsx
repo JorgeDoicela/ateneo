@@ -95,4 +95,14 @@ describe('Componente FeedbackCard (Ateneo+)', () => {
     expect(screen.getByText(/en 1.25s/i)).toBeInTheDocument();
     expect(screen.getByText(/2 estudio\(s\) paraclínico\(s\)/i)).toBeInTheDocument();
   });
+
+  it('debe renderizar retroalimentacion_general formateada con Markdown estructural', () => {
+    const mdResult = {
+      ...mockResult,
+      retroalimentacion_general: '## Plan Terapéutico\nIniciar infusión de **Sulfato de Magnesio**.'
+    };
+    render(<FeedbackCard result={mdResult} studentAnswer="Test" onReset={() => {}} />);
+    expect(screen.getByRole('heading', { level: 2, name: /Plan Terapéutico/i })).toBeInTheDocument();
+    expect(screen.getByText('Sulfato de Magnesio').tagName.toLowerCase()).toBe('strong');
+  });
 });

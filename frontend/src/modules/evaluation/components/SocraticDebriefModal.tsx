@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { MessageSquare, X, Send, BookOpen, AlertCircle, RefreshCw } from 'lucide-react';
 import { useSocraticDebriefStore } from '../store/useSocraticDebriefStore';
 import { StreamingMarkdownViewer } from './StreamingMarkdownViewer';
@@ -36,14 +37,14 @@ export const SocraticDebriefModal: React.FC = () => {
     await sendReplica(textToSend);
   };
 
-  return (
+  const modalContent = (
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="socratic-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn"
     >
-      <div className="bg-white w-full max-w-2xl rounded-[28px] shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
+      <div className="bg-white w-full max-w-2xl rounded-[28px] shadow-2xl flex flex-col max-h-[85vh] overflow-hidden animate-scaleUp">
         {/* Cabecera Institucional */}
         <div className="p-6 border-b border-slate-100 flex items-start justify-between">
           <div className="flex items-center space-x-3">
@@ -84,7 +85,7 @@ export const SocraticDebriefModal: React.FC = () => {
             <div className="text-center py-8 text-slate-500 text-sm">
               <p className="font-medium text-slate-700">Inicia el debate socrático con el tutor IA.</p>
               <p className="text-xs mt-1 text-slate-500 max-w-md mx-auto">
-                Explica tu razonamiento fisiopatológico o por qué omitiste este punto según la Guía de Práctica Clínica del MSP.
+                Explica tu razonamiento fisiopatológico o por qué omitiste este punto según la Guía de Práctica Clínica (GPC Ecuador).
               </p>
             </div>
           )}
@@ -116,7 +117,7 @@ export const SocraticDebriefModal: React.FC = () => {
                   <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center space-x-1.5 text-xs text-cyan-700">
                     <BookOpen className="w-3.5 h-3.5 shrink-0" />
                     <span>
-                      GPC MSP Ecuador ({turn.cita_normativa.guia}, Pág. {turn.cita_normativa.pagina})
+                      GPC Ecuador ({turn.cita_normativa.guia}, Pág. {turn.cita_normativa.pagina})
                     </span>
                   </div>
                 )}
@@ -173,6 +174,8 @@ export const SocraticDebriefModal: React.FC = () => {
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 };
 
 export default SocraticDebriefModal;

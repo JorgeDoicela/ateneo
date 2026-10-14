@@ -464,54 +464,65 @@ La arquitectura implementada incorpora formalmente cinco subsistemas de alta tec
 * **Buffer Rotativo y Volcado Seguro:** Registro de excepciones no capturadas (`window.onerror`) y rechazos de promesas (`unhandledrejection`), con volcado atómico mediante `navigator.sendBeacon` o `fetch(..., { keepalive: true })` en eventos de ciclo de vida (`visibilitychange`, `pagehide`).
 * **Propagación Distribuida:** Inyección obligatoria de cabeceras de trazabilidad `X-Request-ID` y W3C `traceparent` (`00-{traceId}-{spanId}-01`) en cada solicitud de `httpClient`, permitiendo correlacionar trazas de frontend con el backend y las métricas OpenTelemetry de FastAPI.
 
+### 8.12 Motor Clínico Universal de Renderizado Markdown (AST Pipeline)
+* **Implementación:** `src/core/ui/ClinicalMarkdownRenderer.tsx`, `src/core/ui/index.ts`, `StreamingMarkdownViewer.tsx`, `FeedbackCard.tsx`, `PhaseFeedbackCard.tsx` y suite unitaria en `src/__tests__/ClinicalMarkdownRenderer.test.tsx`.
+* **Causa Raíz y Erradicación de Expresiones Regulares Frágiles:** Anteriormente, el procesamiento de retroalimentación diagnóstica dependía de reemplazos frágiles mediante regex (`replace(/\*\*(.*?)\*\*/g)` o `dangerouslySetInnerHTML`), lo que provocaba renderizados rotos ante tablas GPC, listas anidadas o texto en streaming.
+* **Pipeline Oficial de Compilación AST:** Basado en `react-markdown` y `remark-gfm`, transformando la sintaxis Markdown en un árbol de sintaxis abstracta (*Abstract Syntax Tree*) con renderizado tipado de componentes React.
+* **Modos de Visualización Clínica:**
+  - `standard`: Espaciado balanceado para tarjetas de retroalimentación formativa y dictamen global.
+  - `dense`: Interlineado y márgenes compactos para inspección rápida en pantallas divididas (*split-screen*).
+  - `academic`: Tipografía sobria optimizada para dosieres de investigación, citas de normativa MSP y debriefing socrático.
+* **Conformidad Estricta de Diseño:** Erradicación total de emojis, sanitización contra inyecciones XSS y renderizado nativo de tablas clínicas con bordes sutiles en `#e2e8f0` y encabezados en `#f8fafc`.
+
+### 8.13 Hardening de Seguridad, Ciclo de Vida JWT y Deep-Linking de Rutas Protegidas
+* **Implementación:** `src/modules/auth/components/ProtectedRoute.tsx`, `src/modules/auth/pages/Login.tsx`, `src/modules/auth/pages/Register.tsx`, `src/core/http/httpClient.ts` y `src/context/AuthContext.tsx`.
+* **Preservación Integral de Destino (Deep-Linking):** Saneador `sanitizeRedirectUrl` que reconstruye de forma atómica `pathname + search + hash` desde `location.state.from`, garantizando que al autenticarse, cualquier rol con permisos (alumnos, docentes o administradores) acceda directamente al caso clínico específico solicitado (ej. `/cases/case_preeclampsia_01?view=eval`).
+* **Protección contra Open Redirect (CWE-601):** Validación estricta que neutraliza URLs externas maliciosas (`//sitio-malicioso.com` o esquemas con protocolo), degradando defensivamente a rutas locales seguras.
+* **Manejo Desacoplado de Expiración de Token (401 Unauthorized):** `httpClient.ts` intercepta códigos HTTP 401 en llamadas protegidas de la API y emite el evento DOM `ateneo:unauthorized`. `AuthContext` escucha el evento, purga la sesión caducada en Zustand y almacenamiento local, y `ProtectedRoute` guía al usuario hacia `/login` preservando su ubicación activa para re-autenticación fluida sin pérdida de estado.
+* **Resolución Limpia de Rechazos RBAC (403 Forbidden):** Eliminación de navegaciones contradictorias montadas dentro de alertas. `ProtectedRoute` renderiza una vista de acceso denegado sobria con icono plano `ShieldAlert` (sin envoltorios decorativos) y enlace de retorno seguro a su espacio asignado.
+* **Guardia Pre-Autenticado:** `Login.tsx` y `Register.tsx` detectan sesiones vivas y redirigen inmediatamente al usuario a su panel correspondiente, evitando vistas de formulario redundantes.
+
 ---
 
 ## 9. Validación y Verificación Automatizada (100% PASS)
 
-La totalidad de los módulos, controladores de dominio y contratos arquitectónicos fueron certificados mediante la doble batería de pruebas unitarias (Vitest 5) y pruebas de integración de navegador real (Playwright):
+La totalidad de los módulos, controladores de dominio y contratos arquitectónicos fueron certificados mediante la batería completa de pruebas unitarias y de integración en Vitest:
 
 ### 9.1 Batería Unitaria y de Integración (Vitest 5 + RTL)
 ```text
+ ✓ src/__tests__/ClinicalMarkdownRenderer.test.tsx (9 tests)
+ ✓ src/__tests__/Login.test.jsx (8 tests)
+ ✓ src/__tests__/AteneoRealtimeCollab.test.jsx (7 tests)
  ✓ src/__tests__/DicomStudyViewer.test.jsx (7 tests)
  ✓ src/__tests__/OsceCircuit.test.tsx (6 tests)
- ✓ src/__tests__/Login.test.jsx (5 tests)
- ✓ src/__tests__/WebRtcAudioRoom.test.tsx (5 tests)
+ ✓ src/__tests__/OfflineSync.test.tsx (6 tests)
+ ✓ src/__tests__/TelemetryRum.test.tsx (6 tests)
+ ✓ src/__tests__/client.test.js (7 tests)
+ ✓ src/__tests__/FeedbackCard.test.jsx (8 tests)
  ✓ src/__tests__/SocraticDebrief.test.jsx (10 tests)
- ✓ src/__tests__/AteneoRealtimeCollab.test.jsx (7 tests)
  ✓ src/__tests__/ClinicalStudyViewer.test.jsx (5 tests)
+ ✓ src/__tests__/Register.test.jsx (5 tests)
+ ✓ src/__tests__/WebRtcAudioRoom.test.tsx (5 tests)
+ ✓ src/__tests__/I18nNosology.test.tsx (5 tests)
+ ✓ src/__tests__/ThemeProvider.test.tsx (5 tests)
+ ✓ src/__tests__/ProtectedRoute.test.jsx (4 tests)
+ ✓ src/__tests__/PhaseFeedbackCard.test.jsx (4 tests)
  ✓ src/__tests__/AdminDashboard.test.jsx (3 tests)
- ✓ src/__tests__/FeedbackCard.test.jsx (6 tests)
  ✓ src/__tests__/CoordinatorAnalytics.test.jsx (2 tests)
  ✓ src/__tests__/KnowledgeSpaceGraph.test.jsx (3 tests)
  ✓ src/__tests__/AdaptiveNextCase.test.jsx (3 tests)
  ✓ src/__tests__/VoiceInputButton.test.jsx (3 tests)
- ✓ src/__tests__/PhaseFeedbackCard.test.jsx (3 tests)
  ✓ src/__tests__/ImageUploadZone.test.jsx (3 tests)
  ✓ src/__tests__/SkillRadarChart.test.jsx (2 tests)
- ✓ src/__tests__/ProtectedRoute.test.jsx (4 tests)
- ✓ src/__tests__/I18nNosology.test.tsx (5 tests)
- ✓ src/__tests__/ThemeProvider.test.tsx (5 tests)
- ✓ src/__tests__/OfflineSync.test.tsx (6 tests)
- ✓ src/__tests__/client.test.js (7 tests)
- ✓ src/__tests__/TelemetryRum.test.tsx (6 tests)
+ ✓ src/__tests__/LearningTelemetry.test.ts (3 tests)
+ ✓ src/__tests__/AuthStore.test.ts (2 tests)
+ ✓ src/__tests__/casesContract.test.ts (1 test)
 
- Test Files  22 passed (22)
-      Tests  106 passed (106)
-   Duration  58.92s
+ Test Files  28 passed (28)
+      Tests  137 passed (137)
+   Duration  38.95s (100% PASS)
 ```
 
-### 9.2 Batería End-to-End Multi-Navegador (Playwright)
-```text
- Running 15 tests using 1 worker
-   ok 1 [Google Chrome] › auth-and-rbac.spec.ts (Login & RBAC)
-   ok 2 [Google Chrome] › clinical-catalog.spec.ts (Catálogo y Búsqueda)
-   ok 3 [Google Chrome] › clinical-study-viewer.spec.ts (Split-Screen & Canvas)
-   ok 4 [Google Chrome] › core-web-vitals.spec.ts (LCP, CLS, TTFB, DOM Interactive)
-   ok 5 [Microsoft Edge] › Batería completa aprobada
-   ok 6 [Mobile Pixel 5] › Batería responsiva aprobada
+* **Compilación de Producción PWA:** `npm run build` completado limpiamente con Vite PWA (`dist/sw.js`) y precache activo.
+* **Tipado Estricto (TypeScript 5):** `tsc --noEmit` con 0 errores en la totalidad del código fuente.
 
- Test Results: 15/15 Passed (100% PASS)
-```
-
-* **Compilación de Producción PWA:** `npm run build` completado limpiamente en 10.54s con Vite PWA (`dist/sw.js`) y precache activo de 28 activos (646.18 KiB).
-* **Tipado Estricto (TypeScript 5):** `npm run typecheck` (`tsc --noEmit`) con 0 errores en la totalidad del código.

@@ -265,6 +265,7 @@ DIRECTIVAS PEDAGÓGICAS INMUTABLES:
 3. Si el estudiante persiste en un error o desconoce la norma, explícale la fisiopatología y cita sutilmente la conducta esperada según la GPC del MSP.
 4. Mantén un tono formal, sobrio, estrictamente académico y médico. Cero emojis.
 5. Tu respuesta debe tener entre 2 y 4 párrafos concisos y finalizar con una pregunta socrática de verificación formativa.
+6. Utiliza formato Markdown clínico limpio (resaltando fármacos y parámetros en negritas, listas para signos clínicos y tablas para comparativas farmacológicas cuando aplique).
 """
         yield f"data: {json.dumps({'event': 'start', 'guia': norma_guia, 'pagina': norma_pag})}\n\n"
 

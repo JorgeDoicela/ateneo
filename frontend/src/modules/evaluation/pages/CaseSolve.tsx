@@ -117,7 +117,7 @@ export default function CaseSolve() {
 
         <div className="flex items-center gap-2 self-start sm:self-auto text-xs">
           <span className="font-semibold text-[#0b57d0]">
-            {caso?.guia_asociada || 'GPC MSP'}
+            {caso?.guia_asociada || 'GPC Ecuador'}
           </span>
           <span className="text-slate-300 font-light">•</span>
           <span className="text-[#747775] font-medium">
@@ -250,7 +250,7 @@ export default function CaseSolve() {
               <p className="text-xs sm:text-sm text-[#1f1f1f] leading-relaxed font-medium">
                 {isPhaseMode && activePhaseData
                   ? activePhaseData.pregunta_orientadora
-                  : caso?.pregunta || 'Plantee su juicio diagnóstico, exámenes prioritarios y esquema terapéutico de acuerdo a la GPC oficial del MSP.'}
+                  : caso?.pregunta || 'Plantee su juicio diagnóstico, exámenes prioritarios y esquema terapéutico de acuerdo a la GPC oficial de Ecuador.'}
               </p>
             </div>
           </div>

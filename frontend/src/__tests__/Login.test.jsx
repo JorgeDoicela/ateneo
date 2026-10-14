@@ -6,12 +6,14 @@ import Login from '../modules/auth/pages/Login';
 import * as AuthContextModule from '../context/AuthContext';
 
 const mockNavigate = vi.fn();
+let mockLocationState = null;
+
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {
     ...actual,
     useNavigate: () => mockNavigate,
-    useLocation: () => ({ state: null })
+    useLocation: () => ({ state: mockLocationState })
   };
 });
 
@@ -21,9 +23,12 @@ describe('Página de Login (Google Accounts Pattern - Ateneo+)', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     mockLogin.mockReset();
+    mockNavigate.mockReset();
+    mockLocationState = null;
     vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({
       login: mockLogin,
-      user: null
+      user: null,
+      loading: false
     });
   });
 
@@ -118,5 +123,71 @@ describe('Página de Login (Google Accounts Pattern - Ateneo+)', () => {
 
     const emojiRegex = /[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u;
     expect(emojiRegex.test(container.textContent || '')).toBe(false);
+  });
+
+  it('debe redirigir a la ruta profunda del caso clínico solicitada si existe en state.from', async () => {
+    mockLocationState = { from: { pathname: '/cases/case_preeclampsia_01', search: '?view=eval' } };
+    mockLogin.mockResolvedValue({ id: 'usr_docente', rol: 'docente' });
+
+    render(
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText(/Correo electrónico/i), {
+      target: { value: 'docente@ateneo.edu.ec' }
+    });
+    fireEvent.click(screen.getByRole('button', { name: /Siguiente/i }));
+
+    fireEvent.change(screen.getByLabelText(/Contraseña de acceso/i), {
+      target: { value: 'Docente123!' }
+    });
+    fireEvent.click(screen.getByRole('button', { name: /Ingresar/i }));
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/cases/case_preeclampsia_01?view=eval');
+    });
+  });
+
+  it('debe neutralizar intentos de Open Redirect y redirigir a la raíz de forma segura', async () => {
+    mockLocationState = { from: '//sitio-malicioso.com' };
+    mockLogin.mockResolvedValue({ id: 'usr_01', rol: 'alumno' });
+
+    render(
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText(/Correo electrónico/i), {
+      target: { value: 'alumno@ateneo.edu.ec' }
+    });
+    fireEvent.click(screen.getByRole('button', { name: /Siguiente/i }));
+
+    fireEvent.change(screen.getByLabelText(/Contraseña de acceso/i), {
+      target: { value: 'Alumno123!' }
+    });
+    fireEvent.click(screen.getByRole('button', { name: /Ingresar/i }));
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/');
+    });
+  });
+
+  it('debe redirigir automáticamente si el usuario ya cuenta con una sesión activa', () => {
+    vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({
+      login: mockLogin,
+      user: { id: 'usr_admin', rol: 'administrador' },
+      loading: false
+    });
+
+    render(
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>
+    );
+
+    expect(mockNavigate).toHaveBeenCalledWith('/admin', { replace: true });
   });
 });

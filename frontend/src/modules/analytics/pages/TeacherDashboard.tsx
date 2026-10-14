@@ -51,7 +51,7 @@ export default function TeacherDashboard() {
         <div>
           <div className="flex items-center gap-2 text-xs font-medium text-[#0b57d0] mb-2">
             <UserCheck className="w-4 h-4" />
-            <span>Supervisión y Docencia Médica • MSP Ecuador</span>
+            <span>Supervisión y Docencia Médica • GPC Ecuador</span>
           </div>
           <h1 className="text-[28px] sm:text-[34px] font-normal tracking-tight text-[#1f1f1f] font-heading">
             Panel de Docentes y Tutores Clínicos

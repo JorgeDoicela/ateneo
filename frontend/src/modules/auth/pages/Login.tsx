@@ -1,12 +1,33 @@
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { AlertCircle, ChevronDown } from 'lucide-react';
 import FloatingLabelInput from '../../../core/ui/FloatingLabelInput';
 import ClinicalButton from '../../../core/ui/ClinicalButton';
 
+/**
+ * Validador y saneador de ruta de redirección interna (CWE-601 Open Redirect Protection).
+ * Soporta cadenas o instancias Location con query params y hashes.
+ */
+function sanitizeRedirectUrl(target: unknown): string | null {
+  if (!target) return null;
+  let path = '';
+  if (typeof target === 'string') {
+    path = target.trim();
+  } else if (typeof target === 'object' && target !== null && 'pathname' in target) {
+    const loc = target as { pathname?: string; search?: string; hash?: string };
+    path = `${loc.pathname || ''}${loc.search || ''}${loc.hash || ''}`.trim();
+  }
+
+  // Debe ser una ruta interna relativa estricta, sin prefijos de protocolo ni barra doble
+  if (path.startsWith('/') && !path.startsWith('//') && !path.startsWith('/login') && !path.startsWith('/register')) {
+    return path;
+  }
+  return null;
+}
+
 export default function Login() {
-  const { login } = useAuth();
+  const { login, user: currentUser, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -17,8 +38,23 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState<boolean>(false);
 
-  const locationState = location.state as { from?: { pathname?: string } } | null;
-  const from = locationState?.from?.pathname || '/';
+  const locationState = location.state as { from?: unknown } | null;
+  const redirectTarget = sanitizeRedirectUrl(locationState?.from);
+
+  // Redirección inmediata si ya existe una sesión autenticada activa
+  useEffect(() => {
+    if (currentUser && !authLoading) {
+      if (redirectTarget) {
+        navigate(redirectTarget, { replace: true });
+      } else if (currentUser.rol === 'administrador') {
+        navigate('/admin', { replace: true });
+      } else if (currentUser.rol === 'docente') {
+        navigate('/teacher', { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
+    }
+  }, [currentUser, authLoading, redirectTarget, navigate]);
 
   const handleNextStep = (e: FormEvent) => {
     e.preventDefault();
@@ -41,12 +77,16 @@ export default function Login() {
 
     try {
       const user = await login(email, password);
-      if (user.rol === 'administrador') {
+      // Si el usuario intentó acceder a un recurso específico (ej. un caso clínico),
+      // redirigirlo directamente a su destino solicitado
+      if (redirectTarget) {
+        navigate(redirectTarget);
+      } else if (user.rol === 'administrador') {
         navigate('/admin');
       } else if (user.rol === 'docente') {
         navigate('/teacher');
       } else {
-        navigate(from === '/login' ? '/' : from);
+        navigate('/');
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Contraseña incorrecta. Inténtalo de nuevo.';
@@ -78,12 +118,12 @@ export default function Login() {
                 Accede a tu cuenta
               </h1>
               <p className="text-sm font-normal text-[#444746] mt-2 leading-relaxed">
-                Simulador Clínico y Evaluación Médica basada en Guías de Práctica Clínica del MSP Ecuador
+                Simulador Clínico y Evaluación Médica basada en Guías de Práctica Clínica (GPC Ecuador)
               </p>
             </div>
 
             <div className="hidden md:flex items-center gap-4 text-xs text-[#747775] pt-6 border-t border-slate-100">
-              <span>Normativa MSP 2026</span>
+              <span>Normativa GPC Ecuador</span>
               <span>•</span>
               <span>Plataforma Académica</span>
             </div>

@@ -40,7 +40,7 @@ export default function CaseList() {
           Casos de Simulación Clínica
         </h1>
         <p className="text-sm font-normal text-[#444746] mt-1 max-w-2xl leading-relaxed">
-          Casos estructurados según Guías de Práctica Clínica del MSP Ecuador para la evaluación formativa del razonamiento clínico.
+          Casos estructurados según Guías de Práctica Clínica (GPC Ecuador) para la evaluación formativa del razonamiento clínico.
         </p>
       </div>
 

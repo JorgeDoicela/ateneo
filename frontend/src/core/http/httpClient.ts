@@ -87,6 +87,17 @@ export class HttpClient {
     if (!res.ok) {
       const errorData = (await res.json().catch(() => ({}))) as { detail?: string };
       const message = errorData.detail || `Error HTTP ${res.status}: ${res.statusText}`;
+
+      // Si el servidor responde 401 en peticiones protegidas (sesión caducada o token revocado),
+      // emitir evento desacoplado para limpiar credenciales locales y guiar al login
+      if (res.status === 401 && !normalizedEndpoint.includes('/auth/login') && !normalizedEndpoint.includes('/auth/register')) {
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('ateneo:unauthorized', {
+            detail: { endpoint: normalizedEndpoint, status: 401, error: message }
+          }));
+        }
+      }
+
       throw new HttpError(message, res.status, errorData);
     }
 

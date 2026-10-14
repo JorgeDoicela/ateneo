@@ -65,7 +65,8 @@ export default function Navbar() {
                 <img
                   src="/nombre.png"
                   alt="Ateneo+"
-                  className="h-[15px] sm:h-[18px] max-h-[18px] w-auto object-contain shrink-0 group-hover:opacity-95 transition-opacity"
+                  style={{ height: '18px', maxHeight: '18px', width: 'auto', display: 'block' }}
+                  className="h-[18px] max-h-[18px] w-auto object-contain shrink-0 group-hover:opacity-95 transition-opacity"
                 />
               </Link>
             </div>

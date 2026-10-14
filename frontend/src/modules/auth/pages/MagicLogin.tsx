@@ -356,7 +356,7 @@ export const MagicLogin: React.FC = () => {
 
       {/* Pie de página institucional */}
       <footer className="mt-8 text-center text-xs text-slate-400">
-        Sistema de Evaluación Médica y Razonamiento Clínico con IA &bull; MSP Ecuador
+        Sistema de Evaluación Médica y Razonamiento Clínico con IA &bull; GPC Ecuador
       </footer>
     </div>
   );

@@ -69,7 +69,7 @@ export default function PdfViewerModal({
                 {filename || `GPC Oficial: ${guiaId}`}
               </h3>
               <p className="text-xs text-[#747775] truncate">
-                {seccion ? `Sección: ${seccion} • ` : ''}Página {pagina} (Normativa MSP Ecuador)
+                {seccion ? `Sección: ${seccion} • ` : ''}Página {pagina} (Normativa GPC Ecuador)
               </p>
             </div>
           </div>
@@ -129,7 +129,7 @@ export default function PdfViewerModal({
           {pdfUrl && !loading && (
             <iframe
               src={pdfUrl}
-              title="Visor GPC Oficial MSP"
+              title="Visor GPC Oficial Ecuador"
               className="w-full h-full border-0"
             />
           )}

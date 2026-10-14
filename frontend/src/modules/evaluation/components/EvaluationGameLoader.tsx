@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Loader2, BookOpen, Lightbulb, ShieldCheck, Activity, LucideIcon } from 'lucide-react';
 
 interface ClinicalPearl {
@@ -9,7 +10,7 @@ interface ClinicalPearl {
 
 const CLINICAL_PEARLS: ClinicalPearl[] = [
   {
-    tag: "Normativa GPC MSP",
+    tag: "Normativa GPC Ecuador",
     icon: BookOpen,
     text: "Las Guías de Práctica Clínica del MSP Ecuador priorizan evidencias tipo A mediante sistema GRADE para orientar decisiones terapéuticas críticas."
   },
@@ -59,9 +60,13 @@ export default function EvaluationGameLoader({ hasImage = false }: EvaluationGam
   const currentPearl = CLINICAL_PEARLS[pearlIndex];
   const PearlIcon = currentPearl.icon;
 
-  return (
-    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
-      <div className="bg-white rounded-[28px] shadow-xl border-0 max-w-md w-full p-6 sm:p-8 space-y-6">
+  const content = (
+    <div 
+      className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div className="bg-white rounded-[28px] shadow-2xl border-0 max-w-md w-full p-6 sm:p-8 space-y-6 animate-scaleUp">
         
         {/* Encabezado Clínico Minimalista */}
         <div className="flex items-start justify-between">
@@ -72,7 +77,7 @@ export default function EvaluationGameLoader({ hasImage = false }: EvaluationGam
                 Evaluando Razonamiento Clínico
               </h3>
               <p className="text-xs text-[#747775] mt-0.5">
-                {hasImage ? "Procesamiento RAG Multimodal (Texto + Imagen)" : "Motor RAG Ateneo (GPC MSP Ecuador)"}
+                {hasImage ? "Procesamiento RAG Multimodal (Texto + Imagen)" : "Motor RAG Ateneo (GPC Ecuador)"}
               </p>
             </div>
           </div>
@@ -104,4 +109,6 @@ export default function EvaluationGameLoader({ hasImage = false }: EvaluationGam
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(content, document.body) : content;
 }

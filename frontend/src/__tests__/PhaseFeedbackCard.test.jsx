@@ -38,4 +38,14 @@ describe('Componente PhaseFeedbackCard (Resolución por Fases)', () => {
     fireEvent.click(button);
     expect(mockProceed).toHaveBeenCalledTimes(1);
   });
+
+  it('debe renderizar retroalimentacion_fase con soporte de Markdown estructural', () => {
+    const mdPhaseResult = {
+      ...mockPhaseResult,
+      retroalimentacion_fase: '### Conducta Inmediata\nAdministrar **Heparina de bajo peso molecular**.'
+    };
+    render(<PhaseFeedbackCard phaseResult={mdPhaseResult} currentPhase={1} onProceedNextPhase={() => {}} />);
+    expect(screen.getByRole('heading', { level: 3, name: /Conducta Inmediata/i })).toBeInTheDocument();
+    expect(screen.getByText('Heparina de bajo peso molecular').tagName.toLowerCase()).toBe('strong');
+  });
 });

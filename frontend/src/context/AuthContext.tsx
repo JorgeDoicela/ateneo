@@ -12,10 +12,22 @@ export interface AuthProviderProps {
  */
 export function AuthProvider({ children }: AuthProviderProps) {
   const verifyAuth = useAuthStore((state) => state.verifyAuth);
+  const logout = useAuthStore((state) => state.logout);
 
   useEffect(() => {
     verifyAuth();
-  }, [verifyAuth]);
+
+    const handleUnauthorized = () => {
+      logout();
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('ateneo:unauthorized', handleUnauthorized);
+      return () => {
+        window.removeEventListener('ateneo:unauthorized', handleUnauthorized);
+      };
+    }
+  }, [verifyAuth, logout]);
 
   return <>{children}</>;
 }

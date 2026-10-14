@@ -23,6 +23,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useSocraticDebriefStore } from '../store/useSocraticDebriefStore';
 import { EvaluationResult } from '../../../types';
 import useLearningTelemetry from '../../analytics/hooks/useLearningTelemetry';
+import { ClinicalMarkdownRenderer } from '../../../core/ui';
 
 interface EjeConfig {
   key: string;
@@ -172,7 +173,7 @@ export default function FeedbackCard({ result, studentAnswer = '', onReset }: Fe
           <div>
             <div className="flex items-center gap-2 text-xs font-medium text-[#0b57d0] mb-1">
               <ShieldCheck className="w-4 h-4" />
-              <span>Dictamen Formativo Contrastado con MSP</span>
+              <span>Dictamen Formativo Contrastado con GPC</span>
             </div>
             <h2 className="text-2xl font-normal text-[#1f1f1f] font-heading">
               Evaluación Diagnóstica
@@ -197,7 +198,7 @@ export default function FeedbackCard({ result, studentAnswer = '', onReset }: Fe
         </div>
 
         <div className="bg-[#f0f4f9] p-5 rounded-[20px] text-sm text-[#1f1f1f] leading-relaxed">
-          <p>{retroalimentacion_general}</p>
+          <ClinicalMarkdownRenderer content={retroalimentacion_general} />
         </div>
       </div>
 
@@ -232,7 +233,7 @@ export default function FeedbackCard({ result, studentAnswer = '', onReset }: Fe
                   Verificación de Fidelidad Normativa
                 </p>
                 <h3 className="text-sm font-semibold text-slate-900 font-heading">
-                  Fidelidad con la Guía de Práctica Clínica (MSP)
+                  Fidelidad con la Guía de Práctica Clínica (GPC Ecuador)
                 </h3>
               </div>
             </div>

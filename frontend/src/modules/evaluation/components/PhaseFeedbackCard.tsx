@@ -1,5 +1,6 @@
 import { ArrowRight, CheckCircle2, AlertTriangle, BookOpen, Sparkles, Activity } from "lucide-react";
 import { PhaseEvaluationResult } from "../../../types";
+import { ClinicalMarkdownRenderer } from "../../../core/ui";
 
 export interface PhaseFeedbackCardProps {
   phaseResult: PhaseEvaluationResult;
@@ -55,7 +56,7 @@ export default function PhaseFeedbackCard({
       {/* Retroalimentación General */}
       {retroalimentacion_fase && (
         <div className="p-4 rounded-[18px] bg-[#f0f4f9] text-sm text-[#1f1f1f] leading-relaxed">
-          {retroalimentacion_fase}
+          <ClinicalMarkdownRenderer content={retroalimentacion_fase} />
         </div>
       )}
 
@@ -107,7 +108,7 @@ export default function PhaseFeedbackCard({
         <div className="p-4 rounded-[18px] border border-blue-200/80 bg-blue-50/40 space-y-2">
           <div className="flex items-center gap-2 text-xs font-semibold text-blue-900">
             <BookOpen className="w-4 h-4 text-blue-700" />
-            <span>Fundamento Normativo (GPC MSP Ecuador)</span>
+            <span>Fundamento Normativo (GPC Ecuador)</span>
             {cita_normativa.pagina && (
               <span className="text-[11px] font-normal text-blue-700">• Página {cita_normativa.pagina}</span>
             )}
