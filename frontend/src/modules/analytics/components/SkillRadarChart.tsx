@@ -69,7 +69,7 @@ export default function SkillRadarChart({ competenciasPorEje = [] }: SkillRadarC
             Radar de Competencias Clínicas (4 Ejes GPC)
           </h3>
           <p className="text-xs text-[#747775]">
-            Consistencia frente a la norma oficial del MSP Ecuador
+            Consistencia frente a las Guías de Práctica Clínica (GPC Ecuador)
           </p>
         </div>
         <span className="text-xs font-medium bg-sky-50 text-[#0b57d0] px-3 py-1 rounded-full">

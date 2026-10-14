@@ -345,8 +345,7 @@ def generate_clinical_feedback_pdf(
         ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
     ]))
     elements.append(header_table)
-    elements.append(Spacer(1, 6))
-    elements.append(HRFlowable(width="100%", thickness=1.5, color=BRAND_BLUE, spaceBefore=2, spaceAfter=8))
+    elements.append(Spacer(1, 14))
 
     # 2. Tarjeta de Metadatos del Caso y del Estudiante
     meta_content = [
@@ -467,10 +466,10 @@ def generate_clinical_feedback_pdf(
     elements.append(grid_table)
     elements.append(Spacer(1, 8))
 
-    # 6. Fundamentación Normativa Oficial (GPC MSP Ecuador)
+    # 6. Fundamentación Normativa Oficial (GPC Ecuador)
     cita = eval_result.get("cita_normativa", {})
     if cita and cita.get("texto_relevante"):
-        elements.append(Paragraph("<b>Cita y Fundamentación Normativa (MSP Ecuador)</b>", section_heading))
+        elements.append(Paragraph("<b>Cita y Fundamentación Normativa (GPC Ecuador)</b>", section_heading))
         cita_content = [
             Paragraph(f"<b>Guía:</b> {cita.get('guia', guia_asociada)} | <b>Sección:</b> {cita.get('seccion', 'General')} | <b>Página Oficial:</b> {cita.get('pagina', 1)}", ParagraphStyle('CHead', parent=body_style, fontName='Helvetica-Bold', textColor=BRAND_BLUE)),
             Spacer(1, 3),

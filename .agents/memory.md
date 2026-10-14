@@ -15,7 +15,12 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
 * **Delimitación de Alcance Clínico y Terminológico (GPC Ecuador):**
   - Queda prohibido usar denominaciones genéricas o infladas como *"Normativa Oficial del MSP"* o *"Todo el MSP"*, que inducen al error de considerar que la plataforma abarca trámites o regulaciones administrativas ministeriales.
   - La nomenclatura canónica obligatoria es estrictamente: **Guías de Práctica Clínica (GPC Ecuador)** o **GPC Ecuador**.
-  - **Membretes y Reportes PDF:** Todo membrete, subtítulo y pie de dictamen (en `pdf_report_generator.py`) debe indicar estrictamente `SIMULADOR CLÍNICO MULTIMODAL & RAG FORMATIVO • GPC ECUADOR` y sellos criptográficos `ATENEO-GPC-*`, erradicando el rótulo general `MSP ECUADOR`.
+  - **Membretes y Reportes PDF:** Todo membrete, subtítulo y pie de dictamen (en `pdf_report_generator.py`) debe indicar estrictamente `SIMULADOR CLÍNICO MULTIMODAL & RAG FORMATIVO • GPC ECUADOR` y sellos criptográficos `ATENEO-GPC-*`, erradicando el rótulo general `MSP ECUADOR`. Se prohíben líneas divisorias artificiales (`HRFlowable`) debajo del título o membrete, manteniendo una separación pura por espaciado en blanco (`Spacer`) según el diseño clínico minimalista.
+* **Desactivación de Subida Externa de Estudios por el Estudiante (`v1.0.0`):**
+  - **Motivación Pedagógica y de IA:** Para la versión 1.0.0, la evaluación formativa se focaliza exclusivamente en la argumentación clínica estructurada del estudiante (metodología SOAP: Subjetivo, Objetivo, Análisis, Plan) contrastada vía RAG contra las GPC de Ecuador. Los estudios diagnósticos (Rx, ECG, TAC, laboratorio) son provistos de forma controlada por el caso clínico en el panel izquierdo (`ClinicalStudyViewer`, `DicomStudyViewer`).
+  - **Feature Flags Gobernadores (Cero Parches / Preservación de Código):**
+    - Frontend: `frontend/src/core/config/featureFlags.ts` (`FEATURE_FLAGS.ENABLE_STUDENT_IMAGE_UPLOAD = false`). Condiciona el renderizado de `ImageUploadZone` en `CaseSolve.tsx` y el envío de adjuntos en `useCaseSolver.ts`. El componente `ImageUploadZone.tsx` y sus pruebas unitarias se preservan intactos para futuras fases.
+    - Backend: `backend/core/config.py` (`enable_student_multimodal_uploads: bool = False`) y `backend/routers/evaluation.py` (omite la ingesta al pipeline multimodal si el flag está inactivo).
 * **Fuentes Únicas de Verdad:**
   - Backend: `backend/core/config.py` (`settings.app_name = "Ateneo+"`, `settings.app_version = "1.0.0"`).
   - Frontend: `frontend/package.json` (`"name": "ateneo-frontend"`, `"version": "1.0.0"`).

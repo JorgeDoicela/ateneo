@@ -9,10 +9,10 @@ class EjeClinico(str, Enum):
     SEGUIMIENTO = "seguimiento"
 
 class CitaNormativa(BaseModel):
-    guia: str = Field(default="GPC MSP Ecuador", description="Nombre de la Guía de Práctica Clínica del MSP Ecuador")
+    guia: str = Field(default="GPC Ecuador", description="Nombre de la Guía de Práctica Clínica (GPC Ecuador)")
     seccion: str = Field(default="General", description="Sección o capítulo relevante dentro de la norma")
     pagina: Optional[int] = Field(default=None, description="Número de página de la norma si está disponible")
-    texto_relevante: str = Field(default="Normativa oficial del Ministerio de Salud Pública.", description="Cita textual o fragmento normativo exacto de respaldo")
+    texto_relevante: str = Field(default="Guía de Práctica Clínica oficial de Ecuador.", description="Cita textual o fragmento normativo exacto de respaldo")
 
 class CompetenciaDeficiente(BaseModel):
     eje: EjeClinico = Field(..., description="Eje clínico: diagnóstico, tratamiento, prevención o seguimiento")

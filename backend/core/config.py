@@ -39,6 +39,11 @@ class AppSettings(BaseModel):
         default_factory=lambda: int(os.getenv("GEMINI_CIRCUIT_COOLDOWN_SECONDS", "300"))
     )
 
+    # Feature Flags Funcionales (Release v1.0.0)
+    enable_student_multimodal_uploads: bool = Field(
+        default_factory=lambda: os.getenv("ENABLE_STUDENT_MULTIMODAL_UPLOADS", "false").lower() in ("true", "1", "yes")
+    )
+
     # Persistencia de Datos Agnóstica (SQLite en dev / PostgreSQL en prod)
     database_url: str = Field(
         default_factory=lambda: os.getenv(

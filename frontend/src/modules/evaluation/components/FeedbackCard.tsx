@@ -141,9 +141,9 @@ export default function FeedbackCard({ result, studentAnswer = '', onReset }: Fe
     try {
       const blob = await evaluationApi.exportEvaluationPdf({
         case_id: result.case_id || 'case_preeclampsia_01',
-        case_title: result.case_title || 'Caso Clínico Formativo MSP',
+        case_title: result.case_title || 'Caso Clínico Formativo GPC',
         student_name: user?.nombre || 'Estudiante de Medicina',
-        guia_asociada: result.cita_normativa?.guia || 'Norma Oficial MSP Ecuador',
+        guia_asociada: result.cita_normativa?.guia || 'Norma Oficial GPC Ecuador',
         student_answer: studentAnswer || '',
         eval_result: result
       });

@@ -98,14 +98,14 @@ RESPUESTA DEL ESTUDIANTE:
 {respuesta_estudiante}
 </student_clinical_argument>
 
-FRAGMENTO RECUPERADO DE LA GUÍA DE PRÁCTICA CLÍNICA (MSP ECUADOR):
-Guía: GPC {chunk.get('guia_fuente', '').upper()} MSP Ecuador
+FRAGMENTO RECUPERADO DE LA GUÍA DE PRÁCTICA CLÍNICA (GPC ECUADOR):
+Guía: GPC {chunk.get('guia_fuente', '').upper()} (Ecuador)
 Sección: {chunk.get('seccion', 'General')}
 Página: {chunk.get('pagina', 'N/A')}
 Texto Normativo Oficial:
 "{chunk.get('texto', '')}"
 {instruccion_imagen}
-Evalúa el razonamiento clínico del estudiante comparándolo directamente contra la norma oficial del MSP proporcionada.
+Evalúa el razonamiento clínico del estudiante comparándolo directamente contra la Guía de Práctica Clínica oficial proporcionada.
 """
 
 
@@ -156,8 +156,8 @@ RESPUESTA DEL ESTUDIANTE EN ESTA FASE:
 {respuesta_estudiante}
 </student_clinical_argument>
 
-NORMATIVA OFICIAL DE RESPALDO (MSP ECUADOR):
-Guía: GPC {chunk.get('guia_fuente', '').upper()} MSP Ecuador
+NORMATIVA OFICIAL DE RESPALDO (GPC ECUADOR):
+Guía: GPC {chunk.get('guia_fuente', '').upper()} (Ecuador)
 Sección: {chunk.get('seccion', 'General')} (pág. {chunk.get('pagina', 'N/A')})
 Texto Oficial: "{chunk.get('texto', '')}"
 {instruccion_imagen}

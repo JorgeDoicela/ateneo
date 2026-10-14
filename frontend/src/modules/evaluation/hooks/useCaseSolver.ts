@@ -4,6 +4,7 @@ import casesApi from '../../cases/api/casesApi';
 import evaluationApi from '../api/evaluationApi';
 import offlineDb from '../../../core/storage/offlineDb';
 import { useClinicalCaseSessionStore } from '../../../core/stores/useClinicalCaseSessionStore';
+import { FEATURE_FLAGS } from '../../../core/config/featureFlags';
 import type { ClinicalCase, CasePhase, EvaluationResult, PhaseEvaluationResult } from '../../../types';
 
 /**
@@ -126,7 +127,7 @@ export function useCaseSolver(caseId?: string) {
         const res = await evaluationApi.evaluateDirect(
           caseId,
           respuesta,
-          imagenes.length > 0 ? imagenes : null
+          FEATURE_FLAGS.ENABLE_STUDENT_IMAGE_UPLOAD && imagenes.length > 0 ? imagenes : null
         );
         setResultado(res);
         await offlineDb.cacheEvaluationResult(caseId, res);

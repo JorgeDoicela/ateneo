@@ -205,7 +205,7 @@ class PromptSecurityGuard:
             aciertos=[],
             omisiones=[
                 f"Violación de Integridad Académica y Ética Médica: Se detectó un intento deliberado de manipulación de directivas del evaluador ({attack_type or 'inyección de prompt'}){detalle}.",
-                "Ausencia de argumentación clínica fundamentada en la Guía de Práctica Clínica del MSP Ecuador."
+                "Ausencia de argumentación clínica fundamentada en la Guía de Práctica Clínica (GPC Ecuador)."
             ],
             competencias_deficientes=[
                 {
@@ -290,7 +290,7 @@ class PromptSecurityGuard:
             "ADVERTENCIA PEDAGÓGICA Y ÉTICA:\n\n"
             "Se ha detectado un intento de alterar las instrucciones del diálogo socrático. "
             "El simulador Ateneo+ exige una discusión profesional centrada exclusivamente en la evidencia clínica "
-            "y en la Guía de Práctica Clínica del MSP Ecuador. Por favor, formula una réplica o justificación clínica legítima."
+            "y en las Guías de Práctica Clínica (GPC Ecuador). Por favor, formula una réplica o justificación clínica legítima."
         )
         for palabra in mensaje.split(" "):
             yield f"data: {palabra} \n\n"

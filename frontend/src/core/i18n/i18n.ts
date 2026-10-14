@@ -9,7 +9,7 @@ export const I18N_STORAGE_KEY = 'ateneo_locale';
 export const NOSOLOGY_STORAGE_KEY = 'ateneo_nosology_region';
 
 export const SUPPORTED_LOCALES: { code: SupportedLocale; label: string; region: string }[] = [
-  { code: 'es-EC', label: 'Español (Ecuador)', region: 'MSP Ecuador' },
+  { code: 'es-EC', label: 'Español (Ecuador)', region: 'GPC Ecuador' },
   { code: 'es-PE', label: 'Español (Perú)', region: 'MINSA Perú' },
   { code: 'en-US', label: 'English (US / Global)', region: 'WHO / PAHO' }
 ];

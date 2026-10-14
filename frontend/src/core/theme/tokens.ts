@@ -74,7 +74,7 @@ export const TENANT_THEMES: Record<TenantId, TenantTheme> = {
       cardRadius: '28px',
       textOnPrimary: '#ffffff'
     },
-    gpcNormativaDefault: 'Guías de Práctica Clínica MSP Ecuador',
+    gpcNormativaDefault: 'Guías de Práctica Clínica (GPC Ecuador)',
     ratioContrasteWcag: Number(calculateContrastRatio('#2563eb', '#ffffff').toFixed(2))
   },
   uce: {

@@ -106,9 +106,9 @@ async def export_pdf_history_alias(req: Dict[str, Any]):
 
         pdf_buffer = generate_clinical_feedback_pdf(
             student_name=req.get("student_name") or req.get("estudiante_nombre") or "Estudiante de Medicina",
-            case_title=req.get("case_title") or "Caso Clínico MSP",
+            case_title=req.get("case_title") or "Caso Clínico Formativo GPC",
             case_id=req.get("case_id") or "caso_evaluado",
-            guia_asociada=req.get("guia_asociada") or "Norma Oficial MSP Ecuador",
+            guia_asociada=req.get("guia_asociada") or "Norma Oficial GPC Ecuador",
             eval_result=eval_result,
             student_answer=req.get("student_answer") or ""
         )
@@ -139,7 +139,7 @@ async def export_cohort_pdf_async(
         cohorte_id=cohorte_id,
         tenant_id=resolved_tenant
     )
-    tenant_name = "Facultad de Medicina (MSP Ecuador)" if resolved_tenant == "tenant_default" else f"Institución {resolved_tenant}"
+    tenant_name = "Facultad de Medicina (GPC Ecuador)" if resolved_tenant == "tenant_default" else f"Institución {resolved_tenant}"
     filename = f"Informe_Cohorte_{cohorte_id}.pdf"
 
     task_id = await background_worker.submit_task(

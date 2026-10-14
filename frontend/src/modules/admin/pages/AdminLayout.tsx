@@ -15,7 +15,7 @@ export const AdminLayout: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold text-purple-700 uppercase tracking-wider mb-1.5">
             <ShieldCheck className="w-4 h-4" />
-            <span>Consola de Gestión y Seguridad • MSP Ecuador</span>
+            <span>Consola de Gestión y Seguridad • GPC Ecuador</span>
           </div>
           <h1 className="text-[28px] sm:text-[34px] font-normal tracking-tight text-[#1f1f1f] font-heading">
             Panel de Administración

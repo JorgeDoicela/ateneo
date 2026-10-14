@@ -16,6 +16,7 @@ from core.background_worker import background_worker, TaskStatus
 from models.schemas import EvaluationResult, PhaseEvaluationResult
 from auth.security import get_optional_current_user, UserResponse
 from services.pdf_report_generator import generate_clinical_feedback_pdf
+from core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ class ExportPdfRequest(BaseModel):
     case_id: str
     case_title: Optional[str] = "Caso Clínico"
     student_name: Optional[str] = "Estudiante de Ciencias de la Salud"
-    guia_asociada: Optional[str] = "MSP Ecuador"
+    guia_asociada: Optional[str] = "GPC Ecuador"
     student_answer: Optional[str] = ""
     eval_result: Dict[str, Any]
 
@@ -245,15 +246,17 @@ async def evaluate_response(
     if not respuesta_estudiante.strip():
         raise HTTPException(status_code=400, detail="La respuesta del estudiante no puede estar vacía.")
 
-    # Construir lista de (bytes, mime_type) para fusión multimodal
+    # Construir lista de (bytes, mime_type) para fusión multimodal si está habilitada por configuración
     imagenes_bytes_list: List[tuple] = []
-    if imagenes:
+    if settings.enable_student_multimodal_uploads and imagenes:
         for img_file in imagenes:
             if img_file and img_file.filename:
                 img_bytes = await img_file.read()
                 img_mime = img_file.content_type or "image/png"
                 imagenes_bytes_list.append((img_bytes, img_mime))
                 logger.info("Estudio multimodal recibido: %s (%s, %d bytes)", img_file.filename, img_mime, len(img_bytes))
+    elif imagenes:
+        logger.info("Carga de estudios multimodal por estudiante deshabilitada en v1.0.0; omitiendo análisis de adjuntos externos.")
 
     target_user_id = current_user.id if current_user else "usr_alumno_001"
     target_user_email = current_user.email if current_user else "alumno@ateneo.edu.ec"
@@ -301,12 +304,14 @@ async def evaluate_phase_response(
         raise HTTPException(status_code=400, detail="La respuesta del estudiante en esta fase no puede estar vacía.")
 
     imagenes_bytes_list: List[tuple] = []
-    if imagenes:
+    if settings.enable_student_multimodal_uploads and imagenes:
         for img_file in imagenes:
             if img_file and img_file.filename:
                 img_bytes = await img_file.read()
                 img_mime = img_file.content_type or "image/png"
                 imagenes_bytes_list.append((img_bytes, img_mime))
+    elif imagenes:
+        logger.info("Carga de estudios multimodal por estudiante deshabilitada en v1.0.0; omitiendo análisis de adjuntos externos.")
 
     try:
         resultado_fase = evaluation_service.evaluate_phase(

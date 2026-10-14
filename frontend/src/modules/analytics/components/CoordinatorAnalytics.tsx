@@ -133,7 +133,7 @@ export default function CoordinatorAnalytics() {
         </h3>
 
         <p className="text-sm text-[#444746] max-w-3xl leading-relaxed">
-          Detección automática de brechas de aprendizaje acumuladas basada en la evaluación RAG contra la norma oficial del MSP Ecuador. Permite realizar intervenciones curriculares específicas antes del examen de habilitación profesional.
+          Detección automática de brechas de aprendizaje acumuladas basada en la evaluación RAG contra las Guías de Práctica Clínica (GPC Ecuador). Permite realizar intervenciones curriculares específicas antes del examen de habilitación profesional.
         </p>
 
         <div className="flex flex-wrap items-center gap-6 pt-4 border-t border-slate-100 text-xs text-[#747775]">

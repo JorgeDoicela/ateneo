@@ -21,6 +21,7 @@ import SocraticDebriefModal from '../components/SocraticDebriefModal';
 import ClinicalStudyViewer from '../components/ClinicalStudyViewer';
 import ClinicalButton from '../../../core/ui/ClinicalButton';
 import useLearningTelemetry from '../../analytics/hooks/useLearningTelemetry';
+import { FEATURE_FLAGS } from '../../../core/config/featureFlags';
 
 const DicomStudyViewer = lazy(() => import('../components/DicomStudyViewer'));
 
@@ -291,12 +292,14 @@ export default function CaseSolve() {
                 />
               </div>
 
-              {/* Subida de Estudios Diagnósticos Multimodales */}
-              <ImageUploadZone
-                files={imagenes}
-                onChange={setImagenes}
-                disabled={evaluating}
-              />
+              {/* Subida de Estudios Diagnósticos Multimodales (Gobernado por Feature Flag) */}
+              {FEATURE_FLAGS.ENABLE_STUDENT_IMAGE_UPLOAD && (
+                <ImageUploadZone
+                  files={imagenes}
+                  onChange={setImagenes}
+                  disabled={evaluating}
+                />
+              )}
 
               {error && (
                 <div className="p-3.5 bg-rose-50 border border-rose-200/80 rounded-[16px] flex items-start gap-2.5 text-xs text-rose-800 animate-fadeIn">
@@ -331,7 +334,7 @@ export default function CaseSolve() {
 
       {/* Loader de Juego Evaluador */}
       {evaluating && (
-        <EvaluationGameLoader hasImage={imagenes.length > 0} />
+        <EvaluationGameLoader hasImage={FEATURE_FLAGS.ENABLE_STUDENT_IMAGE_UPLOAD && imagenes.length > 0} />
       )}
 
       {/* Modal de Debate y Debriefing Socrático Multiturno */}

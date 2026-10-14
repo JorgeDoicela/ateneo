@@ -248,7 +248,7 @@ CASO CLÍNICO:
 OMISIÓN / PUNTO CLÍNICO EN DISCUSIÓN:
 "{omision_clinica}"
 
-NORMA DEL MINISTERIO DE SALUD PÚBLICA (MSP ECUADOR):
+NORMATIVA DE LA GUÍA DE PRÁCTICA CLÍNICA (GPC ECUADOR):
 "{norma_texto}" (GPC: {norma_guia}, Pág. {norma_pag})
 
 RÉPLICA O ARGUMENTO DEL ESTUDIANTE:
@@ -262,7 +262,7 @@ HISTORIAL DE DIÁLOGO PREVIO:
 DIRECTIVAS PEDAGÓGICAS INMUTABLES:
 1. No reveles la respuesta diagnóstica o farmacológica definitiva directamente de forma masticada.
 2. Si el estudiante se acerca al criterio de la GPC, valida su esfuerzo y hazle una pregunta de precisión clínica (dosis, monitorización, criterios de severidad o contraindicaciones).
-3. Si el estudiante persiste en un error o desconoce la norma, explícale la fisiopatología y cita sutilmente la conducta esperada según la GPC del MSP.
+3. Si el estudiante persiste en un error o desconoce la norma, explícale la fisiopatología y cita sutilmente la conducta esperada según la GPC de Ecuador.
 4. Mantén un tono formal, sobrio, estrictamente académico y médico. Cero emojis.
 5. Tu respuesta debe tener entre 2 y 4 párrafos concisos y finalizar con una pregunta socrática de verificación formativa.
 6. Utiliza formato Markdown clínico limpio (resaltando fármacos y parámetros en negritas, listas para signos clínicos y tablas para comparativas farmacológicas cuando aplique).
@@ -272,7 +272,7 @@ DIRECTIVAS PEDAGÓGICAS INMUTABLES:
         if not settings.gemini_api_key.strip():
             fallback_tokens = [
                 "Has considerado adecuadamente la fisiopatología de base. ",
-                "Sin embargo, según la Guía de Práctica Clínica del MSP Ecuador, ",
+                "Sin embargo, según la Guía de Práctica Clínica (GPC Ecuador), ",
                 f"en {case.titulo} es imperativo valorar los criterios de severidad hemodinámica antes de escalar el tratamiento. ",
                 "¿Qué parámetros específicos de monitorización priorizarías en las primeras horas para justificar tu conducta?"
             ]
