@@ -265,14 +265,18 @@ def test_socratic_turn_endpoint():
 
 
 def test_collaboration_websocket_endpoint():
-    res_auth = client.post("/api/auth/login", json={
+    from fastapi.testclient import TestClient
+    from main import app
+    ws_client = TestClient(app)
+
+    res_auth = ws_client.post("/api/auth/login", json={
         "email": "docente@ateneo.edu.ec",
         "password": "Docente123!"
     })
     token = res_auth.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
 
-    res_create = client.post("/api/ateneo/create", data={
+    res_create = ws_client.post("/api/ateneo/create", data={
         "case_id": "case_preeclampsia_01",
         "docente_id": "usr_docente_001",
         "docente_nombre": "Dr. Carlos Andrade"
@@ -280,7 +284,7 @@ def test_collaboration_websocket_endpoint():
     assert res_create.status_code == 200
     room_code = res_create.json()["room_code"]
 
-    with client.websocket_connect(f"/api/ateneo/ws/{room_code}") as websocket:
+    with ws_client.websocket_connect(f"/api/ateneo/ws/{room_code}") as websocket:
         initial_msg = websocket.receive_json()
         assert initial_msg["type"] == "ROOM_STATE_UPDATED"
         assert initial_msg["payload"]["room_code"] == room_code

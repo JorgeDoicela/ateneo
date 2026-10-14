@@ -22,6 +22,10 @@ class AppSettings(BaseModel):
     Configuración centralizada y tipada del sistema Ateneo+.
     Valida variables de entorno al arranque (Fail-Fast) según el estándar 12-Factor App.
     """
+    # Identidad y Metadatos del Sistema
+    app_name: str = Field(default_factory=lambda: os.getenv("APP_NAME", "Ateneo+"))
+    app_version: str = Field(default_factory=lambda: os.getenv("APP_VERSION", "1.0.0"))
+
     # LLM & IA Resilient Gateway
     gemini_api_key: str = Field(default_factory=lambda: os.getenv("GEMINI_API_KEY", ""))
     gemini_primary_model: str = Field(default_factory=lambda: os.getenv("GEMINI_MODEL", "gemini-3.8-flash"))

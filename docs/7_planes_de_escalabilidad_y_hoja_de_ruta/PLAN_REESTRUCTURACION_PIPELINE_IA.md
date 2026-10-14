@@ -1,7 +1,7 @@
-# Plan Maestro de Reestructuración del Pipeline de IA — Ateneo+ v2
+# Plan Maestro de Reestructuración del Pipeline de IA — Pipeline v2 (Motor de Inferencia de Ateneo+ v1.0.0)
 
 **Estado:** Aprobado — Listo para Ejecución  
-**Versión:** 2.0 (Depurada para Investigación Q1)  
+**Versión del Pipeline:** 2.0 (Motor de Inferencia Científico para Ateneo+ v1.0.0)  
 **Fecha:** 2026-10-03  
 **Hardware de Cómputo Asignado:** NVIDIA A100 (40 GB VRAM)  
 **Alcance:** Reconstrucción integral del pipeline de extracción normativa, indexación vectorial, re-entrenamiento de embeddings BGE-M3 y despliegue de inferencia multimodal soberana para publicación en revistas de primer cuartil (Q1: *IEEE JBHI, Lancet Digital Health, Computers & Education*).

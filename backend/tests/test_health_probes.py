@@ -36,7 +36,7 @@ def test_health_root_contract(health_client):
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "ok"
-    assert data["project"] == "Ateneo"
+    assert data["project"] == "Ateneo+"
     assert data["version"] == "1.0.0"
     assert "probes" in data
     assert data["probes"]["live"] == "/health/live"

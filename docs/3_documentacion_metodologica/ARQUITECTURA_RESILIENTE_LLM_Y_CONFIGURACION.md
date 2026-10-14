@@ -1,6 +1,6 @@
-# Arquitectura de Resiliencia de IA y Centralización de Configuración (Docs-as-Code)
+# Arquitectura de Resiliencia de IA y Centralización de Configuración — Ateneo+ v1.0.0
 
-Este documento técnico formaliza el diseño, implementación y ciclo de vida del subsistema de inferencia resiliente (**ResilientLLMGateway**) y el esquema de configuración bajo el paradigma **12-Factor App (Single Source of Truth)** en la plataforma Ateneo+.
+Este documento técnico formaliza el diseño, implementación y ciclo de vida del subsistema de inferencia resiliente (**ResilientLLMGateway**) y el esquema de configuración bajo el paradigma **12-Factor App (Single Source of Truth)** en la plataforma **Ateneo+ (v1.0.0)**.
 
 ---
 

@@ -38,8 +38,8 @@ async def health_root():
     """
     return {
         "status": "ok",
-        "project": "Ateneo",
-        "version": "1.0.0",
+        "project": settings.app_name,
+        "version": settings.app_version,
         "probes": {
             "live": "/health/live",
             "ready": "/health/ready",

@@ -1,6 +1,6 @@
-# Manual de Pruebas Automatizadas, Suites de Integración y Benchmarks
+# Manual de Pruebas Automatizadas, Suites de Integración y Benchmarks — Ateneo+ v1.0.0
 
-Este documento describe la arquitectura de pruebas automatizadas de **Ateneo+**, los comandos para su ejecución bajo demanda (en local y Docker) y la interpretación de los artefactos generados para el artículo científico.
+Este documento describe la arquitectura de pruebas automatizadas de **Ateneo+ (v1.0.0)**, los comandos para su ejecución bajo demanda (en local y Docker) y la interpretación de los artefactos generados para el artículo científico.
 
 ---
 
@@ -27,7 +27,7 @@ El sistema organiza sus pruebas en 4 niveles complementarios que garantizan la i
 │ • test_api_endpoints.py (Rutas /auth, /cases, /history, /adaptive, /rooms)  │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ NIVEL 1: PRUEBAS DE FRONTEND, TIEMPO REAL Y E2E                             │
-│ • Vitest + React Testing Library (23 suites, 111 tests unitarios aprobados)  │
+│ • Vitest + React Testing Library (26 suites, 122 tests unitarios aprobados)  │
 │ • Playwright E2E Multi-Navegador (15 tests en Chrome, Edge y Mobile Pixel 5)│
 │ • test_multimodal_and_cases.py (10 casos ChromaDB, PDF ReportLab SHA-256)   │
 └─────────────────────────────────────────────────────────────────────────────┘

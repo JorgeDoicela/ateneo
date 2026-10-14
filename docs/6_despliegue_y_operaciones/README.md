@@ -1,6 +1,6 @@
-# Módulo 6: Despliegue y Operaciones
+# Módulo 6: Despliegue y Operaciones — Ateneo+ v1.0.0
 
-Este directorio contiene las guías técnicas, runbooks y procedimientos operativos para el despliegue, configuración de red y puesta en marcha de la plataforma Ateneo+.
+Este directorio contiene las guías técnicas, runbooks y procedimientos operativos para el despliegue, configuración de red y puesta en marcha de la plataforma **Ateneo+ (v1.0.0)**.
 
 ---
 

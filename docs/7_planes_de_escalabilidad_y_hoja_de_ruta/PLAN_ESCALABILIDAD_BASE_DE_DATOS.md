@@ -1,6 +1,6 @@
-# Plan de Arquitectura y Profesionalización de la Base de Datos (Ateneo+ DB)
+# Plan de Arquitectura y Profesionalización de la Base de Datos — Ateneo+ v1.0.0 (Ateneo+ DB)
 
-Este documento establece el diagnóstico forense, el modelo entidad-relación normalizado y la hoja de ruta técnica paso a paso para elevar la capa de persistencia de **Ateneo+** a estándares de producción institucional (+10 años en ingeniería de software), soportando tanto desarrollo local en SQLite WAL como despliegues de alta disponibilidad en PostgreSQL.
+Este documento establece el diagnóstico forense, el modelo entidad-relación normalizado y la hoja de ruta técnica paso a paso para elevar la capa de persistencia de **Ateneo+ (v1.0.0)** a estándares de producción institucional (+10 años en ingeniería de software), soportando tanto desarrollo local en SQLite WAL como despliegues de alta disponibilidad en PostgreSQL.
 
 ---
 

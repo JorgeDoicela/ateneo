@@ -1,6 +1,6 @@
-# Arquitectura Modular del Frontend: Feature-Driven Vertical Slices y Core Shared (Docs-as-Code)
+# Arquitectura Modular del Frontend: Feature-Driven Vertical Slices — Ateneo+ v1.0.0
 
-Este documento técnico especifica la arquitectura, partición de módulos de dominio, desacoplamiento mediante controladores custom hooks, sistema de diseño clínico y optimización de rendimiento PWA implementados en el cliente web de Ateneo+.
+Este documento técnico especifica la arquitectura, partición de módulos de dominio, desacoplamiento mediante controladores custom hooks, sistema de diseño clínico y optimización de rendimiento PWA implementados en el cliente web de **Ateneo+ (v1.0.0)**.
 
 ---
 

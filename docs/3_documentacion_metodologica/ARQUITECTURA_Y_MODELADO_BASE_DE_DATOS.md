@@ -1,6 +1,6 @@
-# Arquitectura y Modelado de la Base de Datos Relacional (Docs-as-Code)
+# Arquitectura y Modelado de la Base de Datos Relacional — Ateneo+ v1.0.0
 
-Este documento especifica el modelo entidad-relación, restricciones relacionales, índices de rendimiento y mecanismos de transaccionalidad ACID implementados en la base de datos de la plataforma Ateneo+.
+Este documento especifica el modelo entidad-relación, restricciones relacionales, índices de rendimiento y mecanismos de transaccionalidad ACID implementados en la base de datos de la plataforma **Ateneo+ (v1.0.0)**.
 
 ---
 

@@ -1,6 +1,6 @@
-# Plan Maestro de Arquitectura, Robustez y Escalabilidad del Backend (Ateneo+ API)
+# Plan Maestro de Arquitectura, Robustez y Escalabilidad del Backend — Ateneo+ v1.0.0 (FastAPI API)
 
-Este documento define la auditoría integral, el diagnóstico de capacidad y la hoja de ruta técnica paso a paso para consolidar el backend de **Ateneo+** bajo estándares de ingeniería de software senior (+10 años en producción), garantizando su escalamiento ordenado desde la etapa actual hacia una plataforma clínica de alta concurrencia universitaria y hospitalaria.
+Este documento define la auditoría integral, el diagnóstico de capacidad y la hoja de ruta técnica paso a paso para consolidar el backend de **Ateneo+ (v1.0.0)** bajo estándares de ingeniería de software senior (+10 años en producción), garantizando su escalamiento ordenado desde la etapa actual hacia una plataforma clínica de alta concurrencia universitaria y hospitalaria.
 
 ---
 

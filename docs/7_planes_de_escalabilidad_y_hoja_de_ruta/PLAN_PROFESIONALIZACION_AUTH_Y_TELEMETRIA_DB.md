@@ -1,6 +1,6 @@
-# Plan Maestro End-to-End: Ciclo de Vida de Identidad (Login/Register), Auditoría de Sesiones y Telemetría Clínica (Base de Datos + Backend + Frontend)
+# Plan Maestro End-to-End: Ciclo de Vida de Identidad, Sesiones y Telemetría Clínica — Ateneo+ v1.0.0
 
-Este documento establece la especificación arquitectónica integral de punta a punta (End-to-End) para profesionalizar la plataforma **Ateneo+**. Articula de forma simétrica las tres capas del sistema: **Persistencia (Base de Datos relacional)**, **Backend (FastAPI + Pydantic v2 + SQLAlchemy 2.0)** y **Frontend (React 18 + TypeScript 5 estricto + TanStack Query v5 + Zustand v5 + Zod v4 + Tailwind CSS institucional)**.
+Este documento establece la especificación arquitectónica integral de punta a punta (End-to-End) para profesionalizar la plataforma **Ateneo+ (v1.0.0)**. Articula de forma simétrica las tres capas del sistema: **Persistencia (Base de Datos relacional)**, **Backend (FastAPI + Pydantic v2 + SQLAlchemy 2.0)** y **Frontend (React 18 + TypeScript 5 estricto + TanStack Query v5 + Zustand v5 + Zod v4 + Tailwind CSS institucional)**.
 
 ---
 

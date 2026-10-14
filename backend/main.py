@@ -52,9 +52,9 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Ateneo API - Evaluación del Razonamiento Clínico mediante RAG",
+    title=f"{settings.app_name} API - Evaluación del Razonamiento Clínico mediante RAG",
     description="Sistema RAG para evaluación formativa de razonamiento clínico basado en GPCs del MSP Ecuador.",
-    version="1.0.0",
+    version=settings.app_version,
     lifespan=lifespan
 )
 

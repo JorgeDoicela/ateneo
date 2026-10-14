@@ -1,5 +1,6 @@
 # Ateneo+: Simulador Clínico Multimodal Basado en Inteligencia Artificial y RAG para el Entrenamiento Formativo y Analítica del Aprendizaje Médico en Ecuador
 
+[![Release](https://img.shields.io/badge/Release-v1.0.0-informational.svg)]()
 [![Status](https://img.shields.io/badge/Status-Validado-success.svg)]()
 [![Backend](https://img.shields.io/badge/FastAPI-0.115.6-009688.svg?logo=fastapi)]()
 [![Frontend](https://img.shields.io/badge/React%2018-Vite%206-61DAFB.svg?logo=react)]()
@@ -18,7 +19,10 @@
 
 ## 1. Resumen Técnico del Sistema
 
-**Ateneo+** es un sistema de tutoría inteligente (*Intelligent Tutoring System - ITS*) clínico multimodal desarrollado y calibrado sobre el cuerpo normativo de las **Guías de Práctica Clínica (GPC) del Ministerio de Salud Pública (MSP) del Ecuador**.
+**Ateneo+ (Versión 1.0.0)** es la plataforma oficial de tutoría inteligente (*Intelligent Tutoring System - ITS*) clínico multimodal desarrollada y calibrada sobre el cuerpo normativo de las **Guías de Práctica Clínica (GPC) del Ministerio de Salud Pública (MSP) del Ecuador**. 
+
+> [!NOTE]
+> **Nomenclatura y Arquitectura:** La versión del producto software es **Ateneo+ v1.0.0** (Release oficial estable). Su motor de inferencia y base de conocimiento operan sobre la 2da generación del pipeline de Machine Learning ([`ateneo-bge-m3-ecuador-v2`](https://huggingface.co/doiceladev/ateneo-bge-m3-ecuador-v2) y [`chroma_db_v2`](backend/data/chroma_db_v2) con 7,052 fragmentos normativos indivisibles).
 
 La plataforma contrasta de forma automatizada y en tiempo real el razonamiento clínico expresado por el estudiante (mediante texto o dictado por voz) junto con estudios diagnósticos adjuntos (Radiografías, Trazados ECG de 12 derivaciones, Hemogramas, Gasometrías y Coagulogramas) contra 7,052 fragmentos normativos oficiales indexados en una base vectorial híbrida.
 

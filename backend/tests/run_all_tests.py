@@ -1,5 +1,5 @@
 """
-Orquestador Maestro de Pruebas Automatizadas para Ateneo+ v2.0
+Orquestador Maestro de Pruebas Automatizadas para Ateneo+ v1.0.0
 Ejecuta de forma secuencial y estructurada la pirámide completa de pruebas:
 1. Topología KST y Bayesian Knowledge Tracing (test_adaptive_curriculum.py)
 2. Fidelidad Normativa y Métricas IBF (test_paper_differentiators.py)

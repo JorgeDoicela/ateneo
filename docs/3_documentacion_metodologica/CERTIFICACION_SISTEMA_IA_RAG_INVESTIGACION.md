@@ -1,6 +1,8 @@
-# Certificación Técnica y Científica del Sistema Ateneo+
+# Certificación Técnica y Científica del Sistema Ateneo+ (v1.0.0)
 
 **Fecha de Certificación:** 2026-10-12  
+**Versión del Software:** `v1.0.0` (Release de Producción)  
+**Generación del Pipeline de Inferencia:** Pipeline v2 (BGE-M3 Fine-Tuned v2 + ChromaDB v2)  
 **Entorno:** Contenedores de Producción Docker (`ateneo-backend-1`, `ateneo-frontend-1`)  
 **Propósito:** Validación empírica integral del sistema para soporte del artículo de investigación científica.
 

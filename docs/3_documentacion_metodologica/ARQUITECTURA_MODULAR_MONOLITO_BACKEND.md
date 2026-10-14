@@ -1,6 +1,6 @@
-# Arquitectura del Backend: Monolito Modular con Persistencia Desacoplada (Docs-as-Code)
+# Arquitectura del Backend: Monolito Modular con Persistencia Desacoplada — Ateneo+ v1.0.0
 
-Este documento técnico especifica el diseño, partición de dominios, inyección de dependencias y capa de persistencia agnóstica implementada en el backend de la plataforma Ateneo+ para soportar crecimiento a gran escala.
+Este documento técnico especifica el diseño, partición de dominios, inyección de dependencias y capa de persistencia agnóstica implementada en el backend de la plataforma **Ateneo+ (v1.0.0)** para soportar crecimiento a gran escala.
 
 ---
 

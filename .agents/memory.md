@@ -4,6 +4,21 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
 
 ---
 
+## 0. Identidad, Nomenclatura y Versionado Canónico (Innegociable)
+
+* **Nombre Oficial de la Plataforma:** **Ateneo+** (Simulador Clínico y Evaluación Médica con IA).
+* **Versión Oficial del Software:** **`v1.0.0`** (Lanzamiento oficial de producción, Release estable consolidado).
+* **Diferenciación Histórica y Desacoplamiento de Versiones (Ateneo vs. Ateneo+ vs. ML v2):**
+  - **Ateneo (v1 experimental):** Corresponde al prototipo académico preliminar de laboratorio (baseline con modelo base genérico sin fine-tuning).
+  - **Ateneo+ (`v1.0.0`):** Es la plataforma de software oficial, completa y definitiva (FastAPI modular, React 18 PWA TypeScript estricto, WebSockets, streaming SSE, visor Canvas GPU, offline IndexedDB y telemetría RUM).
+  - **Pipeline y Modelos ML (`v2`):** Los artefactos de Machine Learning (`ateneo-bge-m3-ecuador-v2`, `chroma_db_v2`, `chunks_corpus_v2`, `ingestion_v2`) representan la 2da iteración del pipeline científico y vectorial que alimenta como motor de inferencia a la plataforma **Ateneo+ v1.0.0**. La numeración interna del pipeline de datos no altera la versión SemVer del producto software.
+* **Fuentes Únicas de Verdad:**
+  - Backend: `backend/core/config.py` (`settings.app_name = "Ateneo+"`, `settings.app_version = "1.0.0"`).
+  - Frontend: `frontend/package.json` (`"name": "ateneo-frontend"`, `"version": "1.0.0"`).
+  - Telemetría RUM y Health Probes: `1.0.0`.
+
+---
+
 ## 1. Decisiones de Diseño y UI/UX Consolidadas
 
 * **Paradigma Visual:** "Clínico Minimalista, Precisión Diagnóstica & IA de Vanguardia".

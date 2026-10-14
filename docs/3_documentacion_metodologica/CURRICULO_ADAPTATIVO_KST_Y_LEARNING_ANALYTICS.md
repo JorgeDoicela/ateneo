@@ -1,6 +1,6 @@
-# Motor de Currículo Adaptativo (KST + BKT), Índice de Brecha Formativa y Learning Analytics
+# Motor de Currículo Adaptativo (KST + BKT), Índice de Brecha Formativa y Learning Analytics — Ateneo+ v1.0.0
 
-Este documento formaliza la arquitectura del **Intelligent Tutoring System (ITS)** integrado en **Ateneo+**, detallando los modelos psicométricos de modelado del estudiante, la selección proactiva de casos clínicos en la Zona de Desarrollo Próximo y la analítica institucional del aprendizaje.
+Este documento formaliza la arquitectura del **Intelligent Tutoring System (ITS)** integrado en **Ateneo+ (v1.0.0)**, detallando los modelos psicométricos de modelado del estudiante, la selección proactiva de casos clínicos en la Zona de Desarrollo Próximo y la analítica institucional del aprendizaje.
 
 ---
 
