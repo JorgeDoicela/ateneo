@@ -316,9 +316,9 @@ export default function FeedbackCard({ result, studentAnswer = '', onReset }: Fe
               <p className="text-xs text-[#444746] font-medium">{cita_normativa.seccion}</p>
             )}
             {cita_normativa.texto_relevante && (
-              <blockquote className="mt-2 p-3 bg-[#f0f4f9] rounded-[16px] text-xs italic text-[#1f1f1f] border-l-2 border-[#0b57d0]">
-                &ldquo;{cita_normativa.texto_relevante}&rdquo;
-              </blockquote>
+              <div className="mt-2 p-3.5 bg-[#f0f4f9] rounded-[16px] text-xs text-[#1e293b] border-l-3 border-[#0b57d0] leading-relaxed">
+                <ClinicalMarkdownRenderer content={cita_normativa.texto_relevante} />
+              </div>
             )}
           </div>
 

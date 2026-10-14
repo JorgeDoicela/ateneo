@@ -80,8 +80,12 @@ class EvaluationService:
         if not resolved_images and case.imagen_url:
             resolved_images = self._load_case_preset_image(case.imagen_url)
 
+        # Enriquecer la consulta con el contexto del caso si la respuesta es breve o evasiva
+        ans_clean = student_answer.strip()
+        query_rag = f"{ans_clean} {case.titulo} {case.pregunta}" if len(ans_clean) < 40 else ans_clean
+
         chunk = retrieve_relevant_chunk(
-            query=student_answer,
+            query=query_rag,
             guia_filtro=case.guia_asociada
         )
 

@@ -145,10 +145,28 @@ def _anchor_cita_to_chunk(cita: CitaNormativa, chunk: Optional[Dict[str, Any]]) 
         # Si el texto es genérico, muy corto o no se encuentra en el fragmento normativo,
         # derivar el extracto textual fidedigno del chunk RAG oficial
         if raw_texto.lower() in generic_placeholders or len(raw_texto) < 15 or raw_texto.lower() not in chunk_texto.lower():
-            extracto = chunk_texto[:320].strip()
-            if len(chunk_texto) > 320:
-                extracto += "..."
+            # Limpiar caracteres de control, saltos de página del PDF (\x0c, \x00-\x1f) y tabulaciones sueltas
+            clean_chunk = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]", " ", chunk_texto)
+            clean_chunk = re.sub(r"[ \t]+", " ", clean_chunk)
+            clean_chunk = re.sub(r"\n{3,}", "\n\n", clean_chunk).strip()
+
+            # Preservar el párrafo clínico íntegro hasta 1000 caracteres
+            if len(clean_chunk) <= 1000:
+                extracto = clean_chunk
+            else:
+                # Cortar en el límite de una oración completa (punto y espacio o salto de línea)
+                window = clean_chunk[:1000]
+                last_period = max(window.rfind(". "), window.rfind(".\n"), window.rfind(".\t"))
+                if last_period > 400:
+                    extracto = window[:last_period + 1].strip()
+                else:
+                    # Si no hay punto cercano, cortar en el último espacio sin mutilar palabras
+                    last_space = window.rfind(" ")
+                    extracto = (window[:last_space].strip() if last_space > 400 else window.strip()) + "..."
             cita.texto_relevante = extracto
+        elif cita.texto_relevante:
+            # Sanear también el texto devuelto por el LLM si tuviera caracteres de control
+            cita.texto_relevante = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]", " ", str(cita.texto_relevante)).strip()
 
     return cita
 

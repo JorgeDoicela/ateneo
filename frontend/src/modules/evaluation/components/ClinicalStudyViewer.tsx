@@ -10,7 +10,8 @@ import {
   Sun, 
   Contrast, 
   Eye, 
-  Move
+  Move,
+  X
 } from 'lucide-react';
 import useLearningTelemetry from '../../analytics/hooks/useLearningTelemetry';
 
@@ -18,6 +19,8 @@ export interface ClinicalStudyViewerProps {
   imageUrl: string;
   title?: string;
   studyType?: 'ecg' | 'rx' | 'lab' | 'general';
+  mode?: 'inline' | 'modal';
+  onClose?: () => void;
 }
 
 /**
@@ -30,6 +33,8 @@ export const ClinicalStudyViewer: React.FC<ClinicalStudyViewerProps> = ({
   imageUrl,
   title = 'Estudio Paraclínico',
   studyType = 'general',
+  mode = 'inline',
+  onClose,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -55,6 +60,21 @@ export const ClinicalStudyViewer: React.FC<ClinicalStudyViewerProps> = ({
       trackParaclinicalInspected('paraclinical_current', title, { studyType, imageUrl });
     }
   }, [imageUrl, title, studyType, trackParaclinicalInspected]);
+
+  // Manejo de atajo de teclado Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isFullscreen) {
+          setIsFullscreen(false);
+        } else if (onClose) {
+          onClose();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFullscreen, onClose]);
 
   // Carga de la imagen en memoria
   useEffect(() => {
@@ -85,8 +105,8 @@ export const ClinicalStudyViewer: React.FC<ClinicalStudyViewerProps> = ({
     const { width, height } = canvas;
     ctx.clearRect(0, 0, width, height);
 
-    // Fondo oscuro institucional de negatoscopio
-    ctx.fillStyle = '#0f172a';
+    // Fondo de negatoscopio clínico adaptativo (claro para reportes de laboratorio, oscuro para Rx/ECG)
+    ctx.fillStyle = studyType === 'lab' ? '#f8fafc' : '#0f172a';
     ctx.fillRect(0, 0, width, height);
 
     const img = imageRef.current;
@@ -156,7 +176,7 @@ export const ClinicalStudyViewer: React.FC<ClinicalStudyViewerProps> = ({
     }
 
     ctx.restore();
-  }, [pan, zoom, brightness, contrast, inverted, showEcgGrid]);
+  }, [pan, zoom, brightness, contrast, inverted, showEcgGrid, studyType]);
 
   useEffect(() => {
     let animId: number;
@@ -207,26 +227,34 @@ export const ClinicalStudyViewer: React.FC<ClinicalStudyViewerProps> = ({
   const zoomIn = () => setZoom((z) => Math.min(z * 1.25, 8.0));
   const zoomOut = () => setZoom((z) => Math.max(z * 0.8, 0.6));
 
+  const isModalMode = mode === 'modal';
+
   const content = (
     <div
       ref={containerRef}
-      className={`relative bg-slate-950 rounded-[24px] overflow-hidden select-none border border-slate-800 flex flex-col ${
-        isFullscreen ? 'fixed inset-4 z-50 shadow-2xl' : 'w-full h-80 sm:h-96'
+      className={`relative bg-white rounded-[20px] overflow-hidden select-none border border-slate-200/90 shadow-xs flex flex-col ${
+        isFullscreen
+          ? 'fixed inset-4 z-50 shadow-2xl'
+          : isModalMode
+            ? 'w-full h-[75vh] min-h-[500px]'
+            : 'w-full h-80 sm:h-96'
       }`}
     >
-      {/* Barra de Herramientas Diagnósticas Superior */}
-      <div className="absolute top-3 left-3 right-3 z-10 flex items-center justify-between pointer-events-none">
-        <div className="bg-slate-900/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-slate-700/60 pointer-events-auto flex items-center space-x-2 text-xs text-slate-200">
-          <Eye className="w-3.5 h-3.5 text-cyan-400" />
-          <span className="font-medium tracking-tight truncate max-w-[200px]">{title}</span>
-          <span className="text-[10px] text-slate-400 font-mono">{(zoom * 100).toFixed(0)}%</span>
+      {/* Barra de Herramientas Diagnósticas Superior Integrada (Estilo Clínico Ateneo+) */}
+      <div className="px-4 py-2.5 bg-[#f0f4f9] border-b border-slate-200/80 flex items-center justify-between text-xs text-[#1f1f1f] z-10 select-none">
+        <div className="flex items-center gap-2">
+          <Eye className="w-3.5 h-3.5 text-[#0b57d0]" />
+          <span className={`font-medium tracking-tight truncate text-[#1f1f1f] ${isModalMode ? 'max-w-[280px] sm:max-w-md' : 'max-w-[220px]'}`}>
+            {title}
+          </span>
+          <span className="text-[11px] text-[#747775] font-mono">{(zoom * 100).toFixed(0)}%</span>
         </div>
 
-        {/* Botonera de Acción */}
-        <div className="bg-slate-900/80 backdrop-blur-md p-1 rounded-full border border-slate-700/60 pointer-events-auto flex items-center space-x-1">
+        {/* Botonera de Acción Plana y Limpia */}
+        <div className="flex items-center gap-1">
           <button
             onClick={zoomIn}
-            className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-full transition-colors"
+            className="p-1.5 text-[#444746] hover:text-[#1f1f1f] hover:bg-white rounded-lg transition-colors border border-transparent hover:border-slate-200/60 shadow-xs"
             title="Acercar (Zoom In)"
             aria-label="Acercar imagen"
           >
@@ -234,7 +262,7 @@ export const ClinicalStudyViewer: React.FC<ClinicalStudyViewerProps> = ({
           </button>
           <button
             onClick={zoomOut}
-            className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-full transition-colors"
+            className="p-1.5 text-[#444746] hover:text-[#1f1f1f] hover:bg-white rounded-lg transition-colors border border-transparent hover:border-slate-200/60 shadow-xs"
             title="Alejar (Zoom Out)"
             aria-label="Alejar imagen"
           >
@@ -242,17 +270,17 @@ export const ClinicalStudyViewer: React.FC<ClinicalStudyViewerProps> = ({
           </button>
           <button
             onClick={resetTransformations}
-            className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-full transition-colors"
+            className="p-1.5 text-[#444746] hover:text-[#1f1f1f] hover:bg-white rounded-lg transition-colors border border-transparent hover:border-slate-200/60 shadow-xs"
             title="Restablecer Vista"
             aria-label="Restablecer vista diagnóstica"
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
-          <div className="w-[1px] h-4 bg-slate-700 mx-1" />
+          <div className="w-[1px] h-4 bg-slate-200 mx-1" />
           <button
             onClick={() => setShowEcgGrid((prev) => !prev)}
-            className={`p-1.5 rounded-full transition-colors ${
-              showEcgGrid ? 'text-rose-400 bg-rose-950/60' : 'text-slate-300 hover:text-white hover:bg-slate-800'
+            className={`p-1.5 rounded-lg transition-colors border ${
+              showEcgGrid ? 'text-rose-600 bg-rose-50 border-rose-200' : 'text-[#444746] hover:text-[#1f1f1f] hover:bg-white border-transparent hover:border-slate-200/60'
             }`}
             title="Rejilla Milimétrica ECG (25mm/s, 10mm/mV)"
             aria-label="Rejilla ECG"
@@ -261,8 +289,8 @@ export const ClinicalStudyViewer: React.FC<ClinicalStudyViewerProps> = ({
           </button>
           <button
             onClick={() => setShowFiltersPanel((prev) => !prev)}
-            className={`p-1.5 rounded-full transition-colors ${
-              showFiltersPanel ? 'text-cyan-400 bg-cyan-950/60' : 'text-slate-300 hover:text-white hover:bg-slate-800'
+            className={`p-1.5 rounded-lg transition-colors border ${
+              showFiltersPanel ? 'text-[#0b57d0] bg-blue-50 border-blue-200' : 'text-[#444746] hover:text-[#1f1f1f] hover:bg-white border-transparent hover:border-slate-200/60'
             }`}
             title="Ajuste de Ventana Diagnóstica"
             aria-label="Ajuste de filtros"
@@ -271,28 +299,42 @@ export const ClinicalStudyViewer: React.FC<ClinicalStudyViewerProps> = ({
           </button>
           <button
             onClick={() => setIsFullscreen((prev) => !prev)}
-            className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-full transition-colors"
+            className="p-1.5 text-[#444746] hover:text-[#1f1f1f] hover:bg-white rounded-lg transition-colors border border-transparent hover:border-slate-200/60 shadow-xs"
             title={isFullscreen ? 'Salir de Pantalla Completa' : 'Maximizar Visor'}
             aria-label="Alternar pantalla completa"
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
+          {onClose && (
+            <>
+              <div className="w-[1px] h-4 bg-slate-200 mx-1" />
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors border border-transparent hover:border-slate-200/60"
+                title="Cerrar Visor Diagnóstico"
+                aria-label="Cerrar visor"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Panel Desplegable de Calibración de Ventana (Brillo / Contraste / Inversión) */}
+      {/* Panel Desplegable de Calibración de Ventana (Estilo Material 3 Limpio) */}
       {showFiltersPanel && (
-        <div className="absolute top-16 right-3 z-20 bg-slate-900/90 backdrop-blur-md p-4 rounded-2xl border border-slate-700/80 text-xs text-slate-200 space-y-3 w-56 shadow-xl animate-fadeIn">
-          <div className="font-semibold text-slate-300 border-b border-slate-800 pb-1.5">
+        <div className="absolute top-12 right-3 z-20 bg-white p-4 rounded-[18px] border border-slate-200 text-xs text-[#1f1f1f] space-y-3 w-56 shadow-lg animate-fadeIn">
+          <div className="font-semibold text-[#1f1f1f] border-b border-slate-100 pb-1.5">
             Ventana Radiológica
           </div>
           <div className="space-y-1">
-            <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <div className="flex items-center justify-between text-[11px] text-[#444746]">
               <span className="flex items-center gap-1.5">
-                <Sun className="w-3.5 h-3.5" />
+                <Sun className="w-3.5 h-3.5 text-[#0b57d0]" />
                 Brillo
               </span>
-              <span>{brightness}%</span>
+              <span className="font-mono">{brightness}%</span>
             </div>
             <input
               type="range"
@@ -300,17 +342,17 @@ export const ClinicalStudyViewer: React.FC<ClinicalStudyViewerProps> = ({
               max={180}
               value={brightness}
               onChange={(e) => setBrightness(Number(e.target.value))}
-              className="w-full accent-cyan-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
+              className="w-full accent-[#0b57d0] cursor-pointer h-1.5 bg-slate-200 rounded-lg"
             />
           </div>
 
           <div className="space-y-1">
-            <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <div className="flex items-center justify-between text-[11px] text-[#444746]">
               <span className="flex items-center gap-1.5">
-                <Contrast className="w-3.5 h-3.5" />
+                <Contrast className="w-3.5 h-3.5 text-[#0b57d0]" />
                 Contraste
               </span>
-              <span>{contrast}%</span>
+              <span className="font-mono">{contrast}%</span>
             </div>
             <input
               type="range"
@@ -318,16 +360,16 @@ export const ClinicalStudyViewer: React.FC<ClinicalStudyViewerProps> = ({
               max={220}
               value={contrast}
               onChange={(e) => setContrast(Number(e.target.value))}
-              className="w-full accent-cyan-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
+              className="w-full accent-[#0b57d0] cursor-pointer h-1.5 bg-slate-200 rounded-lg"
             />
           </div>
 
-          <div className="pt-1 border-t border-slate-800 flex items-center justify-between">
-            <span className="text-[11px] text-slate-300">Inversión Negativo</span>
+          <div className="pt-1 border-t border-slate-100 flex items-center justify-between">
+            <span className="text-[11px] text-[#444746]">Inversión Negativo</span>
             <button
               onClick={() => setInverted((inv) => !inv)}
-              className={`px-2.5 py-1 rounded-lg text-[10px] font-medium transition-colors ${
-                inverted ? 'bg-cyan-500 text-slate-950 font-semibold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+              className={`px-3 py-1 rounded-full text-[10px] font-medium transition-colors ${
+                inverted ? 'bg-[#0b57d0] text-white font-medium shadow-xs' : 'bg-[#f0f4f9] text-[#1f1f1f] hover:bg-slate-200'
               }`}
             >
               {inverted ? 'Activo' : 'Invertir'}
@@ -348,14 +390,14 @@ export const ClinicalStudyViewer: React.FC<ClinicalStudyViewerProps> = ({
         className={`w-full h-full flex-1 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
       />
 
-      {/* Barra de Estado Inferior */}
-      <div className="absolute bottom-2 left-3 right-3 z-10 flex items-center justify-between pointer-events-none text-[10px] text-slate-400">
-        <div className="flex items-center gap-1.5 bg-slate-900/70 px-2.5 py-1 rounded-full border border-slate-800">
-          <Move className="w-3 h-3 text-slate-400" />
-          <span>Arrastrar para desplazar | Rueda del ratón para ampliar</span>
+      {/* Barra de Estado Inferior Plana y Limpia */}
+      <div className="px-4 py-2 bg-[#f0f4f9] border-t border-slate-200/80 flex items-center justify-between text-[11px] text-[#747775] select-none z-10">
+        <div className="flex items-center gap-1.5">
+          <Move className="w-3.5 h-3.5 text-[#747775]" />
+          <span>Arrastrar para desplazar · Rueda del ratón para ampliar</span>
         </div>
         {showEcgGrid && (
-          <span className="bg-rose-950/70 text-rose-300 px-2 py-0.5 rounded-full border border-rose-800/60 font-mono text-[9px]">
+          <span className="text-rose-600 font-mono text-[10px] bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100">
             Rejilla Calibrada: 25mm/s (0.04s/mm)
           </span>
         )}

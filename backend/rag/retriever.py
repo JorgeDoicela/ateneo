@@ -84,6 +84,39 @@ def _extract_page_number(meta: Dict[str, Any]) -> int:
                     return parsed
     return 1
 
+PARATEXT_DISMISS_PATTERNS = [
+    r"abreviaturas[,\s]+signos\s+y\s+s[ií]mbolos",
+    r"tabla\s+de\s+contenido",
+    r"^[0-9.\s]*[ií]ndice",
+    r"comit[eé]\s+editorial",
+    r"equipo\s+de\s+redacci[oó]n",
+    r"equipo\s+de\s+validaci[oó]n",
+    r"autores\s+y\s+colaboradores",
+    r"derechos\s+de\s+autor",
+]
+
+def is_paratext_or_index_chunk(texto: str, seccion: str) -> bool:
+    """
+    Identifica si un fragmento corresponde a índices, abreviaturas o créditos paratextuales.
+    Evita recuperar tablas de contenido o listas de abreviaturas como evidencia clínica.
+    """
+    sec = (seccion or "").lower().strip()
+    txt_start = (texto or "").strip()[:200].lower()
+    
+    for pat in PARATEXT_DISMISS_PATTERNS:
+        if re.search(pat, sec, re.IGNORECASE):
+            return True
+        if re.search(pat, txt_start, re.IGNORECASE):
+            return True
+
+    # Detectar listas de números de página típicas de tablas de contenido
+    # ej. "14. Referencias 55 16. Anexos 63 Tablas Tabla 1... 19 Tabla 2..."
+    tablas_referencias = re.findall(r"(?:tabla\s+\d+|referencias|anexos)\b.*?(\d{1,3})", txt_start)
+    if len(tablas_referencias) >= 3 and ("índice" in txt_start or "tablas" in txt_start or "anexos" in txt_start):
+        return True
+
+    return False
+
 def _sanitize_model_metadata_if_needed(model_path_str: str) -> None:
     """
     Normaliza de forma idempotente los metadatos del modelo fine-tuned si proviene de
@@ -555,7 +588,24 @@ def retrieve_top_k_chunks(
             rrf_scores[cid] = 1.0 / (k_rrf + rank)
 
     retrieved = []
-    for cid in sorted_cids[:top_k]:
+    clinical_cids = []
+    paratext_cids = []
+
+    for cid in sorted_cids:
+        item = chunk_data_map.get(cid)
+        if not item:
+            continue
+        txt = item.get("texto", "")
+        sec = item.get("metadata", {}).get("seccion", "")
+        if is_paratext_or_index_chunk(txt, sec):
+            paratext_cids.append(cid)
+        else:
+            clinical_cids.append(cid)
+
+    # Priorizar fragmentos clínicos sustantivos; solo recurrir a paratexto si no hay otro disponible
+    final_cids = (clinical_cids + paratext_cids)[:top_k]
+
+    for cid in final_cids:
         if cid in chunk_data_map:
             item = chunk_data_map[cid]
             meta = item["metadata"]

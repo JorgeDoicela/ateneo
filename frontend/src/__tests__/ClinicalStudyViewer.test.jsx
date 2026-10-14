@@ -99,4 +99,18 @@ describe('Suite de Pruebas: Visor Diagnóstico de Paraclínicos (ClinicalStudyVi
     fireEvent.click(screen.getByLabelText(/alternar pantalla completa/i));
     expect(screen.getByTitle(/maximizar visor/i)).toBeInTheDocument();
   });
+
+  it('soporta modo modal y activa el callback onClose al hacer clic o presionar Escape', () => {
+    const onCloseMock = vi.fn();
+    render(<ClinicalStudyViewer {...mockProps} mode="modal" onClose={onCloseMock} />);
+
+    const closeBtn = screen.getByLabelText(/cerrar visor/i);
+    expect(closeBtn).toBeInTheDocument();
+
+    fireEvent.click(closeBtn);
+    expect(onCloseMock).toHaveBeenCalledTimes(1);
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(onCloseMock).toHaveBeenCalledTimes(2);
+  });
 });

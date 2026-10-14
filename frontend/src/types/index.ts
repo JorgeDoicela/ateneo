@@ -79,6 +79,7 @@ export interface CasePhase {
   tiempo_estimado?: string;
   estudios_adjuntos?: string[];
   ejes_evaluados?: string[];
+  imagen_url?: string;
   dicom_study?: import('./dicom').DicomStudyMetadata;
 }
 
