@@ -128,7 +128,7 @@ export const MagicLogin: React.FC = () => {
             Invitación de Acceso Institucional
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Simulador Clínico y Evaluación Médica con IA
+            Simulador Clínico
           </p>
         </div>
 
@@ -173,25 +173,22 @@ export const MagicLogin: React.FC = () => {
         {/* Estado 3: Enlace válido - Tarjeta de confirmación previa al ingreso */}
         {!verifying && linkData && !requiresIdentity && (
           <div className="space-y-6">
-            <div className="p-5 bg-slate-50 border border-slate-100 rounded-2xl space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                  Rol Otorgado
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-900 text-white">
+            <div className="p-5 bg-slate-50/80 border border-slate-100 rounded-2xl text-center space-y-2">
+              <div className="flex justify-center">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-800">
                   {linkData.rol === 'docente' ? (
                     <>
-                      <Stethoscope className="w-3.5 h-3.5" />
+                      <Stethoscope className="w-3.5 h-3.5 text-blue-600" />
                       <span>Docente</span>
                     </>
                   ) : linkData.rol === 'administrador' ? (
                     <>
-                      <ShieldCheck className="w-3.5 h-3.5" />
+                      <ShieldCheck className="w-3.5 h-3.5 text-cyan-600" />
                       <span>Administrador</span>
                     </>
                   ) : (
                     <>
-                      <GraduationCap className="w-3.5 h-3.5" />
+                      <GraduationCap className="w-3.5 h-3.5 text-[#0b57d0]" />
                       <span>Estudiante</span>
                     </>
                   )}
@@ -199,31 +196,14 @@ export const MagicLogin: React.FC = () => {
               </div>
 
               {linkData.recipient_name && (
-                <div className="flex items-center justify-between pt-1 border-t border-slate-200/60 text-xs">
-                  <span className="text-slate-500 font-medium">Destinatario</span>
-                  <span className="font-semibold text-slate-800">{linkData.recipient_name}</span>
-                </div>
+                <p className="text-base font-semibold text-slate-800">
+                  {linkData.recipient_name}
+                </p>
               )}
 
-              {linkData.tenant_name && (
-                <div className="flex items-center justify-between pt-1 border-t border-slate-200/60 text-xs">
-                  <span className="text-slate-500 font-medium">Institución</span>
-                  <span className="font-semibold text-slate-800">{linkData.tenant_name}</span>
-                </div>
-              )}
-
-              <div className="flex items-center justify-between pt-1 border-t border-slate-200/60 text-xs">
-                <span className="text-slate-500 font-medium">Destino Clínico</span>
-                <span className="font-mono text-slate-700">{linkData.target_path || '/cases'}</span>
-              </div>
-
-              <div className="flex items-center justify-between pt-1 border-t border-slate-200/60 text-xs">
-                <span className="text-slate-500 font-medium">Estado</span>
-                <span className="text-emerald-700 font-semibold flex items-center gap-1">
-                  <UserCheck className="w-3.5 h-3.5" />
-                  <span>Enlace Activo y Verificado</span>
-                </span>
-              </div>
+              <p className="text-xs text-slate-500">
+                Acceso preparado para iniciar la simulación.
+              </p>
             </div>
 
             {errorMsg && (
@@ -234,7 +214,7 @@ export const MagicLogin: React.FC = () => {
             )}
 
             <p className="text-xs text-slate-500 text-center leading-relaxed">
-              Presione el botón para confirmar sus credenciales e iniciar sesión de forma directa en el entorno de simulación clínica.
+              Presione el botón para ingresar directamente a los casos de simulación clínica.
             </p>
 
             <button
@@ -356,7 +336,7 @@ export const MagicLogin: React.FC = () => {
 
       {/* Pie de página institucional */}
       <footer className="mt-8 text-center text-xs text-slate-400">
-        Sistema de Evaluación Médica y Razonamiento Clínico con IA &bull; GPC Ecuador
+        Simulador Clínico &bull; GPC Ecuador
       </footer>
     </div>
   );

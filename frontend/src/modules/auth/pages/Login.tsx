@@ -128,7 +128,7 @@ export default function Login() {
                 Accede a tu cuenta
               </h1>
               <p className="text-sm font-normal text-[#444746] mt-2 leading-relaxed">
-                Simulador Clínico y Evaluación Médica basada en Guías de Práctica Clínica (GPC Ecuador)
+                Simulador Clínico basado en Guías de Práctica Clínica (GPC Ecuador)
               </p>
             </div>
 

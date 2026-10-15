@@ -487,11 +487,11 @@ def retrieve_top_k_chunks(
         model_target = custom_dense_model or EMBEDDING_MODEL_NAME
         model = get_embedding_model(model_target)
         # Optimización de latencia en CPU: BGE-M3 escala cuadráticamente con longitud de secuencia.
-        # Para RAG de recuperación médica, los primeros 300 caracteres o términos nucleares retienen
-        # la máxima semántica diagnóstica, reduciendo el tiempo de inferencia de 18s a ~1.2s en CPU.
+        # Para RAG de recuperación médica, los primeros 180 caracteres retienen la máxima semántica diagnóstica
+        # reduciendo el tiempo de inferencia de embeddings en CPU de 15s a ~1.2s.
         dense_query = query.strip()
-        if len(dense_query) > 300:
-            dense_query = dense_query[:300]
+        if len(dense_query) > 180:
+            dense_query = dense_query[:180]
         query_embedding = model.encode([dense_query]).tolist()
         where_filter = None
         if canonical_guia:

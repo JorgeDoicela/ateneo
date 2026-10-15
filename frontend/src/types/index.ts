@@ -150,6 +150,7 @@ export interface EvaluationResult {
   competencias_deficientes?: DeficientCompetency[];
   competencias_por_eje?: AxisCompetencyItem[];
   retroalimentacion_general?: string;
+  transcripcion_audio?: string;
   hash_verificacion?: string;
   llm_latency_ms?: number;
   llm_model_used?: string;
@@ -168,6 +169,7 @@ export interface PhaseEvaluationResult {
   desbloquea_siguiente?: boolean;
   siguiente_fase_disponible?: boolean;
   es_ultima_fase?: boolean;
+  transcripcion_audio?: string;
   llm_latency_ms?: number;
   llm_model_used?: string;
   rag_tokens_used?: number;

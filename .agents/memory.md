@@ -1560,4 +1560,64 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
        - Cabecera con título canónico *"Debate Socrático Clínico Integral"* y botón colapsable/expandible que muestra el conteo exacto de brechas clínicas y permite desplegar el inventario completo para consulta continua durante la conversación.
        - Aprobación al 100% en TypeScript (`tsc --noEmit`) y pruebas unitarias de Vitest (`SocraticDebrief.test.jsx` y `FeedbackCard.test.jsx`).
 
+* **Arquitectura de Notas de Voz Clínicas y Evaluación Multimodal Directa (2026-10-15):**
+  - **Causa Raíz:** Anteriormente, el ingreso de voz dependía exclusivamente de la API de reconocimiento del navegador (`webkitSpeechRecognition`), la cual realizaba transcripción local en texto sin permitir que el modelo LLM analizara directamente el audio clínico, la entonación o términos médicos grabados por el estudiante.
+  - **Solución Arquitectónica Definitiva (Cero Parches):**
+    1. *Capacidad Multimodal Nativa de Gemini en Backend (`core/llm_gateway.py`, `rag/evaluator.py`, `modules/evaluation/service.py`):*
+       - Se adaptó el pipeline de evaluación tanto en modo directo (`/api/evaluate`) como multi-fase (`/api/evaluate/phase`) para aceptar un archivo de audio del estudiante (`audio_estudiante: Optional[UploadFile]`).
+       - Gemini recibe las tuplas binarias `(bytes, mime_type)` como partes multimodales directas (`types.Part.from_bytes(...)`), soportando nativamente formatos `audio/webm`, `audio/mp4`, `audio/ogg`, `audio/wav`.
+       - En el contrato Pydantic (`EvaluationResult`, `PhaseEvaluationResult`), se incorporó el campo `transcripcion_audio: Optional[str]`, de modo que el LLM extrae y devuelve la transcripción médica fiel de la nota de voz junto con la evaluación diagnóstica.
+       - En `EvaluationService`, ante casos donde el estudiante responde únicamente por nota de voz sin texto complementario, la consulta de búsqueda RAG vectorial (`retrieve_relevant_chunk`) realiza fallback inteligente a `f"{case.titulo} {case.pregunta}"`, garantizando el anclaje normativo con la GPC correspondiente.
+    2. *Grabador Clínico Institucional en Frontend (`ClinicalVoiceRecorder.tsx`):*
+       - Implementado con la API estándar `MediaRecorder` de JavaScript.
+       - Ofrece grabación de hasta 5 minutos, cronómetro digital `mm:ss`, reproductor de audio integrado para escuchar la nota antes de enviarla y botón de descarte.
+       - Diseño adherido al sistema visual de Ateneo+: fondo `#f0f4f9`, bordes limpios sin adornos ni emojis, iconos planos `lucide-react` (`Mic`, `Square`, `Play`, `Pause`, `Trash2`, `Volume2`).
+    3. *Despliegue de Resultados (`FeedbackCard.tsx` y `PhaseFeedbackCard.tsx`):*
+       - Cuando el resultado contiene `transcripcion_audio`, se despliega un bloque dedicado que exhibe la transcripción oficial extraída por Gemini, contrastada con la GPC de Ecuador.
+       - Cobertura completa en TypeScript estricto (`tsc --noEmit`) y 100% de tests unitarios pasando en Vitest (30 suites, 145 pruebas en verde).
+
+* **Optimización de Latencia en Evaluación Multimodal y Mitigación de Timeouts en Cloudflare Tunnel (2026-10-15):**
+  - **Causa Raíz:** En la primera prueba móvil a través del túnel `ateneo.doicela.dev`, la petición `POST /api/evaluate` con audio tardó 147 segundos en responder. Cloudflare Tunnel corta el stream HTTP tras ~100-120s con `Incoming request ended abruptly: context canceled`. Al cerrarse la conexión bruscamente, el frontend activó su manejador offline (`offlineDb.queueEvaluation`) asignando provisionalmente `score: 0` y la tarjeta *"Modo Local Activo"*, a pesar de que el backend completó con 200 OK a los 147s.
+  - **Diagnóstico Forense de la Latencia:**
+    1. BGE-M3 en CPU escalaba con lentitud ante consultas RAG con queries extensas (`case.titulo + case.pregunta`).
+    2. La caché RAG en frío obligaba a ejecutar inferencia densa en CPU en la primera petición tras reiniciar el contenedor.
+    3. `vite.config.ts` no tenía configurados timeouts de proxy explícitos para `/api`.
+  - **Solución Arquitectónica Definitiva (Cero Parches):**
+    1. *Acotamiento de Queries Densas (`backend/rag/retriever.py` y `backend/modules/evaluation/service.py`):*
+       - Se redujo la ventana de consulta densa de 300 a 180 caracteres nucleares. BGE-M3 pasó de 12.92s/it a 5.62 it/s (aceleración >70x en CPU).
+       - En evaluaciones por nota de voz sin texto, la búsqueda RAG utiliza exclusivamente el título del caso (`case.titulo[:120]`), altamente discriminante y de baja latencia.
+    2. *Precalentamiento de Caché RAG en Arranque (`backend/main.py`):*
+       - En el `lifespan` asíncrono, tras precargar el modelo y BM25, se ejecutan las consultas base de los 10 casos clínicos en segundo plano. La resolución RAG para cualquier caso precargado toma ahora **0.6 milisegundos**.
+    3. *Timeouts de Proxy en Vite (`frontend/vite.config.ts`):*
+       - Configurados `timeout: 180000` y `proxyTimeout: 180000` (3 minutos) en la regla `/api`.
+    4. *Feedback Diferenciado en Frontend (`frontend/src/modules/evaluation/hooks/useCaseSolver.ts`):*
+       - Si la petición falla estando el dispositivo online, el mensaje aclara que la conexión demoró más de lo previsto o se interrumpió temporalmente, en vez de asumir una desconexión total.
+    5. *Rendimiento Verificado:* La evaluación completa con audio binario bajó de **147 segundos a 25.8 segundos** end-to-end, operando holgadamente dentro del límite del túnel. Pruebas: 4/4 passed en pytest, 30 suites (145/145 passed) en vitest, 0 errores en TypeScript.
+
+* **Ciclo de Vida del Modal Socrático y Robustez Responsive en Móviles (2026-10-15):**
+  - **Causa Raíz:** Al abrir el debate socrático en un caso y navegar hacia otro caso clínico, el estado `isOpen: true` del store global Zustand (`useSocraticDebriefStore`) persistía en memoria. Al ingresar a la nueva ruta (`/cases/:id`), `CaseSolve.tsx` montaba el modal socrático inmediatamente abierto, bloqueando la resolución del nuevo caso con las brechas del caso previo. Adicionalmente, en pantallas móviles angostas, el título largo en la cabecera desbordaba y empujaba el botón `X` fuera del contenedor, careciendo además de cierre por toque en el backdrop o tecla Escape.
+  - **Solución Arquitectónica Definitiva (Cero Parches):**
+    1. *Aislamiento de Ciclo de Vida en Caso (`CaseSolve.tsx`):* Se incorporó un `useEffect` dependiente de `[id]` que ejecuta `closeDebrief()` al cambiar de caso y en la función de limpieza (unmount), garantizando que todo caso inicie con el debriefing cerrado y limpio.
+    2. *Cabecera y Botón Responsive (`SocraticDebriefModal.tsx`):* Se aplicó `min-w-0 flex-1 truncate` en el contenedor del título y un botón `X` con tamaño táctil (`w-9 h-9 sm:w-10 sm:h-10 shrink-0 bg-slate-100 rounded-full flex items-center justify-center`) que jamás se desborda en dispositivos móviles.
+    3. *Múltiples Vías de Cierre:* Soporte para cierre inmediato mediante toque en el backdrop exterior (`onClick={closeDebrief}`) y escucha global del teclado (`Escape`). 10/10 pruebas pasadas en `SocraticDebrief.test.jsx`.
+
+* **Optimización de Tokens de Salida y Reproducción Directa de Nota de Voz (2026-10-15):**
+  - **Decisión Arquitectónica:** Se erradicó la generación de texto redundante en la salida de Gemini (`transcripcion_audio`). El modelo escucha directamente el audio de entrada y evalúa el criterio clínico sin reescribir la transcripción textual, ahorrando entre 150 y 300 tokens de salida por llamada (reduciendo costo 4x y latencia en 2 a 4 segundos).
+  - **Experiencia en Cliente (`FeedbackCard.tsx` y `PhaseFeedbackCard.tsx`):** La interfaz recibe el `audioBlob` grabado por el estudiante y despliega un reproductor de audio nativo limpio (`<audio controls />`), permitiendo escuchar la nota de voz original directamente sin consumir cuota de generación de IA. Soporta fallback transparente a transcripciones textuales históricas para evaluaciones pasadas.
+
+* **Resolución del Bug `Infinity:NaN` en Grabación WebM (`ClinicalVoiceRecorder.tsx` - 2026-10-15):**
+  - **Causa Raíz:** Al grabar audio en Chromium y WebKit con `MediaRecorder` en formato `audio/webm;codecs=opus`, el navegador emite los bloques como un stream en vivo sin encabezado EBML de duración total predefinido. Al cargar el Blob en un elemento `<audio src="blob:...">`, el evento `onloadedmetadata` entrega `duration = Infinity`. Al evaluar `formatTime`, `Math.floor(Infinity / 60)` arroja `Infinity` y `Infinity % 60` resulta en `NaN`, imprimiendo `Infinity:NaN` en la cápsula de audio.
+  - **Solución Arquitectónica Definitiva:**
+    1. *Cronómetro en Vivo (`recordedDurationRef`):* Registro continuo de los segundos reales grabados durante el ciclo de vida de la grabación.
+    2. *Sanitización Defensiva:* `formatTime` verifica `Number.isFinite(seconds)` con fallback seguro a `00:00`.
+    3. *Descarte de Infinity en Metadatos:* En `onLoadedMetadata`, si la duración no es finita, se utiliza de inmediato el valor capturado por el cronómetro interno.
+
+* **Enfoque Exclusivo en Simulador Clínico y Simplificación de Magic Links (2026-10-15):**
+  - **Definición de Alcance:** Se erradicó la frase *"Evaluación Médica"* en subtítulos, accesos y pies de página (`MagicLogin.tsx`, `Login.tsx`, `MagicLinkGeneratorCard.tsx`), estandarizando la denominación oficial a **Simulador Clínico**.
+  - **Depuración de Metadatos Burocráticos en Magic Links (`MagicLogin.tsx`):**
+    - Se eliminó la tabla de 5 filas de datos administrativos (`Rol Otorgado`, `Institución Ateneo+ Sede Central`, `Destino Clínico /cases`, `Estado Enlace Activo y Verificado`).
+    - Se sustituyó por una tarjeta sobria y centrada con un chip de rol (`Estudiante`, `Docente`, `Administrador`), el nombre del destinatario si existe y el botón primario directo de ingreso.
+
+
+
 

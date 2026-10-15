@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { 
   CheckCircle2, 
   AlertTriangle, 
@@ -14,7 +14,8 @@ import {
   ShieldCheck,
   ArrowRight,
   LucideIcon,
-  MessageSquare
+  MessageSquare,
+  Mic
 } from 'lucide-react';
 import SkillRadarChart from '../../analytics/components/SkillRadarChart';
 import PdfViewerModal from './PdfViewerModal';
@@ -42,15 +43,28 @@ const EJES_CONFIG: EjeConfig[] = [
 export interface FeedbackCardProps {
   result: EvaluationResult;
   studentAnswer?: string;
+  audioBlob?: Blob | null;
   onReset?: () => void;
 }
 
-export default function FeedbackCard({ result, studentAnswer = '', onReset }: FeedbackCardProps) {
+export default function FeedbackCard({ result, studentAnswer = '', audioBlob = null, onReset }: FeedbackCardProps) {
   const [pdfModalOpen, setPdfModalOpen] = useState<boolean>(false);
   const [downloadingPdf, setDownloadingPdf] = useState<boolean>(false);
   const { user } = useAuth();
   const openDebrief = useSocraticDebriefStore((state) => state.openDebrief);
   const { trackSocraticDebriefOpened } = useLearningTelemetry();
+
+  const audioUrl = useMemo(() => {
+    return audioBlob ? URL.createObjectURL(audioBlob) : null;
+  }, [audioBlob]);
+
+  useEffect(() => {
+    return () => {
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+      }
+    };
+  }, [audioUrl]);
 
   const handleOpenDebrief = (omisionesParam: string[] | string) => {
     const caseId = result.case_id || 'case_preeclampsia_01';
@@ -203,13 +217,34 @@ export default function FeedbackCard({ result, studentAnswer = '', onReset }: Fe
         </div>
       </div>
 
-      {/* 2. Razonamiento Registrado del Estudiante */}
+      {/* 2. Razonamiento Registrado del Estudiante (Nota de Voz o Texto) */}
+      {(audioUrl || result.transcripcion_audio) && (
+        <div className="bg-white rounded-[28px] p-6 shadow-xs border-0 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs font-medium text-[#0b57d0]">
+              <Mic className="w-4 h-4 text-[#0b57d0]" />
+              <span>Tu Nota de Voz Clínica Registrada</span>
+            </div>
+            <span className="text-[11px] text-[#747775]">Evaluada directamente por la IA multimodal</span>
+          </div>
+          {audioUrl ? (
+            <div className="bg-[#f0f4f9] p-3 rounded-[16px] flex items-center">
+              <audio controls src={audioUrl} className="w-full h-10 accent-[#0b57d0]" />
+            </div>
+          ) : (
+            <div className="bg-[#f0f4f9] p-4 rounded-[16px] text-xs sm:text-sm text-[#1f1f1f] leading-relaxed italic border-l-3 border-[#0b57d0]">
+              "{result.transcripcion_audio}"
+            </div>
+          )}
+        </div>
+      )}
+
       {studentAnswer && (
         <div className="bg-white rounded-[28px] p-6 shadow-xs border-0 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs font-medium text-[#444746]">
               <User className="w-4 h-4 text-[#0b57d0]" />
-              <span>Tu Razonamiento Clínico Registrado</span>
+              <span>Tu Razonamiento Clínico Registrado (Texto)</span>
             </div>
           </div>
           <div className="bg-[#f0f4f9] p-4 rounded-[16px] text-xs sm:text-sm text-[#1f1f1f] leading-relaxed whitespace-pre-wrap">
@@ -338,20 +373,19 @@ export default function FeedbackCard({ result, studentAnswer = '', onReset }: Fe
       )}
 
       {/* 6. Auditoría y Telemetría Clínica de Inferencia */}
-      {(result.llm_latency_ms !== undefined || result.faithfulness_score !== undefined || result.llm_model_used) && (
+      {(result.llm_latency_ms !== undefined || result.faithfulness_score !== undefined) && (
         <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-2.5 rounded-[20px] bg-white border border-slate-200/80 text-[11px] text-[#444746] shadow-xs">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <Activity className="w-3.5 h-3.5 text-[#0b57d0]" />
             <span className="font-semibold text-[#1f1f1f]">
-              Telemetría de Inferencia:
+              Tiempo:
             </span>
-            <span>
-              {result.llm_model_used || 'Gemini 3.8 Flash'}
-            </span>
-            {result.llm_latency_ms !== undefined && result.llm_latency_ms > 0 && (
+            {result.llm_latency_ms !== undefined && result.llm_latency_ms > 0 ? (
               <span>
-                en {(result.llm_latency_ms / 1000).toFixed(2)}s
+                {(result.llm_latency_ms / 1000).toFixed(2)}s
               </span>
+            ) : (
+              <span>--</span>
             )}
           </div>
           <div className="flex items-center gap-3">

@@ -257,7 +257,7 @@ export const MagicLinkGeneratorCard: React.FC = () => {
       ? 'Acceso continuo reutilizable (puede ingresar múltiples veces durante la vigencia guardando su historial)'
       : 'Uso personal (1 solo acceso)';
 
-    return `${recipientGreeting}\n\nLe comparto su enlace de acceso a la plataforma Ateneo+ (Simulador Clínico y Evaluación Médica con IA):\n\n- Rol asignado: ${roleCapitalized} (Acceso completo)\n- Destino clínico: ${destName}\n- Enlace directo (1 clic): ${finalUrl}\n- Modalidad: ${modalityText}\n- Vigencia: ${new Date(link.expires_at).toLocaleDateString()}\n\nPuede ingresar desde su navegador móvil o de escritorio cuantas veces necesite. No requiere contraseñas.`;
+    return `${recipientGreeting}\n\nLe comparto su enlace de acceso a la plataforma Ateneo+ (Simulador Clínico):\n\n- Rol asignado: ${roleCapitalized}\n- Enlace directo (1 clic): ${finalUrl}\n- Modalidad: ${modalityText}\n- Vigencia: ${new Date(link.expires_at).toLocaleDateString()}\n\nPuede ingresar desde su navegador móvil o de escritorio cuantas veces necesite. No requiere contraseñas.`;
   };
 
   const handleCopyMessage = (link: MagicLinkRecord) => {

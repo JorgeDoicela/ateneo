@@ -247,11 +247,12 @@ def evaluate_clinical_reasoning(
     imagenes_list: Optional[List[Tuple[bytes, str]]] = None,
     # Backward compat: parámetros singulares
     imagen_bytes: Optional[bytes] = None,
-    imagen_mime: str = "image/jpeg"
+    imagen_mime: str = "image/jpeg",
+    audio_bytes: Optional[Tuple[bytes, str]] = None
 ) -> EvaluationResult:
     """
     Ejecuta el flujo completo de evaluación: prompt -> Gemini -> validación Pydantic.
-    Soporta Fusión Multimodal Simultánea con múltiples estudios clínicos.
+    Soporta Fusión Multimodal Simultánea con múltiples estudios clínicos y notas de voz.
     Contempla 1 reintento automático en caso de error de formato.
     """
     # Normalizar a lista unificada (prioridad: lista > singular > ninguna)
@@ -261,6 +262,15 @@ def evaluate_clinical_reasoning(
     tiene_imagen = bool(imagenes_list)
     n_imagenes = len(imagenes_list) if imagenes_list else 0
     mime_types = [m for _, m in imagenes_list] if imagenes_list else []
+
+    tiene_audio = bool(audio_bytes)
+    audio_mime = audio_bytes[1] if audio_bytes else None
+
+    # Preparar partes multimodales combinando estudios clínicos y nota de voz
+    multimodal_parts: List[Tuple[bytes, str]] = list(imagenes_list or [])
+    if audio_bytes:
+        multimodal_parts.append(audio_bytes)
+
     # 1. Blindaje clínico contra prompt injection y sanitización de entrada
     scan = security_guard.inspect_input(respuesta_estudiante)
     if not scan.is_safe:
@@ -282,6 +292,8 @@ def evaluate_clinical_reasoning(
         tiene_imagen=tiene_imagen,
         n_imagenes=n_imagenes,
         mime_types=mime_types,
+        tiene_audio=tiene_audio,
+        audio_mime=audio_mime
     )
 
     t_start = time.perf_counter()
@@ -289,7 +301,7 @@ def evaluate_clinical_reasoning(
     model_used = "gemini-3.8-flash"
     raw_text = ""
     try:
-        raw_res = call_gemini_llm(prompt, imagenes_list=imagenes_list, return_telemetry=True)
+        raw_res = call_gemini_llm(prompt, imagenes_list=multimodal_parts if multimodal_parts else None, return_telemetry=True)
         if isinstance(raw_res, tuple):
             raw_text, latency_ms, model_used = raw_res
         else:
@@ -298,7 +310,7 @@ def evaluate_clinical_reasoning(
         resultado = parse_and_validate_llm_json(raw_text)
     except ValueError:
         retry_prompt = prompt + "\n\nNOTA: Asegúrate estrictamente de devolver ÚNICAMENTE el objeto JSON sin bloques de código."
-        raw_res_retry = call_gemini_llm(retry_prompt, imagenes_list=imagenes_list, return_telemetry=True)
+        raw_res_retry = call_gemini_llm(retry_prompt, imagenes_list=multimodal_parts if multimodal_parts else None, return_telemetry=True)
         if isinstance(raw_res_retry, tuple):
             raw_text_retry, latency_ms, model_used = raw_res_retry
             raw_text = raw_text_retry
@@ -353,14 +365,25 @@ def evaluate_phase_reasoning(
     respuesta_estudiante: str,
     chunk: Dict[str, Any],
     historial_previo: str = "",
-    imagenes_list: Optional[List[Tuple[bytes, str]]] = None
+    imagenes_list: Optional[List[Tuple[bytes, str]]] = None,
+    audio_bytes: Optional[Tuple[bytes, str]] = None
 ) -> PhaseEvaluationResult:
     """
     Evalúa la respuesta de una fase clínica específica y devuelve un PhaseEvaluationResult estructurado.
+    Soporta Fusión Multimodal Simultánea con múltiples estudios clínicos y notas de voz.
     """
     tiene_imagen = bool(imagenes_list)
     n_imagenes = len(imagenes_list) if imagenes_list else 0
     mime_types = [m for _, m in imagenes_list] if imagenes_list else []
+
+    tiene_audio = bool(audio_bytes)
+    audio_mime = audio_bytes[1] if audio_bytes else None
+
+    # Preparar partes multimodales combinando estudios clínicos y nota de voz
+    multimodal_parts: List[Tuple[bytes, str]] = list(imagenes_list or [])
+    if audio_bytes:
+        multimodal_parts.append(audio_bytes)
+
     # 1. Blindaje clínico contra prompt injection y sanitización de entrada en fases
     scan = security_guard.inspect_input(respuesta_estudiante)
     if not scan.is_safe:
@@ -388,13 +411,15 @@ def evaluate_phase_reasoning(
         tiene_imagen=tiene_imagen,
         n_imagenes=n_imagenes,
         mime_types=mime_types,
+        tiene_audio=tiene_audio,
+        audio_mime=audio_mime
     )
 
     t_start = time.perf_counter()
     latency_ms = 0.0
     model_used = "gemini-3.8-flash"
     try:
-        raw_res = call_gemini_llm(prompt, imagenes_list=imagenes_list, return_telemetry=True)
+        raw_res = call_gemini_llm(prompt, imagenes_list=multimodal_parts if multimodal_parts else None, return_telemetry=True)
         if isinstance(raw_res, tuple):
             raw_text, latency_ms, model_used = raw_res
         else:
@@ -404,7 +429,7 @@ def evaluate_phase_reasoning(
     except Exception:
         # Fallback defensivo si ocurre error de parseo en la fase
         retry_prompt = prompt + "\n\nIMPORTANTE: Devuelve exclusivamente un objeto JSON sin caracteres Markdown."
-        raw_res_retry = call_gemini_llm(retry_prompt, imagenes_list=imagenes_list, return_telemetry=True)
+        raw_res_retry = call_gemini_llm(retry_prompt, imagenes_list=multimodal_parts if multimodal_parts else None, return_telemetry=True)
         if isinstance(raw_res_retry, tuple):
             raw_text_retry, latency_ms, model_used = raw_res_retry
         else:
@@ -440,6 +465,7 @@ def evaluate_phase_reasoning(
         retroalimentacion_fase=eval_base.retroalimentacion_general,
         desbloquea_siguiente=eval_base.score >= 4.0 or fase_numero >= 3, # Desbloquea si no es reprobación total o si es la última
         datos_fase_siguiente=datos_sig,
+        transcripcion_audio=getattr(eval_base, "transcripcion_audio", None),
         llm_latency_ms=latency_ms,
         llm_model_used=model_used,
         rag_tokens_used=max(1, (len(prompt) + len(str(raw_text))) // 4),

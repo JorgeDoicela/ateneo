@@ -48,6 +48,7 @@ export function useCaseSolver(caseId?: string) {
   // Estados de entrada del estudiante inicializados con borrador si existiera
   const [respuesta, setRespuestaState] = useState<string>(() => (caseId ? getDraft(caseId) : ''));
   const [imagenes, setImagenes] = useState<File[]>([]);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [evaluating, setEvaluating] = useState<boolean>(false);
 
   const setRespuesta = useCallback(
@@ -94,7 +95,7 @@ export function useCaseSolver(caseId?: string) {
   const submitSingleTurn = useCallback(
     async (e?: FormEvent) => {
       if (e) e.preventDefault();
-      if (!caseId || !respuesta.trim() || evaluating) return;
+      if (!caseId || (!respuesta.trim() && !audioBlob) || evaluating) return;
 
       setEvaluating(true);
       setError(null);
@@ -104,7 +105,7 @@ export function useCaseSolver(caseId?: string) {
         await offlineDb.queueEvaluation({
           case_id: caseId,
           case_title: caso?.titulo || 'Caso Clínico',
-          respuesta_estudiante: respuesta,
+          respuesta_estudiante: respuesta || 'Nota de voz clínica registrada',
           user_email: 'estudiante@ateneo.local',
           tipo: 'single_turn',
         });
@@ -127,7 +128,8 @@ export function useCaseSolver(caseId?: string) {
         const res = await evaluationApi.evaluateDirect(
           caseId,
           respuesta,
-          FEATURE_FLAGS.ENABLE_STUDENT_IMAGE_UPLOAD && imagenes.length > 0 ? imagenes : null
+          FEATURE_FLAGS.ENABLE_STUDENT_IMAGE_UPLOAD && imagenes.length > 0 ? imagenes : null,
+          audioBlob
         );
         setResultado(res);
         await offlineDb.cacheEvaluationResult(caseId, res);
@@ -136,32 +138,37 @@ export function useCaseSolver(caseId?: string) {
         await offlineDb.queueEvaluation({
           case_id: caseId,
           case_title: caso?.titulo || 'Caso Clínico',
-          respuesta_estudiante: respuesta,
+          respuesta_estudiante: respuesta || 'Nota de voz clínica registrada',
           user_email: 'estudiante@ateneo.local',
           tipo: 'single_turn',
         });
 
+        const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
         const provisionalOutcome: EvaluationResult = {
           score: 0,
           score_max: 10,
-          aciertos: ['Respuesta resguardada en buffer local tras interrupción de red.'],
+          aciertos: isOnline
+            ? ['Respuesta encolada localmente tras demora o interrupción de conexión.']
+            : ['Respuesta resguardada en buffer local tras interrupción de red.'],
           omisiones: [],
           competencias_deficientes: [],
-          retroalimentacion_general: 'Modo Local Activo: No fue posible contactar al servidor central en este momento. Su respuesta clínica fue almacenada localmente y se enviará de forma automática en segundo plano.',
+          retroalimentacion_general: isOnline
+            ? 'Modo Local Activo: La conexión con el servidor demoró más de lo previsto o se interrumpió temporalmente. Su respuesta clínica fue guardada localmente y se sincronizará automáticamente.'
+            : 'Modo Local Activo: No fue posible contactar al servidor central en este momento. Su respuesta clínica fue almacenada localmente y se enviará de forma automática en segundo plano.',
         };
         setResultado(provisionalOutcome);
       } finally {
         setEvaluating(false);
       }
     },
-    [caseId, respuesta, imagenes, evaluating, caso?.titulo]
+    [caseId, respuesta, imagenes, audioBlob, evaluating, caso?.titulo]
   );
 
   // Envío en Modo Multi-Fase
   const submitPhase = useCallback(
     async (e?: FormEvent) => {
       if (e) e.preventDefault();
-      if (!caseId || !respuesta.trim() || evaluating) return;
+      if (!caseId || (!respuesta.trim() && !audioBlob) || evaluating) return;
 
       setEvaluating(true);
       setError(null);
@@ -175,7 +182,7 @@ export function useCaseSolver(caseId?: string) {
         await offlineDb.queueEvaluation({
           case_id: caseId,
           case_title: caso?.titulo || 'Caso Clínico',
-          respuesta_estudiante: respuesta,
+          respuesta_estudiante: respuesta || 'Nota de voz clínica registrada',
           fase_numero: currentPhase,
           user_email: 'estudiante@ateneo.local',
           tipo: 'phase',
@@ -189,7 +196,7 @@ export function useCaseSolver(caseId?: string) {
           desbloquea_siguiente: true,
         };
 
-        setPhaseAnswers((prev) => ({ ...prev, [currentPhase]: respuesta }));
+        setPhaseAnswers((prev) => ({ ...prev, [currentPhase]: respuesta || 'Nota de voz' }));
         setPhaseResults((prev) => ({ ...prev, [currentPhase]: provisionalPhaseResult }));
         setPhaseScores((prev) => ({ ...prev, [currentPhase]: 0 }));
         setCompletedPhases((prev) =>
@@ -207,10 +214,12 @@ export function useCaseSolver(caseId?: string) {
           caseId,
           currentPhase,
           respuesta,
-          historialText
+          historialText,
+          FEATURE_FLAGS.ENABLE_STUDENT_IMAGE_UPLOAD && imagenes.length > 0 ? imagenes : null,
+          audioBlob
         );
 
-        setPhaseAnswers((prev) => ({ ...prev, [currentPhase]: respuesta }));
+        setPhaseAnswers((prev) => ({ ...prev, [currentPhase]: respuesta || 'Nota de voz clínica' }));
         setPhaseResults((prev) => ({ ...prev, [currentPhase]: res }));
         setPhaseScores((prev) => ({ ...prev, [currentPhase]: res.score_fase }));
         setCompletedPhases((prev) =>
@@ -224,7 +233,7 @@ export function useCaseSolver(caseId?: string) {
         await offlineDb.queueEvaluation({
           case_id: caseId,
           case_title: caso?.titulo || 'Caso Clínico',
-          respuesta_estudiante: respuesta,
+          respuesta_estudiante: respuesta || 'Nota de voz clínica registrada',
           fase_numero: currentPhase,
           user_email: 'estudiante@ateneo.local',
           tipo: 'phase',
@@ -238,7 +247,7 @@ export function useCaseSolver(caseId?: string) {
           desbloquea_siguiente: true,
         };
 
-        setPhaseAnswers((prev) => ({ ...prev, [currentPhase]: respuesta }));
+        setPhaseAnswers((prev) => ({ ...prev, [currentPhase]: respuesta || 'Nota de voz' }));
         setPhaseResults((prev) => ({ ...prev, [currentPhase]: provisionalPhaseResult }));
         setPhaseScores((prev) => ({ ...prev, [currentPhase]: 0 }));
         setCompletedPhases((prev) =>
@@ -251,7 +260,7 @@ export function useCaseSolver(caseId?: string) {
         setEvaluating(false);
       }
     },
-    [caseId, currentPhase, respuesta, phaseAnswers, evaluating, caso?.titulo]
+    [caseId, currentPhase, respuesta, imagenes, audioBlob, phaseAnswers, evaluating, caso?.titulo]
   );
 
   // Avanzar a la siguiente fase
@@ -260,6 +269,7 @@ export function useCaseSolver(caseId?: string) {
     setCurrentPhaseResult(null);
     setRespuesta('');
     setImagenes([]);
+    setAudioBlob(null);
 
     if (currentPhase < totalPhases) {
       setCurrentPhase((prev) => prev + 1);
@@ -289,7 +299,7 @@ export function useCaseSolver(caseId?: string) {
 
       setResultado(finalOutcome);
     }
-  }, [currentPhase, totalPhases, phaseScores, phaseResults]);
+  }, [currentPhase, totalPhases, phaseScores, phaseResults, setRespuesta]);
 
   // Reiniciar caso para reintentar
   const resetCase = useCallback(() => {
@@ -297,6 +307,7 @@ export function useCaseSolver(caseId?: string) {
     setResultado(null);
     setRespuestaState('');
     setImagenes([]);
+    setAudioBlob(null);
     setError(null);
     setCurrentPhase(1);
     setPhaseAnswers({});
@@ -317,6 +328,8 @@ export function useCaseSolver(caseId?: string) {
     setRespuesta,
     imagenes,
     setImagenes,
+    audioBlob,
+    setAudioBlob,
     evaluating,
     resultado,
     isPhaseMode,

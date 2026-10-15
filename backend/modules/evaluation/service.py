@@ -60,6 +60,7 @@ class EvaluationService:
         case_id: str,
         student_answer: str,
         imagenes_bytes: Optional[List[Tuple[bytes, str]]] = None,
+        audio_bytes: Optional[Tuple[bytes, str]] = None,
         user_id: Optional[str] = None,
         user_email: Optional[str] = None,
         tenant_id: Optional[str] = None
@@ -68,7 +69,7 @@ class EvaluationService:
         Ejecuta el ciclo completo de evaluación de razonamiento clínico:
         1. Resuelve el caso clínico y estudios paraclínicos (cargados o predeterminados).
         2. Recupera el fragmento normativo de la GPC del MSP mediante RAG híbrido.
-        3. Realiza la inferencia estructurada multimodal con Gemini.
+        3. Realiza la inferencia estructurada multimodal (texto, imágenes y/o notas de voz) con Gemini.
         4. Persiste el resultado en el historial relacional y actualiza el estado psicométrico BKT
            dentro de una transacción atómica coordinada por Unit of Work (ACID).
         """
@@ -80,9 +81,15 @@ class EvaluationService:
         if not resolved_images and case.imagen_url:
             resolved_images = self._load_case_preset_image(case.imagen_url)
 
-        # Enriquecer la consulta con el contexto del caso si la respuesta es breve o evasiva
+        # Enriquecer la consulta con el contexto del caso si la respuesta es breve o si es nota de voz
         ans_clean = student_answer.strip()
-        query_rag = f"{ans_clean} {case.titulo} {case.pregunta}" if len(ans_clean) < 40 else ans_clean
+        if not ans_clean and audio_bytes:
+            # Nota de voz: usar el título del caso (alta discriminación semántica y baja latencia en CPU)
+            query_rag = case.titulo[:120].strip()
+        elif len(ans_clean) < 40:
+            query_rag = f"{ans_clean} {case.titulo}"[:140].strip()
+        else:
+            query_rag = ans_clean[:180].strip()
 
         chunk = retrieve_relevant_chunk(
             query=query_rag,
@@ -93,7 +100,8 @@ class EvaluationService:
             caso=case,
             respuesta_estudiante=student_answer,
             chunk=chunk,
-            imagenes_list=resolved_images
+            imagenes_list=resolved_images,
+            audio_bytes=audio_bytes
         )
 
         # Si se proporcionan credenciales, persistir atómicamente con Unit of Work
@@ -183,16 +191,24 @@ class EvaluationService:
         respuesta_alumno: str,
         antecedentes_previos: str = "",
         imagenes_estudio: Optional[List[Tuple[bytes, str]]] = None,
+        audio_bytes: Optional[Tuple[bytes, str]] = None,
         fase_nombre: Optional[str] = None
     ) -> PhaseEvaluationResult:
         """
-        Evalúa una fase secuencial clínica individual mediante recuperación RAG acotada.
+        Evalúa una fase secuencial clínica individual mediante recuperación RAG acotada y audio multimodal si aplica.
         """
         case = self.case_service.get_case(case_id)
         if not case:
             raise ValueError(f"Caso clínico '{case_id}' no encontrado.")
 
-        query_rag = f"{respuesta_alumno} {case.titulo}"
+        ans_clean = respuesta_alumno.strip()
+        if not ans_clean and audio_bytes:
+            query_rag = f"{case.titulo} fase {fase_id}"[:120].strip()
+        elif len(ans_clean) < 40:
+            query_rag = f"{ans_clean} {case.titulo}"[:140].strip()
+        else:
+            query_rag = ans_clean[:180].strip()
+
         chunk = retrieve_relevant_chunk(
             query=query_rag,
             guia_filtro=case.guia_asociada
@@ -204,7 +220,8 @@ class EvaluationService:
             respuesta_estudiante=respuesta_alumno,
             chunk=chunk,
             historial_previo=antecedentes_previos or "",
-            imagenes_list=imagenes_estudio
+            imagenes_list=imagenes_estudio,
+            audio_bytes=audio_bytes
         )
 
     def generate_socratic_turn_stream(

@@ -1,10 +1,12 @@
-import { ArrowRight, CheckCircle2, AlertTriangle, BookOpen, Sparkles, Activity } from "lucide-react";
+import { useMemo, useEffect } from "react";
+import { ArrowRight, CheckCircle2, AlertTriangle, BookOpen, Sparkles, Activity, Mic } from "lucide-react";
 import { PhaseEvaluationResult } from "../../../types";
 import { ClinicalMarkdownRenderer } from "../../../core/ui";
 
 export interface PhaseFeedbackCardProps {
   phaseResult: PhaseEvaluationResult;
   currentPhase?: number;
+  audioBlob?: Blob | null;
   onProceedNextPhase: () => void;
   isLastPhase?: boolean;
 }
@@ -12,9 +14,22 @@ export interface PhaseFeedbackCardProps {
 export default function PhaseFeedbackCard({
   phaseResult,
   currentPhase = 1,
+  audioBlob = null,
   onProceedNextPhase,
   isLastPhase = false
 }: PhaseFeedbackCardProps) {
+  const audioUrl = useMemo(() => {
+    return audioBlob ? URL.createObjectURL(audioBlob) : null;
+  }, [audioBlob]);
+
+  useEffect(() => {
+    return () => {
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+      }
+    };
+  }, [audioUrl]);
+
   if (!phaseResult) return null;
 
   const {
@@ -57,6 +72,28 @@ export default function PhaseFeedbackCard({
       {retroalimentacion_fase && (
         <div className="p-4 rounded-[18px] bg-[#f0f4f9] text-sm text-[#1f1f1f] leading-relaxed">
           <ClinicalMarkdownRenderer content={retroalimentacion_fase} />
+        </div>
+      )}
+
+      {/* Audio Multimodal de la Fase (Nota de Voz o Transcripción) */}
+      {(audioUrl || phaseResult.transcripcion_audio) && (
+        <div className="p-4 rounded-[18px] bg-white border border-slate-200/80 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs font-semibold text-[#0b57d0]">
+              <Mic className="w-3.5 h-3.5" />
+              <span>Tu Nota de Voz en esta Fase</span>
+            </div>
+            <span className="text-[11px] text-[#747775]">Evaluada directamente por la IA multimodal</span>
+          </div>
+          {audioUrl ? (
+            <div className="bg-[#f0f4f9] p-3 rounded-[16px] flex items-center">
+              <audio controls src={audioUrl} className="w-full h-10 accent-[#0b57d0]" />
+            </div>
+          ) : (
+            <p className="text-xs text-[#1e293b] italic leading-relaxed bg-[#f0f4f9] p-3 rounded-[16px]">
+              "{phaseResult.transcripcion_audio}"
+            </p>
+          )}
         </div>
       )}
 
@@ -135,15 +172,14 @@ export default function PhaseFeedbackCard({
       )}
 
       {/* Telemetría de Inferencia de la Fase */}
-      {(phaseResult.llm_latency_ms !== undefined || phaseResult.llm_model_used) && (
+      {phaseResult.llm_latency_ms !== undefined && (
         <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 rounded-[18px] bg-slate-50 border border-slate-200/70 text-[11px] text-[#444746]">
           <div className="flex items-center gap-1.5">
             <Activity className="w-3.5 h-3.5 text-[#0b57d0]" />
-            <span className="font-semibold text-[#1f1f1f]">Telemetría:</span>
-            <span>{phaseResult.llm_model_used || 'Gemini 3.8 Flash'}</span>
-            {phaseResult.llm_latency_ms !== undefined && phaseResult.llm_latency_ms > 0 && (
-              <span>en {(phaseResult.llm_latency_ms / 1000).toFixed(2)}s</span>
-            )}
+            <span className="font-semibold text-[#1f1f1f]">Tiempo:</span>
+            <span>
+              {phaseResult.llm_latency_ms > 0 ? `${(phaseResult.llm_latency_ms / 1000).toFixed(2)}s` : '--'}
+            </span>
           </div>
           {phaseResult.paraclinical_studies_count !== undefined && phaseResult.paraclinical_studies_count > 0 && (
             <span>{phaseResult.paraclinical_studies_count} estudio(s) integrado(s)</span>

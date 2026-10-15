@@ -228,23 +228,34 @@ async def download_evaluation_task_artifact(task_id: str):
 @router.post("", response_model=EvaluationResult, dependencies=[Depends(rate_limit_inference)])
 async def evaluate_response(
     case_id: str = Form(...),
-    respuesta_estudiante: str = Form(...),
+    respuesta_estudiante: Optional[str] = Form(""),
     imagenes: Optional[List[UploadFile]] = File(None),
+    audio_estudiante: Optional[UploadFile] = File(None),
     current_user: Optional[UserResponse] = Depends(get_optional_current_user),
     case_service: CaseService = Depends(get_case_service),
     evaluation_service: EvaluationService = Depends(get_evaluation_service)
 ):
     """
-    Recibe la respuesta del estudiante y opcionalmente múltiples estudios diagnósticos
-    simultáneos (ECG, radiografía, gasometría, hemograma, etc.) como lista de archivos.
-    Delega íntegramente en EvaluationService para recuperación RAG, inferencia LLM y persistencia.
+    Recibe la respuesta del estudiante (texto y/o nota de voz clínica directa) y opcionalmente múltiples
+    estudios diagnósticos simultáneos (ECG, radiografía, etc.) como lista de archivos.
+    Delega íntegramente en EvaluationService para recuperación RAG, inferencia LLM multimodal y persistencia.
     """
     caso = case_service.get_case(case_id)
     if not caso:
         raise HTTPException(status_code=404, detail=f"Caso clínico '{case_id}' no encontrado.")
 
-    if not respuesta_estudiante.strip():
-        raise HTTPException(status_code=400, detail="La respuesta del estudiante no puede estar vacía.")
+    texto_limpio = (respuesta_estudiante or "").strip()
+    if not texto_limpio and not audio_estudiante:
+        raise HTTPException(status_code=400, detail="Debe ingresar una respuesta escrita o grabar una nota de voz clínica.")
+
+    # Procesar nota de voz clínica si fue adjuntada
+    audio_tuple: Optional[Tuple[bytes, str]] = None
+    if audio_estudiante and audio_estudiante.filename:
+        audio_content = await audio_estudiante.read()
+        if len(audio_content) > 0:
+            audio_mime = audio_estudiante.content_type or "audio/webm"
+            audio_tuple = (audio_content, audio_mime)
+            logger.info("Nota de voz clínica recibida: %s (%s, %d bytes)", audio_estudiante.filename, audio_mime, len(audio_content))
 
     # Construir lista de (bytes, mime_type) para fusión multimodal si está habilitada por configuración
     imagenes_bytes_list: List[tuple] = []
@@ -265,8 +276,9 @@ async def evaluate_response(
     try:
         resultado = evaluation_service.evaluate_reasoning(
             case_id=case_id,
-            student_answer=respuesta_estudiante,
+            student_answer=texto_limpio,
             imagenes_bytes=imagenes_bytes_list,
+            audio_bytes=audio_tuple,
             user_id=target_user_id,
             user_email=target_user_email,
             tenant_id=target_tenant_id
@@ -285,23 +297,34 @@ async def evaluate_response(
 async def evaluate_phase_response(
     case_id: str = Form(...),
     fase_numero: int = Form(...),
-    respuesta_estudiante: str = Form(...),
+    respuesta_estudiante: Optional[str] = Form(""),
     historial_previo: Optional[str] = Form(""),
     imagenes: Optional[List[UploadFile]] = File(None),
+    audio_estudiante: Optional[UploadFile] = File(None),
     current_user: Optional[UserResponse] = Depends(get_optional_current_user),
     case_service: CaseService = Depends(get_case_service),
     evaluation_service: EvaluationService = Depends(get_evaluation_service)
 ):
     """
     Evalúa una fase clínica secuencial individual (1: Anamnesis, 2: Estudios Paraclínicos, 3: Tratamiento).
-    Devuelve la retroalimentación formativa de la fase delegando en EvaluationService.
+    Soporta nota de voz clínica directa y devuelve la retroalimentación formativa de la fase.
     """
     caso = case_service.get_case(case_id)
     if not caso:
         raise HTTPException(status_code=404, detail=f"Caso clínico '{case_id}' no encontrado.")
 
-    if not respuesta_estudiante.strip():
-        raise HTTPException(status_code=400, detail="La respuesta del estudiante en esta fase no puede estar vacía.")
+    texto_limpio = (respuesta_estudiante or "").strip()
+    if not texto_limpio and not audio_estudiante:
+        raise HTTPException(status_code=400, detail="Debe ingresar una respuesta escrita o grabar una nota de voz clínica en esta fase.")
+
+    # Procesar nota de voz clínica si fue adjuntada
+    audio_tuple: Optional[Tuple[bytes, str]] = None
+    if audio_estudiante and audio_estudiante.filename:
+        audio_content = await audio_estudiante.read()
+        if len(audio_content) > 0:
+            audio_mime = audio_estudiante.content_type or "audio/webm"
+            audio_tuple = (audio_content, audio_mime)
+            logger.info("Nota de voz clínica en fase %d recibida: %s (%s, %d bytes)", fase_numero, audio_estudiante.filename, audio_mime, len(audio_content))
 
     imagenes_bytes_list: List[tuple] = []
     if settings.enable_student_multimodal_uploads and imagenes:
@@ -317,9 +340,10 @@ async def evaluate_phase_response(
         resultado_fase = evaluation_service.evaluate_phase(
             case_id=case_id,
             fase_id=fase_numero,
-            respuesta_alumno=respuesta_estudiante,
+            respuesta_alumno=texto_limpio,
             antecedentes_previos=historial_previo or "",
-            imagenes_estudio=imagenes_bytes_list
+            imagenes_estudio=imagenes_bytes_list,
+            audio_bytes=audio_tuple
         )
         return resultado_fase
     except HTTPException:

@@ -81,18 +81,17 @@ describe('Componente FeedbackCard (Ateneo+)', () => {
     expect(emojiRegex.test(textContent)).toBe(false);
   });
 
-  it('debe renderizar la insignia de telemetría de inferencia clínica sin emojis', () => {
+  it('debe renderizar el tiempo de respuesta clínico sin emojis ni mención a proveedores', () => {
     const telemetryResult = {
       ...mockResult,
       llm_latency_ms: 1250,
-      llm_model_used: 'Gemini 3.8 Flash',
       paraclinical_studies_count: 2,
       faithfulness_score: 0.95
     };
     render(<FeedbackCard result={telemetryResult} studentAnswer="Test" onReset={() => {}} />);
-    expect(screen.getByText(/Telemetría de Inferencia:/i)).toBeInTheDocument();
-    expect(screen.getByText(/Gemini 3.8 Flash/i)).toBeInTheDocument();
-    expect(screen.getByText(/en 1.25s/i)).toBeInTheDocument();
+    expect(screen.getByText(/Tiempo:/i)).toBeInTheDocument();
+    expect(screen.getByText(/1.25s/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Gemini/i)).not.toBeInTheDocument();
     expect(screen.getByText(/2 estudio\(s\) paraclínico\(s\)/i)).toBeInTheDocument();
   });
 

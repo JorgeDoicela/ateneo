@@ -92,10 +92,14 @@ export default defineConfig({
       '/api': {
         target: process.env.BACKEND_PROXY_URL || process.env.VITE_API_URL || 'http://localhost:8000',
         changeOrigin: true,
+        timeout: 180000,
+        proxyTimeout: 180000,
       },
       '/static': {
         target: process.env.BACKEND_PROXY_URL || process.env.VITE_API_URL || 'http://localhost:8000',
         changeOrigin: true,
+        timeout: 60000,
+        proxyTimeout: 60000,
       }
     }
   },

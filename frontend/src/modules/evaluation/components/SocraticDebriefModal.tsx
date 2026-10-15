@@ -29,6 +29,18 @@ export const SocraticDebriefModal: React.FC = () => {
     }
   }, [historial, currentStreamText]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeDebrief();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, closeDebrief]);
+
   if (!isOpen) return null;
 
   const omisionesList = omisiones.length > 0 ? omisiones : (omisionActiva ? [omisionActiva] : []);
@@ -46,25 +58,30 @@ export const SocraticDebriefModal: React.FC = () => {
       role="dialog"
       aria-modal="true"
       aria-labelledby="socratic-title"
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn"
+      onClick={closeDebrief}
     >
-      <div className="bg-white w-full max-w-2xl rounded-[28px] shadow-2xl flex flex-col max-h-[85vh] overflow-hidden animate-scaleUp border border-slate-200/60">
+      <div 
+        className="bg-white w-full max-w-2xl rounded-[28px] shadow-2xl flex flex-col max-h-[90vh] sm:max-h-[85vh] overflow-hidden animate-scaleUp border border-slate-200/60"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Cabecera Institucional */}
-        <div className="p-5 sm:p-6 border-b border-slate-100 flex items-start justify-between">
-          <div className="flex items-center space-x-3">
-            <MessageSquare className="w-6 h-6 text-[#0b57d0] shrink-0" />
-            <div>
-              <h2 id="socratic-title" className="text-lg font-heading font-semibold text-slate-900 tracking-tight">
+        <div className="p-4 sm:p-6 border-b border-slate-100 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-[#0b57d0] shrink-0" />
+            <div className="min-w-0 flex-1">
+              <h2 id="socratic-title" className="text-base sm:text-lg font-heading font-semibold text-slate-900 tracking-tight leading-tight truncate">
                 Debate Socrático Clínico Integral
               </h2>
-              <p className="text-xs text-slate-500 font-medium truncate max-w-md">
+              <p className="text-xs text-slate-500 font-medium truncate">
                 {caseTitle || 'Simulación Clínica Formativa'} • {omisionesList.length} brecha(s) formativa(s)
               </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={closeDebrief}
-            className="text-slate-400 hover:text-slate-700 p-1.5 rounded-full transition-colors cursor-pointer"
+            className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 flex items-center justify-center text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-full transition-colors cursor-pointer"
             aria-label="Cerrar debriefing socrático"
           >
             <X className="w-5 h-5" />

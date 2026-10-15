@@ -23,10 +23,12 @@ import useCaseSolver from '../hooks/useCaseSolver';
 import FeedbackCard from '../components/FeedbackCard';
 import EvaluationGameLoader from '../components/EvaluationGameLoader';
 import VoiceInputButton from '../components/VoiceInputButton';
+import ClinicalVoiceRecorder from '../components/ClinicalVoiceRecorder';
 import ImageUploadZone from '../components/ImageUploadZone';
 import SimulationStepper from '../components/SimulationStepper';
 import PhaseFeedbackCard from '../components/PhaseFeedbackCard';
 import SocraticDebriefModal from '../components/SocraticDebriefModal';
+import { useSocraticDebriefStore } from '../store/useSocraticDebriefStore';
 import ClinicalButton from '../../../core/ui/ClinicalButton';
 import { ClinicalMarkdownRenderer } from '../../../core/ui/ClinicalMarkdownRenderer';
 import useLearningTelemetry from '../../analytics/hooks/useLearningTelemetry';
@@ -38,6 +40,14 @@ const DicomStudyViewer = lazy(() => import('../components/DicomStudyViewer'));
 export default function CaseSolve() {
   const { id } = useParams<{ id: string }>();
 
+  // Limpiar y cerrar cualquier diálogo socrático remanente al cambiar de caso o salir de la resolución
+  useEffect(() => {
+    useSocraticDebriefStore.getState().closeDebrief();
+    return () => {
+      useSocraticDebriefStore.getState().closeDebrief();
+    };
+  }, [id]);
+
   const {
     caso,
     loading,
@@ -46,6 +56,8 @@ export default function CaseSolve() {
     setRespuesta,
     imagenes,
     setImagenes,
+    audioBlob,
+    setAudioBlob,
     evaluating,
     resultado,
     isPhaseMode,
@@ -236,6 +248,7 @@ export default function CaseSolve() {
         <PhaseFeedbackCard
           phaseResult={currentPhaseResult}
           currentPhase={currentPhase}
+          audioBlob={audioBlob}
           onProceedNextPhase={proceedToNextPhase}
           isLastPhase={currentPhase >= totalPhases}
         />
@@ -246,6 +259,7 @@ export default function CaseSolve() {
         <FeedbackCard
           result={resultado}
           studentAnswer={respuesta}
+          audioBlob={audioBlob}
           onReset={resetCase}
         />
       )}
@@ -458,7 +472,7 @@ export default function CaseSolve() {
 
           {/* Panel Derecho: Área de Resolución Diagnóstica */}
           <div className="lg:col-span-6 bg-white rounded-[24px] sm:rounded-[28px] p-5 sm:p-7 md:p-8 shadow-xs border-0 space-y-6">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100">
               <div className="space-y-0.5">
                 <h3 className="text-base font-normal text-[#1f1f1f] font-heading">
                   Tu Resolución Clínica
@@ -468,27 +482,37 @@ export default function CaseSolve() {
                 </p>
               </div>
 
-              <VoiceInputButton
-                value={respuesta}
-                onChange={setRespuesta}
-                disabled={evaluating}
-              />
+              <div className="flex flex-wrap items-center gap-2">
+                <VoiceInputButton
+                  value={respuesta}
+                  onChange={setRespuesta}
+                  disabled={evaluating}
+                />
+                <ClinicalVoiceRecorder
+                  onAudioChange={setAudioBlob}
+                  disabled={evaluating}
+                />
+              </div>
             </div>
 
             <form
               onSubmit={isPhaseMode ? submitPhase : submitSingleTurn}
-              className="space-y-6"
+              className="space-y-5"
             >
               <div>
                 <textarea
                   id="clinical-answer-input"
-                  rows={8}
+                  rows={7}
                   value={respuesta}
                   onChange={(e) => setRespuesta(e.target.value)}
                   disabled={evaluating}
-                  placeholder="Detalla tu impresión diagnóstica, paraclínicos solicitados, hidratación, dosificación y criterios de seguimiento según la norma oficial..."
+                  placeholder={
+                    audioBlob 
+                      ? "Opcional: agrega notas escritas complementarias a tu nota de voz..."
+                      : "Detalla tu impresión diagnóstica, paraclínicos solicitados, hidratación, dosificación y criterios de seguimiento según la norma oficial..."
+                  }
                   className="w-full p-4 bg-[#f0f4f9] rounded-[20px] text-sm text-[#1f1f1f] border border-slate-200/80 focus:outline-none focus:border-[#0b57d0] focus:bg-white transition-all leading-relaxed placeholder:text-[#747775] resize-none"
-                  required
+                  required={!audioBlob}
                 />
               </div>
 
@@ -515,12 +539,12 @@ export default function CaseSolve() {
                   size="md"
                   className="w-full sm:w-auto min-h-[44px]"
                   loading={evaluating}
-                  disabled={!respuesta.trim() || evaluating}
+                  disabled={(!respuesta.trim() && !audioBlob) || evaluating}
                   icon={Send}
                 >
                   {isPhaseMode
                     ? `Evaluar Fase ${currentPhase}`
-                    : 'Emitir Diagnóstico'}
+                    : (audioBlob && !respuesta.trim() ? 'Evaluar Nota de Voz' : 'Emitir Diagnóstico')}
                 </ClinicalButton>
               </div>
             </form>

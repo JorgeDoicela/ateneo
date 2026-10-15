@@ -63,6 +63,7 @@ class EvaluationResult(BaseModel):
     llm_model_used: Optional[str] = Field("gemini-3.8-flash", description="Modelo LLM que generó el dictamen clínico")
     rag_tokens_used: Optional[int] = Field(0, description="Tokens consumidos en prompt y generación")
     paraclinical_studies_count: Optional[int] = Field(0, description="Cantidad de estudios paraclínicos (imágenes/labs) evaluados")
+    transcripcion_audio: Optional[str] = Field(None, description="Transcripción médica fiel del razonamiento expuesto en la nota de voz del estudiante")
 
 class EvaluationRequest(BaseModel):
     case_id: str = Field(..., description="ID del caso clínico evaluado")
@@ -91,6 +92,7 @@ class PhaseEvaluationResult(BaseModel):
     llm_model_used: Optional[str] = Field("gemini-3.8-flash", description="Modelo LLM utilizado")
     rag_tokens_used: Optional[int] = Field(0, description="Tokens consumidos en prompt y generación")
     paraclinical_studies_count: Optional[int] = Field(0, description="Cantidad de estudios paraclínicos evaluados")
+    transcripcion_audio: Optional[str] = Field(None, description="Transcripción médica fiel del razonamiento expuesto en la nota de voz de esta fase")
 
 
 class ClinicalCaseSchema(BaseModel):

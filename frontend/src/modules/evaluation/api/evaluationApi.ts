@@ -6,10 +6,19 @@ import type { EvaluationResult, PhaseEvaluationResult } from '../../../types';
  * Servicio de Red de Evaluación Clínica, RAG y Feedback con Validación Zod
  */
 export const evaluationApi = {
-  async evaluateDirect(caseId: string, respuestaEstudiante: string, imagenes: File[] | null = null): Promise<EvaluationResult> {
+  async evaluateDirect(
+    caseId: string,
+    respuestaEstudiante: string,
+    imagenes: File[] | null = null,
+    audioBlob?: Blob | null
+  ): Promise<EvaluationResult> {
     const formData = new FormData();
     formData.append('case_id', caseId);
     formData.append('respuesta_estudiante', respuestaEstudiante);
+
+    if (audioBlob) {
+      formData.append('audio_estudiante', audioBlob, 'nota_voz_clinica.webm');
+    }
 
     if (imagenes && imagenes.length > 0) {
       imagenes.forEach((img) => {
@@ -31,12 +40,17 @@ export const evaluationApi = {
     faseNumero: number,
     respuestaEstudiante: string,
     historialPrevio: string = '',
-    imagenes: File[] | null = null
+    imagenes: File[] | null = null,
+    audioBlob?: Blob | null
   ): Promise<PhaseEvaluationResult> {
     const formData = new FormData();
     formData.append('case_id', caseId);
     formData.append('fase_numero', faseNumero.toString());
     formData.append('respuesta_estudiante', respuestaEstudiante);
+
+    if (audioBlob) {
+      formData.append('audio_estudiante', audioBlob, 'nota_voz_fase.webm');
+    }
 
     if (historialPrevio) {
       formData.append('historial_previo', historialPrevio);
