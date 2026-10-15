@@ -13,10 +13,8 @@ import {
   ChevronDown,
   Check,
   User,
-  X,
-  GraduationCap
+  X
 } from 'lucide-react';
-import ClinicalCareerModal from '../../../modules/gamification/components/ClinicalCareerModal';
 import { useAuth } from '../../../context/AuthContext';
 import { useTheme } from '../../theme/ThemeProvider';
 import type { TenantId } from '../../theme/tokens';
@@ -39,7 +37,6 @@ export default function UserProfileDropdown({ showLabel = false }: UserProfileDr
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLangOpen, setIsLangOpen] = useState<boolean>(false);
-  const [showCareerModal, setShowCareerModal] = useState<boolean>(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -234,66 +231,48 @@ export default function UserProfileDropdown({ showLabel = false }: UserProfileDr
             </div>
           )}
 
-          {/* 5. Acceso a Carrera Formativa e Hitos Clínicos */}
-          <div className="py-2 border-b border-slate-100">
-            <button
-              type="button"
-              onClick={() => {
-                setIsOpen(false);
-                setShowCareerModal(true);
-              }}
-              className="w-full flex items-center justify-between px-2.5 py-2 text-xs text-slate-700 hover:text-blue-600 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer"
-            >
-              <span className="flex items-center gap-2 font-medium">
-                <GraduationCap className="w-4 h-4 text-[#0b57d0]" />
-                <span>Carrera Formativa e Hitos</span>
-              </span>
-              <span className="text-[10px] text-blue-600 font-semibold bg-blue-50 px-2 py-0.5 rounded-full">
-                Ver Hitos
-              </span>
-            </button>
-          </div>
+          {/* 5. Selector de Idioma Customizado (Restringido a Administradores) */}
+          {user.rol === 'administrador' && (
+            <div className="py-2 border-b border-slate-100 text-xs space-y-1.5">
+              <button
+                type="button"
+                onClick={() => setIsLangOpen(!isLangOpen)}
+                className="w-full flex items-center justify-between py-1 text-slate-700 hover:text-blue-600 transition-colors cursor-pointer group"
+              >
+                <span className="flex items-center gap-1.5 text-slate-500 font-medium">
+                  <Globe className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                  Idioma
+                </span>
+                <span className="flex items-center gap-1 font-semibold text-slate-700 group-hover:text-blue-600">
+                  <span>{supportedLocales.find(l => l.code === locale)?.label || locale}</span>
+                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isLangOpen ? 'rotate-180 text-blue-600' : ''}`} />
+                </span>
+              </button>
 
-          {/* 6. Selector de Idioma Customizado (Cero controles nativos del SO) */}
-          <div className="py-2 border-b border-slate-100 text-xs space-y-1.5">
-            <button
-              type="button"
-              onClick={() => setIsLangOpen(!isLangOpen)}
-              className="w-full flex items-center justify-between py-1 text-slate-700 hover:text-blue-600 transition-colors cursor-pointer group"
-            >
-              <span className="flex items-center gap-1.5 text-slate-500 font-medium">
-                <Globe className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-500 transition-colors" />
-                Idioma
-              </span>
-              <span className="flex items-center gap-1 font-semibold text-slate-700 group-hover:text-blue-600">
-                <span>{supportedLocales.find(l => l.code === locale)?.label || locale}</span>
-                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isLangOpen ? 'rotate-180 text-blue-600' : ''}`} />
-              </span>
-            </button>
-
-            {isLangOpen && (
-              <div className="pt-1 pb-1 space-y-1 animate-fadeIn bg-slate-50/70 rounded-xl p-1.5 border border-slate-100">
-                {supportedLocales.map((locItem) => (
-                  <button
-                    key={locItem.code}
-                    type="button"
-                    onClick={() => {
-                      changeLocale(locItem.code as SupportedLocale);
-                      setIsLangOpen(false);
-                    }}
-                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
-                      locale === locItem.code
-                        ? 'bg-blue-50 text-blue-700 font-semibold'
-                        : 'text-slate-600 hover:bg-white hover:text-slate-900'
-                    }`}
-                  >
-                    <span>{locItem.label}</span>
-                    {locale === locItem.code && <Check className="w-3.5 h-3.5 text-blue-600" />}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+              {isLangOpen && (
+                <div className="pt-1 pb-1 space-y-1 animate-fadeIn bg-slate-50/70 rounded-xl p-1.5 border border-slate-100">
+                  {supportedLocales.map((locItem) => (
+                    <button
+                      key={locItem.code}
+                      type="button"
+                      onClick={() => {
+                        changeLocale(locItem.code as SupportedLocale);
+                        setIsLangOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
+                        locale === locItem.code
+                          ? 'bg-blue-50 text-blue-700 font-semibold'
+                          : 'text-slate-600 hover:bg-white hover:text-slate-900'
+                      }`}
+                    >
+                      <span>{locItem.label}</span>
+                      {locale === locItem.code && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* 6. Botón Cerrar Sesión */}
           <div className="pt-2">
@@ -310,11 +289,6 @@ export default function UserProfileDropdown({ showLabel = false }: UserProfileDr
       </div>,
       document.body
     )}
-
-    <ClinicalCareerModal
-      isOpen={showCareerModal}
-      onClose={() => setShowCareerModal(false)}
-    />
   </div>
   );
 }

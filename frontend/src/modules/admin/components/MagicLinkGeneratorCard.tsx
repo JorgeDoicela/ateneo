@@ -242,22 +242,27 @@ export const MagicLinkGeneratorCard: React.FC = () => {
 
   const buildInviteMessage = (link: MagicLinkRecord): string => {
     const finalUrl = normalizeShareableUrl(link.magic_link_url);
-    const roleCapitalized = link.rol.charAt(0).toUpperCase() + link.rol.slice(1);
-    const destName = link.target_path.includes('teacher') 
-      ? 'Panel Docente (Casos, Salas y Analítica)' 
-      : link.target_path.includes('admin') 
-      ? 'Consola de Administración' 
-      : 'Simulador Clínico (Casos y RAG MSP)';
+    
+    // Si el nombre es un tag genérico como "Estudiante 1", "Participante 2", etc., usamos fórmula universal respetuosa
+    const isGenericTag = !link.recipient_name || /^(estudiante|alumno|participante|evaluador|docente|usuario)\s*\d+$/i.test(link.recipient_name.trim());
+    
+    const recipientGreeting = isGenericTag 
+      ? 'Estimado(a):' 
+      : `Estimado(a) ${link.recipient_name}:`;
 
-    const recipientGreeting = link.recipient_name 
-      ? `Estimado(a) ${link.recipient_name}:` 
-      : 'Estimado(a) colega:';
+    const profileText = link.rol === 'docente'
+      ? 'Panel Docente (Casos Clínicos, Salas en Tiempo Real y Analítica)'
+      : link.rol === 'administrador'
+      ? 'Consola de Administración'
+      : 'Simulación Formativa y Casos Clínicos (GPC Ecuador)';
 
     const modalityText = link.max_uses > 1 
-      ? 'Acceso continuo reutilizable (puede ingresar múltiples veces durante la vigencia guardando su historial)'
-      : 'Uso personal (1 solo acceso)';
+      ? 'Acceso continuo (puede ingresar cuantas veces requiera; su historial y avance se conservarán automáticamente)'
+      : 'Acceso personal (1 solo ingreso)';
 
-    return `${recipientGreeting}\n\nLe comparto su enlace de acceso a la plataforma Ateneo+ (Simulador Clínico):\n\n- Rol asignado: ${roleCapitalized}\n- Enlace directo (1 clic): ${finalUrl}\n- Modalidad: ${modalityText}\n- Vigencia: ${new Date(link.expires_at).toLocaleDateString()}\n\nPuede ingresar desde su navegador móvil o de escritorio cuantas veces necesite. No requiere contraseñas.`;
+    const expiryDate = new Date(link.expires_at).toLocaleDateString();
+
+    return `${recipientGreeting}\n\nLe comparto su enlace de acceso institucional para la evaluación y prueba de la plataforma Ateneo+ (Simulador Clínico con Inteligencia Artificial):\n\n• Enlace directo (1 clic): ${finalUrl}\n• Perfil de acceso: ${profileText}\n• Modalidad: ${modalityText}\n• Sin contraseñas: Autenticación directa y segura desde navegador móvil o de escritorio.\n• Vigencia: Disponible hasta el ${expiryDate}.\n\nSu criterio y retroalimentación interactuando con los casos estructurados bajo las Guías de Práctica Clínica (GPC Ecuador) serán de gran valor para este proyecto académico. Agradecemos de antemano su distinguida colaboración y tiempo.`;
   };
 
   const handleCopyMessage = (link: MagicLinkRecord) => {

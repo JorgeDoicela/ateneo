@@ -309,7 +309,6 @@
       "enunciado": "Recién nacido a término (39 semanas de gestación, peso 3,200 g), producto de parto vaginal complicado por desprendimiento prematuro de placenta normoinserta y sufrimiento fetal agudo. Presenta líquido amniótico meconial espeso, apnea y bradicardia severa al nacer, requiriendo reanimación neonatal avanzada con intubación endotraqueal.\n\n**Evaluación Neonatal Inmediata:**\n- **Puntuación de APGAR:** 2 al minuto 1 | 3 a los 5 minutos\n- **Gasometría de cordón umbilical:** pH 6.95, PaCO2 58 mmHg, HCO3 12 mmol/L, Exceso de Bases (EB) -16 mmol/L\n\n**Evolución a las 2 horas de vida:**\n- Letargia marcada e hipotonía generalizada\n- Reflejos arcaicos (succión y moro) ausentes\n- Crisis convulsivas sutiles (movimientos de pedaleo y parpadeo repetitivo)",
       "pregunta": "Conforme a la GPC oficial de Encefalopatía Hipóxico-Isquémica (EHI-RN) del MSP Ecuador:\n1. Clasifique la gravedad del cuadro clínico según la escala de Sarnat (EHI Moderada-Grave / Estadio II-III).\n2. Determine los criterios e indicación de inicio de Hipotermia Terapéutica corporal total antes de las 6 horas de vida.\n3. Establezca las directrices de neuroprotección, soporte hemodinámico y control metabólico en UCIN.",
       "nivel_esperado": "pregrado_avanzado",
-      "imagen_url": "/static/images/ehirn_coagulograma.png",
       "competencias_activadas": [
         "semiologia_anamnesis",
         "correlacion_multimodal",
@@ -359,7 +358,6 @@
       "enunciado": "Paciente masculino de 3 años de edad (peso 14 kg), es llevado a emergencias por presentar fiebre de 38.9 °C de 3 días de evolución, tos frecuente, decaimiento e hiporexia. Desde hace 8 horas presenta taquipnea y dificultad respiratoria progresiva.\n\n**Examen físico y signos vitales:**\n- **Frecuencia Cardíaca:** 138 lpm\n- **Frecuencia Respiratoria:** 46 rpm (taquipnea para rango de 1 a 5 años: >= 40 rpm)\n- **Saturación O2:** 89% al aire ambiente\n- **Temperatura:** 38.9 °C axilar\n- **Estado general:** Letárgico, tiraje subcostal e intercostal marcado, aleteo nasal\n- **Auscultación pulmonar:** Estertores crepitantes y disminución del murmullo vesicular en base pulmonar derecha",
       "pregunta": "De acuerdo con la GPC de Neumonía Adquirida en la Comunidad en Pediatría del MSP Ecuador:\n1. Identifique los signos de gravedad clínica y criterios de ingreso hospitalario inmediato.\n2. Indique el manejo inicial de soporte oxigenatorio y monitoreo continuo.\n3. Prescriba el esquema antibiótico empírico parenteral de primera línea normado por el MSP (Ampicilina parenteral 150-200 mg/kg/día IV cada 6 horas).",
       "nivel_esperado": "pregrado_avanzado",
-      "imagen_url": "/static/images/neumonia_rx.png",
       "competencias_activadas": [
         "semiologia_anamnesis",
         "examenes_complementarios",

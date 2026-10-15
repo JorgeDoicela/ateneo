@@ -30,7 +30,7 @@ export default function CareerBadgeButton() {
         type="button"
         onClick={() => setShowModal(true)}
         title="Carrera Formativa e Hitos Clínicos"
-        className="flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 select-none bg-gradient-to-r from-cyan-50/50 via-blue-50/40 to-indigo-50/50 hover:from-cyan-100/70 hover:via-blue-100/60 hover:to-indigo-100/70 text-slate-700 hover:text-[#0b57d0] border border-blue-200/60 hover:border-blue-300/90 shadow-xs hover:shadow-sm cursor-pointer"
+        className="hidden md:flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 select-none bg-gradient-to-r from-cyan-50/50 via-blue-50/40 to-indigo-50/50 hover:from-cyan-100/70 hover:via-blue-100/60 hover:to-indigo-100/70 text-slate-700 hover:text-[#0b57d0] border border-blue-200/60 hover:border-blue-300/90 shadow-xs hover:shadow-sm cursor-pointer"
       >
         <GraduationCap className="w-4 h-4 text-[#0b57d0]" />
         <span className="hidden sm:inline font-semibold">
