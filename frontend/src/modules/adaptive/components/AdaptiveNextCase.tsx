@@ -35,10 +35,30 @@ export default function AdaptiveNextCase({ onSelectCase, onToggleGraph }: Adapti
 
   if (loading) {
     return (
-      <div className="w-full bg-white rounded-[24px] border border-slate-200/80 p-6 animate-pulse mb-8 shadow-sm">
-        <div className="h-4 bg-slate-200 rounded w-1/4 mb-4"></div>
-        <div className="h-6 bg-slate-200 rounded w-3/4 mb-3"></div>
-        <div className="h-4 bg-slate-100 rounded w-1/2"></div>
+      <div className="relative w-full mb-8">
+        {/* Halo estático suave mientras carga */}
+        <div 
+          className="absolute -inset-1.5 bg-gradient-to-r from-cyan-400/10 via-blue-500/10 to-violet-500/10 rounded-[32px] blur-xl opacity-40 pointer-events-none" 
+          aria-hidden="true"
+        />
+        <div className="relative w-full bg-white/90 backdrop-blur-xl rounded-[24px] sm:rounded-[28px] border border-white/80 shadow-sm p-5 sm:p-7 md:p-8 animate-pulse">
+          {/* Encabezado esqueleto */}
+          <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+            <div className="h-4 bg-slate-200/70 rounded-full w-36"></div>
+            <div className="h-4 bg-slate-200/50 rounded-full w-28 hidden sm:block"></div>
+          </div>
+          {/* Cuerpo esqueleto con dimensiones idénticas a la tarjeta final */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-center pt-4">
+            <div className="lg:col-span-8 space-y-3">
+              <div className="h-3.5 bg-slate-200/60 rounded-full w-48"></div>
+              <div className="h-7 bg-slate-200/80 rounded-lg w-4/5 sm:w-3/5"></div>
+              <div className="h-3.5 bg-slate-200/50 rounded-full w-64"></div>
+            </div>
+            <div className="lg:col-span-4 flex justify-end">
+              <div className="h-11 bg-slate-200/70 rounded-[18px] w-full lg:w-36"></div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -51,7 +71,7 @@ export default function AdaptiveNextCase({ onSelectCase, onToggleGraph }: Adapti
   const pPct = Math.round((competencia_objetivo?.p_dominio || 0.4) * 100);
 
   return (
-    <div className="relative w-full mb-8 group">
+    <div className="relative w-full mb-8 group animate-fadeIn">
       {/* Halo de Iluminación Ambiental Líquido con Barrido hacia la Derecha (Adaptativo Móvil/Escritorio) */}
       <div 
         className="absolute -inset-1.5 bg-[linear-gradient(90deg,rgba(6,182,212,0.35)_0%,rgba(37,99,235,0.3)_33%,rgba(124,58,237,0.35)_66%,rgba(6,182,212,0.35)_100%)] animate-liquid-wave rounded-[32px] blur-xl opacity-30 touch-ambient-glow group-hover:opacity-75 group-active:opacity-95 transition-opacity duration-300 pointer-events-none" 

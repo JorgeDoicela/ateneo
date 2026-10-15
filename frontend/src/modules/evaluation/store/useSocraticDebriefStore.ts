@@ -3,7 +3,7 @@ import type { SocraticDebriefState, SocraticDialogTurn } from '../../../types';
 import { streamSocraticTurn } from '../../../core/http/eventStreamClient';
 
 interface SocraticDebriefActions {
-  openDebrief: (caseId: string, caseTitle: string, omision: string) => void;
+  openDebrief: (caseId: string, caseTitle: string, omisiones: string[] | string) => void;
   closeDebrief: () => void;
   sendReplica: (replicaText: string) => Promise<void>;
   resetDialog: () => void;
@@ -18,21 +18,30 @@ export const useSocraticDebriefStore = create<SocraticDebriefStore>((set, get) =
   caseId: '',
   caseTitle: '',
   omisionActiva: '',
+  omisiones: [],
   historial: [],
   currentStreamText: '',
   isStreaming: false,
   error: null,
 
-  openDebrief: (caseId: string, caseTitle: string, omision: string) => {
+  openDebrief: (caseId: string, caseTitle: string, omisionesInput: string[] | string) => {
     if (activeAbortController) {
       activeAbortController.abort();
       activeAbortController = null;
     }
+
+    const normalizedOmisiones = Array.isArray(omisionesInput)
+      ? omisionesInput.filter(Boolean)
+      : (omisionesInput ? [omisionesInput] : []);
+
+    const primaryOmision = normalizedOmisiones.length > 0 ? normalizedOmisiones[0] : '';
+
     set({
       isOpen: true,
       caseId,
       caseTitle,
-      omisionActiva: omision,
+      omisionActiva: primaryOmision,
+      omisiones: normalizedOmisiones,
       historial: [],
       currentStreamText: '',
       isStreaming: false,
@@ -62,7 +71,7 @@ export const useSocraticDebriefStore = create<SocraticDebriefStore>((set, get) =
   },
 
   sendReplica: async (replicaText: string) => {
-    const { caseId, omisionActiva, historial, isStreaming } = get();
+    const { caseId, omisionActiva, omisiones, historial, isStreaming } = get();
     const cleanReplica = replicaText.trim();
     if (!cleanReplica || isStreaming) return;
 
@@ -86,6 +95,7 @@ export const useSocraticDebriefStore = create<SocraticDebriefStore>((set, get) =
     const payload = {
       case_id: caseId,
       omision_clinica: omisionActiva,
+      omisiones_clinicas: omisiones.length > 0 ? omisiones : [omisionActiva],
       estudiante_replica: cleanReplica,
       historial: historial.map((h) => ({ role: h.role, text: h.text })),
     };

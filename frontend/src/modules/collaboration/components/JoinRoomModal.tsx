@@ -62,49 +62,76 @@ export default function JoinRoomModal({ isOpen, onClose }: JoinRoomModalProps) {
       aria-labelledby="join-room-title"
     >
       <div 
-        className="bg-white rounded-[28px] shadow-2xl border border-slate-100 max-w-md w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 space-y-6 animate-scaleUp"
+        className="bg-white rounded-[28px] shadow-2xl border border-slate-200/60 max-w-lg w-full p-6 sm:p-8 space-y-6 animate-scaleUp relative overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+        {/* Halos difusos sutiles de fondo para refracción Glassmorphism confinados en el modal */}
+        <div 
+          className="pointer-events-none absolute -top-12 -right-12 w-52 h-52 bg-gradient-to-br from-cyan-400/15 via-blue-500/10 to-transparent rounded-full blur-2xl"
+          aria-hidden="true"
+        />
+        <div 
+          className="pointer-events-none absolute -bottom-10 -left-10 w-52 h-52 bg-gradient-to-tl from-indigo-500/15 via-violet-500/10 to-transparent rounded-full blur-2xl"
+          aria-hidden="true"
+        />
+
+        {/* Cabecera del Diálogo */}
+        <div className="flex items-center justify-between border-b border-slate-100/90 pb-4 relative z-10">
           <div className="flex items-center gap-2.5">
-            <Users className="w-5 h-5 text-[#0b57d0]" />
-            <h3 className="text-lg font-normal text-[#1f1f1f] font-heading">
-              Unirse a Sala de Ateneo
-            </h3>
+            <Users className="w-5 h-5 text-blue-600 shrink-0" />
+            <div>
+              <h3 id="join-room-title" className="text-lg font-heading font-normal text-slate-900 tracking-tight">
+                Unirse a Sala de Ateneo
+              </h3>
+              <p className="text-xs text-slate-500">
+                Discusión clínica sincrónica y análisis de casos en tiempo real
+              </p>
+            </div>
           </div>
           <button
             onClick={handleClose}
-            className="p-1.5 rounded-full hover:bg-slate-100 text-[#747775] cursor-pointer transition-colors"
+            className="p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 cursor-pointer transition-colors"
+            aria-label="Cerrar modal"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form onSubmit={handleJoinRoom} className="space-y-4">
+        {/* Formulario */}
+        <form onSubmit={handleJoinRoom} className="space-y-5 relative z-10">
           <div>
-            <label className="block text-xs font-medium text-[#444746] mb-1.5">
+            <label htmlFor="room-code-input" className="block text-xs font-medium text-slate-700 mb-1.5">
               Código de Sala (6 u 8 caracteres)
             </label>
-            <input
-              type="text"
-              placeholder="ej. ATENEO-8Q8Y"
-              value={roomInput}
-              onChange={(e) => setRoomInput(e.target.value.toUpperCase())}
-              required
-              autoFocus
-              className="w-full px-4 py-3 bg-[#f0f4f9] rounded-[16px] text-sm font-mono uppercase text-[#1f1f1f] border border-slate-200/80 focus:outline-none focus:border-[#0b57d0]"
-            />
+            <div className="relative">
+              <input
+                id="room-code-input"
+                type="text"
+                placeholder="ej. ATENEO-8Q8Y"
+                value={roomInput}
+                onChange={(e) => setRoomInput(e.target.value.toUpperCase())}
+                required
+                autoFocus
+                maxLength={16}
+                className="w-full px-4 py-3 bg-[#f0f4f9] rounded-[16px] text-sm font-mono uppercase tracking-wider text-slate-900 border border-slate-200/90 focus:outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100/60 transition-all placeholder:text-slate-400"
+              />
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1.5">
+              Solicita el código al docente facilitador o al creador de la sesión clínica.
+            </p>
           </div>
 
           {joinError && (
-            <p className="text-xs text-rose-600 font-medium">{joinError}</p>
+            <div className="p-3 bg-rose-50/90 border border-rose-200/80 rounded-[14px] text-xs text-rose-700 font-medium animate-fadeIn">
+              {joinError}
+            </div>
           )}
 
           <div className="flex items-center justify-end gap-3 pt-2">
             <button
               type="button"
               onClick={handleClose}
-              className="px-4 py-2 text-xs font-medium text-[#444746] hover:text-[#1f1f1f] cursor-pointer"
+              className="px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-700 hover:text-slate-900 bg-white/70 hover:bg-slate-100/80 border border-slate-200/60 rounded-full transition-all cursor-pointer shadow-2xs"
             >
               Cancelar
             </button>

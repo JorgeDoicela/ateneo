@@ -332,7 +332,8 @@ async def evaluate_phase_response(
 
 class SocraticTurnRequest(BaseModel):
     case_id: str
-    omision_clinica: str
+    omision_clinica: Optional[str] = None
+    omisiones_clinicas: Optional[List[str]] = None
     estudiante_replica: str
     historial: Optional[List[Dict[str, str]]] = []
 
@@ -347,6 +348,7 @@ async def socratic_turn_stream(
     Endpoint de streaming para debriefing socrático interactivo post-evaluación.
     Permite interrogar al estudiante sobre omisiones clínicas sin revelar la respuesta de inmediato,
     guiando el razonamiento formativo con anclaje estricto en la GPC del MSP mediante Server-Sent Events (SSE).
+    Soporta debate unificado sobre la lista completa de omisiones o sobre una omisión singular (retrocompatibilidad).
     """
     caso = case_service.get_case(req.case_id)
     if not caso:
@@ -355,12 +357,23 @@ async def socratic_turn_stream(
     if not req.estudiante_replica.strip():
         raise HTTPException(status_code=400, detail="La réplica del estudiante no puede estar vacía.")
 
+    # Normalizar lista unificada de omisiones clínicas
+    omisiones_list: List[str] = []
+    if req.omisiones_clinicas and len(req.omisiones_clinicas) > 0:
+        omisiones_list = [o.strip() for o in req.omisiones_clinicas if o and o.strip()]
+    elif req.omision_clinica and req.omision_clinica.strip():
+        omisiones_list = [req.omision_clinica.strip()]
+
+    if not omisiones_list:
+        omisiones_list = ["Aspectos normativos y criterios de manejo según la GPC Ecuador."]
+
     try:
         event_generator = evaluation_service.generate_socratic_turn_stream(
             case_id=req.case_id,
-            omision_clinica=req.omision_clinica,
+            omision_clinica=omisiones_list[0],
             estudiante_replica=req.estudiante_replica,
-            historial=req.historial
+            historial=req.historial,
+            omisiones_clinicas=omisiones_list
         )
         return StreamingResponse(
             event_generator,

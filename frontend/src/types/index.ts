@@ -193,6 +193,7 @@ export interface SocraticDebriefState {
   caseId: string;
   caseTitle: string;
   omisionActiva: string;
+  omisiones: string[];
   historial: SocraticDialogTurn[];
   currentStreamText: string;
   isStreaming: boolean;

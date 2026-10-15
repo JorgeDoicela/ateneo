@@ -89,8 +89,8 @@ describe('Suite de Pruebas: Debriefing Socrático Multiturno (Ateneo+)', () => {
 
       render(<SocraticDebriefModal />);
 
-      expect(screen.getByText('Debriefing Socrático Guiado')).toBeInTheDocument();
-      expect(screen.getByText('Caso Preeclampsia Severa')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /Debate Socrático/i })).toBeInTheDocument();
+      expect(screen.getByText(/Caso Preeclampsia Severa/i)).toBeInTheDocument();
       expect(screen.getByText(/Omisión de sulfato de magnesio esquema Zuspan/i)).toBeInTheDocument();
 
       const closeButton = screen.getByRole('button', { name: /cerrar debriefing socrático/i });

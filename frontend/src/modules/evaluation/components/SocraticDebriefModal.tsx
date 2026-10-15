@@ -9,6 +9,7 @@ export const SocraticDebriefModal: React.FC = () => {
     isOpen,
     caseTitle,
     omisionActiva,
+    omisiones = [],
     historial,
     currentStreamText,
     isStreaming,
@@ -19,6 +20,7 @@ export const SocraticDebriefModal: React.FC = () => {
   } = useSocraticDebriefStore();
 
   const [inputReplica, setInputReplica] = useState('');
+  const [showAllOmisiones, setShowAllOmisiones] = useState(false);
   const chatScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -28,6 +30,8 @@ export const SocraticDebriefModal: React.FC = () => {
   }, [historial, currentStreamText]);
 
   if (!isOpen) return null;
+
+  const omisionesList = omisiones.length > 0 ? omisiones : (omisionActiva ? [omisionActiva] : []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,48 +48,77 @@ export const SocraticDebriefModal: React.FC = () => {
       aria-labelledby="socratic-title"
       className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn"
     >
-      <div className="bg-white w-full max-w-2xl rounded-[28px] shadow-2xl flex flex-col max-h-[85vh] overflow-hidden animate-scaleUp">
+      <div className="bg-white w-full max-w-2xl rounded-[28px] shadow-2xl flex flex-col max-h-[85vh] overflow-hidden animate-scaleUp border border-slate-200/60">
         {/* Cabecera Institucional */}
-        <div className="p-6 border-b border-slate-100 flex items-start justify-between">
+        <div className="p-5 sm:p-6 border-b border-slate-100 flex items-start justify-between">
           <div className="flex items-center space-x-3">
-            <MessageSquare className="w-6 h-6 text-cyan-600 shrink-0" />
+            <MessageSquare className="w-6 h-6 text-[#0b57d0] shrink-0" />
             <div>
-              <h2 id="socratic-title" className="text-lg font-semibold text-slate-900 tracking-tight">
-                Debriefing Socrático Guiado
+              <h2 id="socratic-title" className="text-lg font-heading font-semibold text-slate-900 tracking-tight">
+                Debate Socrático Clínico Integral
               </h2>
               <p className="text-xs text-slate-500 font-medium truncate max-w-md">
-                {caseTitle || 'Simulación Clínica Formativa'}
+                {caseTitle || 'Simulación Clínica Formativa'} • {omisionesList.length} brecha(s) formativa(s)
               </p>
             </div>
           </div>
           <button
             onClick={closeDebrief}
-            className="text-slate-400 hover:text-slate-700 p-1.5 rounded-full transition-colors"
+            className="text-slate-400 hover:text-slate-700 p-1.5 rounded-full transition-colors cursor-pointer"
             aria-label="Cerrar debriefing socrático"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Banner de Omisión Clínica a Tratar */}
-        <div className="px-6 py-3 bg-amber-50/70 border-b border-amber-100 flex items-start space-x-3">
-          <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
-          <div className="text-xs text-amber-900 leading-relaxed">
-            <span className="font-semibold text-amber-950">Omisión o aspecto normativo en discusión:</span>{' '}
-            {omisionActiva}
+        {/* Panel Desplegable de Brechas Formativas del Caso */}
+        {omisionesList.length > 0 && (
+          <div className="px-5 sm:px-6 py-3 bg-amber-50/70 border-b border-amber-100/80 text-xs text-amber-950">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                <span className="font-semibold">
+                  Brechas clínicas identificadas ({omisionesList.length}):
+                </span>
+              </div>
+              {omisionesList.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAllOmisiones(!showAllOmisiones)}
+                  className="text-[11px] font-semibold text-amber-800 hover:text-amber-950 underline cursor-pointer"
+                >
+                  {showAllOmisiones ? 'Ocultar detalle' : 'Ver todas'}
+                </button>
+              )}
+            </div>
+
+            {showAllOmisiones ? (
+              <ul className="mt-2 space-y-1.5 pl-6 list-disc text-amber-900/90 max-h-32 overflow-y-auto">
+                {omisionesList.map((om, idx) => (
+                  <li key={idx} className="leading-snug">
+                    {om}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-1 text-amber-900 leading-snug truncate pl-6">
+                {omisionesList[0]}
+                {omisionesList.length > 1 && ` (+${omisionesList.length - 1} más)`}
+              </p>
+            )}
           </div>
-        </div>
+        )}
 
         {/* Área de Conversación Multiturno */}
         <div
           ref={chatScrollRef}
-          className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50"
+          className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 bg-slate-50/50"
         >
           {historial.length === 0 && !isStreaming && (
             <div className="text-center py-8 text-slate-500 text-sm">
               <p className="font-medium text-slate-700">Inicia el debate socrático con el tutor IA.</p>
               <p className="text-xs mt-1 text-slate-500 max-w-md mx-auto">
-                Explica tu razonamiento fisiopatológico o por qué omitiste este punto según la Guía de Práctica Clínica (GPC Ecuador).
+                Explica tu razonamiento fisiopatológico o argumenta tu conducta médica frente a las omisiones normadas por las Guías de Práctica Clínica (GPC Ecuador).
               </p>
             </div>
           )}

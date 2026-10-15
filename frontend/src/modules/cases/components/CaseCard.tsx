@@ -26,7 +26,7 @@ export default function CaseCard({ caso, gpcMeta, viewMode = 'grid' }: CaseCardP
 
         <Link
           to={`/cases/${caso.id}`}
-          className="relative block bg-white/95 backdrop-blur-xl rounded-[20px] p-4 sm:p-5 shadow-xs border border-white/80 group-hover:border-white/90 group-hover:-translate-y-0.5 active:scale-[0.995] transition-all duration-300 focus:outline-none"
+          className="relative block bg-white/95 backdrop-blur-xl rounded-[20px] p-4 sm:p-5 shadow-xs border border-white/80 group-hover:border-white/90 active:scale-[0.995] transition-all duration-300 focus:outline-none"
         >
           <div className="flex items-center justify-between gap-3 sm:gap-4">
             <div className="space-y-1 sm:space-y-1.5 flex-1 min-w-0">
@@ -70,7 +70,7 @@ export default function CaseCard({ caso, gpcMeta, viewMode = 'grid' }: CaseCardP
 
       <Link
         to={`/cases/${caso.id}`}
-        className="relative flex flex-col h-full bg-white/95 backdrop-blur-xl rounded-[28px] p-6 shadow-xs border border-white/80 group-hover:border-white/90 group-hover:-translate-y-0.5 active:scale-[0.995] transition-all duration-300 justify-between focus:outline-none"
+        className="relative flex flex-col h-full bg-white/95 backdrop-blur-xl rounded-[28px] p-6 shadow-xs border border-white/80 group-hover:border-white/90 active:scale-[0.995] transition-all duration-300 justify-between focus:outline-none"
       >
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-2">

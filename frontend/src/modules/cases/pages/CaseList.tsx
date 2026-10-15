@@ -38,7 +38,7 @@ export default function CaseList() {
   }, [selectedCategory, classificationTab]);
 
   return (
-    <div className="space-y-8 animate-fadeIn pb-16">
+    <div className="space-y-8 animate-fadeIn pb-24 sm:pb-16">
       
       {/* 1. Header Principal */}
       <div className="pb-2 pt-2">

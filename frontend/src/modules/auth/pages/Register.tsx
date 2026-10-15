@@ -129,8 +129,18 @@ export default function Register() {
   };
 
   return (
-    <div className="w-full flex flex-col items-center justify-center">
-      <div className="w-full max-w-[1040px] bg-white rounded-[28px] p-8 sm:p-12 min-h-[460px] shadow-xs border-0 transition-all duration-300 flex flex-col justify-between">
+    <div className="w-full flex flex-col items-center justify-center relative">
+      {/* Halos de Luz Ambiental para Refracción de Cristal en Auth */}
+      <div 
+        className="pointer-events-none absolute -top-24 -left-20 w-80 h-80 bg-gradient-to-br from-cyan-400/20 via-blue-500/15 to-transparent rounded-full blur-3xl"
+        aria-hidden="true"
+      />
+      <div 
+        className="pointer-events-none absolute -bottom-20 -right-16 w-88 h-88 bg-gradient-to-tl from-indigo-500/15 via-violet-500/10 to-transparent rounded-full blur-3xl"
+        aria-hidden="true"
+      />
+
+      <div className="w-full max-w-[1040px] bg-white rounded-[28px] p-8 sm:p-12 min-h-[460px] shadow-xs border border-slate-200/60 transition-all duration-300 flex flex-col justify-between relative z-10">
         
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-stretch flex-1">
           {/* Columna Izquierda (5 cols): Marca Institucional y Contexto Académico */}
@@ -139,7 +149,7 @@ export default function Register() {
               <img
                 src="/ateneo.png"
                 alt="Ateneo+"
-                className="w-12 h-12 mb-4 object-contain"
+                className="w-12 h-12 mb-4 object-contain select-none"
               />
               <div className="flex items-center gap-1.5 mb-2">
                 <span className="font-heading font-black text-2xl tracking-tight text-slate-900">
@@ -154,10 +164,10 @@ export default function Register() {
               </p>
             </div>
 
-            <div className="hidden md:flex items-center gap-4 text-xs text-[#747775] pt-6 border-t border-slate-100">
-              <span>Normativa GPC Ecuador</span>
-              <span>•</span>
-              <span>Registro Institucional</span>
+            <div className="hidden md:flex items-center gap-3 text-xs text-[#747775] pt-6 border-t border-slate-100">
+              <span className="font-medium text-slate-600">Normativa GPC Ecuador</span>
+              <span className="text-slate-300">•</span>
+              <span className="font-medium text-slate-600">Registro Institucional</span>
             </div>
           </div>
 
@@ -253,15 +263,15 @@ export default function Register() {
                     />
 
                     <div className="flex items-center justify-between text-xs pt-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2.5">
                         <input
                           id="show-pass-register"
                           type="checkbox"
                           checked={showPassword}
                           onChange={(e) => setShowPassword(e.target.checked)}
-                          className="rounded border-slate-300 text-[#0b57d0] focus:ring-0 cursor-pointer"
+                          className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-0 cursor-pointer accent-blue-600"
                         />
-                        <label htmlFor="show-pass-register" className="text-xs text-[#444746] cursor-pointer">
+                        <label htmlFor="show-pass-register" className="text-xs text-slate-600 cursor-pointer select-none">
                           Mostrar contraseñas
                         </label>
                       </div>
@@ -279,7 +289,7 @@ export default function Register() {
                     <div className="flex items-center justify-between pt-4">
                       <Link
                         to="/login"
-                        className="text-xs font-medium text-[#0b57d0] hover:underline cursor-pointer"
+                        className="px-3.5 py-2 text-xs font-medium text-slate-700 hover:text-blue-700 bg-white/70 hover:bg-gradient-to-r hover:from-cyan-50/50 hover:via-blue-50/40 hover:to-indigo-50/50 border border-slate-200/60 hover:border-blue-200 rounded-full transition-all cursor-pointer shadow-2xs"
                       >
                         ¿Ya tienes cuenta? Iniciar sesión
                       </Link>

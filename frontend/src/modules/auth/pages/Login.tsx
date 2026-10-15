@@ -97,8 +97,18 @@ export default function Login() {
   };
 
   return (
-    <div className="w-full flex flex-col items-center justify-center">
-      <div className="w-full max-w-[1040px] bg-white rounded-[28px] p-8 sm:p-12 min-h-[420px] shadow-xs border-0 transition-all duration-300 flex flex-col justify-between">
+    <div className="w-full flex flex-col items-center justify-center relative">
+      {/* Halos de Luz Ambiental para Refracción de Cristal en Auth */}
+      <div 
+        className="pointer-events-none absolute -top-24 -left-20 w-80 h-80 bg-gradient-to-br from-cyan-400/20 via-blue-500/15 to-transparent rounded-full blur-3xl"
+        aria-hidden="true"
+      />
+      <div 
+        className="pointer-events-none absolute -bottom-20 -right-16 w-88 h-88 bg-gradient-to-tl from-indigo-500/15 via-violet-500/10 to-transparent rounded-full blur-3xl"
+        aria-hidden="true"
+      />
+
+      <div className="w-full max-w-[1040px] bg-white rounded-[28px] p-8 sm:p-12 min-h-[420px] shadow-xs border border-slate-200/60 transition-all duration-300 flex flex-col justify-between relative z-10">
         
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-stretch flex-1">
           {/* Columna Izquierda (5 cols): Marca, Identidad y Título Material 3 */}
@@ -107,7 +117,7 @@ export default function Login() {
               <img
                 src="/ateneo.png"
                 alt="Ateneo+"
-                className="w-12 h-12 mb-4 object-contain"
+                className="w-12 h-12 mb-4 object-contain select-none"
               />
               <div className="flex items-center gap-1.5 mb-2">
                 <span className="font-heading font-black text-2xl tracking-tight text-slate-900">
@@ -122,22 +132,22 @@ export default function Login() {
               </p>
             </div>
 
-            <div className="hidden md:flex items-center gap-4 text-xs text-[#747775] pt-6 border-t border-slate-100">
-              <span>Normativa GPC Ecuador</span>
-              <span>•</span>
-              <span>Plataforma Académica</span>
+            <div className="hidden md:flex items-center gap-3 text-xs text-[#747775] pt-6 border-t border-slate-100">
+              <span className="font-medium text-slate-600">Normativa GPC Ecuador</span>
+              <span className="text-slate-300">•</span>
+              <span className="font-medium text-slate-600">Plataforma Académica</span>
             </div>
           </div>
 
           {/* Columna Derecha (7 cols): Formulario Flotante en 2 Pasos */}
-          <div className="md:col-span-7 flex flex-col justify-between pt-6 md:pt-24">
+          <div className="md:col-span-7 flex flex-col justify-between pt-4 md:pt-16">
             <div>
               {/* Notificación de Error */}
               {error && (
                 <div className={`mb-6 p-3.5 rounded-[16px] flex items-start gap-2.5 text-xs animate-fadeIn ${
                   error.toLowerCase().includes('bloqueada')
-                    ? 'bg-amber-50 border border-amber-200 text-amber-900'
-                    : 'bg-rose-50 border border-rose-200/80 text-rose-800'
+                    ? 'bg-amber-50/90 border border-amber-200 text-amber-900'
+                    : 'bg-rose-50/90 border border-rose-200/80 text-rose-800'
                 }`}>
                   <AlertCircle className={`w-4 h-4 shrink-0 mt-0.5 ${
                     error.toLowerCase().includes('bloqueada') ? 'text-amber-600' : 'text-rose-600'
@@ -162,7 +172,7 @@ export default function Login() {
                   <div className="flex items-center justify-end gap-3 pt-4">
                     <Link
                       to="/register"
-                      className="px-4 py-2.5 text-sm font-semibold text-[#0b57d0] hover:text-[#0842a0] hover:bg-blue-50/60 rounded-full transition-colors cursor-pointer"
+                      className="px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-700 hover:text-blue-700 bg-white/70 hover:bg-gradient-to-r hover:from-cyan-50/50 hover:via-blue-50/40 hover:to-indigo-50/50 border border-slate-200/60 hover:border-blue-200 rounded-full transition-all cursor-pointer shadow-2xs"
                     >
                       Crear cuenta
                     </Link>
@@ -180,13 +190,13 @@ export default function Login() {
               {/* Paso 2: Contraseña de Acceso */}
               {step === 2 && (
                 <form onSubmit={handleFinalSubmit} className="space-y-6">
-                  {/* Chip de cuenta seleccionada */}
+                  {/* Chip de cuenta seleccionada en cristal líquido */}
                   <div
                     onClick={() => { setStep(1); setError(null); }}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-300 bg-[#f0f4f9] hover:bg-slate-100 cursor-pointer text-xs font-medium text-[#1f1f1f] transition-colors"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200/80 bg-white/80 hover:bg-white hover:border-blue-200 shadow-2xs cursor-pointer text-xs font-medium text-slate-800 transition-all group"
                   >
-                    <span>{email}</span>
-                    <ChevronDown className="w-3.5 h-3.5 text-[#747775]" />
+                    <span className="text-slate-700 group-hover:text-blue-700 transition-colors">{email}</span>
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600 transition-colors" />
                   </div>
 
                   <FloatingLabelInput
@@ -199,15 +209,15 @@ export default function Login() {
                     autoFocus
                   />
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2.5">
                     <input
                       id="show-pass"
                       type="checkbox"
                       checked={showPassword}
                       onChange={(e) => setShowPassword(e.target.checked)}
-                      className="rounded border-slate-300 text-[#0b57d0] focus:ring-0 cursor-pointer"
+                      className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-0 cursor-pointer accent-blue-600"
                     />
-                    <label htmlFor="show-pass" className="text-xs text-[#444746] cursor-pointer">
+                    <label htmlFor="show-pass" className="text-xs text-slate-600 cursor-pointer select-none">
                       Mostrar contraseña
                     </label>
                   </div>
@@ -216,7 +226,7 @@ export default function Login() {
                     <button
                       type="button"
                       onClick={() => { setStep(1); setError(null); }}
-                      className="px-4 py-2.5 text-sm font-semibold text-[#0b57d0] hover:text-[#0842a0] hover:bg-blue-50/60 rounded-full transition-colors cursor-pointer"
+                      className="px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-700 hover:text-slate-900 bg-white/70 hover:bg-slate-100/80 border border-slate-200/60 rounded-full transition-all cursor-pointer shadow-2xs"
                     >
                       Volver
                     </button>

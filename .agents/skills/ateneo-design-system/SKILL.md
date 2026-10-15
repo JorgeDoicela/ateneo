@@ -57,7 +57,7 @@ El imagotipo oficial de **Ateneo+** (`/ateneo.png`) fusiona la letra **A**, el e
   - **Tarjeta Hero de IA (KST & BKT / ZDP):** `bg-white/90 backdrop-blur-xl border border-white/80 shadow-sm rounded-[28px]` respaldada por halo difuso tricolor (`blur-xl` a 60% de opacidad).
   - **Botones Institucionales (`ClinicalButton`):** Variantes secondary y outline en `bg-white/80 backdrop-blur-md border border-slate-200/80 hover:bg-white shadow-xs`.
   - **Selector de Modo de Vista (Grid/List):** Cápsula de cristal `bg-white/70 backdrop-blur-md border border-slate-200/80 shadow-xs`.
-* **Superficie de Tarjetas de Lectura Clínica (Garantía de Contraste):** Las tarjetas de casos clínicos preservan fondo blanco sólido (`#ffffff` / `bg-white`) con esquinas amplias `rounded-[28px]` y micro-elevación interactiva (`hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/5`), garantizando contraste puro y cero fatiga visual en análisis clínico prolongado.
+* **Superficie de Tarjetas de Lectura Clínica (Garantía de Contraste y Estabilidad Espacial):** Las tarjetas de casos clínicos preservan fondo blanco sólido (`#ffffff` / `bg-white`) con esquinas amplias `rounded-[28px]`, ancladas físicamente a su posición espacial (sin traslación vertical `-translate-y`), con borde sutil (`border-slate-200/50 hover:border-blue-300/80`) y sombra suave interactiva (`hover:shadow-md hover:shadow-indigo-500/5`), garantizando contraste puro, estabilidad visual y cero fatiga visual en análisis clínico prolongado.
 * **Texto Primario / Títulos (On-Surface):** `#1f1f1f` / `#0f172a` (`slate-900`).
 * **Texto Secundario / Leyendas (On-Surface Variant):** `#444746` / `#475569` (`slate-600`).
 * **Barra de Desplazamiento Estilizada (Minimal Scrollbar):** Barra delgada (`8px`), track transparente y thumb tipo píldora `#c4c7c5` (hover `#747775`) sin flechas de scroll del navegador, eliminando el scrollbar tosco predeterminado del sistema operativo.
@@ -134,7 +134,7 @@ className="py-2.5 px-7 bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600
 La pantalla principal (`http://localhost:5173/` - `CaseList.jsx` y `App.jsx`) implementa el patrón **Google Workspace (Gmail / Drive) 3-Zone Architecture**:
 
 ### 5.1 Barra Superior Centralizada (`Navbar` en `AppLayout.tsx`)
-* **Izquierda:** Imagotipo oficial plano `/ateneo.png` + logotipo `/nombre.png` con micro-interacción de escala limpia.
+* **Izquierda:** Imagotipo oficial plano `/ateneo.png` + logotipo `/nombre.png` estáticos y fijos en reposo y hover (sin escalado interactivo `scale` ni traslación vertical `translate`).
 * **Centro (Cápsula de Búsqueda de Cristal Flotante):**
   - Contenedor de cristal esmerilado `max-w-2xl bg-white/70 hover:bg-white/90 backdrop-blur-md rounded-full px-4 py-2 flex items-center gap-3 border border-slate-200/60 focus-within:bg-white focus-within:border-blue-400 focus-within:shadow-md focus-within:shadow-indigo-500/5 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all`.
   - Icono de lupa `Search` azul translúcido, input reactivo vinculado a query params `?q=...` y botón de filtros `SlidersHorizontal`.
@@ -143,9 +143,9 @@ La pantalla principal (`http://localhost:5173/` - `CaseList.jsx` y `App.jsx`) im
   - **Administradores:** Selector `<select>` de sede institucional para auditoría inter-campus y enlaces de administración (*Usuarios y Roles*, *Magic Links*).
   - **Prohibición de Telemetría Interna:** Prohibido exponer métricas técnicas de desarrollo (como `Contraste WCAG: 5.2:1 (AA)`) en menús de usuario final.
 
-### 5.2 Barra Lateral y Botones de Acción de Cabecera
-* **Botones de Cabecera en Cristal Líquido (`ClinicalButton`):**
-  - Botón *"Mi Desempeño"* y *"Unirse a Sala"* en `bg-white/80 backdrop-blur-md border border-slate-200/80 hover:bg-white hover:border-slate-300 shadow-xs active:scale-[0.98]`.
+* **Botones de Acción y Navegación de Cabecera en Cristal Líquido:**
+  - Botones *"Desempeño / Catálogo"* y *"Unirse a Sala"* en cápsula tipo píldora translúcida con gradiente pastel sutil (`bg-gradient-to-r from-cyan-50/50 via-blue-50/40 to-indigo-50/50`), borde refinado (`border border-blue-200/60`), texto en gris clínico y los iconos planos limpios en `#0b57d0`.
+  - Transición suave en hover hacia gradiente pastel intensificado (`hover:from-cyan-100/70 hover:via-blue-100/60 hover:to-indigo-100/70 hover:border-blue-300/90 hover:text-[#0b57d0]`), sin bloques oscuros sólidos, sin halos excesivos y con estabilidad posicional absoluta (sin `-translate-y`).
 * **Selector de Modo de Vista (Grid / List):**
   - Cápsula en cristal translúcido `bg-white/70 backdrop-blur-md p-1 rounded-full border border-slate-200/80 shadow-xs`.
 
@@ -159,7 +159,7 @@ La pantalla principal (`http://localhost:5173/` - `CaseList.jsx` y `App.jsx`) im
   - Especialidad seleccionada en gradiente tricolor de marca con sombra cromática: `bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-500/25 font-semibold`.
   - Especialidades inactivas en micro-cristal: `bg-white/90 backdrop-blur-xs text-slate-700 border border-slate-200/80 hover:bg-white hover:border-slate-300`.
 * **Tarjetas de Casos Clínicos (`CaseCard.tsx`):**
-  - **Garantía de Contraste Médico:** Fondo blanco sólido `#ffffff` (`bg-white`) con esquinas amplias `rounded-[28px]`, borde sutil `border-slate-200/50 hover:border-blue-300/80` y micro-elevación suave interactiva (`hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/5`).
+  - **Garantía de Contraste Médico y Estabilidad Espacial:** Fondo blanco sólido `#ffffff` (`bg-white`) con esquinas amplias `rounded-[28px]`, borde sutil `border-slate-200/50 hover:border-blue-300/80` y sombra interactiva suave sin elevación física (`hover:shadow-md hover:shadow-indigo-500/5`), garantizando que la tarjeta permanezca inmóvil en su plano espacial al pasar el cursor.
   - Botón circular de flecha `->` con transición suave de gris neutro a gradiente oficial Ateneo+ en estado hover.
   - Modo lista compacto con fila blanca de cristal sutil `rounded-[20px] p-5 shadow-xs border border-slate-200/50 hover:border-blue-300/80`.
 

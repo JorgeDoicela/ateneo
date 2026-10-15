@@ -212,10 +212,12 @@ class EvaluationService:
         case_id: str,
         omision_clinica: str,
         estudiante_replica: str,
-        historial: Optional[List[Dict[str, str]]] = None
+        historial: Optional[List[Dict[str, str]]] = None,
+        omisiones_clinicas: Optional[List[str]] = None
     ) -> Generator[str, None, None]:
         """
-        Genera el flujo de tokens en formato Server-Sent Events (SSE) para debriefing socrático.
+        Genera el flujo de tokens en formato Server-Sent Events (SSE) para debriefing socrático interactivo.
+        Soporta retroalimentación integral multiturno sobre todas las omisiones clínicas del caso.
         """
         case = self.case_service.get_case(case_id)
         if not case:
@@ -228,9 +230,13 @@ class EvaluationService:
             yield from security_guard.generate_security_violation_socratic_stream(scan.attack_type)
             return
 
+        # Consolidar omisiones formativas
+        lista_omisiones = omisiones_clinicas if (omisiones_clinicas and len(omisiones_clinicas) > 0) else [omision_clinica]
+        query_rag = " ".join(lista_omisiones) + " " + scan.sanitized_text
+
         try:
             chunk = retrieve_relevant_chunk(
-                query=f"{omision_clinica} {scan.sanitized_text}",
+                query=query_rag[:300],
                 guia_filtro=case.guia_asociada
             )
         except Exception as e:
@@ -241,6 +247,8 @@ class EvaluationService:
         norma_guia = chunk.get("guia_fuente", case.guia_asociada) if chunk else case.guia_asociada
         norma_pag = chunk.get("pagina", 1) if chunk else 1
 
+        omisiones_formateadas = "\n".join([f"- {om}" for om in lista_omisiones])
+
         prompt_socratico = f"""
 Eres un Docente Médico Tutor de Ateneo+, especialista en pedagogía clínica y medicina basada en evidencias.
 Estás conduciendo un Debriefing Socrático con un médico interno de pregrado tras una simulación clínica.
@@ -249,8 +257,8 @@ CASO CLÍNICO:
 - Título: {case.titulo}
 - Cuadro: {case.enunciado}
 
-OMISIÓN / PUNTO CLÍNICO EN DISCUSIÓN:
-"{omision_clinica}"
+INVENTARIO COMPLETO DE OMISIONES / PUNTOS CLÍNICOS EN DISCUSIÓN:
+{omisiones_formateadas}
 
 NORMATIVA DE LA GUÍA DE PRÁCTICA CLÍNICA (GPC ECUADOR):
 "{norma_texto}" (GPC: {norma_guia}, Pág. {norma_pag})

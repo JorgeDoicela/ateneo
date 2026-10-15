@@ -12,8 +12,9 @@ interface AxisConfig {
 }
 
 export default function SkillRadarChart({ competenciasPorEje = [] }: SkillRadarChartProps) {
-  const center = 150;
-  const radius = 95;
+  const centerX = 190;
+  const centerY = 150;
+  const radius = 80;
 
   const axesConfig: AxisConfig[] = [
     { key: 'diagnóstico', label: 'Diagnóstico', angle: -Math.PI / 2, align: 'middle' },
@@ -45,8 +46,8 @@ export default function SkillRadarChart({ competenciasPorEje = [] }: SkillRadarC
   const gridPolygons = levels.map(level => {
     return axesConfig.map(axis => {
       const r = radius * level;
-      const x = center + r * Math.cos(axis.angle);
-      const y = center + r * Math.sin(axis.angle);
+      const x = centerX + r * Math.cos(axis.angle);
+      const y = centerY + r * Math.sin(axis.angle);
       return `${x},${y}`;
     }).join(' ');
   });
@@ -54,8 +55,8 @@ export default function SkillRadarChart({ competenciasPorEje = [] }: SkillRadarC
   const dataPoints = axesConfig.map((axis, i) => {
     const pct = scoresByAxis[i] / 100;
     const r = radius * pct;
-    const x = center + r * Math.cos(axis.angle);
-    const y = center + r * Math.sin(axis.angle);
+    const x = centerX + r * Math.cos(axis.angle);
+    const y = centerY + r * Math.sin(axis.angle);
     return { x, y, score: scoresByAxis[i], axis };
   });
 
@@ -63,47 +64,49 @@ export default function SkillRadarChart({ competenciasPorEje = [] }: SkillRadarC
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
         <div>
-          <h3 className="text-base font-normal text-[#1f1f1f] font-heading">
+          <h3 className="text-xl font-normal text-[#1f1f1f] font-heading">
             Radar de Competencias Clínicas (4 Ejes GPC)
           </h3>
-          <p className="text-xs text-[#747775]">
-            Consistencia frente a las Guías de Práctica Clínica (GPC Ecuador)
+          <p className="text-xs text-[#747775] mt-0.5">
+            Consistencia diagnóstica y terapéutica frente a las Guías de Práctica Clínica (GPC Ecuador)
           </p>
         </div>
-        <span className="text-xs font-medium bg-sky-50 text-[#0b57d0] px-3 py-1 rounded-full">
+        <span className="text-xs font-semibold bg-gradient-to-r from-cyan-50/70 via-blue-50/50 to-indigo-50/70 border border-blue-200/60 text-[#0b57d0] px-3.5 py-1 rounded-full shadow-2xs">
           Analítica 4 Ejes
         </span>
       </div>
 
-      <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-2">
-        <div className="w-full max-w-[280px] aspect-square relative flex items-center justify-center">
-          <svg viewBox="0 0 300 300" className="w-full h-full">
+      <div className="flex flex-col lg:flex-row items-center justify-between gap-8 pt-2">
+        <div className="w-full lg:w-1/2 max-w-[380px] relative flex items-center justify-center">
+          <svg viewBox="0 0 380 300" className="w-full h-auto overflow-visible">
             <defs>
               <linearGradient id="radarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#0b57d0" stopOpacity="0.25" />
-                <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.10" />
+                <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.30" />
+                <stop offset="100%" stopColor="#2563eb" stopOpacity="0.15" />
               </linearGradient>
             </defs>
 
+            {/* Ejes Radiales */}
             {axesConfig.map((axis, idx) => {
-              const xEnd = center + radius * Math.cos(axis.angle);
-              const yEnd = center + radius * Math.sin(axis.angle);
+              const xEnd = centerX + radius * Math.cos(axis.angle);
+              const yEnd = centerY + radius * Math.sin(axis.angle);
               return (
                 <line
                   key={idx}
-                  x1={center}
-                  y1={center}
+                  x1={centerX}
+                  y1={centerY}
                   x2={xEnd}
                   y2={yEnd}
                   stroke="#cbd5e1"
-                  strokeWidth="1.5"
-                  strokeDasharray="3 3"
+                  strokeWidth="1.2"
+                  strokeDasharray="2 3"
                 />
               );
             })}
 
+            {/* Anillos Poligonales de Nivel */}
             {gridPolygons.map((polyStr, idx) => (
               <polygon
                 key={idx}
@@ -114,14 +117,16 @@ export default function SkillRadarChart({ competenciasPorEje = [] }: SkillRadarC
               />
             ))}
 
+            {/* Polígono de Desempeño */}
             <polygon
               points={polygonPath}
               fill="url(#radarGradient)"
-              stroke="#0b57d0"
+              stroke="#2563eb"
               strokeWidth="2.5"
               className="transition-all duration-700 ease-out"
             />
 
+            {/* Puntos en los Vértices */}
             {dataPoints.map((p, idx) => (
               <g key={idx} className="group">
                 <circle
@@ -130,15 +135,17 @@ export default function SkillRadarChart({ competenciasPorEje = [] }: SkillRadarC
                   r="5"
                   fill="#0b57d0"
                   stroke="#ffffff"
-                  strokeWidth="2"
+                  strokeWidth="2.5"
+                  className="shadow-sm"
                 />
               </g>
             ))}
 
+            {/* Etiquetas de los Ejes Holgadas y sin Recortes */}
             {axesConfig.map((axis, idx) => {
-              const rLabel = radius + 22;
-              const lx = center + rLabel * Math.cos(axis.angle);
-              const ly = center + rLabel * Math.sin(axis.angle);
+              const rLabel = radius + (axis.key === 'diagnóstico' ? 18 : axis.key === 'seguimiento' ? 22 : 16);
+              const lx = centerX + rLabel * Math.cos(axis.angle);
+              const ly = centerY + rLabel * Math.sin(axis.angle) + (axis.key === 'tratamiento' || axis.key === 'prevención' ? 4 : 0);
               const score = scoresByAxis[idx];
 
               return (
@@ -147,7 +154,7 @@ export default function SkillRadarChart({ competenciasPorEje = [] }: SkillRadarC
                   x={lx}
                   y={ly}
                   textAnchor={axis.align}
-                  className="fill-[#1f1f1f] text-[11px] font-medium"
+                  className="fill-[#1f1f1f] text-[11px] font-semibold select-none font-sans"
                 >
                   {axis.label} ({score}%)
                 </text>
@@ -156,8 +163,9 @@ export default function SkillRadarChart({ competenciasPorEje = [] }: SkillRadarC
           </svg>
         </div>
 
-        <div className="w-full md:w-1/2 space-y-3">
-          <div className="text-xs font-medium text-[#444746]">
+        {/* Panel Derecho: Barras de Dominio en Cristal Líquido */}
+        <div className="w-full lg:w-1/2 space-y-3">
+          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
             <span>Nivel de Dominio por Eje Clínico</span>
           </div>
 
@@ -170,40 +178,40 @@ export default function SkillRadarChart({ competenciasPorEje = [] }: SkillRadarC
                 return eKey.includes(aKey);
               });
 
-              let barColor = 'bg-[#0b57d0]';
+              let barColor = 'bg-gradient-to-r from-blue-500 to-indigo-600';
               let badgeText = matched?.estadoLabel || 'Alto';
-              let badgeBg = 'bg-sky-50 text-[#0b57d0]';
+              let badgeBg = 'bg-sky-50 text-[#0b57d0] border-sky-200/70';
 
               if (score === 0) {
-                barColor = 'bg-slate-400';
+                barColor = 'bg-slate-300';
                 badgeText = matched?.estadoLabel || 'No Demostrado';
-                badgeBg = 'bg-slate-100 text-[#444746]';
+                badgeBg = 'bg-slate-50 text-slate-600 border-slate-200/70';
               } else if (score < 50) {
-                barColor = 'bg-rose-500';
+                barColor = 'bg-gradient-to-r from-rose-500 to-pink-600';
                 badgeText = matched?.estadoLabel || 'Brecha Crítica';
-                badgeBg = 'bg-rose-50 text-rose-700';
+                badgeBg = 'bg-rose-50/90 text-rose-800 border-rose-200/70';
               } else if (score < 80) {
-                barColor = 'bg-amber-500';
+                barColor = 'bg-gradient-to-r from-amber-400 to-orange-500';
                 badgeText = matched?.estadoLabel || 'En Desarrollo';
-                badgeBg = 'bg-amber-50 text-amber-700';
+                badgeBg = 'bg-amber-50/90 text-amber-800 border-amber-200/70';
               } else {
                 badgeText = matched?.estadoLabel || 'Consolidado';
-                badgeBg = 'bg-emerald-50 text-emerald-700';
-                barColor = 'bg-emerald-600';
+                badgeBg = 'bg-emerald-50/90 text-emerald-800 border-emerald-200/70';
+                barColor = 'bg-gradient-to-r from-emerald-500 to-teal-600';
               }
 
               return (
-                <div key={axis.key} className="bg-[#f0f4f9] p-3.5 rounded-[16px] space-y-1.5 min-w-0">
+                <div key={axis.key} className="bg-white/85 hover:bg-white border border-slate-200/80 hover:border-blue-300/80 p-3.5 rounded-[18px] space-y-2 min-w-0 shadow-2xs transition-all">
                   <div className="flex flex-wrap items-center justify-between gap-1.5 text-xs font-medium min-w-0">
-                    <span className="text-[#1f1f1f] truncate">{axis.label}</span>
+                    <span className="text-slate-800 font-semibold truncate">{axis.label}</span>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className={`text-[11px] px-2.5 py-0.5 rounded-full ${badgeBg}`}>
+                      <span className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full border ${badgeBg}`}>
                         {badgeText}
                       </span>
-                      <span className="font-mono text-[#0b57d0]">{score}%</span>
+                      <span className="font-mono font-bold text-[#0b57d0]">{score}%</span>
                     </div>
                   </div>
-                  <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-700 ${barColor}`}
                       style={{ width: `${score}%` }}

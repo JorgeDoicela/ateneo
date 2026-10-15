@@ -52,10 +52,11 @@ export default function FeedbackCard({ result, studentAnswer = '', onReset }: Fe
   const openDebrief = useSocraticDebriefStore((state) => state.openDebrief);
   const { trackSocraticDebriefOpened } = useLearningTelemetry();
 
-  const handleOpenDebrief = (omisionTexto: string) => {
+  const handleOpenDebrief = (omisionesParam: string[] | string) => {
     const caseId = result.case_id || 'case_preeclampsia_01';
-    trackSocraticDebriefOpened(caseId, omisionTexto);
-    openDebrief(caseId, result.case_title || 'Caso Clínico Formativo', omisionTexto);
+    const primaryOmision = Array.isArray(omisionesParam) ? (omisionesParam[0] || '') : omisionesParam;
+    trackSocraticDebriefOpened(caseId, primaryOmision);
+    openDebrief(caseId, result.case_title || 'Caso Clínico Formativo', omisionesParam);
   };
 
   if (!result) return null;
@@ -268,29 +269,31 @@ export default function FeedbackCard({ result, studentAnswer = '', onReset }: Fe
 
         {/* Omisiones */}
         <div className="bg-white rounded-[28px] p-6 shadow-xs border-0 space-y-4">
-          <div className="flex items-center gap-2 text-xs font-semibold text-amber-800 border-b border-slate-100 pb-3">
-            <AlertTriangle className="w-4 h-4 text-amber-600" />
-            <span>Omisiones Formativas y Mejoras ({omisiones.length})</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2 text-xs font-semibold text-amber-800">
+              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>Omisiones Formativas y Mejoras ({omisiones.length})</span>
+            </div>
+            {omisiones.length > 0 && (
+              <button
+                type="button"
+                onClick={() => handleOpenDebrief(omisiones)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-gradient-to-r from-cyan-50/50 via-blue-50/40 to-indigo-50/50 hover:from-cyan-100/70 hover:via-blue-100/60 hover:to-indigo-100/70 text-slate-700 hover:text-[#0b57d0] border border-blue-200/60 hover:border-blue-300/90 shadow-2xs active:scale-95 transition-all cursor-pointer self-start sm:self-auto"
+                title="Iniciar sesión de debriefing socrático sobre todas las omisiones del caso"
+              >
+                <MessageSquare className="w-3.5 h-3.5 text-[#0b57d0]" />
+                <span>Debate Socrático Integral</span>
+              </button>
+            )}
           </div>
           <ul className="space-y-2.5 text-xs text-[#1f1f1f]">
             {omisiones.map((o, idx) => (
               <li
                 key={idx}
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-colors"
+                className="flex items-start gap-2 p-2 rounded-xl hover:bg-slate-50 transition-colors"
               >
-                <div className="flex items-start gap-2 flex-1">
-                  <span className="text-amber-600 font-bold">•</span>
-                  <span className="leading-relaxed">{o}</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleOpenDebrief(o)}
-                  className="inline-flex items-center space-x-1.5 text-[11px] font-medium text-cyan-700 hover:text-cyan-800 bg-cyan-50/80 hover:bg-cyan-100 px-3 py-1.5 rounded-lg transition-colors shrink-0 self-start sm:self-auto"
-                  title="Debatir este aspecto formativo con el Tutor IA"
-                >
-                  <MessageSquare className="w-3.5 h-3.5" />
-                  <span>Debate Socrático</span>
-                </button>
+                <span className="text-amber-600 font-bold mt-0.5">•</span>
+                <span className="leading-relaxed flex-1">{o}</span>
               </li>
             ))}
           </ul>

@@ -14,6 +14,8 @@ import { useAuth } from '../../context/AuthContext';
 import GlobalSearchBar from './components/GlobalSearchBar';
 import ConnectivityBadge from './components/ConnectivityBadge';
 import UserProfileDropdown from './components/UserProfileDropdown';
+import NotificationsDropdown from './components/NotificationsDropdown';
+import MobileBottomNav from './components/MobileBottomNav';
 import JoinRoomModal from '../../modules/collaboration/components/JoinRoomModal';
 
 /**
@@ -24,6 +26,7 @@ import JoinRoomModal from '../../modules/collaboration/components/JoinRoomModal'
  * - ConnectivityBadge (Buffer offline y sincronización hospitalaria)
  * - Enlaces RBAC (Benchmark, Desempeño, Admin, Docente)
  * - UserProfileDropdown (Menú de identidad institucional y sesión)
+ * - MobileBottomNav (Barra de navegación inferior móvil exclusiva del catálogo)
  */
 export default function Navbar() {
   const { user } = useAuth();
@@ -31,6 +34,7 @@ export default function Navbar() {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const isAnalyticsView = location.pathname === '/analytics' || location.pathname === '/performance';
+  const isCatalogRoute = location.pathname === '/' || location.pathname === '/cases';
 
   return (
     <header className="bg-white/85 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-50 transition-colors w-full">
@@ -55,18 +59,18 @@ export default function Navbar() {
           <>
             {/* 1. Logo & Identidad de Marca Ateneo+ */}
             <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-              <Link to="/" className="flex items-center gap-2 sm:gap-2.5 group">
+              <Link to="/" className="flex items-center gap-2 sm:gap-2.5 select-none" title="Ateneo+">
                 <img
                   src="/ateneo.png"
                   alt="Ateneo+ Logo"
                   style={{ width: '26px', height: '26px' }}
-                  className="w-6 h-6 sm:w-7 sm:h-7 object-contain shrink-0 group-hover:scale-105 transition-transform"
+                  className="w-6 h-6 sm:w-7 sm:h-7 object-contain shrink-0"
                 />
                 <img
                   src="/nombre.png"
                   alt="Ateneo+"
                   style={{ height: '18px', maxHeight: '18px', width: 'auto', display: 'block' }}
-                  className="h-[18px] max-h-[18px] w-auto object-contain shrink-0 group-hover:opacity-95 transition-opacity"
+                  className="h-[18px] max-h-[18px] w-auto object-contain shrink-0 hover:opacity-90 transition-opacity"
                 />
               </Link>
             </div>
@@ -76,7 +80,7 @@ export default function Navbar() {
 
             {/* 3. Navegación, Conectividad Clínica y Perfil */}
             <div className="flex items-center gap-1.5 sm:gap-3 text-xs font-medium text-[#444746] shrink-0">
-              {/* Botón de Búsqueda Móvil */}
+              {/* Botón de Búsqueda Móvil en Cabecera (Siempre disponible en móvil) */}
               {user && (
                 <button
                   type="button"
@@ -84,7 +88,7 @@ export default function Navbar() {
                   title="Buscar casos clínicos"
                   className="md:hidden p-2 rounded-full text-[#444746] hover:text-[#1f1f1f] hover:bg-slate-100 transition-colors cursor-pointer"
                 >
-                  <Search className="w-4 h-4 text-[#0b57d0]" />
+                  <Search className="w-5 h-5 text-[#0b57d0]" strokeWidth={2.2} />
                 </button>
               )}
 
@@ -97,10 +101,10 @@ export default function Navbar() {
                   <Link
                     to={isAnalyticsView ? '/cases' : '/analytics'}
                     title={isAnalyticsView ? 'Volver al Catálogo de Casos' : 'Mi Desempeño y Tendencias Clínicas'}
-                    className={`flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-full text-xs transition-colors ${
+                    className={`${isCatalogRoute ? 'hidden md:flex' : 'flex'} items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 select-none ${
                       isAnalyticsView
-                        ? 'bg-sky-50 text-[#0b57d0] font-semibold hover:bg-sky-100/80'
-                        : 'text-[#444746] hover:text-[#1f1f1f] hover:bg-slate-100'
+                        ? 'bg-gradient-to-r from-cyan-100/80 via-blue-100/70 to-indigo-100/80 text-[#0b57d0] font-semibold border border-blue-300/80 shadow-xs'
+                        : 'bg-gradient-to-r from-cyan-50/50 via-blue-50/40 to-indigo-50/50 hover:from-cyan-100/70 hover:via-blue-100/60 hover:to-indigo-100/70 text-slate-700 hover:text-[#0b57d0] border border-blue-200/60 hover:border-blue-300/90 shadow-xs hover:shadow-sm'
                     }`}
                   >
                     {isAnalyticsView ? (
@@ -121,7 +125,7 @@ export default function Navbar() {
                     type="button"
                     onClick={() => setShowJoinModal(true)}
                     title="Unirse a Sala de Ateneo"
-                    className="flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-full text-xs transition-colors text-[#444746] hover:text-[#1f1f1f] hover:bg-slate-100 cursor-pointer"
+                    className={`${isCatalogRoute ? 'hidden md:flex' : 'flex'} items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 bg-gradient-to-r from-cyan-50/50 via-blue-50/40 to-indigo-50/50 hover:from-cyan-100/70 hover:via-blue-100/60 hover:to-indigo-100/70 text-slate-700 hover:text-[#0b57d0] border border-blue-200/60 hover:border-blue-300/90 shadow-xs hover:shadow-sm cursor-pointer select-none`}
                   >
                     <Users className="w-4 h-4 text-[#0b57d0]" />
                     <span className="hidden md:inline">Unirse a Sala</span>
@@ -132,10 +136,10 @@ export default function Navbar() {
                     <Link
                       to="/benchmark"
                       title="Benchmark Científico"
-                      className={`flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-full transition-colors ${
+                      className={`flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 select-none ${
                         location.pathname === '/benchmark'
-                          ? 'bg-sky-50 text-[#0b57d0] font-semibold'
-                          : 'text-[#444746] hover:text-[#1f1f1f] hover:bg-slate-100'
+                          ? 'bg-gradient-to-r from-cyan-100/80 via-blue-100/70 to-indigo-100/80 text-[#0b57d0] font-semibold border border-blue-300/80 shadow-xs'
+                          : 'bg-gradient-to-r from-cyan-50/50 via-blue-50/40 to-indigo-50/50 hover:from-cyan-100/70 hover:via-blue-100/60 hover:to-indigo-100/70 text-slate-700 hover:text-[#0b57d0] border border-blue-200/60 hover:border-blue-300/90 shadow-xs hover:shadow-sm'
                       }`}
                     >
                       <Award className="w-4 h-4 text-[#0b57d0]" />
@@ -148,10 +152,10 @@ export default function Navbar() {
                     <Link
                       to="/admin/users"
                       title="Consola Administrador"
-                      className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-colors ${
+                      className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 select-none ${
                         location.pathname.startsWith('/admin')
-                          ? 'bg-purple-50 text-purple-700 font-semibold'
-                          : 'text-[#444746] hover:text-[#1f1f1f] hover:bg-slate-100'
+                          ? 'bg-gradient-to-r from-purple-100/80 via-indigo-100/70 to-violet-100/80 text-purple-800 font-semibold border border-purple-300/80 shadow-xs'
+                          : 'bg-gradient-to-r from-purple-50/50 via-indigo-50/40 to-violet-50/50 hover:from-purple-100/70 hover:via-indigo-100/60 hover:to-violet-100/70 text-slate-700 hover:text-purple-800 border border-purple-200/60 hover:border-purple-300/90 shadow-xs hover:shadow-sm'
                       }`}
                     >
                       <ShieldCheck className="w-4 h-4 text-purple-600" />
@@ -164,10 +168,10 @@ export default function Navbar() {
                     <Link
                       to="/teacher/cases"
                       title="Consola Docente"
-                      className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-colors ${
+                      className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 select-none ${
                         location.pathname.startsWith('/teacher')
-                          ? 'bg-blue-50 text-blue-700 font-semibold'
-                          : 'text-[#444746] hover:text-[#1f1f1f] hover:bg-slate-100'
+                          ? 'bg-gradient-to-r from-blue-100/80 via-sky-100/70 to-indigo-100/80 text-blue-800 font-semibold border border-blue-300/80 shadow-xs'
+                          : 'bg-gradient-to-r from-cyan-50/50 via-blue-50/40 to-indigo-50/50 hover:from-cyan-100/70 hover:via-blue-100/60 hover:to-indigo-100/70 text-slate-700 hover:text-blue-800 border border-blue-200/60 hover:border-blue-300/90 shadow-xs hover:shadow-sm'
                       }`}
                     >
                       <UserCheck className="w-4 h-4 text-blue-600" />
@@ -175,8 +179,15 @@ export default function Navbar() {
                     </Link>
                   )}
 
-                  {/* Menú Desplegable de Perfil */}
-                  <UserProfileDropdown />
+                  {/* Bandeja de Notificaciones (Visible en escritorio / En móvil vive en la barra inferior) */}
+                  <div className="hidden md:block">
+                    <NotificationsDropdown />
+                  </div>
+
+                  {/* Menú Desplegable de Perfil (Oculto en cabecera móvil si está en catálogo, ya que se renderiza en la barra inferior) */}
+                  <div className={isCatalogRoute ? 'hidden md:block' : 'block'}>
+                    <UserProfileDropdown />
+                  </div>
                 </>
               ) : location.pathname === '/login' ? (
                 <Link
@@ -202,6 +213,12 @@ export default function Navbar() {
       <JoinRoomModal
         isOpen={showJoinModal}
         onClose={() => setShowJoinModal(false)}
+      />
+
+      {/* Barra de Navegación Inferior Móvil (Exclusiva del Catálogo de Casos) */}
+      <MobileBottomNav
+        onOpenSearch={() => setShowMobileSearch(true)}
+        onOpenJoinRoom={() => setShowJoinModal(true)}
       />
     </header>
   );
