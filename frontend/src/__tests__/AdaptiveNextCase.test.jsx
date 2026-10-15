@@ -42,7 +42,7 @@ describe('Componente AdaptiveNextCase (KST & BKT)', () => {
 
     expect(screen.getByText(/Caso Recomendado/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Diagnóstico Diferencial/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Objetivo a entrenar/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Competencia en entrenamiento/i).length).toBeGreaterThan(0);
   });
 
   it('debe invocar onSelectCase al pulsar el botón de resolver caso recomendado', async () => {

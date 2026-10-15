@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
-import { TrendingUp, Users } from 'lucide-react';
+import { TrendingUp, Users, GraduationCap } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import UserProfileDropdown from './UserProfileDropdown';
 import NotificationsDropdown from './NotificationsDropdown';
+import ClinicalCareerModal from '../../../modules/gamification/components/ClinicalCareerModal';
 
 export interface MobileBottomNavProps {
   onOpenSearch?: () => void;
@@ -18,6 +20,7 @@ export interface MobileBottomNavProps {
 export default function MobileBottomNav({ onOpenJoinRoom }: MobileBottomNavProps) {
   const { user } = useAuth();
   const location = useLocation();
+  const [showCareerModal, setShowCareerModal] = useState<boolean>(false);
 
   if (!user) return null;
 
@@ -25,7 +28,9 @@ export default function MobileBottomNav({ onOpenJoinRoom }: MobileBottomNavProps
   const isCaseSolveRoute = location.pathname.startsWith('/cases/') && location.pathname !== '/cases';
   if (isCaseSolveRoute) return null;
 
-  return createPortal(
+  return (
+    <>
+      {createPortal(
     <nav 
       aria-label="Navegación móvil inferior"
       className="md:hidden fixed bottom-4 inset-x-4 z-40 flex justify-center pointer-events-none select-none animate-fadeIn"
@@ -34,24 +39,37 @@ export default function MobileBottomNav({ onOpenJoinRoom }: MobileBottomNavProps
         {/* 1. Enlace Mi Desempeño */}
         <Link
           to="/analytics"
-          className="flex-1 flex flex-col items-center justify-center py-1 px-1.5 text-slate-700 hover:text-[#0b57d0] active:scale-95 transition-all cursor-pointer group"
+          className="flex-1 flex flex-col items-center justify-center py-1 px-1 text-slate-700 hover:text-[#0b57d0] active:scale-95 transition-all cursor-pointer group"
           title="Mi Desempeño y Tendencias Clínicas"
         >
           <TrendingUp className="w-5 h-5 text-slate-700 group-hover:text-[#0b57d0] transition-colors" />
-          <span className="text-[11px] font-medium text-slate-600 group-hover:text-[#0b57d0] transition-colors mt-1 leading-none">
+          <span className="text-[10px] sm:text-[11px] font-medium text-slate-600 group-hover:text-[#0b57d0] transition-colors mt-1 leading-none">
             Desempeño
           </span>
         </Link>
 
-        {/* 2. Botón Unirse a Sala */}
+        {/* 2. Botón Carrera Formativa e Hitos */}
+        <button
+          type="button"
+          onClick={() => setShowCareerModal(true)}
+          className="flex-1 flex flex-col items-center justify-center py-1 px-1 text-slate-700 hover:text-[#0b57d0] active:scale-95 transition-all cursor-pointer group"
+          title="Carrera Formativa e Hitos Clínicos"
+        >
+          <GraduationCap className="w-5 h-5 text-slate-700 group-hover:text-[#0b57d0] transition-colors" />
+          <span className="text-[10px] sm:text-[11px] font-medium text-slate-600 group-hover:text-[#0b57d0] transition-colors mt-1 leading-none">
+            Hitos
+          </span>
+        </button>
+
+        {/* 3. Botón Unirse a Sala */}
         <button
           type="button"
           onClick={onOpenJoinRoom}
-          className="flex-1 flex flex-col items-center justify-center py-1 px-1.5 text-slate-700 hover:text-[#0b57d0] active:scale-95 transition-all cursor-pointer group"
+          className="flex-1 flex flex-col items-center justify-center py-1 px-1 text-slate-700 hover:text-[#0b57d0] active:scale-95 transition-all cursor-pointer group"
           title="Unirse a Sala de Ateneo"
         >
           <Users className="w-5 h-5 text-slate-700 group-hover:text-[#0b57d0] transition-colors" />
-          <span className="text-[11px] font-medium text-slate-600 group-hover:text-[#0b57d0] transition-colors mt-1 leading-none">
+          <span className="text-[10px] sm:text-[11px] font-medium text-slate-600 group-hover:text-[#0b57d0] transition-colors mt-1 leading-none">
             Unirse a Sala
           </span>
         </button>
@@ -68,5 +86,12 @@ export default function MobileBottomNav({ onOpenJoinRoom }: MobileBottomNavProps
       </div>
     </nav>,
     document.body
+  )}
+
+  <ClinicalCareerModal
+    isOpen={showCareerModal}
+    onClose={() => setShowCareerModal(false)}
+  />
+  </>
   );
 }

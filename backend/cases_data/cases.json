@@ -12,6 +12,42 @@
         "semiologia_anamnesis",
         "diagnostico_final",
         "plan_terapeutico_msp"
+      ],
+      "modo_simulacion": "fases",
+      "fases": [
+        {
+          "fase_numero": 1,
+          "titulo": "Fase 1: Anamnesis y Sospecha Diagnóstica",
+          "descripcion": "Gestante de 32 semanas por FUM, 28 años de edad, acude al servicio de urgencias por presentar cefalea holocraneana intensa de inicio reciente, fosfenos y epigastralgia en barra.",
+          "datos_revelados": "**Signos vitales al ingreso:**\n- **Presión Arterial:** 165/110 mmHg (confirmada en dos tomas separadas por 15 minutos en decúbito lateral izquierdo).\n- **Frecuencia Cardíaca:** 88 lpm\n- **Neurológico:** Reflejos osteotendinosos exaltados (+++/++++).\n- **Examen físico:** Edema bimaleolar bilateral (++), abdomen grávido con fondo uterino acorde a edad gestacional, FCF 142 lpm.",
+          "pregunta_evaluativa": "Identifique la sospecha diagnóstica sindrómica según la GPC del MSP Ecuador y determine si la paciente cumple criterios de severidad que ameriten hospitalización inmediata en sala de choque obstétrico.",
+          "ejes_evaluados": [
+            "diagnóstico"
+          ]
+        },
+        {
+          "fase_numero": 2,
+          "titulo": "Fase 2: Interpretación de Paraclínicos y Afectación Orgánica",
+          "descripcion": "Se canalizan dos vías venosas y se procesa batería laboratorial de emergencia para preeclampsia grave.",
+          "datos_revelados": "**Analítica de urgencias:**\n- **Examen de orina:** Proteinuria con tirilla reactiva +++ (estimada > 300 mg/dL).\n- **Plaquetas:** 92.000 /uL (trombocitopenia moderada).\n- **Creatinina sérica:** 1.2 mg/dL (elevación respecto a niveles basales del embarazo).\n- **TGO (AST):** 96 U/L | **TGP (ALT):** 105 U/L (duplicación de enzimas hepáticas).\n- **LDH:** 680 U/L (indica hemólisis y daño tisular).",
+          "pregunta_evaluativa": "Interprete los resultados de laboratorio identificando los órganos blanco afectados (plaquetario, hepático y renal) y ratifique el diagnóstico definitivo normado por el MSP (Preeclampsia con Criterios de Severidad).",
+          "ejes_evaluados": [
+            "diagnóstico",
+            "seguimiento"
+          ]
+        },
+        {
+          "fase_numero": 3,
+          "titulo": "Fase 3: Prescripción de Neuroprotección y Conducta Obstétrica",
+          "descripcion": "Confirmación de Preeclampsia con Criterios de Severidad. Requiere profilaxis de eclampsia y control tensional urgente.",
+          "datos_revelados": "**Monitoreo continuo y diuresis:**\n- Sonda vesical a permanencia con bolsa recolectora: Diuresis de 35 ml/h.\n- Registro cardiotocográfico: FCF 140 lpm, variabilidad conservada, sin desaceleraciones.",
+          "pregunta_evaluativa": "Prescriba el esquema de neuroprotección con Sulfato de Magnesio normado por el MSP (Esquema Zuspan: dosis de carga y mantenimiento), el fármaco antihipertensivo de primera línea para crisis (Hidralazina / Labetalol / Nifedipino VO) y determine la conducta obstétrica de finalización del embarazo.",
+          "ejes_evaluados": [
+            "tratamiento",
+            "prevención",
+            "seguimiento"
+          ]
+        }
       ]
     },
     {
@@ -26,6 +62,41 @@
         "semiologia_anamnesis",
         "diagnostico_final",
         "plan_terapeutico_msp"
+      ],
+      "modo_simulacion": "fases",
+      "fases": [
+        {
+          "fase_numero": 1,
+          "titulo": "Fase 1: Activación de Código Rojo y Clasificación del Choque",
+          "descripcion": "Paciente de 22 años, primigesta, finaliza parto vaginal hace 20 minutos tras trabajo de parto prolongado. Presenta sangrado transvaginal rutilante abundante estimado en 800 ml con descompensación hemodinámica.",
+          "datos_revelados": "**Signos vitales y estado clínico:**\n- **Presión Arterial:** 85/50 mmHg\n- **Frecuencia Cardíaca:** 125 lpm\n- **Llenado capilar:** 4 segundos\n- **Sensorio:** Ansiosa, pálida, diaforética y con frialdad distal.",
+          "pregunta_evaluativa": "Active el Código Rojo obstétrico, clasifique el grado de choque hipovolémico según la tabla de severidad del MSP Ecuador (choque moderado) e indique las medidas de resucitación hemodinámica inicial (oxigenoterapia y accesos venosos).",
+          "ejes_evaluados": [
+            "diagnóstico"
+          ]
+        },
+        {
+          "fase_numero": 2,
+          "titulo": "Fase 2: Diagnóstico Etiológico y Maniobras de Contención",
+          "descripcion": "Equipo multidisciplinario en sala de partos. Se realiza exploración dirigida del canal de parto y evaluación uterina.",
+          "datos_revelados": "**Hallazgos exploratorios:**\n- **Palpación abdominal:** Útero flácido, por encima de la cicatriz umbilical, sin globo de seguridad de Pinard.\n- **Especuloscopía:** Cérvix y paredes vaginales íntegros, sin desgarros del canal blando.\n- **Placenta y membranas:** Revisión confirma alumbramiento íntegro de cotiledones y membranas ovulares.",
+          "pregunta_evaluativa": "Identifique la etiología del sangrado aplicando la regla de las 4T de la GPC del MSP (Tono: Atonía Uterina) e indique la maniobra física no farmacológica inmediata de compresión mientras se administran los uterotónicos.",
+          "ejes_evaluados": [
+            "diagnóstico",
+            "tratamiento"
+          ]
+        },
+        {
+          "fase_numero": 3,
+          "titulo": "Fase 3: Farmacoterapia Uterotónica Escalonada y Hemoderivados",
+          "descripcion": "Se mantiene masaje uterino bimanual y reposición de cristaloides tibios a chorro. Se requiere hemostasia farmacológica rápida.",
+          "datos_revelados": "**Monitorización a los 10 minutos de reanimación:**\n- Sangrado transvaginal persiste moderado.\n- Dos vías periféricas con catéter calibre 16G permeables pasando Lactato Ringer.\n- Sonda Foley instalada con orina clara.",
+          "pregunta_evaluativa": "Prescriba la secuencia farmacológica de uterotónicos de primera y segunda línea normada por el MSP (Oxitocina infusión, Metilergonovina/Ergometrina y Misoprostol sublingual/rectal), y señale la indicación de colocación de balón de taponamiento hidrostático intrauterino (Bakri).",
+          "ejes_evaluados": [
+            "tratamiento",
+            "seguimiento"
+          ]
+        }
       ]
     },
     {
@@ -40,7 +111,44 @@
         "examenes_complementarios",
         "plan_terapeutico_msp"
       ],
-      "fragmento_gpc_ideal_id": "gpc_GP_Tuberculosis-1_chunk_0067"
+      "fragmento_gpc_ideal_id": "gpc_GP_Tuberculosis-1_chunk_0067",
+      "modo_simulacion": "fases",
+      "fases": [
+        {
+          "fase_numero": 1,
+          "titulo": "Fase 1: Identificación y Captación del Sintomático Respiratorio",
+          "descripcion": "Paciente masculino de 35 años acude a consulta de medicina general por tos persistente con expectoración de 21 días, diaforesis nocturna y pérdida de peso.",
+          "datos_revelados": "**Examen físico y signos vitales:**\n- **Signos vitales:** PA 115/70 mmHg, FC 82 lpm, FR 18 rpm, Temperatura 37.6 °C.\n- **Antropometría:** Talla 1.68 m, Peso 52 kg, IMC 18.4 kg/m².\n- **Auscultación:** Estertores crepitantes localizados en ápex pulmonar derecho.",
+          "pregunta_evaluativa": "Defina la condición operacional del paciente según el Programa Nacional de Control de la Tuberculosis del MSP Ecuador (Sintomático Respiratorio) e indique la prueba diagnóstica microbiológica inmediata de bajo costo en el primer nivel de atención.",
+          "ejes_evaluados": [
+            "diagnóstico",
+            "prevención"
+          ]
+        },
+        {
+          "fase_numero": 2,
+          "titulo": "Fase 2: Confirmación Diagnóstica Microbiológica y Molecular",
+          "descripcion": "Se recolectan dos muestras seriadas de esputo para baciloscopía y se solicita prueba de biología molecular rápida.",
+          "datos_revelados": "**Reporte microbiológico y radiológico:**\n- **Baciloscopía (Ziehl-Neelsen):** Muestra 1 (+), Muestra 2 (++).\n- **GeneXpert MTB/RIF:** Complejo Mycobacterium tuberculosis DETECTADO. Resistencia a Rifampicina: NO DETECTADA (Sensible).\n- **Radiografía de tórax:** Infiltrado cavitario apical derecho con áreas de consolidación periférica.",
+          "pregunta_evaluativa": "Interprete los resultados para clasificar el caso clínico (Tuberculosis Pulmonar Bacteriológicamente Confirmada Sensible) y detalle los tamizajes serológicos y metabólicos complementarios que deben solicitarse de rigor normado.",
+          "ejes_evaluados": [
+            "diagnóstico",
+            "examenes_complementarios"
+          ]
+        },
+        {
+          "fase_numero": 3,
+          "titulo": "Fase 3: Prescripción del Esquema TAES/DOTS y Estudio de Contactos",
+          "descripcion": "Confirmada tuberculosis pulmonar sensible en paciente de 52 kg. Se requiere iniciar terapia combinada estrictamente supervisada.",
+          "datos_revelados": "**Perfil serológico y entorno familiar:**\n- Serología para VIH no reactiva. Glucemia y transaminasas basales dentro de límites normales.\n- Núcleo familiar: Convive con esposa y dos hijos de 3 y 7 años.",
+          "pregunta_evaluativa": "Formule el esquema terapéutico normado por el MSP (Fase Inicial 2HRZE y Fase de Consolidación 4HR en dosis fija combinada), defina los controles bacteriológicos mensuales y la conducta de estudio y quimioprofilaxis con Isoniazida en sus contactos intradomiciliarios.",
+          "ejes_evaluados": [
+            "tratamiento",
+            "prevención",
+            "seguimiento"
+          ]
+        }
+      ]
     },
     {
       "id": "case_vih_01",
@@ -54,7 +162,43 @@
         "plan_terapeutico_msp",
         "seguimiento_prevencion"
       ],
-      "fragmento_gpc_ideal_id": "gpc_gpc_VIH_acuerdo_ministerial05-07-2019_chunk_0365"
+      "fragmento_gpc_ideal_id": "gpc_gpc_VIH_acuerdo_ministerial05-07-2019_chunk_0365",
+      "modo_simulacion": "fases",
+      "fases": [
+        {
+          "fase_numero": 1,
+          "titulo": "Fase 1: Confirmación Diagnóstica y Estadificación Clínica Inicial",
+          "descripcion": "Paciente masculino de 29 años acude a la Unidad de Atención Integral (UAI) con dos pruebas rápidas de tamizaje reactivas.",
+          "datos_revelados": "**Evaluación clínica y confirmación:**\n- Inmunoensayo confirmatorio de 4ta generación (Ag p24 + Ac anti-VIH 1/2) REACTIVO.\n- Examen físico: Afebril, estado general conservado, sin lesiones orofaríngeas ni adenopatías periféricas palpables.\n- Auscultación cardiopulmonar sin hallazgos patológicos.",
+          "pregunta_evaluativa": "Establezca la conducta médica inicial de asesoría post-prueba, estadificación clínica OMS (Estadio Clínico 1 asintomático) y los pasos inmediatos para vinculación efectiva al programa TARV.",
+          "ejes_evaluados": [
+            "diagnóstico",
+            "prevención"
+          ]
+        },
+        {
+          "fase_numero": 2,
+          "titulo": "Fase 2: Evaluación Inmunovirológica y Profilaxis Antimicrobiana",
+          "descripcion": "Se obtienen resultados de la analítica basal previa al inicio de los antirretrovirales.",
+          "datos_revelados": "**Panel inmunológico e infeccioso:**\n- **Recuento de Linfocitos T CD4:** 210 células/mm³ (14%).\n- **Carga Viral VIH-1:** 120.000 copias/ml.\n- **Serologías:** VDRL no reactiva, AgsVHB negativo, Anti-VHC negativo.\n- **Descarte de Tuberculosis:** Baciloscopía negativa y radiografía de tórax normal.",
+          "pregunta_evaluativa": "Interprete el nivel de inmunodepresión según el recuento de CD4, determine la indicación de profilaxis antimicrobiana primaria (Cotrimoxazol para Pneumocystis jirovecii) y establezca la ventana temporal para el inicio de antirretrovirales.",
+          "ejes_evaluados": [
+            "diagnóstico",
+            "prevención"
+          ]
+        },
+        {
+          "fase_numero": 3,
+          "titulo": "Fase 3: Prescripción de TARV Preferente y Seguimiento Virologico",
+          "descripcion": "Sin contraindicaciones biológicas ni infecciones oportunistas activas. Paciente preparado para iniciar tratamiento de por vida.",
+          "datos_revelados": "**Función orgánica basal:**\n- Creatinina sérica: 0.8 mg/dL (TFGe > 90 ml/min/1.73 m²).\n- Transaminasas y perfil lipídico dentro de rangos normales.",
+          "pregunta_evaluativa": "Prescriba el esquema de primera línea preferente en adultos normado por el Acuerdo Ministerial del MSP Ecuador (TLD: Tenofovir Disoproxil Fumarato + Lamivudina + Dolutegravir en combinación a dosis fija única diaria) y defina el monitoreo de carga viral para constatar supresión virológica indetectable.",
+          "ejes_evaluados": [
+            "tratamiento",
+            "seguimiento"
+          ]
+        }
+      ]
     },
     {
       "id": "case_hta_01",
@@ -119,7 +263,44 @@
         "diagnostico_final",
         "seguimiento_prevencion"
       ],
-      "fragmento_gpc_ideal_id": "gpc_guia_prevencion_diagnostico_tratamiento_enfermedad_renal_cronica_2018_chunk_0068"
+      "fragmento_gpc_ideal_id": "gpc_guia_prevencion_diagnostico_tratamiento_enfermedad_renal_cronica_2018_chunk_0068",
+      "modo_simulacion": "fases",
+      "fases": [
+        {
+          "fase_numero": 1,
+          "titulo": "Fase 1: Factores de Riesgo y Sospecha de Daño Renal Subclínico",
+          "descripcion": "Paciente masculino de 64 años con DM2 e HTA de 10 años de evolución acude a control de rutina en consulta externa. Se encuentra asintomático.",
+          "datos_revelados": "**Evaluación clínica:**\n- **Presión Arterial:** 138/84 mmHg\n- **Frecuencia Cardíaca:** 72 lpm | **IMC:** 28.5 kg/m²\n- Fondo de ojo revela retinopatía diabética no proliferativa leve.\n- Sin edemas en miembros inferiores ni signos de sobrecarga de volumen.",
+          "pregunta_evaluativa": "Identifique los factores de riesgo de nefropatía crónica diabética e hipertensiva, e indique las pruebas de tamizaje cuantitativo normadas por el MSP para evaluación de función renal.",
+          "ejes_evaluados": [
+            "diagnóstico",
+            "prevención"
+          ]
+        },
+        {
+          "fase_numero": 2,
+          "titulo": "Fase 2: Estadificación KDIGO (TFGe y Albuminuria)",
+          "descripcion": "Se reciben resultados de creatinina sérica y muestra de orina aislada matutina.",
+          "datos_revelados": "**Perfil renal y metabólico:**\n- **Creatinina sérica:** 1.8 mg/dL\n- **TFGe (CKD-EPI):** 38 ml/min/1.73 m²\n- **Razón Albúmina/Creatinina en orina (RAC):** 180 mg/g (microalbuminuria persistente confirmada).\n- **HbA1c:** 7.4% | **Potasio sérico:** 4.7 mEq/L",
+          "pregunta_evaluativa": "Estadifique la Enfermedad Renal Crónica cruzando la categoría de filtrado glomerular (G3b) y la categoría de albuminuria (A2) según los criterios KDIGO/MSP, y determine el riesgo de progresión y eventos cardiovasculares.",
+          "ejes_evaluados": [
+            "diagnóstico",
+            "seguimiento"
+          ]
+        },
+        {
+          "fase_numero": 3,
+          "titulo": "Fase 3: Prescripción Nefroprotectora y Adecuación Terapéutica",
+          "descripcion": "Confirmada ERC estadio G3bA2. Requiere reajuste de medicamentos y directrices de protección renal.",
+          "datos_revelados": "**Plan de tratamiento actual:**\n- Recibe Enalapril 10 mg/día y Metformina 850 mg cada 12 horas.\n- No refiere uso reciente de AINEs ni contrastes iodados.",
+          "pregunta_evaluativa": "Prescriba las medidas de nefroprotección normadas (ajuste de IECA/ARA-II, ajuste o suspensión de antidiabéticos según TFGe < 45 ml/min), defina las metas de PA (< 130/80 mmHg), restricción proteica y criterios de interconsulta a nefrología.",
+          "ejes_evaluados": [
+            "tratamiento",
+            "prevención",
+            "seguimiento"
+          ]
+        }
+      ]
     },
     {
       "id": "case_ehirn_01",
@@ -134,7 +315,42 @@
         "correlacion_multimodal",
         "plan_terapeutico_msp"
       ],
-      "fragmento_gpc_ideal_id": "gpc_gpc_ehirn2019_chunk_0106"
+      "fragmento_gpc_ideal_id": "gpc_gpc_ehirn2019_chunk_0106",
+      "modo_simulacion": "fases",
+      "fases": [
+        {
+          "fase_numero": 1,
+          "titulo": "Fase 1: Asfixia Perinatal y Reanimación en Sala de Partos",
+          "descripcion": "Recién nacido a término (39 semanas, 3.200 g), nace en apnea con bradicardia severa tras desprendimiento prematuro de placenta y líquido amniótico meconial espeso.",
+          "datos_revelados": "**Datos de reanimación y cordón:**\n- **APGAR:** 2 al minuto 1 | 3 a los 5 minutos | 5 a los 10 minutos (requirió ventilación a presión positiva e intubación endotraqueal).\n- **Gasometría de arteria umbilical:** pH 6.95, PaCO2 58 mmHg, HCO3 12 mmol/L, Exceso de Bases (EB) -16 mmol/L.",
+          "pregunta_evaluativa": "Verifique si el neonato cumple los criterios fisiológicos y gasométricos de asfixia perinatal severa según la GPC de EHI-RN del MSP Ecuador para alertar a la UCIN e iniciar protocolo de neuroprotección.",
+          "ejes_evaluados": [
+            "diagnóstico"
+          ]
+        },
+        {
+          "fase_numero": 2,
+          "titulo": "Fase 2: Evaluación Neurológica y Estadificación de Sarnat",
+          "descripcion": "El paciente ingresa a la Unidad de Cuidados Intensivos Neonatales (UCIN) a las 2 horas de vida para examen neurológico seriado.",
+          "datos_revelados": "**Examen neurológico neonatal:**\n- **Sensorio:** Letárgico con respuesta mínima a estímulos dolorosos.\n- **Tono y postura:** Hipotonía generalizada con disminución de movimientos espontáneos.\n- **Reflejos arcaicos:** Reflejo de succión y reflejo de Moro completamente ausentes.\n- **Actividad paroxística:** Movimientos convulsivos sutiles de pedaleo y parpadeo repetitivo.\n- **Coagulograma paraclínico:** Plaquetas 105.000 /uL, TP e INR prolongados.",
+          "pregunta_evaluativa": "Clasifique el grado de encefalopatía hipóxico-isquémica según la escala de Sarnat (Estadio II / Moderada a Grave) e interprete los criterios de elegibilidad para neuromonitoreo y neuroprotección activa.",
+          "ejes_evaluados": [
+            "diagnóstico",
+            "correlacion_multimodal"
+          ]
+        },
+        {
+          "fase_numero": 3,
+          "titulo": "Fase 3: Protocolo de Hipotermia Terapéutica y Soporte en UCIN",
+          "descripcion": "Neonato de 2.5 horas de vida con EHI moderada-grave confirmada, dentro de la ventana terapéutica crítica de 6 horas.",
+          "datos_revelados": "**Monitorización invasiva en UCIN:**\n- Sensor de temperatura esofágica/rectal continua colocado.\n- Cateterismo venoso y arterial umbilical permeable.",
+          "pregunta_evaluativa": "Indique los parámetros de inducción y mantenimiento de Hipotermia Terapéutica corporal total normados por el MSP (temperatura diana de 33.5 °C a 34.5 °C durante 72 horas y recalentamiento a 0.5 °C/h), y prescriba el anticonvulsivante de primera línea (Fenobarbital 20 mg/kg IV).",
+          "ejes_evaluados": [
+            "tratamiento",
+            "seguimiento"
+          ]
+        }
+      ]
     },
     {
       "id": "case_nac_01",
@@ -150,7 +366,42 @@
         "correlacion_multimodal",
         "plan_terapeutico_msp"
       ],
-      "fragmento_gpc_ideal_id": "gpc_GPC_neumonía-adquirida_2017_chunk_0060"
+      "fragmento_gpc_ideal_id": "gpc_GPC_neumonía-adquirida_2017_chunk_0060",
+      "modo_simulacion": "fases",
+      "fases": [
+        {
+          "fase_numero": 1,
+          "titulo": "Fase 1: Triaje Pediátrico y Signos de Alarma Respiratoria",
+          "descripcion": "Preescolar masculino de 3 años (14 kg) acude a urgencias pediátricas por fiebre alta de 3 días y dificultad respiratoria progresiva de 8 horas de evolución.",
+          "datos_revelados": "**Signos vitales y exploración:**\n- **Frecuencia Respiratoria:** 46 rpm (taquipnea significativa para rango de 1 a 5 años: >= 40 rpm).\n- **Saturación O2:** 89% al aire ambiente.\n- **Frecuencia Cardíaca:** 138 lpm | **Temperatura:** 38.9 °C.\n- **Esfuerzo respiratorio:** Tiraje subcostal e intercostal marcado, aleteo nasal y letargia.",
+          "pregunta_evaluativa": "Identifique los signos de peligro y dificultad respiratoria grave según la GPC de NAC en Pediatría del MSP Ecuador, y fundamente la decisión de ingreso hospitalario inmediato y oxigenoterapia suplementaria.",
+          "ejes_evaluados": [
+            "diagnóstico"
+          ]
+        },
+        {
+          "fase_numero": 2,
+          "titulo": "Fase 2: Correlación Radiológica y Hallazgos Auscultatorios",
+          "descripcion": "Se estabiliza oxigenación mediante cánula nasal a 2 L/min y se realiza estudio radiológico de tórax.",
+          "datos_revelados": "**Auscultación y Radiografía de tórax:**\n- **Auscultación pulmonar:** Disminución focal del murmullo vesicular y estertores crepitantes inspiratorios en base derecha.\n- **Radiografía de tórax (Rx):** Opacidad de consolidación alveolar en lóbulo inferior derecho con broncograma aéreo evidente, sin evidencia de derrame pleural ni neumotórax.",
+          "pregunta_evaluativa": "Correlacione los hallazgos semiológicos con el patrón radiológico para confirmar la sospecha de neumonía bacteriana típica (Streptococcus pneumoniae) y descarte complicaciones pleuropulmonares inmediatas.",
+          "ejes_evaluados": [
+            "diagnóstico",
+            "correlacion_multimodal"
+          ]
+        },
+        {
+          "fase_numero": 3,
+          "titulo": "Fase 3: Prescripción de Antibioticoterapia Parenteral y Seguimiento",
+          "descripcion": "Paciente hospitalizado en sala pediátrica. SatO2 corregida a 95% con oxígeno bajo flujo. Requiere tratamiento antibiótico parenteral.",
+          "datos_revelados": "**Hemograma y bioquímica:**\n- Leucocitos: 18.500 /uL (Neutrófilos 78%).\n- Proteína C Reactiva (PCR): 48 mg/L.\n- Función renal y electrolitos normales. Vía periférica permeable.",
+          "pregunta_evaluativa": "Prescriba el esquema antibiótico parenteral de primera línea normado por la GPC del MSP para NAC grave hospitalizada (Ampicilina IV 150-200 mg/kg/día fraccionada cada 6 horas), y señale los criterios clínicos para evaluar mejoría en las primeras 48 a 72 horas.",
+          "ejes_evaluados": [
+            "tratamiento",
+            "seguimiento"
+          ]
+        }
+      ]
     },
     {
       "id": "case_sepsis_neonatal_01",
@@ -164,7 +415,42 @@
         "examenes_complementarios",
         "plan_terapeutico_msp"
       ],
-      "fragmento_gpc_ideal_id": "gpc_GPC-Sepsis-neonatal_chunk_0058"
+      "fragmento_gpc_ideal_id": "gpc_GPC-Sepsis-neonatal_chunk_0058",
+      "modo_simulacion": "fases",
+      "fases": [
+        {
+          "fase_numero": 1,
+          "titulo": "Fase 1: Identificación de Factores de Riesgo y Sospecha Clínica",
+          "descripcion": "Recién nacido a término de 18 horas de vida (38 semanas, 3.100 g), con antecedente de RPM materna de 22 horas sin profilaxis. Presenta rechazo al alimento, quejido y letargia.",
+          "datos_revelados": "**Signos vitales neonatales:**\n- **Temperatura axilar:** 35.8 °C (hipotermia neonatal significativa).\n- **Frecuencia Respiratoria:** 66 rpm (taquipnea neonatal: >= 60 rpm).\n- **Frecuencia Cardíaca:** 168 lpm.\n- **Perfusión:** Llenado capilar de 3.5 segundos y extremidades frías con livedo reticularis leve.",
+          "pregunta_evaluativa": "Identifique el diagnóstico de sospecha (Sepsis Neonatal Temprana), reconozca los factores de riesgo mayores perinatales presentes y justifique el aislamiento y monitorización en cuidados neonatales.",
+          "ejes_evaluados": [
+            "diagnóstico"
+          ]
+        },
+        {
+          "fase_numero": 2,
+          "titulo": "Fase 2: Interpretación Paraclínica e Índices Leucocitarios",
+          "descripcion": "Neonato en incubadora de transporte hacia UCIN. Se realiza toma de hemocultivos y biometría hemática completa.",
+          "datos_revelados": "**Resultados de laboratorio:**\n- **Leucocitos totales:** 5.200 /uL (leucopenia para edad neonatal).\n- **Neutrófilos inmaduros (bandas):** 22% | **Neutrófilos totales:** 45%.\n- **Índice Inmaduros/Totales (I/T):** 0.48 (marcadamente patológico > 0.20).\n- **Plaquetas:** 135.000 /uL.\n- **Proteína C Reactiva (PCR cuantitativa):** 18 mg/L (positiva).\n- Hemocultivos seriados (dos tomas) inoculados.",
+          "pregunta_evaluativa": "Interprete los índices hematológicos y reactantes de fase aguda según los criterios de sepsis neonatal del MSP Ecuador, confirmando la categoría de Sepsis Probable de transmisión vertical.",
+          "ejes_evaluados": [
+            "diagnóstico",
+            "examenes_complementarios"
+          ]
+        },
+        {
+          "fase_numero": 3,
+          "titulo": "Fase 3: Antibioticoterapia Empírica Combinada y Monitorización",
+          "descripcion": "Neonato canalizado con infusión de glucosa a requerimiento basal. Requiere cobertura antibiótica empírica sin demora.",
+          "datos_revelados": "**Estado actual:**\n- Peso: 3.100 g. Edad: 18 horas de vida.\n- Acceso vascular periférico permeable y diuresis presente.",
+          "pregunta_evaluativa": "Prescriba el esquema de antibioticoterapia empírica parenteral combinada de primera línea normado por la GPC del MSP (Ampicilina 100 mg/kg/día cada 12 h IV + Gentamicina 4-5 mg/kg/día cada 24 h IV), defina el tiempo de espera para resultado de hemocultivos y la conducta a las 48 horas.",
+          "ejes_evaluados": [
+            "tratamiento",
+            "seguimiento"
+          ]
+        }
+      ]
     },
     {
       "id": "case_aborto_01",
@@ -178,7 +464,43 @@
         "diagnostico_final",
         "plan_terapeutico_msp"
       ],
-      "fragmento_gpc_ideal_id": "gpc_gpc_guia_aborto_espontaneo_incompleto_19_feb_2014_chunk_0010"
+      "fragmento_gpc_ideal_id": "gpc_gpc_guia_aborto_espontaneo_incompleto_19_feb_2014_chunk_0010",
+      "modo_simulacion": "fases",
+      "fases": [
+        {
+          "fase_numero": 1,
+          "titulo": "Fase 1: Anamnesis Ginecológica y Diagnóstico Clínico",
+          "descripcion": "Paciente femenina de 23 años, secundigesta (G2P1A0) con amenorrea de 9 semanas. Acude a urgencias por metrorragia abundante con coágulos y dolor cólico hipogástrico.",
+          "datos_revelados": "**Examen ginecológico y signos vitales:**\n- **Signos vitales:** PA 100/65 mmHg, FC 88 lpm, Temperatura 36.7 °C (hemodinámicamente estable).\n- **Abdomen:** Doloroso en hipogastrio, sin signos peritoneales ni fiebre.\n- **Especuloscopía:** Sangrado transvaginal activo rutilante con restos tisulares en el canal cervical.\n- **Tacto vaginal:** Orificio Cervical Interno (OCI) permeable, útero aumentado compatible con 8-9 semanas.",
+          "pregunta_evaluativa": "Establezca el diagnóstico clínico específico (Aborto Incompleto no complicado) y diferéncielo de otras formas de aborto (amenaza de aborto, aborto diferido o completo) según la GPC del MSP Ecuador.",
+          "ejes_evaluados": [
+            "diagnóstico"
+          ]
+        },
+        {
+          "fase_numero": 2,
+          "titulo": "Fase 2: Confirmación Ecográfica y Determinación de Grupo Sanguíneo",
+          "descripcion": "Se solicita ecografía transvaginal ginecológica y laboratorio para valoración hematológica y factor Rh.",
+          "datos_revelados": "**Hallazgos ecográficos y serológicos:**\n- **Ecografía transvaginal:** Cavidad uterina con ecos heterogéneos engrosados (línea endometrial de 24 mm) compatibles con restos ovulares retenidos, sin saco gestacional viable.\n- **Hemograma:** Hemoglobina 11.2 g/dL, Hematocrito 34%.\n- **Grupo y Factor Rh:** O Negativo (Rh Negativo). Prueba de Coombs indirecta: Negativa.",
+          "pregunta_evaluativa": "Correlacione los hallazgos ecográficos para confirmar la necesidad de evacuación uterina y determine la indicación perentoria de profilaxis con Inmunoglobulina Anti-D en la paciente Rh negativa no sensibilizada.",
+          "ejes_evaluados": [
+            "diagnóstico",
+            "prevención"
+          ]
+        },
+        {
+          "fase_numero": 3,
+          "titulo": "Fase 3: Selección del Método de Evacuación y Anticoncepción",
+          "descripcion": "Paciente informada del diagnóstico de aborto incompleto < 12 semanas. Requiere definición del procedimiento evacuatorio.",
+          "datos_revelados": "**Condición obstétrica:**\n- Edad gestacional menor a 12 semanas, útero móvil menor a 12 cm de tamaño, cérvix permeable y paciente estable sin infección.",
+          "pregunta_evaluativa": "Compare y seleccione el método de evacuación uterina normado por el MSP (Aspiración Manual Endouterina - AMEU vs Tratamiento médico con Misoprostol), fundamentando las ventajas del AMEU sobre el legrado instrumental (LIU), y prescriba la orientación en anticoncepción post-evento obstétrico.",
+          "ejes_evaluados": [
+            "tratamiento",
+            "prevención",
+            "seguimiento"
+          ]
+        }
+      ]
     }
   ]
 }

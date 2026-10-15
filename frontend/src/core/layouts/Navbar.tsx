@@ -17,6 +17,7 @@ import UserProfileDropdown from './components/UserProfileDropdown';
 import NotificationsDropdown from './components/NotificationsDropdown';
 import MobileBottomNav from './components/MobileBottomNav';
 import JoinRoomModal from '../../modules/collaboration/components/JoinRoomModal';
+import CareerBadgeButton from '../../modules/gamification/components/CareerBadgeButton';
 
 /**
  * Navbar — Cabecera principal desacoplada y fijada superior (Liquid Glassmorphism)
@@ -119,6 +120,9 @@ export default function Navbar() {
                       </>
                     )}
                   </Link>
+
+                  {/* Indicador de Carrera Formativa e Hitos */}
+                  <CareerBadgeButton />
 
                   {/* Botón Unirse a Sala Colaborativa (Exclusivo de escritorio) */}
                   <button

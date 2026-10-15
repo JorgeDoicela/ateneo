@@ -13,8 +13,10 @@ import {
   ChevronDown,
   Check,
   User,
-  X
+  X,
+  GraduationCap
 } from 'lucide-react';
+import ClinicalCareerModal from '../../../modules/gamification/components/ClinicalCareerModal';
 import { useAuth } from '../../../context/AuthContext';
 import { useTheme } from '../../theme/ThemeProvider';
 import type { TenantId } from '../../theme/tokens';
@@ -37,6 +39,7 @@ export default function UserProfileDropdown({ showLabel = false }: UserProfileDr
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLangOpen, setIsLangOpen] = useState<boolean>(false);
+  const [showCareerModal, setShowCareerModal] = useState<boolean>(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -231,7 +234,27 @@ export default function UserProfileDropdown({ showLabel = false }: UserProfileDr
             </div>
           )}
 
-          {/* 5. Selector de Idioma Customizado (Cero controles nativos del SO) */}
+          {/* 5. Acceso a Carrera Formativa e Hitos Clínicos */}
+          <div className="py-2 border-b border-slate-100">
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpen(false);
+                setShowCareerModal(true);
+              }}
+              className="w-full flex items-center justify-between px-2.5 py-2 text-xs text-slate-700 hover:text-blue-600 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer"
+            >
+              <span className="flex items-center gap-2 font-medium">
+                <GraduationCap className="w-4 h-4 text-[#0b57d0]" />
+                <span>Carrera Formativa e Hitos</span>
+              </span>
+              <span className="text-[10px] text-blue-600 font-semibold bg-blue-50 px-2 py-0.5 rounded-full">
+                Ver Hitos
+              </span>
+            </button>
+          </div>
+
+          {/* 6. Selector de Idioma Customizado (Cero controles nativos del SO) */}
           <div className="py-2 border-b border-slate-100 text-xs space-y-1.5">
             <button
               type="button"
@@ -287,6 +310,11 @@ export default function UserProfileDropdown({ showLabel = false }: UserProfileDr
       </div>,
       document.body
     )}
+
+    <ClinicalCareerModal
+      isOpen={showCareerModal}
+      onClose={() => setShowCareerModal(false)}
+    />
   </div>
   );
 }

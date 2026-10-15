@@ -176,6 +176,27 @@ class EvaluationService:
                             commit=False
                         )
 
+                    # 3. Procesar gamificación clínica, XP e hitos en la misma transacción atómica
+                    if hasattr(uow, "gamification"):
+                        from modules.gamification.service import GamificationService
+                        gamification_svc = GamificationService(repository=uow.gamification, session=uow.session)
+                        es_fases = getattr(case, "modo_simulacion", "") == "fases" or bool(getattr(case, "fases", None))
+                        dificultad = (getattr(case, "dificultad", "") or "").lower()
+                        es_emergencia = "rojo" in dificultad or "alta" in dificultad or "emergencia" in dificultad or getattr(case, "codigo_rojo", False)
+
+                        gamif_result = gamification_svc.process_evaluation_event(
+                            user_id=user_id,
+                            case_id=case.id,
+                            score=float(eval_dict.get("score", 0.0)),
+                            faithfulness_score=float(eval_dict.get("faithfulness_score", 0.0)) if eval_dict.get("faithfulness_score") is not None else None,
+                            tiempo_segundos=float(eval_dict.get("tiempo_segundos", 0.0)) if eval_dict.get("tiempo_segundos") is not None else 0.0,
+                            es_fases=es_fases,
+                            especialidad=case.especialidad,
+                            es_emergencia=es_emergencia
+                        )
+                        if hasattr(eval_result, "gamification_update"):
+                            eval_result.gamification_update = gamif_result.model_dump()
+
                     # Confirmar toda la transacción multi-repositorio
                     uow.commit()
             except Exception as tx_err:

@@ -163,11 +163,29 @@ export default function PhaseFeedbackCard({
         <div className="p-4 rounded-[18px] bg-[#f8fafc] border border-slate-200/80 space-y-2">
           <span className="text-xs font-semibold text-[#1f1f1f] flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-[#0b57d0]" />
-            Nuevos Hallazgos Paraclínicos Desbloqueados
+            Nuevos Hallazgos Clínicos Desbloqueados
           </span>
-          <p className="text-xs text-[#444746] leading-relaxed">
-            {datos_fase_siguiente}
-          </p>
+          {typeof datos_fase_siguiente === 'string' ? (
+            <p className="text-xs text-[#444746] leading-relaxed">
+              {datos_fase_siguiente}
+            </p>
+          ) : (
+            <div className="text-xs text-[#444746] space-y-2 leading-relaxed">
+              {datos_fase_siguiente.titulo && (
+                <p className="font-semibold text-slate-800">
+                  {datos_fase_siguiente.titulo}
+                </p>
+              )}
+              {datos_fase_siguiente.descripcion && (
+                <p>{datos_fase_siguiente.descripcion}</p>
+              )}
+              {datos_fase_siguiente.datos_revelados && (
+                <div className="bg-white p-2.5 rounded-[12px] border border-slate-200/60 font-mono text-[11px] text-slate-700">
+                  {datos_fase_siguiente.datos_revelados}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 

@@ -107,9 +107,12 @@ export default function AdaptiveNextCase({ onSelectCase, onToggleGraph }: Adapti
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-center pt-4">
           <div className="lg:col-span-8 space-y-2 sm:space-y-2.5">
             <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span className="text-slate-500 font-medium">Objetivo a entrenar:</span>
+              <span className="text-slate-500 font-medium">Competencia en entrenamiento:</span>
               <span className="text-slate-900 font-bold capitalize">
-                {competencia_objetivo?.nombre} ({pPct}%)
+                {competencia_objetivo?.nombre}
+              </span>
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700">
+                {pPct}% dominio
               </span>
             </div>
 
@@ -121,11 +124,11 @@ export default function AdaptiveNextCase({ onSelectCase, onToggleGraph }: Adapti
               <span className="font-medium text-slate-700">{clinicalCase.especialidad || 'Medicina General'}</span>
               <span className="text-slate-300 font-light">•</span>
               <span className="font-medium text-slate-700">Dificultad {clinicalCase.dificultad || 'Intermedia'}</span>
-              {clinicalCase.fases && (
+              {clinicalCase.fases && clinicalCase.fases.length > 0 && (
                 <>
                   <span className="text-slate-300 font-light">•</span>
                   <span className="text-blue-700 font-semibold">
-                    3 Fases Clínicas
+                    {clinicalCase.fases.length} Fases Clínicas
                   </span>
                 </>
               )}

@@ -104,6 +104,11 @@ def init_database() -> None:
     from modules.collaboration.models import AteneoRoomModel
     from modules.adaptive.models import StudentMasteryModel, StudentSnapshotModel
     from modules.cases.models import ClinicalCaseModel
+    from modules.gamification.models import (
+        AchievementDefinitionModel,
+        StudentGamificationProfileModel,
+        StudentUnlockedAchievementModel
+    )
 
     Base.metadata.create_all(bind=engine)
 
@@ -154,4 +159,102 @@ def init_database() -> None:
         user_repo = UserRepository(db)
         auth_service = AuthService(user_repo, tenant_repo)
         auth_service.seed_demo_users_if_needed()
+
+        # Siembra defensiva e idempotente de hitos clínicos canónicos
+        default_achievements = [
+            {
+                "id": "iniciacion_clinica",
+                "codigo": "ACH_INIT_01",
+                "titulo": "Iniciación Clínica",
+                "descripcion": "Completar la primera simulación diagnóstica con base en las Guías de Práctica Clínica del Ecuador.",
+                "categoria": "diagnostico",
+                "icono": "Stethoscope",
+                "puntos_xp": 50,
+                "criterio_tipo": "cases_completed",
+                "criterio_valor": 1.0
+            },
+            {
+                "id": "apego_gpc_excelente",
+                "codigo": "ACH_GPC_02",
+                "titulo": "Apego Normativo Estricto",
+                "descripcion": "Obtener una calificación diagnóstica igual o superior a 9.0/10 con alta concordancia clínica formativa.",
+                "categoria": "excelencia",
+                "icono": "Award",
+                "puntos_xp": 100,
+                "criterio_tipo": "score_threshold",
+                "criterio_valor": 9.0
+            },
+            {
+                "id": "maestria_secuencial",
+                "codigo": "ACH_PHASE_03",
+                "titulo": "Maestría Secuencial",
+                "descripcion": "Superar con éxito las tres fases secuenciales (Anamnesis, Paraclínicos y Manejo) en simulación dinámica.",
+                "categoria": "fases",
+                "icono": "Layers",
+                "puntos_xp": 75,
+                "criterio_tipo": "phases_completed",
+                "criterio_valor": 1.0
+            },
+            {
+                "id": "resolucion_multidisciplinar",
+                "codigo": "ACH_SPEC_04",
+                "titulo": "Resolución Multidisciplinar",
+                "descripcion": "Resolver casos clínicos de al menos 3 especialidades o Guías de Práctica Clínica distintas.",
+                "categoria": "especialidad",
+                "icono": "Compass",
+                "puntos_xp": 120,
+                "criterio_tipo": "specialties_count",
+                "criterio_valor": 3.0
+            },
+            {
+                "id": "pensamiento_socratico",
+                "codigo": "ACH_SOCRATIC_05",
+                "titulo": "Pensamiento Crítico Socrático",
+                "descripcion": "Participar activamente en un diálogo de debriefing socrático para aclarar y justificar omisiones clínicas.",
+                "categoria": "dialogo",
+                "icono": "MessageSquare",
+                "puntos_xp": 60,
+                "criterio_tipo": "socratic_debrief",
+                "criterio_valor": 1.0
+            },
+            {
+                "id": "eficiencia_urgencias",
+                "codigo": "ACH_TIME_06",
+                "titulo": "Eficiencia en Urgencias",
+                "descripcion": "Emitir un juicio clínico acertado con calificación >= 8.5 en un tiempo menor o igual a 5 minutos.",
+                "categoria": "agilidad",
+                "icono": "Zap",
+                "puntos_xp": 90,
+                "criterio_tipo": "time_efficiency",
+                "criterio_valor": 1.0
+            },
+            {
+                "id": "constancia_formativa",
+                "codigo": "ACH_COUNT_07",
+                "titulo": "Constancia Formativa",
+                "descripcion": "Resolver un acumulado de 5 casos clínicos completos dentro del simulador.",
+                "categoria": "constancia",
+                "icono": "ShieldCheck",
+                "puntos_xp": 150,
+                "criterio_tipo": "cases_completed",
+                "criterio_valor": 5.0
+            },
+            {
+                "id": "manejo_emergencias",
+                "codigo": "ACH_EMERG_08",
+                "titulo": "Manejo de Emergencias Críticas",
+                "descripcion": "Resolver con éxito (nota >= 8.0) un caso clasificado como Código Rojo o urgencia obstétrica/cardiovascular.",
+                "categoria": "emergencias",
+                "icono": "AlertCircle",
+                "puntos_xp": 110,
+                "criterio_tipo": "emergency_case",
+                "criterio_valor": 1.0
+            }
+        ]
+        from modules.gamification.models import AchievementDefinitionModel
+        for ach in default_achievements:
+            existing_ach = db.get(AchievementDefinitionModel, ach["id"])
+            if not existing_ach:
+                db.add(AchievementDefinitionModel(**ach))
+        db.commit()
 

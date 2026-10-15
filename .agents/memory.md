@@ -67,8 +67,8 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
   - **Barra de Navegación Inferior Móvil Estilo App Moderna (`MobileBottomNav.tsx`):**
     - *Desacoplamiento con React Portal (`createPortal(..., document.body)`):* Para evitar que la propiedad `position: fixed; bottom: 1rem;` quede atrapada en el *containing block* del elemento `<header>` (que tiene `backdrop-blur-md` y `sticky`), el componente se teletransporta directamente al final de `document.body`. De este modo, se ancla de forma infalible en la parte inferior de la pantalla del smartphone y no en la cabecera superior.
     - *Comportamiento Condicional Estricto:* La barra inferior móvil (`MobileBottomNav.tsx`) está activa en toda la navegación general para dispositivos móviles (`md:hidden`) y se oculta automáticamente solo en la resolución de casos (`/cases/:id`) para no interferir con la simulación clínica.
-    - *Diseño Canónico Ateneo+ (Modales Flotantes Centrales Homogéneos):* Los tres accesos modales (Unirse a Sala, Notificaciones y Perfil) se despliegan de forma 100% homogénea como diálogos centrales flotantes (fixed inset-0 bg-slate-900/60 backdrop-blur-sm) con tarjeta blanca rounded-[28px], sombras difusas de refracción, botón de cierre X, soporte para tecla Escape y desacoplados del DOM mediante createPortal(..., document.body).
-    - *Distribución Inteligente Cabecera/Barra Inferior:* El Avatar de perfil de usuario en la cabecera superior se oculta permanentemente en móviles (`hidden md:block`), erradicando duplicidad, mientras que la barra inferior aloja el perfil, notificaciones y salas.
+    - *Diseño Canónico Ateneo+ (Modales Flotantes Centrales Homogéneos):* Los cuatro accesos modales (Hitos Clínicos, Unirse a Sala, Notificaciones y Perfil) se despliegan de forma 100% homogénea como diálogos centrales flotantes (`fixed inset-0 bg-slate-900/60 backdrop-blur-sm`) con tarjeta blanca `rounded-[28px]`, sombras difusas de refracción, botón de cierre `X`, soporte para tecla `Escape` y desacoplados del DOM mediante `createPortal(..., document.body)`.
+    - *Distribución Inteligente Cabecera/Barra Inferior:* El Avatar de perfil de usuario en la cabecera superior se oculta permanentemente en móviles (`hidden md:block`), erradicando duplicidad, mientras que la barra inferior aloja Desempeño, Hitos Clínicos (`GraduationCap`), Unirse a Sala, Notificaciones y Perfil.
     - *Separación de Contenido (`CaseList.tsx`):* El padding inferior del catálogo se ajustó a `pb-24 sm:pb-16` para garantizar que la última fila de tarjetas nunca sea tapada por la barra flotante.
   - **Soporte e Instalación de Progressive Web App (PWA) de Alto Rendimiento:**
     - *Criterios de Instalabilidad Chromium y W3C Cumplidos:* Generación e inclusión física de iconos de alta resolución generados desde el imagotipo institucional oficial: `pwa-192x192.png`, `pwa-512x512.png`, `pwa-maskable-512x512.png` (con zona segura del 72% y fondo de relleno clínico `#f0f4f9`), `apple-touch-icon.png` (180x180) y `favicon-32x32.png`.
@@ -79,7 +79,12 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
       - *Bandeja de Notificaciones (`NotificationsDropdown.tsx`):* Mientras la aplicación no esté instalada, la bandeja muestra una tarjeta destacada de sistema con badge de novedad y botón directo *"Instalar ahora"* que activa el prompt nativo de inmediato, encendiendo el punto azul en la campana. Se eliminó la opción redundante de instalación del menú de perfil (`UserProfileDropdown.tsx`) para mantener el modal de perfil enfocado en identidad y configuración de sesión.
   - **Selector de Idioma Purificado (Cero Controles Nativos del SO):** Eliminado el `<select>` nativo que generaba cajas azules del sistema operativo desfasadas; sustituido por un menú interactivo desplegable estilizado en Tailwind con icono `Globe`, `ChevronDown` y checkmark `Check` en el idioma activo.
   - **Dropdown de Perfil Confinado al Viewport:** Contenedor de perfil con `max-w-[calc(100vw-1.5rem)]` para prevenir desbordamientos por la derecha en terminales móviles pequeños.
-  - **Tarjeta Adaptativa KST/BKT:** Reestructuración de la cabecera en flex balanceado con icono `ChevronRight` para *"Ver Ruta de Competencias"*, tipografía de título escalonada (`text-lg sm:text-xl md:text-2xl`) y botón CTA primario con altura táctil mínima de 44px (`min-h-[44px]`).
+  - **Tarjeta Adaptativa KST/BKT y Modal de Ruta de Competencias (`AdaptiveNextCase.tsx`, `KnowledgeSpaceGraph.tsx`):**
+    - Reestructuración de la cabecera en flex balanceado con icono `ChevronRight` para *"Ver Ruta de Competencias"*, tipografía de título escalonada (`text-lg sm:text-xl md:text-2xl`), conteo de fases dinámico (`{clinicalCase.fases.length} Fases Clínicas`) y botón CTA primario con altura táctil mínima de 44px (`min-h-[44px]`).
+    - *Des-tecnificación y Humanización Clínica de Vocabulario:* Erradicada la terminología psicométrica y matemática abstracta (`Zona ZDP`, `Probabilidad P(L)` y `Objetivo a entrenar (XX%)`) en favor de conceptos pedagógicos clínicos directos para estudiantes de medicina:
+      - *"Competencia en entrenamiento:"* con chip formal `{pPct}% dominio`.
+      - *"Nivel de Dominio"* en sustitución de *"Probabilidad P(L)"*.
+      - Estados formativos: *"Dominado (> 75%)"*, *"En Entrenamiento (40% - 75%)"* (en lugar de *"Zona ZDP"*) y *"Prerrequisito Pendiente (< 40%)"* (en lugar de *"Inicial / Bloqueado"*).
   - **Filtro de Especialidades Adaptativo Móvil/Escritorio (`CaseFilterTabs.tsx`):** Para erradicar el riesgo de descubribilidad en móviles (donde el desplazamiento horizontal oculta opciones fuera de pantalla), se implementó un selector desplegable vertical intuitivo (`sm:hidden`) con icono `Filter`, nombre de la especialidad activa, `ChevronDown` y checkmark `Check`. En pantallas de escritorio (`>= sm`), se conserva la barra de chips horizontales de acceso rápido en un clic.
   - **Buscador Spotlight Clínico Inteligente (`GlobalSearchBar.tsx`):** Cápsula de búsqueda de cristal líquido repotenciada con:
     1. *Normalización Fonética y de Acentos:* Coincidencias insensibles a tildes (`normalizeSearchText`), permitiendo buscar "hipertension", "cesarea" o "nefrologia" con éxito.
@@ -103,6 +108,13 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
     - Se reubicó *"Unirse a Sala"* a la barra de navegación superior ([`Navbar.tsx`](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/frontend/src/core/layouts/Navbar.tsx)), al lado de la navegación principal, desacoplado mediante el modal reutilizable [`JoinRoomModal.tsx`](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/frontend/src/modules/collaboration/components/JoinRoomModal.tsx).
       - **Diseño Glassmorphism y Dinámica de Roles (`JoinRoomModal.tsx`):** Tarjeta blanca `rounded-[28px]` con borde perimetral sutil (`border border-slate-200/60 shadow-2xl`), contención estricta `overflow-hidden` con ancho holgado `max-w-lg` (erradicando scroll secundario), halos de refracción ambiental interna (`blur-2xl` cyan/azul y violeta), icono clínico plano `Users`, input monoespaciado en canvas `#f0f4f9` y botón de cancelación en cristal líquido.
       - **Flujo Pedagógico y Diseño Plano (Cero Cajas Anidadas):** Conforme al principio de diseño plano de Ateneo+ (sin "caja dentro de caja" ni fondos grises artificiales), la explicación se sitúa limpiamente como texto plano de soporte bajo el input: (1) Apertura docente y distribución del código; (2) Práctica individual para resolver autónomamente el caso asignado; (3) Ateneo en grupo para debatir y redactar en vivo con el equipo al mismo tiempo.
+* **Subsistema de Carrera Formativa e Hitos Clínicos (`ClinicalCareerModal.tsx`, `CareerBadgeButton.tsx`):**
+  - **Identidad Pedagógica:** Gamificación académica anclada estrictamente en rigor formativo y GPC del Ecuador (no ludificación banal). Recompensas por razonamiento clínico, apego a protocolos, consistencia y maestría en fases diagnósticas.
+    - Homologación Visual Idéntica a JoinRoomModal:
+      - Superficie blanca unificada (`bg-white rounded-[28px] sm:rounded-[32px] p-5 sm:p-7 shadow-2xl border border-slate-200/60 max-w-2xl w-full`): erradicada cualquier caja anidada gris (`#f0f4f9`), logrando un diálogo diáfano con halos aurorales de fondo para refracción Glassmorphism (`cyan-400/15 via-blue-500/10` e `indigo-500/15 via-violet-500/10`).
+      - Cabecera y Pie Institucionales: Icono clínico `GraduationCap` (`w-5 h-5 text-blue-600`), tipografía regular de peso medio y botón de cierre inferior alineado a la derecha en píldora blanca suave.
+      - Píldoras de Filtro Fluidas (Zero Overflow / Cero "Se Tapa"): Eliminado cualquier dropdown o scroll horizontal con riesgo de recorte; las categorías se disponen como chips envueltos (`flex flex-wrap gap-1.5 sm:gap-2`) que se adaptan naturalmente a cualquier ancho de pantalla sin tapar el contenido ni cortar opciones.
+      - Hero y Tarjetas de Hitos: Acabado sutil `bg-slate-50/80` y `bg-slate-50/60` con bordes ultrafinos, métricas XP siempre visibles en tipografía monoespaciada prominente y espaciado elástico entre iconos y títulos. Montado vía `createPortal(..., document.body)`.
     - **Conmutación Dinámica y Simétrica en Navbar ([`Navbar.tsx`](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/frontend/src/core/layouts/Navbar.tsx)):** Al navegar a `/analytics` (o `/performance`), el botón superior muta automáticamente a *"Catálogo"* con icono médico `BookOpen` y enlace de retorno a `/cases`, permitiendo alternar fluidamente entre el catálogo y el análisis de desempeño sin parches ni botones flotantes ad-hoc.
     - **Efecto Colorido Sutil y Liquid Glassmorphism en Botones de Cabecera ([`Navbar.tsx`](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/frontend/src/core/layouts/Navbar.tsx)):** Los botones de navegación y acciones institucionales (*Desempeño*, *Unirse a Sala*, *Benchmark*, *Admin*, *Docente*) cuentan con acabado en cristal líquido y píldora con gradiente pastel sutil (`from-cyan-50/50 via-blue-50/40 to-indigo-50/50`) y borde clínico refinado (`border-blue-200/60`). En estado hover, la transición es delicada e institucional (`hover:from-cyan-100/70 hover:via-blue-100/60 hover:to-indigo-100/70 hover:border-blue-300/90 hover:text-[#0b57d0]`), erradicando bloques oscuros sólidos o halos excesivos, sin traslación vertical y preservando los iconos planos y limpios (`#0b57d0`).
     - **Homologación de Pantallas de Autenticación ([`Login.tsx`](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/frontend/src/modules/auth/pages/Login.tsx) y [`Register.tsx`](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/frontend/src/modules/auth/pages/Register.tsx)):**
@@ -131,6 +143,32 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
   - Las métricas de Information Retrieval (IR) y fidelidad (`Hit@1`, `MRR@5`, `Latencia`, `LaTeX`) pertenecen a la auditoría técnica del pipeline RAG.
   - Se restringió la ruta `/benchmark` en `AppRoutes.tsx` exclusivamente al rol `administrador` (`allowedRoles={['administrador']}`).
   - Se eliminó del Navbar público de alumnos y docentes, ubicándolo únicamente en el menú de perfil institucional de administradores y en su barra de navegación cuando tienen sesión activa de administración.
+* **Subsistema de Hitos Clínicos y Carrera Formativa (`backend/modules/gamification`, `frontend/src/modules/gamification`):**
+  - **Causa Raíz y Filosofía Formativa:** En simuladores médicos de alta fidelidad, la ludificación no debe basarse en mecánicas arcade infantiles (monedas, stickers o vidas), sino en **Hitos Clínicos, Progresión de Carrera Médica y Puntos de Experiencia Clínica (XP)** anclados rigurosamente en las Guías de Práctica Clínica del Ecuador.
+  - **Escala Canónica de Carrera Médica (5 Niveles):**
+    1. *Nivel 1: Estudiante Clínico Inicial* (0 - 299 XP)
+    2. *Nivel 2: Externo de Medicina* (300 - 699 XP)
+    3. *Nivel 3: Interno Rotativo* (700 - 1,299 XP)
+    4. *Nivel 4: Médico General Novel* (1,300 - 2,099 XP)
+    5. *Nivel 5: Residente Clínico de Honor* (2,100+ XP)
+  - **Catálogo de 8 Hitos Clínicos Sembrados Idempotentemente (`achievement_definitions`):**
+    - `iniciacion_clinica`: Primera simulación diagnóstica resuelta (+50 XP).
+    - `apego_gpc_excelente`: Calificación diagnóstica >= 9.0/10 (+100 XP).
+    - `maestria_secuencial`: Superación exitosa de las 3 fases secuenciales (+75 XP).
+    - `resolucion_multidisciplinar`: Casos resueltos en >= 3 especialidades o GPCs distintas (+120 XP).
+    - `pensamiento_socratico`: Participación activa en debriefing socrático post-evaluación (+60 XP).
+    - `eficiencia_urgencias`: Juicio acertado (>= 8.5) emitido en <= 5 minutos (+90 XP).
+    - `constancia_formativa`: 5 casos clínicos resueltos acumulados (+150 XP).
+    - `manejo_emergencias`: Caso clasificado como Código Rojo resuelto con éxito (>= 8.0) (+110 XP).
+  - **Persistencia Transaccional ACID (Unit of Work):**
+    - Tablas relacionales: `achievement_definitions`, `student_gamification_profiles` y `student_unlocked_achievements`.
+    - En `EvaluationService.evaluate_reasoning`, tras persistir `EvaluationHistoryModel` y actualizar el modelo BKT, se ejecuta `GamificationService.process_evaluation_event` dentro del mismo bloque `SqlAlchemyUnitOfWork`. Los XP y nuevos hitos se confirman atómicamente, y se devuelven en el payload `gamification_update` del resultado.
+  - **Arquitectura de Interfaz (Ateneo+ Design System):**
+    - `CareerBadgeButton.tsx`: Indicador de nivel y XP en cabecera con gradiente pastel y apertura directa de modal.
+    - `ClinicalCareerModal.tsx`: Diálogo institucional desacoplado vía `createPortal(..., document.body)` con Hero Panel de rango, barra porcentual, filtros por categoría y tarjetas de hitos con iconos planos de Lucide, estados de desbloqueo y fecha.
+    - `FeedbackCard.tsx`: Tarjeta contextual que muestra los XP ganados, alerta de ascenso de rango si aplica y los nuevos hitos alcanzados tras cada simulación.
+    - `UserProfileDropdown.tsx`: Acceso directo para consultar la carrera formativa desde el perfil de usuario.
+
 * **Purga Rigurosa de Lenguaje Marketero e Inflado (Rol Estudiante):**
   - **Causa Raíz:** Existían rezagos de lenguaje comercial, publicitario y de pitch ("Simulador Clínico Avanzado", "Diferenciador Científico 3", "Resolución Acelerada", "análisis inteligente", iconos Sparkles en áreas clínicas) incompatibles con el estándar de simulación médica formal.
   - **Solución Estrictamente Frontend (Cero Impacto Backend):**
@@ -1617,6 +1655,21 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
   - **Depuración de Metadatos Burocráticos en Magic Links (`MagicLogin.tsx`):**
     - Se eliminó la tabla de 5 filas de datos administrativos (`Rol Otorgado`, `Institución Ateneo+ Sede Central`, `Destino Clínico /cases`, `Estado Enlace Activo y Verificado`).
     - Se sustituyó por una tarjeta sobria y centrada con un chip de rol (`Estudiante`, `Docente`, `Administrador`), el nombre del destinatario si existe y el botón primario directo de ingreso.
+
+* **Resolución de Crash en Evaluación por Fases (`Objects are not valid as a React child` - 2026-10-15):**
+  - **Causa Raíz:** En la simulación por fases (`/api/evaluate/phase`), el backend (`backend/rag/evaluator.py`) devuelve `datos_fase_siguiente` como un diccionario estructurado (`{fase_numero, titulo, descripcion, datos_revelados, estudios_adjuntos, pregunta_evaluativa}`). En el frontend, `PhaseEvaluationResultSchema` (Zod) tipaba este campo rígidamente como `z.string()`, provocando una advertencia de discrepancia y retornando el objeto crudo. Al renderizar `{datos_fase_siguiente}` dentro de una etiqueta `<p>` en `PhaseFeedbackCard.tsx`, React arrojaba un error fatal bloqueando la pantalla.
+  - **Solución Definitiva:**
+    1. *Tipado y Esquema Polimórfico:* Se definió `NextPhaseData` en `types/index.ts` y `NextPhaseDataSchema` en `schemas.ts`, tipando `datos_fase_siguiente` como `string | NextPhaseData | null`.
+    2. *Renderizado Condicional Estructurado (`PhaseFeedbackCard.tsx`):* Se discrimina si es `string` o `NextPhaseData`, renderizando en este último el título de la fase, la evolución clínica y el bloque formateado de datos paraclínicos desbloqueados sin romper el árbol React.
+
+* **Estandarización Canónica de los 10 Casos Clínicos en Modo Simulación Dinámica por Fases (2026-10-15):**
+  - **Decisión Pedagógica y de Dominio:** Los 10 casos clínicos canónicos de la plataforma fueron formalizados bajo `modo_simulacion: "fases"` con 3 hitos secuenciales en `backend/cases_data/cases.json`:
+    1. *Fase 1: Anamnesis y Sospecha Diagnóstica:* Motivo de consulta, signos vitales y formulación diagnóstica inicial.
+    2. *Fase 2: Interpretación de Paraclínicos y Exámenes:* Desbloqueo secuencial de estudios laboratoriales, electrocardiográficos, radiológicos o gasométricos con estratificación de severidad.
+    3. *Fase 3: Prescripción Terapéutica, Manejo y Monitoreo:* Esquemas farmacológicos normados por la GPC respectiva (dosificación, vías, contraindicaciones y criterios de seguimiento o referencia).
+  - **Validación Integral:** Los 10 casos recuperan con 100% de éxito en RAG BGE-M3 (`test_all_canonical_cases_retrieval`), contratos verificados en frontend (`casesContract.test.ts`), y servidor FastAPI activo en Docker (`http://localhost:8000/api/cases`).
+
+
 
 
 

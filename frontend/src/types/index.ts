@@ -156,6 +156,29 @@ export interface EvaluationResult {
   llm_model_used?: string;
   rag_tokens_used?: number;
   paraclinical_studies_count?: number;
+  gamification_update?: {
+    xp_ganados: number;
+    desglose_xp: Record<string, number>;
+    subio_nivel: boolean;
+    nuevo_nivel?: number | null;
+    nuevo_rango?: string | null;
+    nuevos_logros_desbloqueados?: Array<{
+      achievement_id: string;
+      titulo: string;
+      descripcion: string;
+      puntos_xp: number;
+      icono: string;
+    }>;
+  };
+}
+
+export interface NextPhaseData {
+  fase_numero?: number;
+  titulo?: string;
+  descripcion?: string;
+  datos_revelados?: string;
+  estudios_adjuntos?: string[];
+  pregunta_evaluativa?: string;
 }
 
 export interface PhaseEvaluationResult {
@@ -165,7 +188,7 @@ export interface PhaseEvaluationResult {
   omisiones: string[];
   cita_normativa?: NormativeCitation;
   retroalimentacion_fase?: string;
-  datos_fase_siguiente?: string;
+  datos_fase_siguiente?: string | NextPhaseData | null;
   desbloquea_siguiente?: boolean;
   siguiente_fase_disponible?: boolean;
   es_ultima_fase?: boolean;

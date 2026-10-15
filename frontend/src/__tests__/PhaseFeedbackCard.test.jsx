@@ -48,4 +48,21 @@ describe('Componente PhaseFeedbackCard (Resolución por Fases)', () => {
     expect(screen.getByRole('heading', { level: 3, name: /Conducta Inmediata/i })).toBeInTheDocument();
     expect(screen.getByText('Heparina de bajo peso molecular').tagName.toLowerCase()).toBe('strong');
   });
+
+  it('debe renderizar datos_fase_siguiente cuando viene como objeto estructurado sin romper React', () => {
+    const objectPhaseResult = {
+      ...mockPhaseResult,
+      datos_fase_siguiente: {
+        fase_numero: 2,
+        titulo: 'Fase 2: Pruebas Complementarias',
+        descripcion: 'Evolución a las 2 horas de ingreso.',
+        datos_revelados: 'Plaquetas: 85.000 /uL'
+      }
+    };
+    render(<PhaseFeedbackCard phaseResult={objectPhaseResult} currentPhase={1} onProceedNextPhase={() => {}} />);
+    expect(screen.getByText(/Nuevos Hallazgos Clínicos Desbloqueados/i)).toBeInTheDocument();
+    expect(screen.getByText('Fase 2: Pruebas Complementarias')).toBeInTheDocument();
+    expect(screen.getByText('Evolución a las 2 horas de ingreso.')).toBeInTheDocument();
+    expect(screen.getByText(/Plaquetas: 85.000/i)).toBeInTheDocument();
+  });
 });

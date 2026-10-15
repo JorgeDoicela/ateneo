@@ -37,7 +37,7 @@ describe('Componente KnowledgeSpaceGraph (Grafo KST)', () => {
     });
 
     expect(screen.getByText('Dominado')).toBeInTheDocument();
-    expect(screen.getByText('Zona ZDP (En Progreso)')).toBeInTheDocument();
+    expect(screen.getByText('En Entrenamiento')).toBeInTheDocument();
   });
 
   it('debe invocar onClose al hacer clic en el botón de cierre', async () => {

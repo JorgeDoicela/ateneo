@@ -64,6 +64,7 @@ class EvaluationResult(BaseModel):
     rag_tokens_used: Optional[int] = Field(0, description="Tokens consumidos en prompt y generación")
     paraclinical_studies_count: Optional[int] = Field(0, description="Cantidad de estudios paraclínicos (imágenes/labs) evaluados")
     transcripcion_audio: Optional[str] = Field(None, description="Transcripción médica fiel del razonamiento expuesto en la nota de voz del estudiante")
+    gamification_update: Optional[dict] = Field(None, description="Actualización de puntos XP, rango e hitos clínicos desbloqueados tras la simulación")
 
 class EvaluationRequest(BaseModel):
     case_id: str = Field(..., description="ID del caso clínico evaluado")

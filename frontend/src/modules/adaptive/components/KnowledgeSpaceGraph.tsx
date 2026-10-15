@@ -75,14 +75,14 @@ export default function KnowledgeSpaceGraph({ isOpen, onClose }: KnowledgeSpaceG
       };
     } else if (pVal >= 0.40) {
       return {
-        label: 'Zona ZDP (En Progreso)',
+        label: 'En Entrenamiento',
         icon: Clock,
         iconColor: 'text-[#0b57d0]',
         textColor: 'text-[#0b57d0] font-semibold'
       };
     } else {
       return {
-        label: 'Sin Iniciar / Prerrequisito',
+        label: 'Prerrequisito Pendiente',
         icon: Lock,
         iconColor: 'text-slate-400',
         textColor: 'text-slate-500 font-medium'
@@ -146,11 +146,11 @@ export default function KnowledgeSpaceGraph({ isOpen, onClose }: KnowledgeSpaceG
             </span>
             <span className="inline-flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-[#0b57d0] shrink-0" />
-              <span>Zona ZDP (40% - 75%)</span>
+              <span>En Entrenamiento (40% - 75%)</span>
             </span>
             <span className="inline-flex items-center gap-1.5">
               <Lock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-              <span>Inicial / Bloqueado (&lt; 40%)</span>
+              <span>Prerrequisito Pendiente (&lt; 40%)</span>
             </span>
           </div>
         </div>
@@ -191,7 +191,7 @@ export default function KnowledgeSpaceGraph({ isOpen, onClose }: KnowledgeSpaceG
                     <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200/50">
                       <div className="text-left sm:text-right">
                         <span className="text-[10px] text-slate-400 block font-medium uppercase tracking-wider">
-                          Probabilidad P(L)
+                          Nivel de Dominio
                         </span>
                         <span className="text-base font-mono font-bold text-slate-900">
                           {Math.round(pVal * 100)}%

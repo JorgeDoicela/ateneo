@@ -136,6 +136,16 @@ export const EvaluationResultSchema = z.object({
   llm_model_used: z.string().optional(),
   rag_tokens_used: z.number().optional(),
   paraclinical_studies_count: z.number().optional(),
+  gamification_update: z.any().optional(),
+});
+
+export const NextPhaseDataSchema = z.object({
+  fase_numero: z.number().int().optional(),
+  titulo: z.string().optional(),
+  descripcion: z.string().optional(),
+  datos_revelados: z.string().nullable().optional(),
+  estudios_adjuntos: z.array(z.string()).optional(),
+  pregunta_evaluativa: z.string().optional(),
 });
 
 export const PhaseEvaluationResultSchema = z.object({
@@ -145,7 +155,7 @@ export const PhaseEvaluationResultSchema = z.object({
   omisiones: z.array(z.string()).default([]),
   cita_normativa: NormativeCitationSchema.optional(),
   retroalimentacion_fase: z.string().optional(),
-  datos_fase_siguiente: z.string().optional(),
+  datos_fase_siguiente: z.union([z.string(), NextPhaseDataSchema]).nullable().optional(),
   desbloquea_siguiente: z.boolean().default(true),
   siguiente_fase_disponible: z.boolean().optional(),
   es_ultima_fase: z.boolean().optional(),

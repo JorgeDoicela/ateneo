@@ -15,7 +15,9 @@ import {
   ArrowRight,
   LucideIcon,
   MessageSquare,
-  Mic
+  Mic,
+  GraduationCap,
+  Award
 } from 'lucide-react';
 import SkillRadarChart from '../../analytics/components/SkillRadarChart';
 import PdfViewerModal from './PdfViewerModal';
@@ -217,7 +219,77 @@ export default function FeedbackCard({ result, studentAnswer = '', audioBlob = n
         </div>
       </div>
 
-      {/* 2. Razonamiento Registrado del Estudiante (Nota de Voz o Texto) */}
+      {/* 2. Reconocimiento Formativo y Progresión de Carrera Médica */}
+      {result.gamification_update && (
+        <div className="bg-gradient-to-br from-cyan-50/40 via-blue-50/30 to-indigo-50/40 rounded-[28px] p-6 sm:p-7 shadow-xs border border-blue-200/60 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-2xl bg-white shadow-xs text-[#0b57d0] border border-blue-100">
+                <GraduationCap className="w-5 h-5 text-[#0b57d0]" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-slate-900 tracking-tight">
+                  Progresión en Carrera Formativa
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Puntos clínicos obtenidos por adherencia diagnóstica y resolución
+                </p>
+              </div>
+            </div>
+
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100/80 text-blue-800 text-xs font-semibold self-start sm:self-auto">
+              <span>+{result.gamification_update.xp_ganados} XP ganados</span>
+            </div>
+          </div>
+
+          {result.gamification_update.subio_nivel && (
+            <div className="p-3.5 rounded-[18px] bg-white border border-blue-300/80 flex items-center gap-3">
+              <Award className="w-5 h-5 text-amber-500 shrink-0" />
+              <div className="text-xs">
+                <span className="font-bold text-slate-900 block">
+                  Ascenso de Rango Clínico Formativo
+                </span>
+                <span className="text-slate-600">
+                  Has alcanzado el rango de <span className="font-semibold text-blue-700">{result.gamification_update.nuevo_rango}</span> (Nivel {result.gamification_update.nuevo_nivel}).
+                </span>
+              </div>
+            </div>
+          )}
+
+          {result.gamification_update.nuevos_logros_desbloqueados && result.gamification_update.nuevos_logros_desbloqueados.length > 0 && (
+            <div className="space-y-2 pt-1">
+              <span className="text-xs font-medium text-slate-700 block">
+                Nuevos hitos clínicos alcanzados en esta simulación:
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {result.gamification_update.nuevos_logros_desbloqueados.map((ach) => (
+                  <div
+                    key={ach.achievement_id}
+                    className="p-3 rounded-[16px] bg-white border border-emerald-200/80 flex items-center justify-between gap-3 shadow-2xs"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <div className="min-w-0">
+                        <span className="text-xs font-bold text-slate-900 block truncate">
+                          {ach.titulo}
+                        </span>
+                        <span className="text-[11px] text-slate-500 block truncate">
+                          {ach.descripcion}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="text-[11px] font-mono font-bold text-emerald-700 shrink-0">
+                      +{ach.puntos_xp} XP
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 3. Razonamiento Registrado del Estudiante (Nota de Voz o Texto) */}
       {(audioUrl || result.transcripcion_audio) && (
         <div className="bg-white rounded-[28px] p-6 shadow-xs border-0 space-y-3">
           <div className="flex items-center justify-between">
