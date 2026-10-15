@@ -58,6 +58,8 @@ node_modules/
 dist/
 **/dist/
 .dist/
+dev-dist/
+**/dev-dist/
 *.local
 *.tsbuildinfo
 **/*.tsbuildinfo

@@ -13,13 +13,17 @@ import {
   ChevronDown,
   Check,
   User,
-  X
+  X,
+  Smartphone,
+  Download
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { useTheme } from '../../theme/ThemeProvider';
 import type { TenantId } from '../../theme/tokens';
 import { useI18n } from '../../i18n/useI18n';
 import type { SupportedLocale } from '../../../types/i18n';
+import { usePWAInstall } from '../../pwa/usePWAInstall';
+import PWAInstallModal from '../../pwa/PWAInstallModal';
 
 export interface UserProfileDropdownProps {
   dropUp?: boolean;
@@ -37,6 +41,7 @@ export default function UserProfileDropdown({ showLabel = false }: UserProfileDr
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLangOpen, setIsLangOpen] = useState<boolean>(false);
+  const { isInstalled, promptInstall, showIOSModal, setShowIOSModal } = usePWAInstall();
 
   useEffect(() => {
     if (!isOpen) return;
@@ -272,7 +277,38 @@ export default function UserProfileDropdown({ showLabel = false }: UserProfileDr
             )}
           </div>
 
-          {/* 6. Botón Cerrar Sesión */}
+          {/* 6. Opción de Instalación PWA (Acceso Hospitalario Nativo) */}
+          <div className="py-2 border-b border-slate-100 text-xs">
+            {isInstalled ? (
+              <div className="flex items-center justify-between px-2.5 py-1.5 bg-slate-50 rounded-xl text-slate-500 select-none">
+                <span className="flex items-center gap-2 font-medium">
+                  <Smartphone className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Ateneo+ App Instalada</span>
+                </span>
+                <Check className="w-3.5 h-3.5 text-emerald-600" />
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={async () => {
+                  setIsOpen(false);
+                  await promptInstall();
+                }}
+                className="w-full flex items-center justify-between px-2.5 py-2 bg-gradient-to-r from-blue-50/70 via-indigo-50/50 to-cyan-50/70 hover:from-blue-100/80 hover:via-indigo-100/60 hover:to-cyan-100/80 text-[#0b57d0] rounded-xl font-medium transition-all cursor-pointer group border border-blue-200/50"
+                title="Instalar Ateneo+ en este dispositivo"
+              >
+                <span className="flex items-center gap-2">
+                  <Download className="w-3.5 h-3.5 text-[#0b57d0] group-hover:scale-110 transition-transform" />
+                  <span>Instalar Aplicación (PWA)</span>
+                </span>
+                <span className="text-xs font-semibold text-[#0b57d0]">
+                  Instalar
+                </span>
+              </button>
+            )}
+          </div>
+
+          {/* 7. Botón Cerrar Sesión */}
           <div className="pt-2">
             <button
               type="button"
@@ -287,6 +323,12 @@ export default function UserProfileDropdown({ showLabel = false }: UserProfileDr
       </div>,
       document.body
     )}
+
+    {/* Modal de Orientación PWA para Dispositivos iOS Safari */}
+    <PWAInstallModal
+      isOpen={showIOSModal}
+      onClose={() => setShowIOSModal(false)}
+    />
   </div>
   );
 }

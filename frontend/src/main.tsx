@@ -4,6 +4,10 @@ import App from './App';
 import './index.css';
 import './core/i18n/i18n';
 import { telemetry } from './core/observability/telemetry';
+import { registerSW } from 'virtual:pwa-register';
+
+// Registro automático del Service Worker para capacidades PWA y resiliencia offline
+registerSW({ immediate: true });
 
 // Inicialización de Observabilidad Forense de Usuario Real (RUM)
 telemetry.init({

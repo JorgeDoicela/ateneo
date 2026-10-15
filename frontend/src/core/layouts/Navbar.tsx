@@ -80,8 +80,8 @@ export default function Navbar() {
 
             {/* 3. Navegación, Conectividad Clínica y Perfil */}
             <div className="flex items-center gap-1.5 sm:gap-3 text-xs font-medium text-[#444746] shrink-0">
-              {/* Botón de Búsqueda Móvil en Cabecera (Siempre disponible en móvil) */}
-              {user && (
+              {/* Botón de Búsqueda Móvil en Cabecera (Exclusivo del catálogo de casos clínicos) */}
+              {user && isCatalogRoute && (
                 <button
                   type="button"
                   onClick={() => setShowMobileSearch(true)}
@@ -97,11 +97,11 @@ export default function Navbar() {
 
               {user ? (
                 <>
-                  {/* Enlace Dinámico Desempeño / Catálogo */}
+                  {/* Enlace Dinámico Desempeño / Catálogo (Exclusivo de escritorio) */}
                   <Link
                     to={isAnalyticsView ? '/cases' : '/analytics'}
                     title={isAnalyticsView ? 'Volver al Catálogo de Casos' : 'Mi Desempeño y Tendencias Clínicas'}
-                    className={`${isCatalogRoute ? 'hidden md:flex' : 'flex'} items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 select-none ${
+                    className={`hidden md:flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 select-none ${
                       isAnalyticsView
                         ? 'bg-gradient-to-r from-cyan-100/80 via-blue-100/70 to-indigo-100/80 text-[#0b57d0] font-semibold border border-blue-300/80 shadow-xs'
                         : 'bg-gradient-to-r from-cyan-50/50 via-blue-50/40 to-indigo-50/50 hover:from-cyan-100/70 hover:via-blue-100/60 hover:to-indigo-100/70 text-slate-700 hover:text-[#0b57d0] border border-blue-200/60 hover:border-blue-300/90 shadow-xs hover:shadow-sm'
@@ -120,12 +120,12 @@ export default function Navbar() {
                     )}
                   </Link>
 
-                  {/* Botón Unirse a Sala Colaborativa */}
+                  {/* Botón Unirse a Sala Colaborativa (Exclusivo de escritorio) */}
                   <button
                     type="button"
                     onClick={() => setShowJoinModal(true)}
                     title="Unirse a Sala de Ateneo"
-                    className={`${isCatalogRoute ? 'hidden md:flex' : 'flex'} items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 bg-gradient-to-r from-cyan-50/50 via-blue-50/40 to-indigo-50/50 hover:from-cyan-100/70 hover:via-blue-100/60 hover:to-indigo-100/70 text-slate-700 hover:text-[#0b57d0] border border-blue-200/60 hover:border-blue-300/90 shadow-xs hover:shadow-sm cursor-pointer select-none`}
+                    className="hidden md:flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 bg-gradient-to-r from-cyan-50/50 via-blue-50/40 to-indigo-50/50 hover:from-cyan-100/70 hover:via-blue-100/60 hover:to-indigo-100/70 text-slate-700 hover:text-[#0b57d0] border border-blue-200/60 hover:border-blue-300/90 shadow-xs hover:shadow-sm cursor-pointer select-none"
                   >
                     <Users className="w-4 h-4 text-[#0b57d0]" />
                     <span className="hidden md:inline">Unirse a Sala</span>

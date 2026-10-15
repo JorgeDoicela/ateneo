@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Bell, CheckCheck, BookOpen, Sparkles, Users, X } from 'lucide-react';
+import { Bell, CheckCheck, BookOpen, Sparkles, Users, X, Download } from 'lucide-react';
+import { usePWAInstall } from '../../pwa/usePWAInstall';
+import PWAInstallModal from '../../pwa/PWAInstallModal';
 
 export interface NotificationsDropdownProps {
   dropUp?: boolean;
@@ -16,32 +18,7 @@ interface NotificationItem {
   tipo: 'evaluacion' | 'normativa' | 'sala';
 }
 
-const NOTIFICACIONES_MOCK: NotificationItem[] = [
-  {
-    id: 'notif-1',
-    titulo: 'Debriefing Socrático Disponible',
-    mensaje: 'La retroalimentación formativa del caso clínico de preeclampsia está lista para revisión.',
-    tiempo: 'Hace 10 min',
-    leido: false,
-    tipo: 'evaluacion'
-  },
-  {
-    id: 'notif-2',
-    titulo: 'Actualización Normativa GPC',
-    mensaje: 'Nuevos criterios de severidad hemodinámica anclados a la GPC Ecuador.',
-    tiempo: 'Hace 2 horas',
-    leido: false,
-    tipo: 'normativa'
-  },
-  {
-    id: 'notif-3',
-    titulo: 'Sesión Clínica Finalizada',
-    mensaje: 'El dictamen del caso grupal en AteneoRoom ha sido sincronizado a tu desempeño.',
-    tiempo: 'Ayer',
-    leido: true,
-    tipo: 'sala'
-  }
-];
+const STORAGE_PWA_NOTIF_READ = 'ateneo_pwa_notif_read';
 
 /**
  * NotificationsDropdown — Modal centrado de notificaciones clínicas formativas
@@ -49,9 +26,16 @@ const NOTIFICACIONES_MOCK: NotificationItem[] = [
  */
 export default function NotificationsDropdown({ showLabel = false }: NotificationsDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [notificaciones, setNotificaciones] = useState<NotificationItem[]>(NOTIFICACIONES_MOCK);
+  const [notificaciones, setNotificaciones] = useState<NotificationItem[]>([]);
+  const { isInstalled, promptInstall, showIOSModal, setShowIOSModal } = usePWAInstall();
+  const [isPWANotifRead, setIsPWANotifRead] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem(STORAGE_PWA_NOTIF_READ) === 'true';
+  });
 
-  const sinLeerCount = notificaciones.filter(n => !n.leido).length;
+  // Se contabiliza la notificación de instalación PWA solo si la app no está instalada y no ha sido leída
+  const isPWAPending = !isInstalled && !isPWANotifRead;
+  const sinLeerCount = notificaciones.filter(n => !n.leido).length + (isPWAPending ? 1 : 0);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -68,6 +52,15 @@ export default function NotificationsDropdown({ showLabel = false }: Notificatio
 
   const marcarTodasLeidas = () => {
     setNotificaciones(prev => prev.map(n => ({ ...n, leido: true })));
+    setIsPWANotifRead(true);
+    localStorage.setItem(STORAGE_PWA_NOTIF_READ, 'true');
+  };
+
+  const handleInstallClick = async () => {
+    setIsPWANotifRead(true);
+    localStorage.setItem(STORAGE_PWA_NOTIF_READ, 'true');
+    setIsOpen(false);
+    await promptInstall();
   };
 
   const marcarLeida = (id: string) => {
@@ -170,7 +163,11 @@ export default function NotificationsDropdown({ showLabel = false }: Notificatio
             {/* Barra de Estado y Acciones Rápidas */}
             <div className="flex items-center justify-between pt-1 relative z-10">
               <span className="text-xs font-semibold text-slate-700">
-                {sinLeerCount > 0 ? `${sinLeerCount} novedades pendientes` : 'Todas las notificaciones leídas'}
+                {sinLeerCount > 0 
+                  ? `${sinLeerCount} novedades pendientes` 
+                  : notificaciones.length > 0 
+                    ? 'Todas las notificaciones leídas' 
+                    : 'Bandeja al día'}
               </span>
               {sinLeerCount > 0 && (
                 <button
@@ -185,10 +182,50 @@ export default function NotificationsDropdown({ showLabel = false }: Notificatio
             </div>
 
             {/* Lista de Notificaciones Formativas */}
-            <div className="divide-y divide-slate-100 max-h-80 overflow-y-auto no-scrollbar relative z-10">
-              {notificaciones.length === 0 ? (
-                <div className="py-12 text-center text-xs text-slate-400">
-                  No tienes notificaciones pendientes
+            <div className="space-y-2 max-h-80 overflow-y-auto no-scrollbar relative z-10">
+              {/* Notificación Dinámica de Instalación PWA (Toda la tarjeta es interactiva para habilitar la instalación) */}
+              {!isInstalled && (
+                <button
+                  type="button"
+                  onClick={handleInstallClick}
+                  className={`w-full text-left p-3.5 rounded-2xl border transition-all flex items-start gap-3 cursor-pointer group active:scale-[0.99] select-none ${
+                    isPWANotifRead
+                      ? 'bg-slate-50/70 hover:bg-slate-100/80 border-slate-200/60 opacity-80'
+                      : 'bg-gradient-to-r from-blue-50/70 via-indigo-50/40 to-cyan-50/60 hover:from-blue-100/80 hover:via-indigo-100/60 hover:to-cyan-100/80 border-blue-200/80 shadow-2xs'
+                  }`}
+                  title="Tocar o hacer clic para instalar la aplicación"
+                >
+                  <Download className="w-5 h-5 text-[#0b57d0] shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className={`text-xs ${isPWANotifRead ? 'font-medium text-slate-700' : 'font-semibold text-slate-900 group-hover:text-[#0b57d0] transition-colors'}`}>
+                        Instalar Ateneo+ en este dispositivo
+                      </p>
+                      <span className="text-[11px] font-semibold text-[#0b57d0] shrink-0">
+                        App PWA
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">
+                      Instala la aplicación médica para acceso hospitalario directo y simulación clínica a pantalla completa.
+                    </p>
+                    <div className="mt-2.5 flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0b57d0] group-hover:bg-blue-700 text-white font-medium text-xs shadow-xs transition-colors">
+                        <Download className="w-3.5 h-3.5 text-white" />
+                        <span>Instalar ahora</span>
+                      </span>
+                    </div>
+                  </div>
+                </button>
+              )}
+
+              {/* Notificaciones Formativas Clínicas */}
+              {notificaciones.length === 0 && isInstalled ? (
+                <div className="py-12 px-4 flex flex-col items-center justify-center text-center">
+                  <Bell className="w-8 h-8 text-slate-300 stroke-[1.5] mb-2.5" />
+                  <p className="text-sm font-medium text-slate-700">Sin notificaciones pendientes</p>
+                  <p className="text-xs text-slate-400 mt-1 max-w-xs leading-relaxed">
+                    Aquí se mostrarán avisos de debriefings clínicos, salas colaborativas y actualizaciones de GPC.
+                  </p>
                 </div>
               ) : (
                 notificaciones.map(item => (
@@ -222,6 +259,12 @@ export default function NotificationsDropdown({ showLabel = false }: Notificatio
         </div>,
         document.body
       )}
+
+      {/* Modal de instrucciones para iOS Safari */}
+      <PWAInstallModal
+        isOpen={showIOSModal}
+        onClose={() => setShowIOSModal(false)}
+      />
     </div>
   );
 }

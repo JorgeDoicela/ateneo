@@ -1,4 +1,5 @@
 import React, { useState, useEffect, ComponentType } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Compass, CheckCircle2, Clock, Lock, ArrowDown } from 'lucide-react';
 import { adaptiveApi } from '../api/adaptiveApi';
 import { useAuth } from '../../../context/AuthContext';
@@ -11,17 +12,36 @@ export interface KnowledgeSpaceGraphProps {
 
 interface NodeStatus {
   label: string;
-  badgeClass: string;
-  cardBorder: string;
   icon: ComponentType<{ className?: string }>;
   iconColor: string;
+  textColor: string;
 }
 
+/**
+ * KnowledgeSpaceGraph — Modal institucional de la Ruta de Competencias Clínicas (KST/BKT).
+ * Desacoplado del DOM mediante React Portal hacia document.body con overlay backdrop-blur
+ * a pantalla completa (z-[100]) para garantizar que cubra tanto la cabecera como la barra inferior móvil.
+ */
 export default function KnowledgeSpaceGraph({ isOpen, onClose }: KnowledgeSpaceGraphProps) {
   const { user } = useAuth();
   const [data, setData] = useState<KnowledgeStateResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
+  // Gestión de cierre con Escape y bloqueo de scroll de la página de fondo
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, onClose]);
+
+  // Carga de la topología KST
   useEffect(() => {
     if (!isOpen) return;
     let isMounted = true;
@@ -49,122 +69,156 @@ export default function KnowledgeSpaceGraph({ isOpen, onClose }: KnowledgeSpaceG
     if (pVal >= 0.75) {
       return {
         label: 'Dominado',
-        badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-        cardBorder: 'border-emerald-200/80 bg-emerald-50/20',
         icon: CheckCircle2,
-        iconColor: 'text-emerald-600'
+        iconColor: 'text-emerald-600',
+        textColor: 'text-emerald-700 font-semibold'
       };
     } else if (pVal >= 0.40) {
       return {
         label: 'Zona ZDP (En Progreso)',
-        badgeClass: 'bg-blue-50 text-blue-700 border-blue-200',
-        cardBorder: 'border-blue-200/80 bg-blue-50/20',
         icon: Clock,
-        iconColor: 'text-blue-600'
+        iconColor: 'text-[#0b57d0]',
+        textColor: 'text-[#0b57d0] font-semibold'
       };
     } else {
       return {
         label: 'Sin Iniciar / Prerrequisito',
-        badgeClass: 'bg-slate-100 text-slate-600 border-slate-200',
-        cardBorder: 'border-slate-200/80 bg-slate-50/30',
         icon: Lock,
-        iconColor: 'text-slate-400'
+        iconColor: 'text-slate-400',
+        textColor: 'text-slate-500 font-medium'
       };
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[28px] shadow-xl border border-slate-100 p-6 md:p-8 space-y-6">
-        
-        {/* Modal Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-          <div className="flex items-center space-x-3">
-            <Compass className="w-6 h-6 text-blue-600" />
+  return createPortal(
+    <div 
+      className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 animate-fadeIn"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="kst-modal-title"
+    >
+      <div 
+        className="bg-white w-full max-w-3xl max-h-[92vh] sm:max-h-[88vh] rounded-[28px] shadow-2xl border border-slate-200/60 flex flex-col animate-scaleUp relative overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Halos difusos sutiles de fondo para refracción Glassmorphism */}
+        <div 
+          className="pointer-events-none absolute -top-16 -right-16 w-56 h-56 bg-gradient-to-br from-cyan-400/15 via-blue-500/10 to-transparent rounded-full blur-2xl"
+          aria-hidden="true"
+        />
+        <div 
+          className="pointer-events-none absolute -bottom-16 -left-16 w-56 h-56 bg-gradient-to-tl from-indigo-500/15 via-violet-500/10 to-transparent rounded-full blur-2xl"
+          aria-hidden="true"
+        />
+
+        {/* Cabecera Fija del Modal */}
+        <div className="flex items-center justify-between p-5 sm:p-6 pb-4 border-b border-slate-100 shrink-0 relative z-10">
+          <div className="flex items-center gap-3">
+            <Compass className="w-6 h-6 text-[#0b57d0] shrink-0" />
             <div>
-              <h2 className="text-xl font-bold font-heading text-slate-900 tracking-tight">
+              <h2 id="kst-modal-title" className="text-lg sm:text-xl font-heading font-normal text-slate-900 tracking-tight">
                 Ruta de Competencias Clínicas
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Secuencia formativa de prerrequisitos y probabilidad continua de dominio por competencia
+              <p className="text-xs text-slate-500 mt-0.5 leading-tight">
+                Secuencia formativa de prerrequisitos y probabilidad continua de dominio
               </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+            className="p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer shrink-0"
             title="Cerrar modal"
+            aria-label="Cerrar modal"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Legend */}
-        <div className="flex flex-wrap items-center gap-3 text-xs bg-slate-50 p-3 rounded-[16px] border border-slate-100">
-          <span className="font-semibold text-slate-700 mr-2">Leyenda de Estados:</span>
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">
-            <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Dominado (&gt; 75%)
-          </span>
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-medium">
-            <Clock className="w-3.5 h-3.5 mr-1" /> Zona de Desarrollo Próximo ZDP (40% - 75%)
-          </span>
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200 font-medium">
-            <Lock className="w-3.5 h-3.5 mr-1" /> Inicial / Bloqueado (&lt; 40%)
-          </span>
+        {/* Leyenda Clínica Plana */}
+        <div className="px-5 sm:px-6 pt-3 pb-2 shrink-0 border-b border-slate-100/60 bg-slate-50/50 relative z-10">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-600">
+            <span className="font-semibold text-slate-700">Estados:</span>
+            <span className="inline-flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span>Dominado (&gt; 75%)</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-[#0b57d0] shrink-0" />
+              <span>Zona ZDP (40% - 75%)</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Lock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <span>Inicial / Bloqueado (&lt; 40%)</span>
+            </span>
+          </div>
         </div>
 
-        {/* Content / Graph Nodes */}
-        {loading ? (
-          <div className="py-12 text-center text-slate-400 animate-pulse text-sm">
-            Cargando ruta de competencias y nivel de dominio...
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {nodes.map((node, idx) => {
+        {/* Contenido / Nodos de Competencia con Scroll Limpio */}
+        <div className="flex-1 overflow-y-auto no-scrollbar p-5 sm:p-6 space-y-4 relative z-10">
+          {loading ? (
+            <div className="py-16 text-center text-slate-400 animate-pulse text-xs">
+              Cargando ruta formativa y modelo adaptativo de competencias...
+            </div>
+          ) : nodes.length === 0 ? (
+            <div className="py-12 text-center text-xs text-slate-400">
+              No hay nodos de competencias configurados para esta ruta.
+            </div>
+          ) : (
+            nodes.map((node, idx) => {
               const pVal = knowledgeState[node.id] !== undefined ? knowledgeState[node.id] : 0.40;
               const status = getNodeStatus(pVal);
               const IconComponent = status.icon;
 
               return (
                 <React.Fragment key={node.id}>
-                  <div className={`p-4 md:p-5 rounded-[20px] border transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-4 ${status.cardBorder}`}>
-                    <div className="space-y-1">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-xs font-mono font-bold text-slate-400">0{node.orden || idx + 1}.</span>
-                        <h4 className="text-base font-bold text-slate-900 font-heading">
+                  <div className="p-4 sm:p-5 rounded-[22px] bg-[#f0f4f9]/50 hover:bg-[#f0f4f9]/80 border border-slate-200/70 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                    <div className="space-y-1 min-w-0 flex-1">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-xs font-mono font-bold text-slate-400 shrink-0">
+                          0{node.orden || idx + 1}.
+                        </span>
+                        <h4 className="text-sm sm:text-base font-semibold text-slate-900 tracking-tight">
                           {node.nombre}
                         </h4>
                       </div>
-                      <p className="text-xs text-slate-600 leading-relaxed max-w-xl">
+                      <p className="text-xs text-slate-500 leading-relaxed">
                         {node.descripcion}
                       </p>
                     </div>
 
-                    <div className="flex items-center space-x-4 self-end md:self-center shrink-0">
-                      <div className="text-right">
-                        <span className="text-xs text-slate-500 font-medium block">Probabilidad P(L)</span>
-                        <span className="text-lg font-mono font-bold text-slate-900">
+                    <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200/50">
+                      <div className="text-left sm:text-right">
+                        <span className="text-[10px] text-slate-400 block font-medium uppercase tracking-wider">
+                          Probabilidad P(L)
+                        </span>
+                        <span className="text-base font-mono font-bold text-slate-900">
                           {Math.round(pVal * 100)}%
                         </span>
                       </div>
-                      <div className={`inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-full border text-xs font-bold ${status.badgeClass}`}>
-                        <IconComponent className="w-3.5 h-3.5" />
-                        <span>{status.label}</span>
+
+                      <div className="flex items-center gap-1.5 text-xs shrink-0">
+                        <IconComponent className={`w-4 h-4 ${status.iconColor} shrink-0`} />
+                        <span className={status.textColor}>
+                          {status.label}
+                        </span>
                       </div>
                     </div>
                   </div>
 
                   {idx < nodes.length - 1 && (
-                    <div className="flex justify-center">
+                    <div className="flex justify-center -my-1">
                       <ArrowDown className="w-4 h-4 text-slate-300" />
                     </div>
                   )}
                 </React.Fragment>
               );
-            })}
-          </div>
-        )}
+            })
+          )}
+        </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

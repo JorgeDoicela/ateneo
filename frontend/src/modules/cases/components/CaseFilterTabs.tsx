@@ -59,25 +59,27 @@ export default function CaseFilterTabs({
   return (
     <div className="space-y-4">
       {/* 1. Pestañas de Clasificación General y Selector de Vista */}
-      <div className="flex items-center justify-between gap-3 pb-2 border-b border-slate-200/80">
-        <div className="flex items-center gap-3 sm:gap-6 overflow-x-auto no-scrollbar shrink min-w-0">
+      <div className="flex items-center justify-between gap-3 border-b border-slate-200/80">
+        <div className="flex items-center gap-3 sm:gap-6 overflow-x-auto overflow-y-hidden no-scrollbar shrink min-w-0">
           <button
+            type="button"
             onClick={() => onSelectClassificationTab('all')}
-            className={`pb-2 text-xs sm:text-sm font-medium whitespace-nowrap transition-colors cursor-pointer shrink-0 ${
+            className={`pb-2.5 pt-1 text-xs sm:text-sm font-medium whitespace-nowrap transition-colors cursor-pointer shrink-0 border-b-2 -mb-px ${
               classificationTab === 'all'
-                ? 'border-b-2 border-[#0b57d0] text-[#0b57d0] font-semibold -mb-[9px]'
-                : 'text-[#444746] hover:text-[#1f1f1f]'
+                ? 'border-[#0b57d0] text-[#0b57d0] font-semibold'
+                : 'border-transparent text-[#444746] hover:text-[#1f1f1f]'
             }`}
           >
             <span>Todos los Casos ({totalCasesCount})</span>
           </button>
 
           <button
+            type="button"
             onClick={() => onSelectClassificationTab('urgent')}
-            className={`pb-2 text-xs sm:text-sm font-medium flex items-center gap-1.5 whitespace-nowrap transition-colors cursor-pointer shrink-0 ${
+            className={`pb-2.5 pt-1 text-xs sm:text-sm font-medium flex items-center gap-1.5 whitespace-nowrap transition-colors cursor-pointer shrink-0 border-b-2 -mb-px ${
               classificationTab === 'urgent'
-                ? 'border-b-2 border-rose-600 text-rose-700 font-semibold -mb-[9px]'
-                : 'text-[#444746] hover:text-[#1f1f1f]'
+                ? 'border-rose-600 text-rose-700 font-semibold'
+                : 'border-transparent text-[#444746] hover:text-[#1f1f1f]'
             }`}
           >
             <Zap className="w-3.5 h-3.5 text-rose-600 shrink-0" />
@@ -86,7 +88,7 @@ export default function CaseFilterTabs({
         </div>
 
         {/* Selector de Vista (Grid vs List) */}
-        <div className="flex items-center gap-1 bg-white/70 backdrop-blur-md p-1 rounded-full border border-slate-200/80 shadow-xs shrink-0">
+        <div className="flex items-center gap-1 bg-white/70 backdrop-blur-md p-1 rounded-full border border-slate-200/80 shadow-xs shrink-0 mb-1.5">
           <button
             onClick={() => onChangeViewMode('grid')}
             title="Vista en Cuadrícula"

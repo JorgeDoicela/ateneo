@@ -1,20 +1,33 @@
 {
-  "name": "Ateneo +",
-  "short_name": "Ateneo +",
+  "name": "Ateneo+ — Simulador Clínico",
+  "short_name": "Ateneo+",
+  "description": "Simulador clínico multimodal y evaluación médica formativa con IA y RAG (GPC Ecuador)",
   "start_url": "/",
+  "id": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "orientation": "any",
+  "background_color": "#f0f4f9",
+  "theme_color": "#ffffff",
+  "categories": ["education", "medical"],
   "icons": [
     {
-      "src": "/icons/icon-192.png",
+      "src": "/pwa-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "/pwa-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
