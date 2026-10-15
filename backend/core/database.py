@@ -117,7 +117,7 @@ def init_database() -> None:
             {
                 "id": "tenant_default",
                 "codigo": "ateneo_central",
-                "nombre_institucional": "Ateneo+ Sede Central (MSP Ecuador)",
+                "nombre_institucional": "Ateneo+ Sede Central",
                 "dominio_email": "ateneo.edu.ec",
                 "gpc": ["GPC_Hipertension_Arterial_MSP_2019", "GPC_Diabetes_Mellitus_Tipo_2_MSP_2017", "GPC_Neumonia_Adquirida_Comunidad_Pediatria_MSP_2019"]
             },
@@ -137,7 +137,8 @@ def init_database() -> None:
             }
         ]
         for t_data in default_tenants:
-            if not tenant_repo.get_by_id(t_data["id"]):
+            existing_t = tenant_repo.get_by_id(t_data["id"])
+            if not existing_t:
                 tenant_repo.create(TenantModel(
                     id=t_data["id"],
                     codigo=t_data["codigo"],
@@ -146,6 +147,9 @@ def init_database() -> None:
                     gpc_activas_json=json.dumps(t_data["gpc"], ensure_ascii=False),
                     activo=True
                 ))
+            elif "(MSP Ecuador)" in existing_t.nombre_institucional:
+                existing_t.nombre_institucional = existing_t.nombre_institucional.replace(" (MSP Ecuador)", "").strip()
+                db.commit()
 
         user_repo = UserRepository(db)
         auth_service = AuthService(user_repo, tenant_repo)

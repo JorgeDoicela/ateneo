@@ -258,12 +258,6 @@ export default function GlobalSearchBar({ isMobile, onClose }: GlobalSearchBarPr
           autoFocus={isMobile}
         />
 
-        {/* Indicador de Atajo de Teclado en Escritorio */}
-        {!isMobile && !searchQuery && (
-          <kbd className="hidden lg:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono font-medium text-slate-400 bg-slate-100/90 rounded border border-slate-200 shrink-0">
-            Ctrl K
-          </kbd>
-        )}
 
         {/* Botón de Limpiar Búsqueda */}
         {searchQuery && (
@@ -297,7 +291,7 @@ export default function GlobalSearchBar({ isMobile, onClose }: GlobalSearchBarPr
 
       {/* 2. Menú Desplegable Spotlight Predictivo en Vivo */}
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-[24px] shadow-2xl border border-slate-100 py-3 z-50 animate-fadeIn max-h-[460px] overflow-y-auto divide-y divide-slate-100">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-[24px] shadow-2xl border border-slate-200/80 py-3 z-50 animate-fadeIn max-h-[460px] overflow-y-auto divide-y divide-slate-100">
           {searchQuery.trim() ? (
             <div>
               <div className="px-4 py-1.5 flex items-center justify-between text-[11px] font-semibold text-[#747775] uppercase tracking-wider">
@@ -429,7 +423,7 @@ export default function GlobalSearchBar({ isMobile, onClose }: GlobalSearchBarPr
 
       {/* 3. Panel Emergente de Filtros Clínicos Avanzados */}
       {isFilterPanelOpen && (
-        <div className="absolute top-full right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white/95 backdrop-blur-xl rounded-[24px] shadow-2xl border border-slate-100 p-5 z-50 animate-fadeIn space-y-4">
+        <div className="absolute top-full right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-[24px] shadow-2xl border border-slate-200/80 p-5 z-50 animate-fadeIn space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <div className="flex items-center gap-2">
               <Filter className="w-4 h-4 text-[#0b57d0]" />

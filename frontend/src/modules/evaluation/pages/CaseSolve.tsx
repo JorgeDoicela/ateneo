@@ -508,11 +508,7 @@ export default function CaseSolve() {
                 </div>
               )}
 
-              <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 pt-2">
-                <span className="text-[11px] text-[#747775] text-center sm:text-left">
-                  {respuesta.trim().split(/\s+/).filter(Boolean).length} palabras
-                </span>
-
+              <div className="flex items-center justify-end pt-2">
                 <ClinicalButton
                   type="submit"
                   variant="primary"

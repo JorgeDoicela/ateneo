@@ -26,7 +26,7 @@ const INSTITUTIONAL_DOMAINS: Record<string, DetectedTenant> = {
   },
   'ateneo.edu.ec': {
     codigo: 'ateneo_central',
-    nombre: 'Ateneo+ Sede Central (GPC Ecuador)',
+    nombre: 'Ateneo+ Sede Central',
     siglas: 'ATENEO+'
   }
 };
@@ -119,7 +119,9 @@ export default function Register() {
       };
 
       const res = await authApi.register(payload);
-      setRegisteredSuccess(res.mensaje || 'Cuenta institucional creada exitosamente.');
+      const rawMsg = res.mensaje || 'Cuenta institucional creada exitosamente.';
+      const cleanMsg = rawMsg.replace(/\s*\((?:MSP|GPC)\s*Ecuador\)/gi, '').replace(/\s*(?:MSP|GPC)\s*Ecuador/gi, '');
+      setRegisteredSuccess(cleanMsg);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'No fue posible completar el registro. Inténtalo de nuevo.';
       setError(msg);

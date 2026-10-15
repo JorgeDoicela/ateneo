@@ -184,8 +184,8 @@ export default function Navbar() {
                     <NotificationsDropdown />
                   </div>
 
-                  {/* Menú Desplegable de Perfil (Oculto en cabecera móvil si está en catálogo, ya que se renderiza en la barra inferior) */}
-                  <div className={isCatalogRoute ? 'hidden md:block' : 'block'}>
+                  {/* Menú Desplegable de Perfil (Oculto en cabecera móvil, ya que vive en la barra inferior) */}
+                  <div className="hidden md:block">
                     <UserProfileDropdown />
                   </div>
                 </>

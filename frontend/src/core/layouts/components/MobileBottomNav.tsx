@@ -21,9 +21,9 @@ export default function MobileBottomNav({ onOpenJoinRoom }: MobileBottomNavProps
 
   if (!user) return null;
 
-  // Solo debe mostrarse en la vista del catálogo de casos clínicos
-  const isCatalogRoute = location.pathname === '/' || location.pathname === '/cases';
-  if (!isCatalogRoute) return null;
+  // Ocultar en la resolución activa de casos clínicos para maximizar el área de simulación
+  const isCaseSolveRoute = location.pathname.startsWith('/cases/') && location.pathname !== '/cases';
+  if (isCaseSolveRoute) return null;
 
   return createPortal(
     <nav 

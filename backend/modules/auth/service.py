@@ -332,7 +332,7 @@ class AuthService:
             nombre=new_user.nombre,
             rol=UserRole(new_user.rol),
             tenant_id=new_user.tenant_id,
-            mensaje=f"Usuario registrado exitosamente en {tenant.nombre_institucional}."
+            mensaje=f"Usuario registrado exitosamente en {tenant.nombre_institucional.replace(' (MSP Ecuador)', '').replace(' (GPC Ecuador)', '').strip()}."
         )
 
     def create_magic_link(

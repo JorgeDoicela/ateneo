@@ -84,7 +84,7 @@ export default function JoinRoomModal({ isOpen, onClose }: JoinRoomModalProps) {
                 Unirse a Sala de Ateneo
               </h3>
               <p className="text-xs text-slate-500">
-                Discusión clínica sincrónica y análisis de casos en tiempo real
+                Prácticas individuales y ateneos clínicos en tiempo real
               </p>
             </div>
           </div>
@@ -107,7 +107,7 @@ export default function JoinRoomModal({ isOpen, onClose }: JoinRoomModalProps) {
               <input
                 id="room-code-input"
                 type="text"
-                placeholder="ej. ATENEO-8Q8Y"
+                placeholder="EJ. ATENEO-8Q8Y"
                 value={roomInput}
                 onChange={(e) => setRoomInput(e.target.value.toUpperCase())}
                 required
@@ -116,9 +116,20 @@ export default function JoinRoomModal({ isOpen, onClose }: JoinRoomModalProps) {
                 className="w-full px-4 py-3 bg-[#f0f4f9] rounded-[16px] text-sm font-mono uppercase tracking-wider text-slate-900 border border-slate-200/90 focus:outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100/60 transition-all placeholder:text-slate-400"
               />
             </div>
-            <p className="text-[11px] text-slate-400 mt-1.5">
-              Solicita el código al docente facilitador o al creador de la sesión clínica.
-            </p>
+            
+            <div className="mt-3 space-y-1 text-xs text-slate-500 leading-relaxed">
+              <p className="text-slate-600">
+                Solicita el código a tu profesor según la modalidad de la clase:
+              </p>
+              <div className="space-y-0.5 pl-1 text-[11px] text-slate-500">
+                <p>
+                  <strong className="text-slate-700 font-medium">• Práctica individual:</strong> para resolver de forma personal el caso asignado.
+                </p>
+                <p>
+                  <strong className="text-slate-700 font-medium">• Ateneo en grupo:</strong> para analizar el caso y redactar juntos en vivo con tus compañeros.
+                </p>
+              </div>
+            </div>
           </div>
 
           {joinError && (
