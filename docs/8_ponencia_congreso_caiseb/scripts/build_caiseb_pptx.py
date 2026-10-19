@@ -1,7 +1,7 @@
 """
 Script: build_caiseb_pptx.py
 Propósito: Construir la presentación oficial magistral de 13 diapositivas en CAISEB.pptx
-           para la ponencia en el Congreso Académico Internacional en Salud y Educación Biomédica (CAISEB).
+           para la ponencia en el Congreso Académico Internacional de Innovación en Salud, Educación y Bienestar (CAISEB).
            Cumple estrictamente con la normativa oficial:
            - Tipografía: Arial
            - Dimensiones: 20.0 x 11.25 pulgadas (panorámica institucional)
@@ -23,6 +23,8 @@ from pptx.enum.shapes import MSO_SHAPE
 # Definición de rutas absolutas del proyecto
 PROJECT_ROOT = Path(r"c:\Users\DESARROLLADOR\Desktop\Proyectos\clinical_rag")
 BACKUP_PPTX = PROJECT_ROOT / "CAISEB_backup.pptx"
+if not BACKUP_PPTX.exists() and (PROJECT_ROOT / "CAISEB_0.pptx").exists():
+    BACKUP_PPTX = PROJECT_ROOT / "CAISEB_0.pptx"
 TARGET_PPTX = PROJECT_ROOT / "CAISEB.pptx"
 
 # Rutas de figuras y capturas del sistema
@@ -484,7 +486,7 @@ def build_presentation():
     add_card_header(tx_exp1, "Tnlgo. Jorge Ismael Doicela Molina", 26, COLOR_PRIMARY_NAVY)
     
     p_sub1 = tx_exp1.add_paragraph()
-    p_sub1.text = "Investigador Principal | Arquitectura de Software, MLOps e IA"
+    p_sub1.text = "Investigador | Arquitectura de Software, MLOps e IA"
     p_sub1.font.name = FONT_FAMILY
     p_sub1.font.size = Pt(20)
     p_sub1.font.bold = True
@@ -554,7 +556,7 @@ def build_presentation():
     p_proyecto.space_after = Pt(8)
 
     p_congreso = tf_cierre.add_paragraph()
-    p_congreso.text = "Congreso Académico Internacional en Salud y Educación Biomédica (CAISEB 2026)"
+    p_congreso.text = "Congreso Académico Internacional de Innovación en Salud, Educación y Bienestar (CAISEB 2026)"
     p_congreso.font.name = FONT_FAMILY
     p_congreso.font.size = Pt(20)
     p_congreso.font.bold = True

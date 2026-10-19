@@ -1728,5 +1728,16 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
     4. *Aislamiento de Infraestructura:* Cero modificaciones en Dockerfiles ni `docker-compose.yml`, preservando la estabilidad de los contenedores en producción.
   - **Validación:** 4/4 pruebas unitarias aprobadas en `tests/test_openai_compatible_gateway.py`, 17/17 pruebas de regresión aprobadas al 100% en backend (KST, JWT, Auth, RAG Cache en 76.7s).
   - **Sincronización de Documentación:** Documento Word oficial recompilado con éxito (`ATENEO_DOSSIER_TECNICO_Y_PONENCIA_CAISEB.docx`, 2.56 MB) y `DOSSIER_PONENCIA_MAGISTRAL_CAISEB_40MIN.md` sincronizado con las subsecciones 8 y 16.6.
-
-
+* **Estandarización de Nomenclatura Oficial CAISEB y Paridad de Autoría (2026-10-19):**
+  - **Nombre Oficial del Congreso:** Corregido en toda la documentación técnica, scripts de generación y diapositivas a: **Congreso Académico Internacional de Innovación en Salud, Educación y Bienestar (CAISEB)**.
+  - **Paridad Estricta de Autoría e Investigadores:**
+    - Erradicada cualquier jerarquía artificial de "Investigador Principal" vs. "Coinvestigador". Ambos autores figuran en paridad estricta como **Investigadores**:
+      - `Tnlgo. Jorge Ismael Doicela Molina` (Investigador — Arquitectura de Software, MLOps e Inteligencia Artificial Aplicada).
+      - `Mgtr. Estefani Angélica Sánchez Morales` (Investigadora — Educación Médica, Metodología y Validación Clínica).
+  - **Filiación Institucional:** Sanitizada para eliminar referencias no oficiales ("Facultad de Ciencias Médicas" o "Red Universitaria"). La filiación oficial canónica es estrictamente **Ateneo+**.
+  - **Entorno de Compilación y Artefactos Oficiales:**
+    - Paquetes `python-docx` y `python-pptx` instalados y verificados en el entorno virtual (`backend/.venv`).
+    - Artefactos compilados y sincronizados al 100%:
+      - `ATENEO_DOSSIER_TECNICO_Y_PONENCIA_CAISEB.docx` (2.53 MB, 21 secciones, portada y pie de página corregidos).
+      - `CAISEB.pptx` (3.96 MB, 13 diapositivas panorámicas con diseño formal para el atril).
+      - `DOSSIER_PONENCIA_MAGISTRAL_CAISEB_40MIN.md` y `README.md` alineados con la nomenclatura y filiación canónica.

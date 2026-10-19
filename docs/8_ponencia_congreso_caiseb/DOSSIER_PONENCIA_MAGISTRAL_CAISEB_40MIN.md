@@ -1,5 +1,5 @@
 # DOSSIER MAESTRO DE PONENCIA MAGISTRAL (40 MINUTOS)
-## CONGRESO ACADÉMICO INTERNACIONAL EN SALUD Y EDUCACIÓN BIOMÉDICA (CAISEB)
+## CONGRESO ACADÉMICO INTERNACIONAL DE INNOVACIÓN EN SALUD, EDUCACIÓN Y BIENESTAR (CAISEB)
 
 **Título Oficial de la Investigación:**  
 *Simulador clínico multimodal basado en inteligencia artificial y RAG para el entrenamiento formativo y analítica del aprendizaje médico en Ecuador*
@@ -8,7 +8,7 @@
 - **Tnlgo. Jorge Ismael Doicela Molina** (Investigador — Arquitectura de Software, MLOps e Inteligencia Artificial Aplicada)  
 - **Mgtr. Estefani Angélica Sánchez Morales** (Investigadora — Educación Médica, Metodología y Validación Clínica)
 
-**Filiación Institucional:** Ateneo+ / Facultad de Ciencias Médicas  
+**Filiación Institucional:** Ateneo+  
 **Tiempo Asignado:** 40 Minutos de Exposición + Sesión de Preguntas y Respuestas (Q&A)  
 **Marco de Referencia Normativo:** Guías de Práctica Clínica (GPC) oficiales del Ministerio de Salud Pública (MSP) del Ecuador  
 

@@ -1,6 +1,6 @@
 # 8. Ponencia Oficial del Congreso CAISEB (40 Minutos)
 
-Este directorio consolida todos los recursos, documentos oficiales, diapositivas y scripts de compilación para la defensa magistral de **Ateneo+** en el **Congreso Académico Internacional en Salud y Educación Biomédica (CAISEB)**.
+Este directorio consolida todos los recursos, documentos oficiales, diapositivas y scripts de compilación para la defensa magistral de **Ateneo+** en el **Congreso Académico Internacional de Innovación en Salud, Educación y Bienestar (CAISEB)**.
 
 ---
 
@@ -10,7 +10,7 @@ Este directorio consolida todos los recursos, documentos oficiales, diapositivas
 * **Autores e Investigadores:**
   - **Tnlgo. Jorge Ismael Doicela Molina** (Investigador — Arquitectura de Software, MLOps e Inteligencia Artificial)
   - **Mgtr. Estefani Angélica Sánchez Morales** (Investigadora — Educación Médica, Metodología y Validación Clínica)
-* **Filiación:** Ateneo+ / Facultad de Ciencias Médicas
+* **Filiación:** Ateneo+
 * **Tiempo de Exposición:** 40 minutos + ronda de preguntas (Q&A)
 
 ---

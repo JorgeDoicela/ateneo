@@ -221,7 +221,7 @@ def main():
     p_inst.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_inst.paragraph_format.space_before = Pt(16)
     p_inst.paragraph_format.space_after = Pt(4)
-    r_inst = p_inst.add_run("CONGRESO ACADEMICO INTERNACIONAL EN SALUD Y EDUCACION BIOMEDICA (CAISEB 2026)")
+    r_inst = p_inst.add_run("CONGRESO ACADEMICO INTERNACIONAL DE INNOVACION EN SALUD, EDUCACION Y BIENESTAR (CAISEB 2026)")
     r_inst.font.name = "Arial"
     r_inst.font.size = Pt(11)
     r_inst.font.bold = True
@@ -272,7 +272,7 @@ def main():
     p_fil = doc.add_paragraph()
     p_fil.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_fil.paragraph_format.space_after = Pt(20)
-    r_fil = p_fil.add_run("Filiacion: Ateneo+ / Red Universitaria y Hospitalaria Docente de Ciencias Medicas\nQuito, Ecuador — Octubre 2026")
+    r_fil = p_fil.add_run("Filiacion: Ateneo+\nQuito, Ecuador — Octubre 2026")
     r_fil.font.size = Pt(9)
     r_fil.font.italic = True
     r_fil.font.color.rgb = COLOR_MUTED
