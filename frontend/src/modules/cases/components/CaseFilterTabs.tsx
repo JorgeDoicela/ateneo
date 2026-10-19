@@ -57,7 +57,7 @@ export default function CaseFilterTabs({
   }, [isDropdownOpen]);
 
   return (
-    <div className="space-y-4">
+    <div data-tour="specialty-filters" className="space-y-4">
       {/* 1. Pestañas de Clasificación General y Selector de Vista */}
       <div className="flex items-center justify-between gap-3 border-b border-slate-200/80">
         <div className="flex items-center gap-3 sm:gap-6 overflow-x-auto overflow-y-hidden no-scrollbar shrink min-w-0">

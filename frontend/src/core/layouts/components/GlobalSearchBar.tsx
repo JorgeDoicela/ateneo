@@ -226,6 +226,7 @@ export default function GlobalSearchBar({ isMobile, onClose }: GlobalSearchBarPr
   return (
     <div 
       ref={containerRef}
+      data-tour="global-search"
       className={isMobile ? "relative w-full flex items-center" : "relative w-full max-w-2xl mx-auto hidden md:flex items-center"}
     >
       {/* Halo de Refracción Óptica Ambiental de Cristal Líquido */}

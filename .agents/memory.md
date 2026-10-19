@@ -1673,8 +1673,20 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
     3. *Fase 3: Prescripción Terapéutica, Manejo y Monitoreo:* Esquemas farmacológicos normados por la GPC respectiva (dosificación, vías, contraindicaciones y criterios de seguimiento o referencia).
   - **Validación Integral:** Los 10 casos recuperan con 100% de éxito en RAG BGE-M3 (`test_all_canonical_cases_retrieval`), contratos verificados en frontend (`casesContract.test.ts`), y servidor FastAPI activo en Docker (`http://localhost:8000/api/cases`).
 
+* **Integración del Debate Socrático en la Simulación Progresiva por Fases (`PhaseFeedbackCard.tsx` - 2026-10-19):**
+  - **Causa Raíz:** Como el 100% de los casos clínicos en Ateneo+ se resuelven bajo el modelo dinámico secuencial por fases (Fases 1, 2 y 3), la pantalla que el estudiante observa inmediatamente tras responder en cada hito es `PhaseFeedbackCard`. El botón de *"Debate Socrático"* había quedado confinado exclusivamente a `FeedbackCard.tsx` (la tarjeta final del caso global o casos directos). Por consiguiente, al recibir retroalimentación de omisiones en una fase (ej. *"Omisiones a Mejorar (6)"*), la caja amarilla carecía del disparador, generando la percepción de que el debate socrático había desaparecido de la plataforma. Adicionalmente, al consolidar `finalOutcome` en `useCaseSolver.ts` tras la última fase, faltaba inyectar `case_id` y `case_title`.
+  - **Solución Arquitectónica Definitiva (Cero Parches):**
+    1. *Disparador Socrático en `PhaseFeedbackCard.tsx`:* Se rediseñó la cabecera del bloque de omisiones incorporando el botón estilizado en cristal líquido *"Debate Socrático"* con icono `MessageSquare`, que invoca `openDebrief(targetCaseId, `${caseTitle} (Fase ${currentPhase})`, omisiones)`.
+    2. *Propagación de Metadatos en `CaseSolve.tsx`:* Inyección de `caseId={caso?.id}` y `caseTitle={caso?.titulo}` al montar `PhaseFeedbackCard`.
+    3. *Consolidación Global en `useCaseSolver.ts`:* `finalOutcome` incluye ahora explícitamente `case_id` y `case_title`.
+    4. *Verificación de Tipos y Pruebas Unitarias:* 0 errores en `tsc --noEmit`, 18/18 pruebas aprobadas al 100% en Vitest (`PhaseFeedbackCard.test.jsx`, `SocraticDebrief.test.jsx`, `FeedbackCard.test.jsx`).
 
-
-
-
-
+* **Arquitectura del Tour Guiado Formativo Desacoplado (`StudentTourGuide.tsx` y `TourHelpButton.tsx` - 2026-10-19):**
+  - **Decisión y Cero Impacto:** Para orientar a los estudiantes en el catálogo de casos (`/cases`), se diseñó un tour visual nativo sin librerías externas ni modificación de funciones existentes.
+  - **Componentes:**
+    1. *`useTourStore.ts`:* Control reactivo de apertura, cierre, paso actual y navegación adelante/atrás.
+    2. *`StudentTourGuide.tsx`:* Overlay desacoplado renderizado mediante `createPortal(..., document.body)` con recorte SVG spotlight dinámico (`mask`) alrededor del elemento activo y tarjeta flotante en Liquid Glassmorphism con flechas, atajos de teclado (`Escape`, `ArrowRight`, `ArrowLeft`) y cero emojis.
+    3. *`TourHelpButton.tsx`:* Botón flotante circular en cristal líquido posicionado en `bottom-24 right-5` (justo encima del acceso de Perfil en la barra móvil inferior) y en la esquina inferior en escritorio.
+    4. *Puntos de Anclaje Pasivos:* Atributos `data-tour` semánticos en `GlobalSearchBar`, `AdaptiveNextCase`, `CaseFilterTabs`, primera `CaseCard`, `Desempeño`, `Hitos` y `Unirse a Sala`.
+  - **Alineación Visual:** Aumento de padding inferior en `CaseList.tsx` (`pb-36 sm:pb-24`) para evitar cualquier solapamiento en móviles entre la última tarjeta y las barras flotantes.
+  - **Validación:** 0 errores en `tsc --noEmit`, 5/5 pruebas unitarias en `StudentTourGuide.test.jsx`, 30/30 pruebas aprobadas en la suite integral de Vitest.

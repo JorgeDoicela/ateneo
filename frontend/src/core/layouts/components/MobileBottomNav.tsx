@@ -39,6 +39,7 @@ export default function MobileBottomNav({ onOpenJoinRoom }: MobileBottomNavProps
         {/* 1. Enlace Mi Desempeño */}
         <Link
           to="/analytics"
+          data-tour="analytics-nav"
           className="flex-1 flex flex-col items-center justify-center py-1 px-1 text-slate-700 hover:text-[#0b57d0] active:scale-95 transition-all cursor-pointer group"
           title="Mi Desempeño y Tendencias Clínicas"
         >
@@ -51,6 +52,7 @@ export default function MobileBottomNav({ onOpenJoinRoom }: MobileBottomNavProps
         {/* 2. Botón Carrera Formativa e Hitos */}
         <button
           type="button"
+          data-tour="career-nav"
           onClick={() => setShowCareerModal(true)}
           className="flex-1 flex flex-col items-center justify-center py-1 px-1 text-slate-700 hover:text-[#0b57d0] active:scale-95 transition-all cursor-pointer group"
           title="Carrera Formativa e Hitos Clínicos"
@@ -64,6 +66,7 @@ export default function MobileBottomNav({ onOpenJoinRoom }: MobileBottomNavProps
         {/* 3. Botón Unirse a Sala */}
         <button
           type="button"
+          data-tour="join-room-nav"
           onClick={onOpenJoinRoom}
           className="flex-1 flex flex-col items-center justify-center py-1 px-1 text-slate-700 hover:text-[#0b57d0] active:scale-95 transition-all cursor-pointer group"
           title="Unirse a Sala de Ateneo"

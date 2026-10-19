@@ -9,6 +9,7 @@ import CaseCard from '../components/CaseCard';
 import CaseFilterTabs from '../components/CaseFilterTabs';
 import AdaptiveNextCase from '../../adaptive/components/AdaptiveNextCase';
 import KnowledgeSpaceGraph from '../../adaptive/components/KnowledgeSpaceGraph';
+import { TourHelpButton, StudentTourGuide } from '../../../core/tour';
 
 export default function CaseList() {
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ export default function CaseList() {
   }, [selectedCategory, classificationTab]);
 
   return (
-    <div className="space-y-8 animate-fadeIn pb-24 sm:pb-16">
+    <div className="space-y-8 animate-fadeIn pb-36 sm:pb-24">
       
       {/* 1. Header Principal */}
       <div className="pb-2 pt-2">
@@ -100,13 +101,14 @@ export default function CaseList() {
                   : 'space-y-4 pt-2'
               }
             >
-              {filteredCases.map((caso) => (
-                <CaseCard
-                  key={caso.id}
-                  caso={caso}
-                  gpcMeta={resolveGpcMeta(caso.guia_asociada)}
-                  viewMode={viewMode}
-                />
+              {filteredCases.map((caso, index) => (
+                <div key={caso.id} {...(index === 0 ? { 'data-tour': 'case-card' } : {})}>
+                  <CaseCard
+                    caso={caso}
+                    gpcMeta={resolveGpcMeta(caso.guia_asociada)}
+                    viewMode={viewMode}
+                  />
+                </div>
               ))}
             </div>
           )}
@@ -116,6 +118,10 @@ export default function CaseList() {
         isOpen={showKstGraph}
         onClose={() => setShowKstGraph(false)}
       />
+
+      {/* Botón Flotante de Ayuda y Tour Guiado Formativo */}
+      <TourHelpButton />
+      <StudentTourGuide />
     </div>
   );
 }

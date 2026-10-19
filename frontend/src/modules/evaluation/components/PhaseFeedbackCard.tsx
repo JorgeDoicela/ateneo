@@ -1,11 +1,15 @@
 import { useMemo, useEffect } from "react";
-import { ArrowRight, CheckCircle2, AlertTriangle, BookOpen, Sparkles, Activity, Mic } from "lucide-react";
+import { ArrowRight, CheckCircle2, AlertTriangle, BookOpen, Sparkles, Activity, Mic, MessageSquare } from "lucide-react";
 import { PhaseEvaluationResult } from "../../../types";
 import { ClinicalMarkdownRenderer } from "../../../core/ui";
+import { useSocraticDebriefStore } from "../store/useSocraticDebriefStore";
+import { useLearningTelemetry } from "../../analytics/hooks/useLearningTelemetry";
 
 export interface PhaseFeedbackCardProps {
   phaseResult: PhaseEvaluationResult;
   currentPhase?: number;
+  caseId?: string;
+  caseTitle?: string;
   audioBlob?: Blob | null;
   onProceedNextPhase: () => void;
   isLastPhase?: boolean;
@@ -14,10 +18,15 @@ export interface PhaseFeedbackCardProps {
 export default function PhaseFeedbackCard({
   phaseResult,
   currentPhase = 1,
+  caseId,
+  caseTitle,
   audioBlob = null,
   onProceedNextPhase,
   isLastPhase = false
 }: PhaseFeedbackCardProps) {
+  const openDebrief = useSocraticDebriefStore((state) => state.openDebrief);
+  const { trackSocraticDebriefOpened } = useLearningTelemetry();
+
   const audioUrl = useMemo(() => {
     return audioBlob ? URL.createObjectURL(audioBlob) : null;
   }, [audioBlob]);
@@ -40,6 +49,13 @@ export default function PhaseFeedbackCard({
     retroalimentacion_fase,
     datos_fase_siguiente
   } = phaseResult;
+
+  const handleOpenDebrief = (omisionesParam: string[] | string) => {
+    const targetCaseId = caseId || 'caso_clinico';
+    const primaryOmision = Array.isArray(omisionesParam) ? (omisionesParam[0] || '') : omisionesParam;
+    trackSocraticDebriefOpened(targetCaseId, primaryOmision);
+    openDebrief(targetCaseId, `${caseTitle || 'Caso Clínico'} (Fase ${currentPhase})`, omisionesParam);
+  };
 
   const scorePercentage = Math.round(score_fase * 10);
   const isApproved = score_fase >= 6.0;
@@ -120,11 +136,24 @@ export default function PhaseFeedbackCard({
         </div>
 
         {/* Omisiones */}
-        <div className="p-4 rounded-[18px] bg-amber-50/70 border border-amber-200/80 space-y-2">
-          <span className="text-xs font-semibold text-amber-800 flex items-center gap-1.5">
-            <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-            Omisiones a Mejorar ({omisiones.length})
-          </span>
+        <div className="p-4 rounded-[18px] bg-amber-50/70 border border-amber-200/80 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-200/60 pb-2">
+            <span className="text-xs font-semibold text-amber-800 flex items-center gap-1.5">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              Omisiones a Mejorar ({omisiones.length})
+            </span>
+            {omisiones.length > 0 && (
+              <button
+                type="button"
+                onClick={() => handleOpenDebrief(omisiones)}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-cyan-50/50 via-blue-50/40 to-indigo-50/50 hover:from-cyan-100/70 hover:via-blue-100/60 hover:to-indigo-100/70 text-slate-700 hover:text-[#0b57d0] border border-blue-200/60 hover:border-blue-300/90 shadow-2xs active:scale-95 transition-all cursor-pointer self-start sm:self-auto"
+                title="Iniciar debate socrático con el Tutor IA sobre las omisiones de esta fase"
+              >
+                <MessageSquare className="w-3.5 h-3.5 text-[#0b57d0]" />
+                <span>Debate Socrático</span>
+              </button>
+            )}
+          </div>
           {omisiones.length > 0 ? (
             <ul className="space-y-1.5 text-xs text-amber-950 leading-snug">
               {omisiones.map((o, i) => (

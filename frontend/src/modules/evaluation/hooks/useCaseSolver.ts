@@ -289,6 +289,8 @@ export function useCaseSolver(caseId?: string) {
       );
 
       const finalOutcome: EvaluationResult = {
+        case_id: caseId,
+        case_title: caso?.titulo || 'Caso Clínico Formativo',
         score: Math.round(avgScore * 10) / 10,
         score_max: 10,
         aciertos: allAciertos,
@@ -299,7 +301,7 @@ export function useCaseSolver(caseId?: string) {
 
       setResultado(finalOutcome);
     }
-  }, [currentPhase, totalPhases, phaseScores, phaseResults, setRespuesta]);
+  }, [currentPhase, totalPhases, phaseScores, phaseResults, setRespuesta, caseId, caso?.titulo]);
 
   // Reiniciar caso para reintentar
   const resetCase = useCallback(() => {

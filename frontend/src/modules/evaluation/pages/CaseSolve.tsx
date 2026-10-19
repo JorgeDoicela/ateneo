@@ -248,6 +248,8 @@ export default function CaseSolve() {
         <PhaseFeedbackCard
           phaseResult={currentPhaseResult}
           currentPhase={currentPhase}
+          caseId={caso?.id}
+          caseTitle={caso?.titulo}
           audioBlob={audioBlob}
           onProceedNextPhase={proceedToNextPhase}
           isLastPhase={currentPhase >= totalPhases}

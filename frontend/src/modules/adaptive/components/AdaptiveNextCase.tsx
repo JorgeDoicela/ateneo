@@ -35,7 +35,7 @@ export default function AdaptiveNextCase({ onSelectCase, onToggleGraph }: Adapti
 
   if (loading) {
     return (
-      <div className="relative w-full mb-8">
+      <div data-tour="adaptive-case" className="relative w-full mb-8">
         {/* Halo estático suave mientras carga */}
         <div 
           className="absolute -inset-1.5 bg-gradient-to-r from-cyan-400/10 via-blue-500/10 to-violet-500/10 rounded-[32px] blur-xl opacity-40 pointer-events-none" 
@@ -69,7 +69,7 @@ export default function AdaptiveNextCase({ onSelectCase, onToggleGraph }: Adapti
   const { case: clinicalCase, competencia_objetivo } = recommendation;
 
   return (
-    <div className="relative w-full mb-8 group animate-fadeIn">
+    <div data-tour="adaptive-case" className="relative w-full mb-8 group animate-fadeIn">
       {/* Halo de Iluminación Ambiental Líquido */}
       <div 
         className="absolute -inset-1 bg-[linear-gradient(90deg,rgba(6,182,212,0.25)_0%,rgba(37,99,235,0.2)_33%,rgba(124,58,237,0.25)_66%,rgba(6,182,212,0.25)_100%)] animate-liquid-wave rounded-[30px] blur-lg opacity-25 group-hover:opacity-60 transition-opacity duration-300 pointer-events-none" 

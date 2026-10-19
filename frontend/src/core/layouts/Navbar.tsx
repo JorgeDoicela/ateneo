@@ -85,6 +85,7 @@ export default function Navbar() {
               {user && isCatalogRoute && (
                 <button
                   type="button"
+                  data-tour="global-search"
                   onClick={() => setShowMobileSearch(true)}
                   title="Buscar casos clínicos"
                   className="md:hidden p-2 rounded-full text-[#444746] hover:text-[#1f1f1f] hover:bg-slate-100 transition-colors cursor-pointer"
@@ -101,6 +102,7 @@ export default function Navbar() {
                   {/* Enlace Dinámico Desempeño / Catálogo (Exclusivo de escritorio) */}
                   <Link
                     to={isAnalyticsView ? '/cases' : '/analytics'}
+                    data-tour="analytics-nav"
                     title={isAnalyticsView ? 'Volver al Catálogo de Casos' : 'Mi Desempeño y Tendencias Clínicas'}
                     className={`hidden md:flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 select-none ${
                       isAnalyticsView
@@ -122,11 +124,14 @@ export default function Navbar() {
                   </Link>
 
                   {/* Indicador de Carrera Formativa e Hitos */}
-                  <CareerBadgeButton />
+                  <div data-tour="career-nav" className="hidden md:block">
+                    <CareerBadgeButton />
+                  </div>
 
                   {/* Botón Unirse a Sala Colaborativa (Exclusivo de escritorio) */}
                   <button
                     type="button"
+                    data-tour="join-room-nav"
                     onClick={() => setShowJoinModal(true)}
                     title="Unirse a Sala de Ateneo"
                     className="hidden md:flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 bg-gradient-to-r from-cyan-50/50 via-blue-50/40 to-indigo-50/50 hover:from-cyan-100/70 hover:via-blue-100/60 hover:to-indigo-100/70 text-slate-700 hover:text-[#0b57d0] border border-blue-200/60 hover:border-blue-300/90 shadow-xs hover:shadow-sm cursor-pointer select-none"

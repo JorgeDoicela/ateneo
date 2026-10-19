@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { ShieldCheck, AlertCircle, ArrowRight, Loader2, UserCheck, Stethoscope, GraduationCap } from 'lucide-react';
+import { ShieldCheck, AlertCircle, ArrowRight, Loader2, Stethoscope, GraduationCap } from 'lucide-react';
 import useAuthStore from '../../../core/stores/useAuthStore';
 import authApi from '../api/authApi';
 import FloatingLabelInput from '../../../core/ui/FloatingLabelInput';

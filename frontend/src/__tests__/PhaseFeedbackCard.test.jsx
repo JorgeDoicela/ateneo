@@ -65,4 +65,38 @@ describe('Componente PhaseFeedbackCard (Resolución por Fases)', () => {
     expect(screen.getByText('Evolución a las 2 horas de ingreso.')).toBeInTheDocument();
     expect(screen.getByText(/Plaquetas: 85.000/i)).toBeInTheDocument();
   });
+
+  it('debe renderizar el botón de Debate Socrático cuando existen omisiones y abrir el debriefing al pulsar', async () => {
+    const { useSocraticDebriefStore } = await import('../modules/evaluation/store/useSocraticDebriefStore');
+    useSocraticDebriefStore.getState().closeDebrief();
+
+    render(
+      <PhaseFeedbackCard
+        phaseResult={mockPhaseResult}
+        currentPhase={1}
+        caseId="case_trombo_01"
+        caseTitle="Tromboembolismo Pulmonar"
+        onProceedNextPhase={() => {}}
+      />
+    );
+
+    const debateButton = screen.getByRole('button', { name: /Debate Socrático/i });
+    expect(debateButton).toBeInTheDocument();
+
+    fireEvent.click(debateButton);
+    const storeState = useSocraticDebriefStore.getState();
+    expect(storeState.isOpen).toBe(true);
+    expect(storeState.caseId).toBe('case_trombo_01');
+    expect(storeState.caseTitle).toBe('Tromboembolismo Pulmonar (Fase 1)');
+    expect(storeState.omisiones).toEqual(['No solicitó dímero D']);
+  });
+
+  it('no debe mostrar el botón de Debate Socrático si no hay omisiones en la fase', () => {
+    const cleanPhaseResult = {
+      ...mockPhaseResult,
+      omisiones: []
+    };
+    render(<PhaseFeedbackCard phaseResult={cleanPhaseResult} currentPhase={1} onProceedNextPhase={() => {}} />);
+    expect(screen.queryByRole('button', { name: /Debate Socrático/i })).not.toBeInTheDocument();
+  });
 });
