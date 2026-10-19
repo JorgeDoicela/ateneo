@@ -1692,8 +1692,41 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
   - **Validación:** 0 errores en `tsc --noEmit`, 5/5 pruebas unitarias en `StudentTourGuide.test.jsx`, 30/30 pruebas aprobadas en la suite integral de Vitest.
 
 * **Consolidación del Dossier Integral en Word para el Congreso CAISEB (2026-10-19):**
-  - **Decisión:** Siguiendo la instrucción explícita del usuario, se eliminaron los archivos `CAISEB.pptx`, `DOSSIER_PONENCIA_MAGISTRAL_CAISEB_40MIN.pdf` y sus scripts auxiliares. Toda la información del sistema Ateneo+ se unificó en un único documento maestro de Microsoft Word: `docs/8_ponencia_congreso_caiseb/ATENEO_DOSSIER_TECNICO_Y_PONENCIA_CAISEB.docx`.
+  - **Decisión:** Siguiendo la instrucción explícita del usuario, toda la información del sistema Ateneo+ se unificó en un documento maestro de Microsoft Word: `docs/8_ponencia_congreso_caiseb/ATENEO_DOSSIER_TECNICO_Y_PONENCIA_CAISEB.docx`.
   - **Aislamiento Estricto:** Confinado al 100% en `docs/8_ponencia_congreso_caiseb/` respetando `RULE.md` sin alterar código fuente del backend ni del frontend.
   - **Contenido del Documento (21 Secciones Completas, 2.56 MB):** Portada institucional con ambos autores con denominación equitativa de *Investigadores* (Tnlgo. Jorge Ismael Doicela Molina y Mgtr. Estefani Angélica Sánchez Morales), problemática de salud pública en Ecuador, Clean Architecture, seguridad y Gateway LLM, visor DICOM multicorte y frontend multimodal, pipeline MLOps RAG con fine-tuning en GPU A100 (MNRL), modelo psicométrico KST/BKT con ecuaciones bayesianas y ZDP de Vygotsky, tablas empíricas de benchmarks IR y OOD Wilcoxon, catálogo de 10 casos clínicos canónicos, cumplimiento ético LOPDP, guion minuto a minuto de 40 minutos para la ponencia magistral, banco extendido de 10 preguntas estratégicas del tribunal (Q&A con justificación de BGE-M3 vs generativo, LOPDP, BKT Slip y comparación frente a simuladores comerciales), fichas de apoyo rápido y cue cards para el atril con las Cifras de Oro memorizables, y protocolo formal de contingencia operativa ante imprevistos en vivo (Planes A, B y C).
   - **Compilación Automatizada:** Gestionado mediante `python-docx` a través de `docs/8_ponencia_congreso_caiseb/scripts/build_full_word_dossier.py`.
+
+* **Generación de la Presentación Oficial de Diapositivas para el Congreso (`CAISEB.pptx` - 2026-10-19):**
+  - **Solicitud del Usuario:** Preparar y llenar la presentación de pantalla oficial para proyectar durante la ponencia magistral en el Congreso CAISEB.
+  - **Normativa Oficial Cumplida (Lámina 3 CAISEB):**
+    1. Tipografía: Arial oficial estandarizada en títulos y bullets.
+    2. Límite de Diapositivas: Máximo 14 diapositivas según las bases del congreso. La presentación fue calibrada en **13 diapositivas exactas**.
+    3. Dimensiones Panorámicas: Formato nativo institucional de 20.0 x 11.25 pulgadas.
+    4. Paleta de Colores: Azul marino `#002060`, azul profesional `#0f4c81`, cyan de precisión `#0284c7` y tarjetas sobre fondo claro `#f8fafc`.
+    5. Cero Emojis y Tono Sobrio: Rigor científico y técnico senior innegociable.
+  - **Estructura de las 13 Diapositivas:**
+    - *Slide 1:* Portada institucional CAISEB con membrete original.
+    - *Slide 2:* Carátula oficial de la ponencia con título completo y autores (Tnlgo. Jorge Ismael Doicela Molina & Mgtr. Estefani Angélica Sánchez Morales).
+    - *Slide 3:* 1. INTRODUCCIÓN Y PROBLEMA CLÍNICO (Brecha formativa en internado rotativo, sobrecarga asistencial y costo prohibitivo de simulación física de $45,000 a $120,000 USD).
+    - *Slide 4:* 2. EL DESAFÍO: LLMs GENÉRICOS VS. RIGOR NORMATIVO (45.8% de alucinación en fármacos sin RAG vs. anclaje determinista y cita textual de GPC Ecuador en Ateneo+).
+    - *Slide 5:* 3. MÉTODO I: ARQUITECTURA TÉCNICA RAG GROUNDED (4 bloques: Ingesta/BGE-M3 1024d, Búsqueda Híbrida Milvus+BM25 con RRF, Reranker Cohere v3, y Generación Mistral-Large en Split-Screen PWA).
+    - *Slide 6:* 4. MÉTODO II: PSICOMETRÍA COGNITIVA (Knowledge Space Theory en DAG de 7 competencias, Bayesian Knowledge Tracing con $L_0=0.15, T=0.20, G=0.10, S=0.05$, ZDP y Figura 4 de curvas longitudinales incrustada).
+    - *Slide 7:* 5. ENTORNO DE SIMULACIÓN Y MULTIMODALIDAD (Split-Screen 50/50, visor de radiografías de tórax, dictado clínico por voz con Web Speech API, catálogo de 10 casos canónicos y captura real del sistema).
+    - *Slide 8:* 6. RESULTADOS I: BENCHMARKS TÉCNICOS Y FIDELIDAD (Tabla formal: BM25 vs. Denso vs. Ateneo+ Híbrido con Hit@1 91.5% [+369%], MRR@5 0.941 [+274%], alucinación <5% y Faithfulness 85.4%).
+    - *Slide 9:* 7. RESULTADOS II: EVALUACIÓN EXPERIMENTAL EN COHORTE (Estudio $N=25$ internos rotativos con ganancia de Hake $g=0.74$, $d>2.0$, Wilcoxon $W=365.0, p<0.001$, y gráfico boxplot incrustado).
+    - *Slide 10:* 8. ANALÍTICA INSTITUCIONAL Y SALUD PÚBLICA (Índice de Brecha Formativa - IBF, semáforo curricular, eficiencia económica <$0.05 USD vs. $1,200 USD físicos, cumplimiento LOPDP on-premise y gráfico IBF incrustado).
+    - *Slide 11:* 9. CONCLUSIONES Y TRABAJO FUTURO (Validación tecnológica y pedagógica, democratización del entrenamiento clínico, 50 casos en atención primaria, Nosology Adapters e integración HL7/FHIR).
+    - *Slide 12:* 10. DATOS DE LOS EXPOSITORES E INVESTIGADORES (Perfiles académicos y roles: Jorge Doicela Molina [Tecnología, MLOps, IA] & Estefani Sánchez Morales [Educación Médica, Validación Clínica]).
+    - *Slide 13:* CIERRE OFICIAL Y RONDA DE PREGUNTAS (Diseño de cierre CAISEB, apertura de sesión de defensa ante el tribunal).
+* **Adaptador Agnóstico Universal OpenAI-Compatible y Universalidad Temática (2026-10-19):**
+  - **Decisión Arquitectónica (Principio Open/Closed):** Para permitir que cualquier usuario o investigador conecte modelos de IA propios (entrenados desde cero o fine-tuneados como LLaMA-3-Med, BioMistral, Meditron, DeepSeek-R1) alojados en servidores vLLM, Ollama, llama.cpp o Hugging Face TGI, se desacopló el motor de inferencia en `backend/core/llm_gateway.py` y `backend/core/config.py` mediante el patrón Adapter.
+  - **Cero Regresiones e Inmutabilidad de Entorno:**
+    1. *Default Intacto:* Si no se especifican variables nuevas en `.env`, el sistema opera de forma idéntica con Google Gemini (`LLM_PROVIDER="gemini"`), sus circuit breakers (`CLOSED`, `OPEN`, `HALF_OPEN`) y la cascada `gemini-3.8-flash` $\to$ `gemini-3.7-flash` $\to$ `gemini-3.5-flash`.
+    2. *Conector Universal OpenAI-Compatible:* Al configurar `LLM_PROVIDER=openai_compatible`, el gateway despacha peticiones mediante `httpx` hacia `CUSTOM_LLM_BASE_URL` (`/v1/chat/completions`) con soporte para multimodalidad en Base64, esquemas JSON estructurados y streaming SSE.
+    3. *Universalidad de Dominio Clínico:* El pipeline RAG jerárquico (`BGE-M3` + `BM25` + `Cohere Rerank`) y las 7 competencias del modelo KST/BKT son agnósticos a la especialidad, permitiendo indexar guías y evaluar casos de cualquier área médica (pediatría, cardiología, oncología, cirugía, etc.) con cero cambios de código.
+    4. *Aislamiento de Infraestructura:* Cero modificaciones en Dockerfiles ni `docker-compose.yml`, preservando la estabilidad de los contenedores en producción.
+  - **Validación:** 4/4 pruebas unitarias aprobadas en `tests/test_openai_compatible_gateway.py`, 17/17 pruebas de regresión aprobadas al 100% en backend (KST, JWT, Auth, RAG Cache en 76.7s).
+  - **Sincronización de Documentación:** Documento Word oficial recompilado con éxito (`ATENEO_DOSSIER_TECNICO_Y_PONENCIA_CAISEB.docx`, 2.56 MB) y `DOSSIER_PONENCIA_MAGISTRAL_CAISEB_40MIN.md` sincronizado con las subsecciones 8 y 16.6.
+
 

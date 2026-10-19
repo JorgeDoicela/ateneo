@@ -107,3 +107,52 @@ Para garantizar la reproducibilidad y eliminar la deuda técnica por duplicidad:
 * **Raíz Única:** Todo el stack (`docker-compose.yml`, FastAPI en host o contenedor, Vite Frontend) lee de un único archivo [.env](.env).
 * **Validación Tipada con Pydantic:** [backend/core/config.py](backend/core/config.py) implementa `AppSettings`, validando tipos, rutas absolutas resueltas (`Path(__file__).resolve().parent`) y configuración de CORS antes de permitir peticiones HTTP.
 * **Orquestación en Docker:** [docker-compose.yml](docker-compose.yml) inyecta las variables con `env_file: - .env` e implementa `start_period: 30s` en el healthcheck del backend para acomodar la carga del modelo transformer `BAAI/bge-m3` (2.2 GB) sin marcar estados insalubres falsos.
+
+---
+
+## 6. Soporte Agnóstico Universal y Evaluadores Locales On-Premise (OpenAI-Compatible)
+
+Para garantizar la soberanía de datos hospitalarios (cumplimiento LOPDP) y permitir el uso de modelos médicos fine-tuneados propios sin dependencia de proveedores comerciales en la nube, el sistema implementa el **patrón Adapter** en `ResilientLLMGateway`:
+
+### 6.1 Parámetros de Entorno
+
+```dotenv
+# Proveedor activo: 'gemini' (predeterminado) o 'openai_compatible'
+LLM_PROVIDER=openai_compatible
+
+# Endpoint del servidor local de inferencia
+CUSTOM_LLM_BASE_URL=http://localhost:11434/v1
+
+# Identificador del modelo levantado localmente
+GEMINI_MODEL=llama3.1:8b
+
+# Parámetros opcionales
+CUSTOM_LLM_API_KEY=not-needed
+CUSTOM_LLM_TIMEOUT_SECONDS=60
+```
+
+### 6.2 Opciones de Despliegue Local para Evaluadores Propios
+
+1. **Ollama (Estaciones de Trabajo y Servidores Locales):**
+   ```bash
+   ollama pull llama3.1:8b
+   # Ollama expone automáticamente el endpoint OpenAI-Compatible en http://localhost:11434/v1
+   ```
+2. **vLLM (Servidores Hospitalarios con GPU NVIDIA Dedicada):**
+   ```bash
+   python -m vllm.entrypoints.openai.api_server \
+     --model ./mis_pesos_finetuneados_medicos \
+     --port 8000 \
+     --max-model-len 8192
+   # Expone la API en http://localhost:8000/v1
+   ```
+3. **llama.cpp / Servidores GGUF (Inferencia Cuantizada en CPU):**
+   ```bash
+   ./llama-server -m ./mi_modelo_medico_q4_k_m.gguf -c 8192 --port 8080
+   # Expone la API en http://localhost:8080/v1
+   ```
+
+### 6.3 Mecánica del Gateway y Contrato JSON
+* **Modo JSON Estricto:** El adaptador inyecta automáticamente `"response_format": {"type": "json_object"}` para forzar la emisión estructurada de `score`, `aciertos`, `omisiones`, `competencias_deficientes` y `cita_normativa`.
+* **Soporte Multimodal en Base64:** Si la simulación incluye radiografías o electrocardiogramas, las imágenes se transforman a Base64 estándar dentro del payload de mensajes de usuario.
+* **Streaming en Tiempo Real:** Compatible con Server-Sent Events (SSE) leyendo bloques `data: {"choices": [{"delta": {"content": ...}}]}` para debriefing socrático sin latencia.

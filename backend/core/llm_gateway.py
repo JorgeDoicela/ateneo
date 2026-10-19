@@ -1,7 +1,9 @@
 import time
 import json
+import base64
 from enum import Enum
 from typing import List, Tuple, Optional, Dict, Any
+import httpx
 from google import genai
 from google.genai import types
 from core.config import settings
@@ -189,7 +191,6 @@ class ResilientLLMGateway:
         self._opened_until.clear()
 
     def generate(
-
         self,
         prompt: str,
         imagenes_list: Optional[List[Tuple[bytes, str]]] = None,
@@ -198,14 +199,40 @@ class ResilientLLMGateway:
         temperature: float = 0.2
     ) -> LLMGenerationResult:
         """
-        Ejecuta inferencia resiliente atravesando la cascada de modelos configurados.
-        Si un modelo tiene el circuito abierto, se omite de forma instantánea sin generar latencia.
+        Ejecuta inferencia resiliente según el proveedor configurado en settings.llm_provider.
+        Por defecto utiliza Google Gemini con Circuit Breaker.
+        Si se configura 'openai_compatible', despacha hacia cualquier servidor local/fine-tuneado (vLLM, Ollama, TGI).
         """
+        provider = getattr(settings, "llm_provider", "gemini").lower()
+        if provider in ("openai_compatible", "custom_local", "vllm", "ollama", "custom"):
+            return self._generate_openai_compatible(
+                prompt=prompt,
+                imagenes_list=imagenes_list,
+                system_instruction=system_instruction,
+                response_mime_type=response_mime_type,
+                temperature=temperature
+            )
+        return self._generate_gemini(
+            prompt=prompt,
+            imagenes_list=imagenes_list,
+            system_instruction=system_instruction,
+            response_mime_type=response_mime_type,
+            temperature=temperature
+        )
+
+    def _generate_gemini(
+        self,
+        prompt: str,
+        imagenes_list: Optional[List[Tuple[bytes, str]]] = None,
+        system_instruction: Optional[str] = None,
+        response_mime_type: Optional[str] = None,
+        temperature: float = 0.2
+    ) -> LLMGenerationResult:
+        """Inferencia resiliente a través de Google Gemini con Circuit Breaker."""
         client = self._get_client()
         models_cascade = settings.get_models_cascade()
         attempts: List[Dict[str, Any]] = []
 
-        # Preparar contenido
         if imagenes_list:
             image_parts = [
                 types.Part.from_bytes(data=img_bytes, mime_type=mime_type)
@@ -223,7 +250,6 @@ class ResilientLLMGateway:
 
         gen_config = types.GenerateContentConfig(**config_kwargs)
 
-        # Evaluar candidatos disponibles
         primary_model = models_cascade[0]
         for idx, model_name in enumerate(models_cascade):
             if not self._is_model_available(model_name):
@@ -248,7 +274,6 @@ class ResilientLLMGateway:
                 if fallback_occurred:
                     logger.info(f"Fallback exitoso: Petición resuelta por modelo de respaldo '{model_name}'.", extra={"action": "llm_fallback_success", "model": model_name, "primary_model": primary_model})
 
-
                 attempts.append({"model": model_name, "status": "SUCCESS"})
                 return LLMGenerationResult(
                     text=text,
@@ -263,10 +288,101 @@ class ResilientLLMGateway:
                 attempts.append({"model": model_name, "status": "FAILED", "error": str(err)})
                 self._record_failure(model_name, err)
 
-        # Si todos los modelos disponibles en la cadena fallaron
         raise AllModelsExhaustedException(
             f"Se agotaron todos los modelos configurados en la cadena de fallback ({models_cascade}). "
             f"Historial de intentos: {attempts}"
+        )
+
+    def _generate_openai_compatible(
+        self,
+        prompt: str,
+        imagenes_list: Optional[List[Tuple[bytes, str]]] = None,
+        system_instruction: Optional[str] = None,
+        response_mime_type: Optional[str] = None,
+        temperature: float = 0.2
+    ) -> LLMGenerationResult:
+        """Inferencia agnóstica para modelos fine-tuneados o locales mediante protocolo OpenAI-Compatible."""
+        base_url = getattr(settings, "custom_llm_base_url", "http://localhost:11434/v1").rstrip("/")
+        url = f"{base_url}/chat/completions"
+        api_key = getattr(settings, "custom_llm_api_key", "not-needed")
+        timeout_sec = float(getattr(settings, "custom_llm_timeout_seconds", 60))
+
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
+        models_cascade = settings.get_models_cascade()
+        attempts: List[Dict[str, Any]] = []
+        primary_model = models_cascade[0]
+
+        messages: List[Dict[str, Any]] = []
+        if system_instruction:
+            messages.append({"role": "system", "content": system_instruction})
+
+        if imagenes_list:
+            content_parts: List[Dict[str, Any]] = [{"type": "text", "text": prompt}]
+            for img_bytes, mime_type in imagenes_list:
+                b64 = base64.b64encode(img_bytes).decode("utf-8")
+                content_parts.append({
+                    "type": "image_url",
+                    "image_url": {"url": f"data:{mime_type};base64,{b64}"}
+                })
+            messages.append({"role": "user", "content": content_parts})
+        else:
+            messages.append({"role": "user", "content": prompt})
+
+        for idx, model_name in enumerate(models_cascade):
+            if not self._is_model_available(model_name):
+                attempts.append({
+                    "model": model_name,
+                    "status": "SKIPPED_CIRCUIT_OPEN",
+                    "reason": f"En cuarentena por fallo previo hasta timestamp {self._opened_until.get(model_name)}"
+                })
+                continue
+
+            payload: Dict[str, Any] = {
+                "model": model_name,
+                "messages": messages,
+                "temperature": temperature
+            }
+            if response_mime_type == "application/json":
+                payload["response_format"] = {"type": "json_object"}
+
+            try:
+                logger.info(
+                    f"Invocando modelo OpenAI-Compatible '{model_name}' en {url} (Intento {idx + 1}/{len(models_cascade)})...",
+                    extra={"action": "openai_compatible_invoke", "model": model_name, "url": url}
+                )
+                with httpx.Client(timeout=timeout_sec) as client:
+                    resp = client.post(url, json=payload, headers=headers)
+                    if resp.status_code in (401, 403):
+                        raise FatalLLMException(f"Error de autenticación fatal en endpoint {url}: HTTP {resp.status_code}")
+                    resp.raise_for_status()
+                    data = resp.json()
+
+                    text = ""
+                    choices = data.get("choices", [])
+                    if choices:
+                        msg = choices[0].get("message", {})
+                        text = msg.get("content", "") or ""
+
+                self._record_success(model_name)
+                fallback_occurred = (model_name != primary_model)
+                attempts.append({"model": model_name, "status": "SUCCESS"})
+                return LLMGenerationResult(
+                    text=text,
+                    model_used=model_name,
+                    fallback_occurred=fallback_occurred,
+                    attempts=attempts
+                )
+            except FatalLLMException:
+                raise
+            except Exception as err:
+                attempts.append({"model": model_name, "status": "FAILED", "error": str(err)})
+                self._record_failure(model_name, err)
+
+        raise AllModelsExhaustedException(
+            f"Se agotaron todos los modelos en endpoint OpenAI-Compatible ({models_cascade}). Historial: {attempts}"
         )
 
     def generate_stream(
@@ -275,10 +391,27 @@ class ResilientLLMGateway:
         system_instruction: Optional[str] = None,
         temperature: float = 0.2
     ):
-        """
-        Transmite progresivamente tokens en streaming atravesando la cascada de modelos con Circuit Breaker.
-        Retorna un generador que emite fragmentos de texto en tiempo real para Server-Sent Events (SSE).
-        """
+        """Transmite tokens en streaming según el proveedor configurado."""
+        provider = getattr(settings, "llm_provider", "gemini").lower()
+        if provider in ("openai_compatible", "custom_local", "vllm", "ollama", "custom"):
+            return self._generate_openai_compatible_stream(
+                prompt=prompt,
+                system_instruction=system_instruction,
+                temperature=temperature
+            )
+        return self._generate_gemini_stream(
+            prompt=prompt,
+            system_instruction=system_instruction,
+            temperature=temperature
+        )
+
+    def _generate_gemini_stream(
+        self,
+        prompt: str,
+        system_instruction: Optional[str] = None,
+        temperature: float = 0.2
+    ):
+        """Streaming de tokens nativo a través de Google Gemini."""
         client = self._get_client()
         models_cascade = settings.get_models_cascade()
         config_kwargs: Dict[str, Any] = {"temperature": temperature}
@@ -293,7 +426,6 @@ class ResilientLLMGateway:
             try:
                 logger.info(f"Invocando stream con '{model_name}' (Intento {idx + 1}/{len(models_cascade)})...", extra={"action": "llm_stream_attempt", "model": model_name, "attempt": idx + 1})
                 response_stream = client.models.generate_content_stream(
-
                     model=model_name,
                     contents=prompt,
                     config=gen_config
@@ -317,6 +449,75 @@ class ResilientLLMGateway:
                 self._record_failure(model_name, err)
 
         raise AllModelsExhaustedException("Todos los modelos de la cascada fallaron al iniciar streaming.")
+
+    def _generate_openai_compatible_stream(
+        self,
+        prompt: str,
+        system_instruction: Optional[str] = None,
+        temperature: float = 0.2
+    ):
+        """Streaming de tokens estándar SSE para modelos OpenAI-Compatible (vLLM, Ollama, etc.)."""
+        base_url = getattr(settings, "custom_llm_base_url", "http://localhost:11434/v1").rstrip("/")
+        url = f"{base_url}/chat/completions"
+        api_key = getattr(settings, "custom_llm_api_key", "not-needed")
+        timeout_sec = float(getattr(settings, "custom_llm_timeout_seconds", 60))
+
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
+        models_cascade = settings.get_models_cascade()
+        messages: List[Dict[str, Any]] = []
+        if system_instruction:
+            messages.append({"role": "system", "content": system_instruction})
+        messages.append({"role": "user", "content": prompt})
+
+        for idx, model_name in enumerate(models_cascade):
+            if not self._is_model_available(model_name):
+                continue
+
+            payload = {
+                "model": model_name,
+                "messages": messages,
+                "temperature": temperature,
+                "stream": True
+            }
+
+            try:
+                def _stream_iterator():
+                    with httpx.Client(timeout=timeout_sec) as client:
+                        with client.stream("POST", url, json=payload, headers=headers) as resp:
+                            if resp.status_code in (401, 403):
+                                raise FatalLLMException(f"Error de autenticación fatal en endpoint {url}: HTTP {resp.status_code}")
+                            resp.raise_for_status()
+                            for line in resp.iter_lines():
+                                if not line:
+                                    continue
+                                line_str = line.strip()
+                                if line_str.startswith("data:"):
+                                    line_data = line_str[5:].strip()
+                                    if line_data == "[DONE]":
+                                        break
+                                    try:
+                                        chunk_obj = json.loads(line_data)
+                                        choices = chunk_obj.get("choices", [])
+                                        if choices:
+                                            delta = choices[0].get("delta", {})
+                                            token = delta.get("content")
+                                            if token:
+                                                yield token
+                                    except Exception:
+                                        pass
+                    self._record_success(model_name)
+
+                return _stream_iterator()
+
+            except FatalLLMException:
+                raise
+            except Exception as err:
+                self._record_failure(model_name, err)
+
+        raise AllModelsExhaustedException("Todos los modelos de la cascada fallaron al iniciar streaming OpenAI-Compatible.")
 
 
 # Singleton del Gateway para reutilización de estado del Circuit Breaker en todo el ciclo de vida del backend

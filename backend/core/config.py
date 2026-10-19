@@ -39,6 +39,20 @@ class AppSettings(BaseModel):
         default_factory=lambda: int(os.getenv("GEMINI_CIRCUIT_COOLDOWN_SECONDS", "300"))
     )
 
+    # Proveedor de Inferencia LLM Agnóstico (gemini | openai_compatible)
+    llm_provider: str = Field(
+        default_factory=lambda: os.getenv("LLM_PROVIDER", "gemini").lower()
+    )
+    custom_llm_base_url: str = Field(
+        default_factory=lambda: os.getenv("CUSTOM_LLM_BASE_URL", "http://localhost:11434/v1")
+    )
+    custom_llm_api_key: str = Field(
+        default_factory=lambda: os.getenv("CUSTOM_LLM_API_KEY", "not-needed")
+    )
+    custom_llm_timeout_seconds: int = Field(
+        default_factory=lambda: int(os.getenv("CUSTOM_LLM_TIMEOUT_SECONDS", "60"))
+    )
+
     # Feature Flags Funcionales (Release v1.0.0)
     enable_student_multimodal_uploads: bool = Field(
         default_factory=lambda: os.getenv("ENABLE_STUDENT_MULTIMODAL_UPLOADS", "false").lower() in ("true", "1", "yes")
@@ -161,3 +175,7 @@ EMBEDDING_MODEL_NAME = os.getenv(
 JWT_SECRET_KEY = settings.jwt_secret_key
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
 ALLOWED_ORIGINS = settings.allowed_origins_raw
+LLM_PROVIDER = settings.llm_provider
+CUSTOM_LLM_BASE_URL = settings.custom_llm_base_url
+CUSTOM_LLM_API_KEY = settings.custom_llm_api_key
+CUSTOM_LLM_TIMEOUT_SECONDS = settings.custom_llm_timeout_seconds

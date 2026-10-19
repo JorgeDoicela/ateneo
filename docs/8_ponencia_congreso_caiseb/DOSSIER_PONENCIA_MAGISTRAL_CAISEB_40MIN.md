@@ -71,7 +71,8 @@ Ateneo+ no es un prototipo aislado; es una plataforma de ingeniería de software
    - Soporte offline con persistencia en IndexedDB mediante patrón Outbox y sincronización en segundo plano al recuperar conectividad hospitalaria.
 2. **Backend Transaccional (FastAPI + SQLAlchemy + Unit of Work):**
    - Transaccionalidad atómica: las evaluaciones, el cálculo psicométrico de dominio y los registros de telemetría ocurren dentro de un `SqlAlchemyUnitOfWork`. Si una etapa falla, se produce rollback total.
-   - Pasarela LLM Resiliente (`ResilientLLMGateway`): Disyuntores automáticos (Circuit Breakers) con estados `CLOSED`, `OPEN`, `HALF_OPEN` y fallback determinístico (`gemini-3.8-flash` $\to$ `gemini-3.7-flash` $\to$ `gemini-3.5-flash`).
+   - Pasarela LLM Resiliente (`ResilientLLMGateway`): Disyuntores automáticos (Circuit Breakers) con estados `CLOSED`, `OPEN`, `HALF_OPEN`. Opera por defecto con la jerarquía Google Gemini (`gemini-3.8-flash` $\to$ `gemini-3.7-flash` $\to$ `gemini-3.5-flash`), y mediante el adaptador universal desacoplado (`LLM_PROVIDER=openai_compatible`), admite cualquier modelo médico fine-tuneado o local (LLaMA-3, Meditron, BioMistral, DeepSeek) desplegado sobre vLLM, Ollama o TGI.
+   - Universalidad de Dominio: El RAG jerárquico y las 7 competencias KST/BKT admiten cualquier especialidad médica (pediatría, cardiología, oncología, cirugía, etc.) con cero cambios de código.
    - Rate Limiter Token Bucket para protección contra sobrecargas y módulo `PromptSecurityGuard` para neutralizar ataques de jailbreak o prompt injection clínico.
 3. **Colaboración y Debriefing Sincrónico:**
    - Salas AteneoRoom mediante WebSockets nativos para ateneos clínicos hospitalarios entre docentes y residentes.
@@ -263,6 +264,10 @@ Ateneo+ trasciende el concepto de simulador: establece un nuevo paradigma de ana
 ### P10: ¿Cuál es la ventaja competitiva de Ateneo+ frente a simuladores comerciales de alto costo (Body Interact, SimMan)?
 * **Respuesta Estratégica y Económica:**  
   *Los simuladores comerciales extranjeros presentan tres barreras insalvables para las universidades ecuatorianas: 1) Costos prohibitivos de adquisición y licencias anuales (oscilando entre $40,000 y $120,000 USD por centro), lo que restringe su uso a pocos estudiantes de élite; 2) Desconexión epidemiológica y normativa, pues simulan patologías y algoritmos de la FDA/NHS incompatibles con el Cuadro Nacional de Medicamentos Básicos (CNMB) del Ecuador; y 3) Falta de análisis socrático en texto libre, limitándose a árboles de selección múltiple prefijados. Ateneo+ ofrece evaluación multimodal en texto y voz libre con costo de cómputo inferior a $0.02 USD por sesión, haciéndolo 100% democratizable y adaptado a la realidad sanitaria nacional.*
+
+### P11: Si una facultad u hospital prohíbe el uso de nubes externas por política institucional de privacidad, ¿cómo se ejecuta el evaluador de IA localmente?
+* **Respuesta de Soberanía e Infraestructura:**  
+  *Ateneo+ no depende de forma cautiva de Google ni de ninguna nube extranjera. El sistema integra el patrón Adapter desacoplado en ResilientLLMGateway: basta con configurar `LLM_PROVIDER=openai_compatible` y `CUSTOM_LLM_BASE_URL` en el archivo `.env` para conectar cualquier modelo evaluador médico de código abierto (LLaMA-3.1-8B, BioMistral, Meditron o modelos propios fine-tuneados) alojado en servidores locales mediante Ollama, vLLM o llama.cpp. El evaluador opera con inyección estricta de formato JSON (score, aciertos, omisiones, cita de GPC) y serialización multimodal de radiografías en Base64. De esta manera, el 100% de la inferencia, los embeddings vectoriales BGE-M3 y la base de datos se ejecutan dentro de la red privada del hospital, garantizando soberanía técnica y cumplimiento estricto de la LOPDP.*
 
 ---
 

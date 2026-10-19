@@ -564,10 +564,23 @@ def main():
     
     add_bullet_item(doc, "Backend Monolito Modular Asincrono: FastAPI en Python 3.11 con inyeccion formal de dependencias Depends() y estandarizacion de errores bajo RFC 7807 (Problem Details for HTTP APIs).", bold_prefix="Core Backend: ")
     add_bullet_item(doc, "Coordinacion Transaccional Unit of Work: Context manager SqlAlchemyUnitOfWork que asegura atomicidad ACID estricta: si la evaluacion RAG, el calculo psicometrico BKT o el registro analitico fallan, se dispara un rollback completo e inmediato.", bold_prefix="Transaccionalidad: ")
-    add_bullet_item(doc, "ResilientLLMGateway con Circuit Breaker Tripartito: Disyuntores de estado CLOSED, OPEN y HALF_OPEN. Ante saturacion de cuota (HTTP 429) o latencia anomala en Google Gemini 3.8 Flash, conmuta sin latencia fantasma a Gemini 3.7 Flash, Gemini 3.5 Flash o un fallback determinista.", bold_prefix="Gateway de IA: ")
+    add_bullet_item(doc, "ResilientLLMGateway con Circuit Breaker y Adaptador Universal OpenAI-Compatible: Disyuntores de estado CLOSED, OPEN y HALF_OPEN. En modo por defecto gestiona la cascada de Google Gemini (3.8 Flash, 3.7 Flash, 3.5 Flash) con zero-latency fallback ante saturación de cuota (HTTP 429). Gracias al desacoplamiento desacoplado en AppSettings (LLM_PROVIDER=openai_compatible), admite cualquier modelo de código abierto o fine-tuneado por la comunidad médica (LLaMA-3-Med, BioMistral, Meditron, DeepSeek-R1) alojado en servidores locales o remotos (vLLM, Ollama, TGI, llama.cpp), soportando multimodalidad en base64 y streaming SSE sin alterar la lógica de negocio.", bold_prefix="Gateway de IA Agnóstico: ")
     add_bullet_item(doc, "Blindaje contra Prompt Injection (PromptSecurityGuard): Pipeline de sanitizacion previa y deteccion heuristica con 11 vectores de ataque neutralizados al 100% (cero falsos positivos en razonamientos medicos legitimos) con Rate Limiting Token Bucket.", bold_prefix="Ciberseguridad en Salud: ")
     add_bullet_item(doc, "Persistencia Hibrida SQLite WAL y PostgreSQL: SQLite 3 configurado con PRAGMA journal_mode=WAL y PRAGMA synchronous=NORMAL para alta concurrencia de lectura/escritura, con conmutacion automatica a clusters PostgreSQL empresariales mediante variable DATABASE_URL.", bold_prefix="Base de Datos: ")
     add_bullet_item(doc, "Modo Offline Hospitalario (IndexedDB + Outbox): El interno puede resolver casos en zonas sin conectividad (consultorios rurales o subsuelos de hospitales); la base de datos cliente almacena las resoluciones en cola y sincroniza con el servidor al detectar conexion.", bold_prefix="Resiliencia Offline PWA: ")
+
+    add_heading_2(doc, "8.2 Guía de Despliegue de Evaluadores Locales On-Premise (Ollama, vLLM y GGUF)")
+    add_body_paragraph(
+        doc,
+        "Para hospitales universitarios, comités de bioética o instituciones que exigen soberanía de datos estricta bajo la LOPDP sin salida a nubes comerciales, "
+        "Ateneo+ permite operar con cualquier modelo de lenguaje médico propio (LLaMA-3.1-8B, BioMistral-7B, Meditron o checkpoints fine-tuneados) ejecutándose de forma 100% local. "
+        "El backend se desacopla a través del adaptador OpenAI-Compatible sin requerir recompilación de código:",
+        bold_prefix="Soberanía Tecnológica On-Premise: "
+    )
+    add_bullet_item(doc, "Variables de Configuración (.env): Definir LLM_PROVIDER=openai_compatible, CUSTOM_LLM_BASE_URL=http://localhost:11434/v1 (o puerto 8000 en vLLM) y GEMINI_MODEL con el nombre del modelo local.", bold_prefix="1. Configuración Plug-and-Play: ")
+    add_bullet_item(doc, "Motores Soportados: Ollama (ollama run llama3.1:8b para laptops y servidores estándar), vLLM (python -m vllm.entrypoints.openai.api_server para clusters GPU de alta velocidad) y llama.cpp (llama-server para inferencia cuantizada en CPU).", bold_prefix="2. Servidores de Inferencia: ")
+    add_bullet_item(doc, "Garantía de Esquema JSON: El adaptador inyecta 'response_format': {'type': 'json_object'} para asegurar que el modelo local emita el contrato estricto de EvaluationResult (score, aciertos, omisiones, competencias deficientes y cita de GPC).", bold_prefix="3. Rigor Estructurado: ")
+    add_bullet_item(doc, "Multimodalidad en Base64: Las radiografías y trazos de ECG adjuntos se serializan automáticamente en Base64 estándar dentro del payload de mensajes para modelos VLM locales.", bold_prefix="4. Soporte Multimodal: ")
 
     # =========================================================================
     # SECCION 9: EXPERIENCIA CLINICA MULTIMODAL Y MÓDULOS DEL SISTEMA
@@ -1015,6 +1028,18 @@ def main():
         bold_prefix="Formación Médica Continua: "
     )
 
+    add_heading_2(doc, "16.6 Universalidad Tematica y Soporte de Modelos Propios Fine-Tuneados (OpenAI-Compatible)")
+    add_body_paragraph(
+        doc,
+        "La arquitectura del sistema garantiza total agnosticisimo tanto en el dominio clinico como en el motor de inferencia de IA. "
+        "En el dominio medico, el pipeline RAG y el modelo psicometrico KST/BKT evaluan competencias clinicas universales (anamnesis, signos vitales, paraclínicos, diagnostico, prescripcion y referencia), "
+        "pudiendo indexar guias y casos de cualquier especialidad (oncologia, pediatria, ginecologia, nefrologia o salud mental) sin alterar el codigo fuente. "
+        "En la capa de IA, mediante el patron Adapter implementado en ResilientLLMGateway, Ateneo+ admite de forma plug-and-play cualquier modelo de lenguaje "
+        "entrenado desde cero o fine-tuneado por investigadores (LLaMA-3, Meditron, BioMistral, DeepSeek) expuesto mediante API estandar OpenAI-Compatible (vLLM, Ollama o TGI), "
+        "garantizando soberania tecnologica plena e independencia absoluta de proveedores de nube comerciales.",
+        bold_prefix="Agnosticismo de Dominio e Inferencia: "
+    )
+
     # =========================================================================
     # SECCION 17: GUION ESTRATEGICO Y CRONOGRAMA DE 40 MINUTOS
     # =========================================================================
@@ -1096,7 +1121,10 @@ def main():
          "El modelo BKT modela probabilisticamente este fenomeno mediante el parametro de descuido o Slip (S), calibrado empiricamente entre 0.08 y 0.12 para competencias complejas. La regla de actualizacion bayesiana posterior amortigua el impacto de un fallo aislado: si un alumno con alta probabilidad de dominio acumulada (P(L) = 0.92) comete un error, su probabilidad no cae a cero, sino que desciende suavemente a un rango intermedio (~0.72). Si en el siguiente caso responde correctamente, la evidencia confirma su maestria previa y restaura su nivel. Ademas, el sistema admite retroalimentacion en debriefing socratico para refutar y justificar su razonamiento."),
 
         ("P10: ¿Cual es la ventaja competitiva de Ateneo+ frente a simuladores comerciales de alto costo (Body Interact, SimMan)?",
-         "Los simuladores comerciales extranjeros presentan tres barreras insalvables para las universidades ecuatorianas: 1) Costos prohibitivos de adquisicion y licencias anuales (oscilando entre $40,000 y $120,000 USD por centro), lo que restringe su uso a pocos estudiantes de elite; 2) Desconexion epidemiologica y normativa, pues simulan patologias y algoritmos de la FDA/NHS incompatibles con el Cuadro Nacional de Medicamentos Basicos (CNMB) del Ecuador; y 3) Falta de analisis socrático en texto libre, limitandose a arboles de seleccion multiple prefijados. Ateneo+ ofrece evaluacion multimodal en texto y voz libre con costo de computo inferior a $0.02 USD por sesion, haciendolo 100% democratizable y adaptado a la realidad sanitaria nacional.")
+         "Los simuladores comerciales extranjeros presentan tres barreras insalvables para las universidades ecuatorianas: 1) Costos prohibitivos de adquisicion y licencias anuales (oscilando entre $40,000 y $120,000 USD por centro), lo que restringe su uso a pocos estudiantes de elite; 2) Desconexion epidemiologica y normativa, pues simulan patologias y algoritmos de la FDA/NHS incompatibles con el Cuadro Nacional de Medicamentos Basicos (CNMB) del Ecuador; y 3) Falta de analisis socrático en texto libre, limitandose a arboles de seleccion multiple prefijados. Ateneo+ ofrece evaluacion multimodal en texto y voz libre con costo de computo inferior a $0.02 USD por sesion, haciendolo 100% democratizable y adaptado a la realidad sanitaria nacional."),
+
+        ("P11: Si una facultad u hospital prohíbe el uso de nubes externas por política institucional de privacidad, ¿cómo se ejecuta el evaluador de IA localmente?",
+         "Ateneo+ no depende de forma cautiva de Google ni de ninguna nube extranjera. El sistema integra el patrón Adapter desacoplado en ResilientLLMGateway: basta con configurar LLM_PROVIDER=openai_compatible y CUSTOM_LLM_BASE_URL en el archivo .env para conectar cualquier modelo evaluador médico de código abierto (LLaMA-3.1-8B, BioMistral, Meditron o modelos propios fine-tuneados) alojado en servidores locales mediante Ollama, vLLM o llama.cpp. El evaluador opera con inyección estricta de formato JSON (score, aciertos, omisiones, cita de GPC) y serialización multimodal de radiografías en Base64. De esta manera, el 100% de la inferencia, los embeddings vectoriales BGE-M3 y la base de datos se ejecutan dentro de la red privada del hospital, garantizando soberanía técnica y cumplimiento estricto de la LOPDP.")
     ]
     
     for q_tit, q_resp in preguntas:
