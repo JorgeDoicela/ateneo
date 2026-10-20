@@ -4,9 +4,14 @@ import { Mic, Square, Play, Pause, Trash2, AlertCircle } from 'lucide-react';
 interface ClinicalVoiceRecorderProps {
   onAudioChange: (blob: Blob | null) => void;
   disabled?: boolean;
+  onRecordingStateChange?: (isRecording: boolean) => void;
 }
 
-export default function ClinicalVoiceRecorder({ onAudioChange, disabled = false }: ClinicalVoiceRecorderProps) {
+export default function ClinicalVoiceRecorder({
+  onAudioChange,
+  disabled = false,
+  onRecordingStateChange,
+}: ClinicalVoiceRecorderProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -16,10 +21,15 @@ export default function ClinicalVoiceRecorder({ onAudioChange, disabled = false 
   const [permissionError, setPermissionError] = useState<string | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  const timerIntervalRef = useRef<number | null>(null);
+  const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
   const recordedDurationRef = useRef<number>(0);
+
+  useEffect(() => {
+    onRecordingStateChange?.(isRecording);
+  }, [isRecording, onRecordingStateChange]);
 
   // Formato mm:ss con validación defensiva contra Infinity y NaN (bug nativo de WebM en navegadores)
   const formatTime = (seconds: number) => {
@@ -31,10 +41,53 @@ export default function ClinicalVoiceRecorder({ onAudioChange, disabled = false 
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  /**
+   * Libera activamente las pistas del micrófono para no bloquear el hardware
+   */
+  const releaseStream = useCallback(() => {
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((track) => {
+        try {
+          track.stop();
+        } catch {
+          // Ignorar si ya estaba cerrado
+        }
+      });
+      mediaStreamRef.current = null;
+    }
+  }, []);
+
+  const stopRecording = useCallback(() => {
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch (err) {
+        console.warn('Error al detener MediaRecorder:', err);
+      }
+    }
+
+    const finalDur = Math.max(1, recordedDurationRef.current);
+    setAudioDuration(finalDur);
+    setIsRecording(false);
+  }, []);
+
   const startRecording = async () => {
     setPermissionError(null);
     try {
+      // Liberar cualquier stream previo antes de solicitar uno nuevo
+      releaseStream();
+
+      // Solicitar acceso al micrófono
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      mediaStreamRef.current = stream;
+
+      // Detectar formato compatible de mayor fidelidad
       const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
         ? 'audio/webm;codecs=opus'
         : MediaRecorder.isTypeSupported('audio/webm')
@@ -54,55 +107,84 @@ export default function ClinicalVoiceRecorder({ onAudioChange, disabled = false 
         }
       };
 
+      recorder.onerror = (event: Event) => {
+        console.error('Error en MediaRecorder:', event);
+        setPermissionError('Ocurrió un error en la captura de audio.');
+        stopRecording();
+      };
+
       recorder.onstop = () => {
-        const type = recorder.mimeType || 'audio/webm';
+        const type = recorder.mimeType || mimeType || 'audio/webm';
         const blob = new Blob(audioChunksRef.current, { type });
+
+        // Prevenir envío de audios vacíos (0 bytes de audio capturados)
+        if (!blob || blob.size === 0) {
+          releaseStream();
+          setPermissionError('Nota de voz demasiado breve o sin audio detectado.');
+          return;
+        }
+
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
         onAudioChange(blob);
 
-        // Detener pistas del microfono
-        stream.getTracks().forEach((track) => track.stop());
+        // Liberar pistas del micrófono una vez finalizado el guardado
+        releaseStream();
       };
 
-      recorder.start(250);
+      // Escuchar si el usuario desconecta el micro para no congelar la UI (compatible con getAudioTracks y getTracks)
+      const tracks = typeof stream.getAudioTracks === 'function'
+        ? stream.getAudioTracks()
+        : typeof stream.getTracks === 'function'
+        ? stream.getTracks()
+        : [];
+
+      tracks.forEach((track) => {
+        if (track && typeof track.addEventListener === 'function') {
+          track.addEventListener('ended', () => {
+            if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+              stopRecording();
+            }
+          });
+        }
+      });
+
+      // Intervalo de chunks a 1000ms para estabilidad óptima de memoria
+      recorder.start(1000);
       setIsRecording(true);
       setRecordingTime(0);
 
-      timerIntervalRef.current = window.setInterval(() => {
+      timerIntervalRef.current = setInterval(() => {
         setRecordingTime((prev) => {
           const nextVal = prev + 1;
           recordedDurationRef.current = nextVal;
-          if (nextVal >= 300) {
-            // Limite de 5 minutos
+          // Límite de 10 minutos (600s)
+          if (nextVal >= 600) {
             stopRecording();
-            return 300;
+            return 600;
           }
           return nextVal;
         });
       }, 1000);
     } catch (err: unknown) {
       console.error('Error al acceder al micrófono:', err);
-      setPermissionError('No se pudo acceder al micrófono.');
+      setPermissionError('No se pudo acceder al micrófono. Verifica los permisos.');
+      releaseStream();
     }
   };
-
-  const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
-    }
-    if (timerIntervalRef.current) {
-      clearInterval(timerIntervalRef.current);
-      timerIntervalRef.current = null;
-    }
-    const finalDur = Math.max(1, recordedDurationRef.current || recordingTime);
-    setAudioDuration(finalDur);
-    setIsRecording(false);
-  }, [recordingTime]);
 
   const discardAudio = () => {
     if (isRecording) {
       stopRecording();
+    }
+    releaseStream();
+    if (audioElementRef.current) {
+      try {
+        audioElementRef.current.pause();
+        audioElementRef.current.currentTime = 0;
+      } catch {
+        // Ignorar si el reproductor ya no estaba activo
+      }
     }
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
@@ -132,11 +214,12 @@ export default function ClinicalVoiceRecorder({ onAudioChange, disabled = false 
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current);
       }
+      releaseStream();
       if (audioUrl) {
         URL.revokeObjectURL(audioUrl);
       }
     };
-  }, [audioUrl]);
+  }, [audioUrl, releaseStream]);
 
   return (
     <div className="inline-flex items-center">
@@ -173,7 +256,7 @@ export default function ClinicalVoiceRecorder({ onAudioChange, disabled = false 
         </span>
       )}
 
-      {/* Estado 1: Todo el div funciona como botón interactivo para grabar nota de voz */}
+      {/* Estado 1: Botón interactivo para grabar nota de voz */}
       {!isRecording && !audioUrl && (
         <button
           type="button"

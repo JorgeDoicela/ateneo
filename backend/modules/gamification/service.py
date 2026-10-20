@@ -1,7 +1,7 @@
 import logging
 from typing import List, Dict, Any, Optional, Tuple
 from sqlalchemy.orm import Session
-from sqlalchemy import select, func, distinct
+from sqlalchemy import select, func, distinct, or_
 from datetime import datetime, timezone
 
 from modules.gamification.repository import GamificationRepository
@@ -67,7 +67,19 @@ class GamificationService:
         }
 
     def get_student_profile(self, user_id: str) -> GamificationProfileDTO:
-        """Retorna el perfil consolidado del estudiante con métricas de carrera médica (solo lectura, sin mutación de BD)."""
+        """Retorna el perfil consolidado del estudiante con métricas de carrera médica (reconcilia automáticamente contra historial real)."""
+        if self.session:
+            stmt_count = select(func.count(EvaluationHistoryModel.id)).where(
+                or_(
+                    EvaluationHistoryModel.user_id == user_id,
+                    EvaluationHistoryModel.user_email == user_id
+                )
+            )
+            history_count = self.session.execute(stmt_count).scalar_one() or 0
+            profile = self.repo.get_profile(user_id)
+            if history_count > 0 and (not profile or profile.casos_resueltos < history_count or profile.puntos_xp == 0):
+                self.reconcile_student_progress_from_history(user_id)
+
         profile = self.repo.get_profile(user_id)
         unlocked_count = self.repo.count_user_achievements(user_id)
         all_defs = self.repo.get_all_active_definitions()
@@ -106,7 +118,20 @@ class GamificationService:
         )
 
     def get_student_achievements(self, user_id: str) -> List[UserAchievementProgressDTO]:
-        """Retorna el catálogo completo de hitos clínicos con el estado de avance del usuario."""
+        """Retorna el catálogo completo de hitos clínicos con el estado de avance del usuario (reconcilia si no tiene logros pero sí historial)."""
+        if self.session:
+            unlocked_test = self.repo.get_user_unlocked_achievements(user_id)
+            if not unlocked_test:
+                stmt_count = select(func.count(EvaluationHistoryModel.id)).where(
+                    or_(
+                        EvaluationHistoryModel.user_id == user_id,
+                        EvaluationHistoryModel.user_email == user_id
+                    )
+                )
+                history_count = self.session.execute(stmt_count).scalar_one() or 0
+                if history_count > 0:
+                    self.reconcile_student_progress_from_history(user_id)
+
         all_defs = self.repo.get_all_active_definitions()
         unlocked = {u.achievement_id: u for u in self.repo.get_user_unlocked_achievements(user_id)}
 
@@ -135,6 +160,104 @@ class GamificationService:
             ))
 
         return results
+
+    def reconcile_student_progress_from_history(self, user_id: str) -> None:
+        """
+        Reconcilia de forma idempotente la progresión formativa y los hitos del estudiante
+        contrastando contra su historial real en EvaluationHistoryModel.
+        Garantiza que cualquier evaluación histórica sume sus puntos de experiencia (XP)
+        y desbloquee los hitos correspondientes.
+        """
+        if not self.session:
+            return
+
+        stmt = select(EvaluationHistoryModel).where(
+            or_(
+                EvaluationHistoryModel.user_id == user_id,
+                EvaluationHistoryModel.user_email == user_id
+            )
+        ).order_by(EvaluationHistoryModel.id.asc())
+
+        evals = list(self.session.execute(stmt).scalars().all())
+        if not evals:
+            return
+
+        profile = self.repo.get_or_create_profile(user_id)
+
+        # 1. Calcular XP acumulado de evaluaciones históricas
+        total_eval_xp = 0
+        for e in evals:
+            xp_base = 50
+            xp_score = int(round((e.score or 0.0) * 10))
+            xp_faithfulness = 25 if (getattr(e, "faithfulness_score", None) and e.faithfulness_score >= 0.80) else 0
+            xp_fases = 30 if getattr(e, "es_fases", False) else 0
+            total_eval_xp += (xp_base + xp_score + xp_faithfulness + xp_fases)
+
+        # 2. Evaluar y desbloquear hitos según el historial real
+        total_casos = len(evals)
+        distinct_gpc = set(e.guia_asociada for e in evals if e.guia_asociada)
+        max_score = max((e.score or 0.0) for e in evals)
+
+        achievements_to_unlock = []
+
+        # Hito 1: Iniciación Clínica (>= 1 caso)
+        if total_casos >= 1:
+            achievements_to_unlock.append(("iniciacion_clinica", 1.0, 1.0))
+
+        # Hito 2: Apego Normativo Estricto (score >= 9.0)
+        if max_score >= 9.0:
+            achievements_to_unlock.append(("apego_gpc_excelente", max_score, 9.0))
+
+        # Hito 3: Constancia Formativa (>= 5 casos)
+        if total_casos >= 5:
+            achievements_to_unlock.append(("constancia_formativa", float(total_casos), 5.0))
+
+        # Hito 4: Resolución Multidisciplinar (>= 3 GPCs)
+        if len(distinct_gpc) >= 3:
+            achievements_to_unlock.append(("resolucion_multidisciplinar", float(len(distinct_gpc)), 3.0))
+
+        # Hito 5: Manejo de Emergencias Críticas (score >= 8.0 en emergencias, preeclampsia, shock o rojo)
+        has_emergency = any(
+            (e.score or 0.0) >= 8.0 and any(
+                k in (e.case_id or "").lower() or k in (e.case_title or "").lower() or k in (e.guia_asociada or "").lower()
+                for k in ["emergencia", "preeclampsia", "shock", "rojo", "hemorragia", "parto"]
+            )
+            for e in evals
+        )
+        if has_emergency:
+            achievements_to_unlock.append(("manejo_emergencias", 1.0, 1.0))
+
+        # Hito 6: Eficiencia en Urgencias (tiempo <= 300s y score >= 8.5)
+        has_time_efficiency = any(
+            (e.score or 0.0) >= 8.5 and 0 < getattr(e, "tiempo_segundos", 0.0) <= 300.0
+            for e in evals
+        )
+        if has_time_efficiency:
+            achievements_to_unlock.append(("eficiencia_urgencias", 1.0, 1.0))
+
+        # Hito 7: Maestría Secuencial (simulación por fases)
+        has_fases = any(getattr(e, "es_fases", False) for e in evals)
+        if has_fases:
+            achievements_to_unlock.append(("maestria_secuencial", 1.0, 1.0))
+
+        # Desbloquear hitos y sumar sus XP
+        total_ach_xp = 0
+        for ach_id, current_val, target_val in achievements_to_unlock:
+            model, _ = self.repo.unlock_achievement(user_id, ach_id, current_val, target_val)
+            defn = self.repo.get_definition_by_id(ach_id)
+            if defn:
+                total_ach_xp += defn.puntos_xp
+
+        # 3. Consolidar perfil final
+        xp_total_consolidado = total_eval_xp + total_ach_xp
+        profile.casos_resueltos = max(profile.casos_resueltos, total_casos)
+        profile.puntos_xp = max(profile.puntos_xp, xp_total_consolidado)
+
+        lvl_info = self.get_level_info_for_xp(profile.puntos_xp)
+        profile.nivel_actual = lvl_info["level"]
+        profile.titulo_rango = lvl_info["title"]
+        self.repo.update_profile(profile)
+        self.session.flush()
 
     def process_evaluation_event(
         self,

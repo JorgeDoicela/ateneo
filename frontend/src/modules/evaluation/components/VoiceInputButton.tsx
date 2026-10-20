@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Mic, MicOff, Square } from "lucide-react";
 import { useVoiceRecognition } from "../hooks/useVoiceRecognition";
 
@@ -7,6 +7,7 @@ export interface VoiceInputButtonProps {
   onChange: (updater: (prev: string) => string) => void;
   disabled?: boolean;
   lang?: string;
+  onRecordingChange?: (isRecording: boolean) => void;
 }
 
 export default function VoiceInputButton({
@@ -14,6 +15,7 @@ export default function VoiceInputButton({
   onChange,
   disabled = false,
   lang = "es-EC",
+  onRecordingChange,
 }: VoiceInputButtonProps) {
   const baseTextRef = useRef<string>("");
 
@@ -26,6 +28,10 @@ export default function VoiceInputButton({
     isSupported,
   } = useVoiceRecognition({ lang });
 
+  useEffect(() => {
+    onRecordingChange?.(isRecording);
+  }, [isRecording, onRecordingChange]);
+
   const handleToggle = (): void => {
     if (isRecording) {
       stopRecording();
@@ -37,7 +43,10 @@ export default function VoiceInputButton({
     startRecording((fragment: string) => {
       onChange((prev: string) => {
         const clean = (prev || "").trim();
-        return clean ? `${clean} ${fragment}` : fragment;
+        if (!clean) return fragment;
+        // Si el fragmento empieza con puntuación, no anteponer espacio adicional
+        const needsSpace = !/^[.,;:!?]/.test(fragment);
+        return `${clean}${needsSpace ? ' ' : ''}${fragment}`;
       });
     });
   };

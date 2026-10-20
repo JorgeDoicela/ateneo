@@ -59,8 +59,11 @@ export default function NotificationsDropdown({ showLabel = false }: Notificatio
   const handleInstallClick = async () => {
     setIsPWANotifRead(true);
     localStorage.setItem(STORAGE_PWA_NOTIF_READ, 'true');
-    setIsOpen(false);
-    await promptInstall();
+    // Ejecutar de inmediato en el mismo hilo de evento del usuario para conservar user gesture
+    const outcome = await promptInstall();
+    if (outcome === 'accepted' || outcome === 'guide_shown') {
+      setIsOpen(false);
+    }
   };
 
   const marcarLeida = (id: string) => {

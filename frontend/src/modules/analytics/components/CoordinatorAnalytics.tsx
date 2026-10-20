@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { ShieldCheck, Sparkles, AlertTriangle, Activity, Cpu, Server, Clock } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ShieldCheck, Sparkles, AlertTriangle, Activity, Cpu, Server, Clock, ChevronDown, Check, Users } from 'lucide-react';
 import { analyticsApi } from '../api/analyticsApi';
 import type { CoordinatorAnalyticsData, IbfCohortData } from '../../../types';
 
@@ -15,11 +15,40 @@ interface ExtendedIbfCohortData extends IbfCohortData {
   }>;
 }
 
+const COHORT_OPTIONS = [
+  'Cohorte Medicina 2026-A (Internado Rotativo)',
+  'Cohorte Medicina 2025-B (Pregrado Avanzado)',
+  'Internado Pediatría HPDA'
+];
+
 export default function CoordinatorAnalytics() {
   const [analytics, setAnalytics] = useState<CoordinatorAnalyticsData | null>(null);
   const [ibfData, setIbfData] = useState<ExtendedIbfCohortData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedCohort, setSelectedCohort] = useState<string>('Cohorte Medicina 2026-A (Internado Rotativo)');
+  const [isCohortDropdownOpen, setIsCohortDropdownOpen] = useState<boolean>(false);
+  const cohortDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (cohortDropdownRef.current && !cohortDropdownRef.current.contains(event.target as Node)) {
+        setIsCohortDropdownOpen(false);
+      }
+    }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setIsCohortDropdownOpen(false);
+      }
+    }
+    if (isCohortDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isCohortDropdownOpen]);
 
   const fetchCoordinatorData = async () => {
     setLoading(true);
@@ -106,17 +135,51 @@ export default function CoordinatorAnalytics() {
           </h2>
         </div>
 
-        {/* Selector de Cohorte Píldora */}
-        <div className="flex items-center bg-[#f0f4f9] px-4 py-2 rounded-full border border-slate-200">
-          <select
-            value={selectedCohort}
-            onChange={(e) => setSelectedCohort(e.target.value)}
-            className="text-xs font-medium bg-transparent text-[#1f1f1f] focus:outline-none cursor-pointer"
+        {/* Selector de Cohorte Desplegable Estilizado Ateneo+ */}
+        <div className="relative w-full sm:w-auto" ref={cohortDropdownRef}>
+          <button
+            type="button"
+            onClick={() => setIsCohortDropdownOpen(!isCohortDropdownOpen)}
+            aria-expanded={isCohortDropdownOpen}
+            className="w-full sm:w-auto max-w-full flex items-center justify-between gap-2.5 px-4 py-2 rounded-[18px] sm:rounded-full bg-white hover:bg-slate-50/80 border border-slate-200/80 shadow-xs text-xs font-medium text-[#1f1f1f] transition-all cursor-pointer select-none"
           >
-            <option value="Cohorte Medicina 2026-A (Internado Rotativo)">Cohorte Medicina 2026-A (Internado)</option>
-            <option value="Cohorte Medicina 2025-B (Pregrado Avanzado)">Cohorte Medicina 2025-B (Pregrado)</option>
-            <option value="Internado Pediatría HPDA">Internado Pediatría HPDA</option>
-          </select>
+            <div className="flex items-center gap-2 truncate pr-2 min-w-0">
+              <Users className="w-3.5 h-3.5 text-[#0b57d0] shrink-0" />
+              <span className="text-[#747775] shrink-0">Cohorte:</span>
+              <span className="font-semibold text-[#0b57d0] truncate">{selectedCohort}</span>
+            </div>
+            <ChevronDown
+              className={`w-4 h-4 text-[#747775] shrink-0 transition-transform duration-200 ${
+                isCohortDropdownOpen ? 'rotate-180 text-[#0b57d0]' : ''
+              }`}
+            />
+          </button>
+
+          {isCohortDropdownOpen && (
+            <div className="absolute top-full left-0 sm:left-auto sm:right-0 mt-2 w-full sm:w-80 max-w-[calc(100vw-2.5rem)] bg-white rounded-[22px] shadow-xl border border-slate-100 py-2 z-30 animate-fadeIn max-h-72 overflow-y-auto">
+              {COHORT_OPTIONS.map((coh) => {
+                const isSelected = selectedCohort === coh;
+                return (
+                  <button
+                    key={coh}
+                    type="button"
+                    onClick={() => {
+                      setSelectedCohort(coh);
+                      setIsCohortDropdownOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-4 py-2.5 text-xs text-left transition-colors cursor-pointer ${
+                      isSelected
+                        ? 'bg-blue-50/70 font-semibold text-[#0b57d0]'
+                        : 'text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    <span className="truncate">{coh}</span>
+                    {isSelected && <Check className="w-4 h-4 text-[#0b57d0] shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 

@@ -50,8 +50,9 @@ export default function CaseCard({ caso, gpcMeta, viewMode = 'grid' }: CaseCardP
             </div>
 
             <div className="flex items-center shrink-0 self-center">
-              <div className="w-8 h-8 rounded-full bg-[#f0f4f9] group-hover:bg-gradient-to-tr group-hover:from-cyan-600 group-hover:to-indigo-600 group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-xs">
-                <ArrowRight className="w-4 h-4" />
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white shadow-xs shadow-blue-500/20 group-hover:shadow-md group-hover:shadow-blue-500/30 group-hover:scale-[1.02] active:scale-[0.98] transition-all duration-300">
+                <span className="hidden sm:inline">Resolver</span>
+                <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
               </div>
             </div>
           </div>
@@ -101,8 +102,9 @@ export default function CaseCard({ caso, gpcMeta, viewMode = 'grid' }: CaseCardP
             </span>
           )}
 
-          <div className="w-8 h-8 rounded-full bg-[#f0f4f9] group-hover:bg-gradient-to-tr group-hover:from-cyan-600 group-hover:to-indigo-600 group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-xs">
-            <ArrowRight className="w-4 h-4" />
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white shadow-xs shadow-blue-500/20 group-hover:shadow-md group-hover:shadow-blue-500/30 group-hover:scale-[1.02] active:scale-[0.98] transition-all duration-300">
+            <span>Resolver</span>
+            <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
           </div>
         </div>
       </Link>

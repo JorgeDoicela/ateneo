@@ -90,6 +90,8 @@ export default function CaseSolve() {
   const [isStudyInverted, setIsStudyInverted] = useState<boolean>(false);
   const [showEcgGrid, setShowEcgGrid] = useState<boolean>(false);
   const [showFiltersPopover, setShowFiltersPopover] = useState<boolean>(false);
+  const [isDictating, setIsDictating] = useState<boolean>(false);
+  const [isRecordingVoiceNote, setIsRecordingVoiceNote] = useState<boolean>(false);
 
   const resetStudyTransformations = () => {
     setStudyZoom(1.0);
@@ -505,11 +507,13 @@ export default function CaseSolve() {
                 <VoiceInputButton
                   value={respuesta}
                   onChange={setRespuesta}
-                  disabled={evaluating}
+                  disabled={evaluating || isRecordingVoiceNote}
+                  onRecordingChange={setIsDictating}
                 />
                 <ClinicalVoiceRecorder
                   onAudioChange={setAudioBlob}
-                  disabled={evaluating}
+                  disabled={evaluating || isDictating}
+                  onRecordingStateChange={setIsRecordingVoiceNote}
                 />
               </div>
             </div>

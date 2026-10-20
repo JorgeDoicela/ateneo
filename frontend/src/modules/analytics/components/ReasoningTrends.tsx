@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Filter, Activity } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Filter, Activity, ChevronDown, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import analyticsApi from '../api/analyticsApi';
 import SkillRadarChart from './SkillRadarChart';
 import type { AxisCompetencyItem } from '../../../types';
@@ -53,6 +53,84 @@ export default function ReasoningTrends() {
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedGpc, setSelectedGpc] = useState<string>('TODAS');
   const [activePoint, setActivePoint] = useState<ChartPointItem | null>(null);
+  const [isGpcDropdownOpen, setIsGpcDropdownOpen] = useState<boolean>(false);
+  const gpcDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Control de scroll horizontal y arrastre en PC (Mouse Drag-to-Scroll)
+  const chartScrollContainerRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef<boolean>(false);
+  const startXRef = useRef<number>(0);
+  const scrollLeftRef = useRef<number>(0);
+  const dragDistanceRef = useRef<number>(0);
+  const [isDraggingState, setIsDraggingState] = useState<boolean>(false);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (gpcDropdownRef.current && !gpcDropdownRef.current.contains(event.target as Node)) {
+        setIsGpcDropdownOpen(false);
+      }
+    }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setIsGpcDropdownOpen(false);
+      }
+    }
+    if (isGpcDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isGpcDropdownOpen]);
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!chartScrollContainerRef.current) return;
+    isDraggingRef.current = true;
+    setIsDraggingState(true);
+    startXRef.current = e.pageX - chartScrollContainerRef.current.offsetLeft;
+    scrollLeftRef.current = chartScrollContainerRef.current.scrollLeft;
+    dragDistanceRef.current = 0;
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDraggingRef.current || !chartScrollContainerRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - chartScrollContainerRef.current.offsetLeft;
+    const walk = (x - startXRef.current) * 1.5;
+    dragDistanceRef.current += Math.abs(walk);
+    chartScrollContainerRef.current.scrollLeft = scrollLeftRef.current - walk;
+  };
+
+  const handleMouseUp = () => {
+    isDraggingRef.current = false;
+    setIsDraggingState(false);
+  };
+
+  const handleMouseLeave = () => {
+    isDraggingRef.current = false;
+    setIsDraggingState(false);
+  };
+
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    if (!chartScrollContainerRef.current) return;
+    if (chartScrollContainerRef.current.scrollWidth > chartScrollContainerRef.current.clientWidth) {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        chartScrollContainerRef.current.scrollLeft += e.deltaY;
+      }
+    }
+  };
+
+  const handleScrollBy = (amount: number) => {
+    if (!chartScrollContainerRef.current) return;
+    const container = chartScrollContainerRef.current;
+    if (typeof container.scrollBy === 'function') {
+      container.scrollBy({ left: amount, behavior: 'smooth' });
+    } else {
+      container.scrollLeft += amount;
+    }
+  };
 
   const fetchTrends = async () => {
     setLoading(true);
@@ -96,6 +174,24 @@ export default function ReasoningTrends() {
   useEffect(() => {
     fetchTrends();
   }, []);
+
+  // Auto-scroll inicial hacia las evaluaciones más recientes (extremo derecho)
+  useEffect(() => {
+    if (chartScrollContainerRef.current) {
+      const container = chartScrollContainerRef.current;
+      const timer = setTimeout(() => {
+        if (typeof container.scrollTo === 'function') {
+          container.scrollTo({
+            left: container.scrollWidth,
+            behavior: 'smooth'
+          });
+        } else {
+          container.scrollLeft = container.scrollWidth;
+        }
+      }, 70);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedGpc, trends]);
 
   if (loading) {
     return (
@@ -204,7 +300,7 @@ export default function ReasoningTrends() {
       )}
 
       {/* 3. Gráfica de Progreso de Score en el Tiempo por GPC */}
-      <div className="bg-white rounded-[28px] p-6 sm:p-8 shadow-xs border border-slate-200/60 hover:border-slate-300/80 transition-all space-y-6">
+      <div className="bg-white rounded-[28px] p-4 sm:p-8 shadow-xs border border-slate-200/60 hover:border-slate-300/80 transition-all space-y-6 max-w-full">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100/80 pb-4">
           <div>
             <div className="text-xs font-semibold text-[#0b57d0] uppercase tracking-wider mb-1">
@@ -215,21 +311,71 @@ export default function ReasoningTrends() {
             </h3>
           </div>
 
-          <div className="flex items-center bg-white/85 hover:bg-white backdrop-blur-md px-3.5 py-1.5 rounded-full border border-slate-200/80 shadow-xs transition-all">
-            <Filter className="w-3.5 h-3.5 text-[#0b57d0] mr-2" />
-            <select
-              value={selectedGpc}
-              onChange={(e) => {
-                setSelectedGpc(e.target.value);
-                setActivePoint(null);
-              }}
-              className="text-xs font-medium bg-transparent text-[#1f1f1f] focus:outline-none cursor-pointer pr-1"
+          {/* Selector Desplegable Estilizado Ateneo+ */}
+          <div className="relative w-full sm:w-auto" ref={gpcDropdownRef}>
+            <button
+              type="button"
+              onClick={() => setIsGpcDropdownOpen(!isGpcDropdownOpen)}
+              aria-expanded={isGpcDropdownOpen}
+              className="w-full sm:w-auto max-w-full flex items-center justify-between gap-2.5 px-4 py-2 rounded-[18px] sm:rounded-full bg-white hover:bg-slate-50/80 border border-slate-200/80 shadow-xs text-xs font-medium text-[#1f1f1f] transition-all cursor-pointer select-none"
             >
-              <option value="TODAS">Todas las GPCs</option>
-              {gpcKeys.map(gpc => (
-                <option key={gpc} value={gpc}>{gpc}</option>
-              ))}
-            </select>
+              <div className="flex items-center gap-1.5 truncate pr-2 min-w-0">
+                <Filter className="w-3.5 h-3.5 text-[#0b57d0] shrink-0" />
+                <span className="text-[#747775] shrink-0">Filtrar:</span>
+                <span className="font-semibold text-[#0b57d0] truncate">
+                  {selectedGpc === 'TODAS' ? 'Todas las GPCs' : selectedGpc}
+                </span>
+              </div>
+              <ChevronDown
+                className={`w-4 h-4 text-[#747775] shrink-0 transition-transform duration-200 ${
+                  isGpcDropdownOpen ? 'rotate-180 text-[#0b57d0]' : ''
+                }`}
+              />
+            </button>
+
+            {isGpcDropdownOpen && (
+              <div className="absolute top-full left-0 sm:left-auto sm:right-0 mt-2 w-full sm:w-80 max-w-[calc(100vw-2.5rem)] bg-white rounded-[22px] shadow-xl border border-slate-100 py-2 z-30 animate-fadeIn max-h-72 overflow-y-auto">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedGpc('TODAS');
+                    setActivePoint(null);
+                    setIsGpcDropdownOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-4 py-2.5 text-xs text-left transition-colors cursor-pointer ${
+                    selectedGpc === 'TODAS'
+                      ? 'bg-blue-50/70 font-semibold text-[#0b57d0]'
+                      : 'text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <span className="truncate">Todas las GPCs</span>
+                  {selectedGpc === 'TODAS' && <Check className="w-4 h-4 text-[#0b57d0] shrink-0" />}
+                </button>
+
+                {gpcKeys.map((gpc) => {
+                  const isSelected = selectedGpc === gpc;
+                  return (
+                    <button
+                      key={gpc}
+                      type="button"
+                      onClick={() => {
+                        setSelectedGpc(gpc);
+                        setActivePoint(null);
+                        setIsGpcDropdownOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-4 py-2.5 text-xs text-left transition-colors cursor-pointer ${
+                        isSelected
+                          ? 'bg-blue-50/70 font-semibold text-[#0b57d0]'
+                          : 'text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className="truncate" title={gpc}>{gpc}</span>
+                      {isSelected && <Check className="w-4 h-4 text-[#0b57d0] shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
 
@@ -251,9 +397,53 @@ export default function ReasoningTrends() {
         )}
 
         {pointsSVG.length > 0 ? (
-          <div className="w-full overflow-x-auto no-scrollbar touch-pan-x py-1">
-            <div style={{ minWidth: `${chartWidth}px` }}>
-              <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-auto font-sans overflow-visible select-none">
+          <div className="space-y-2">
+            {/* Controles y Referencias de Navegación Temporal */}
+            <div className="flex items-center justify-between text-xs text-[#747775] px-1 select-none">
+              <span className="text-[11px] font-mono text-slate-400">
+                ← Anteriores
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="hidden sm:inline text-[11px] text-slate-400 font-sans">
+                  Arrastra o usa las flechas para mover
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleScrollBy(-240)}
+                  className="p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer"
+                  title="Ver evaluaciones anteriores"
+                  aria-label="Ver evaluaciones anteriores"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleScrollBy(240)}
+                  className="p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer"
+                  title="Ver evaluaciones recientes"
+                  aria-label="Ver evaluaciones recientes"
+                >
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <span className="text-[11px] font-mono font-semibold text-[#0b57d0]">
+                Más recientes →
+              </span>
+            </div>
+
+            <div 
+              ref={chartScrollContainerRef}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseLeave}
+              onWheel={handleWheel}
+              className={`w-full overflow-x-auto touch-pan-x py-2 select-none ${
+                isDraggingState ? 'cursor-grabbing' : 'cursor-grab'
+              } scrollbar-thin scrollbar-thumb-slate-200 hover:scrollbar-thumb-slate-300 scrollbar-track-transparent`}
+            >
+              <div style={{ minWidth: `${chartWidth}px` }}>
+                <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-auto font-sans overflow-visible select-none">
                 <defs>
                   {/* Gradiente de relleno luminoso bajo la curva */}
                   <linearGradient id="curveAreaGrad" x1="0" y1="0" x2="0" y2="1">
@@ -328,7 +518,11 @@ export default function ReasoningTrends() {
                       key={idx} 
                       className="cursor-pointer group"
                       onMouseEnter={() => setActivePoint(p)}
-                      onClick={() => setActivePoint(p)}
+                      onClick={() => {
+                        if (dragDistanceRef.current < 6) {
+                          setActivePoint(p);
+                        }
+                      }}
                     >
                       {/* Círculo Interactivo */}
                       <circle 
@@ -377,7 +571,8 @@ export default function ReasoningTrends() {
               </svg>
             </div>
           </div>
-        ) : (
+        </div>
+      ) : (
           <p className="text-xs text-[#747775] italic text-center py-6">No hay datos registrados para esta GPC.</p>
         )}
 

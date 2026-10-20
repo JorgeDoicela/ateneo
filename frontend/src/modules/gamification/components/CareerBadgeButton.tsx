@@ -10,17 +10,28 @@ export default function CareerBadgeButton() {
 
   useEffect(() => {
     let isMounted = true;
-    gamificationApi
-      .getProfile()
-      .then((data) => {
-        if (isMounted) setProfile(data);
-      })
-      .catch((err) => {
-        console.warn('Aviso: no se pudo cargar el perfil de carrera médica:', err);
-      });
+    const fetchProfile = () => {
+      gamificationApi
+        .getProfile()
+        .then((data) => {
+          if (isMounted) setProfile(data);
+        })
+        .catch((err) => {
+          console.warn('Aviso: no se pudo cargar el perfil de carrera médica:', err);
+        });
+    };
+
+    fetchProfile();
+
+    const handleUpdate = () => {
+      fetchProfile();
+    };
+
+    window.addEventListener('ateneo:gamification-updated', handleUpdate);
 
     return () => {
       isMounted = false;
+      window.removeEventListener('ateneo:gamification-updated', handleUpdate);
     };
   }, []);
 

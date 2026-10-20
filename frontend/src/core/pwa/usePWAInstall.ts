@@ -16,14 +16,28 @@ declare global {
   }
 }
 
+// Almacenamiento global para capturar el evento en el milisegundo cero, antes de que React se monte
 let globalDeferredPrompt: BeforeInstallPromptEvent | null = null;
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', (e: BeforeInstallPromptEvent) => {
+    e.preventDefault();
+    globalDeferredPrompt = e;
+  });
+
+  window.addEventListener('appinstalled', () => {
+    globalDeferredPrompt = null;
+  });
+}
+
+export type PWAInstallOutcome = 'accepted' | 'dismissed' | 'guide_shown';
 
 /**
  * usePWAInstall — Hook integral para gestión de instalación de Ateneo+ PWA.
- * Compatible con Chromium (Chrome, Edge, Android, Brave, Opera) e iOS/iPadOS Safari.
+ * Compatible con Chromium (Chrome, Edge, Android, Brave, Opera) y Safari iOS / Desktop.
  */
 export function usePWAInstall() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(globalDeferredPrompt);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(() => globalDeferredPrompt);
   const [isInstalled, setIsInstalled] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     return (
@@ -31,13 +45,13 @@ export function usePWAInstall() {
       (window.navigator as unknown as { standalone?: boolean }).standalone === true
     );
   });
-  const [showIOSModal, setShowIOSModal] = useState<boolean>(false);
+  const [showInstallModal, setShowInstallModal] = useState<boolean>(false);
 
   const isIOS = typeof navigator !== 'undefined' && 
     /iPad|iPhone|iPod/.test(navigator.userAgent) && 
     !(window as unknown as { MSStream?: unknown }).MSStream;
 
-  const isInstallable = (!isInstalled && (Boolean(deferredPrompt) || isIOS));
+  const isInstallable = !isInstalled;
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
@@ -50,16 +64,18 @@ export function usePWAInstall() {
       setIsInstalled(true);
       globalDeferredPrompt = null;
       setDeferredPrompt(null);
+      setShowInstallModal(false);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
 
-    // Detección de cambios de display-mode
+    // Detección reactiva de cambios de display-mode
     const mediaQuery = window.matchMedia('(display-mode: standalone)');
     const handleDisplayModeChange = (e: MediaQueryListEvent) => {
       if (e.matches) {
         setIsInstalled(true);
+        setShowInstallModal(false);
       }
     };
     mediaQuery.addEventListener('change', handleDisplayModeChange);
@@ -71,17 +87,22 @@ export function usePWAInstall() {
     };
   }, []);
 
-  const promptInstall = useCallback(async (): Promise<boolean> => {
-    if (isInstalled) return true;
+  const promptInstall = useCallback(async (): Promise<PWAInstallOutcome> => {
+    if (isInstalled) return 'accepted';
 
+    // En iOS siempre se requiere la guía asistida de Safari (no soporta beforeinstallprompt)
     if (isIOS) {
-      setShowIOSModal(true);
-      return false;
+      setShowInstallModal(true);
+      return 'guide_shown';
     }
 
     const promptEvent = deferredPrompt || globalDeferredPrompt;
+    
+    // Si el navegador aún no emitió beforeinstallprompt o no lo soporta en este contexto,
+    // mostramos de inmediato la guía institucional sin dejar al usuario sin respuesta.
     if (!promptEvent) {
-      return false;
+      setShowInstallModal(true);
+      return 'guide_shown';
     }
 
     try {
@@ -91,21 +112,27 @@ export function usePWAInstall() {
         setIsInstalled(true);
         globalDeferredPrompt = null;
         setDeferredPrompt(null);
-        return true;
+        setShowInstallModal(false);
+        return 'accepted';
       }
+      return 'dismissed';
     } catch (err) {
-      console.error('Error al solicitar instalación de Ateneo+ PWA:', err);
+      console.warn('Aviso: el prompt nativo de PWA no pudo desplegarse, mostrando guía asistida:', err);
+      setShowInstallModal(true);
+      return 'guide_shown';
     }
-
-    return false;
   }, [deferredPrompt, isIOS, isInstalled]);
 
   return {
     isInstallable,
     isInstalled,
     isIOS,
-    showIOSModal,
-    setShowIOSModal,
+    showIOSModal: showInstallModal, // Alias para compatibilidad hacia atrás
+    setShowIOSModal: setShowInstallModal,
+    showInstallModal,
+    setShowInstallModal,
     promptInstall
   };
 }
+
+export default usePWAInstall;

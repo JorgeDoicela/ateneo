@@ -68,6 +68,12 @@ export default function FeedbackCard({ result, studentAnswer = '', audioBlob = n
     };
   }, [audioUrl]);
 
+  useEffect(() => {
+    if (result?.gamification_update) {
+      window.dispatchEvent(new CustomEvent('ateneo:gamification-updated'));
+    }
+  }, [result?.gamification_update]);
+
   const handleOpenDebrief = (omisionesParam: string[] | string) => {
     const caseId = result.case_id || 'case_preeclampsia_01';
     const primaryOmision = Array.isArray(omisionesParam) ? (omisionesParam[0] || '') : omisionesParam;

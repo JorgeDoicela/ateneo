@@ -36,9 +36,10 @@ export default function MobileBottomNav({ onOpenJoinRoom }: MobileBottomNavProps
 
   if (!user) return null;
 
-  // Ocultar en la resolución activa de casos clínicos para maximizar el área de simulación
+  // Ocultar en resolución activa de casos clínicos y en vistas de analítica para maximizar el área de gráficos
   const isCaseSolveRoute = location.pathname.startsWith('/cases/') && location.pathname !== '/cases';
-  if (isCaseSolveRoute) return null;
+  const isAnalyticsRoute = location.pathname.startsWith('/analytics') || location.pathname.startsWith('/teacher/analytics');
+  if (isCaseSolveRoute || isAnalyticsRoute) return null;
 
   return (
     <>

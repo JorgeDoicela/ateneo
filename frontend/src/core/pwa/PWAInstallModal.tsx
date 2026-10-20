@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { Share, PlusSquare, X, Smartphone } from 'lucide-react';
+import { Share, PlusSquare, X, Smartphone, Monitor, Download, ArrowRight } from 'lucide-react';
 
 export interface PWAInstallModalProps {
   isOpen: boolean;
@@ -7,11 +7,15 @@ export interface PWAInstallModalProps {
 }
 
 /**
- * PWAInstallModal — Diálogo de orientación clínica para la instalación en iOS / iPadOS Safari.
- * Renderizado vía React Portal hacia document.body con overlay backdrop-blur.
+ * PWAInstallModal — Diálogo de orientación clínica para la instalación de Ateneo+ PWA.
+ * Adaptativo según la plataforma detectada: iOS Safari vs. Escritorio (Chrome, Edge) y otros navegadores.
  */
 export default function PWAInstallModal({ isOpen, onClose }: PWAInstallModalProps) {
   if (!isOpen) return null;
+
+  const isIOS = typeof navigator !== 'undefined' && 
+    /iPad|iPhone|iPod/.test(navigator.userAgent) && 
+    !(window as unknown as { MSStream?: unknown }).MSStream;
 
   return createPortal(
     <div 
@@ -38,13 +42,17 @@ export default function PWAInstallModal({ isOpen, onClose }: PWAInstallModalProp
         {/* Cabecera del Diálogo */}
         <div className="flex items-center justify-between border-b border-slate-100 pb-4 relative z-10">
           <div className="flex items-center gap-2.5">
-            <Smartphone className="w-5 h-5 text-[#0b57d0] shrink-0" />
+            {isIOS ? (
+              <Smartphone className="w-5 h-5 text-[#0b57d0] shrink-0" />
+            ) : (
+              <Monitor className="w-5 h-5 text-[#0b57d0] shrink-0" />
+            )}
             <div>
               <h3 id="pwa-install-title" className="text-base font-heading font-normal text-slate-900 tracking-tight">
-                Instalar Ateneo+ en iOS
+                {isIOS ? 'Instalar Ateneo+ en iOS' : 'Instalar Ateneo+ en este equipo'}
               </h3>
               <p className="text-xs text-slate-500">
-                Acceso hospitalario rápido sin barra de navegador
+                Acceso clínico directo en ventana independiente
               </p>
             </div>
           </div>
@@ -58,27 +66,53 @@ export default function PWAInstallModal({ isOpen, onClose }: PWAInstallModalProp
           </button>
         </div>
 
-        {/* Pasos de Instalación en Safari iOS */}
+        {/* Pasos de Instalación Adaptativos */}
         <div className="space-y-3 relative z-10 text-xs text-slate-700">
-          <div className="flex items-start gap-3 p-3 bg-slate-50/70 rounded-2xl border border-slate-100/80">
-            <Share className="w-5 h-5 text-[#0b57d0] shrink-0 mt-0.5" />
-            <div>
-              <p className="font-semibold text-slate-900">1. Toca el botón Compartir</p>
-              <p className="text-slate-500 mt-0.5 leading-relaxed">
-                En la barra inferior de Safari, pulsa el icono de Compartir (el cuadro con una flecha hacia arriba).
-              </p>
-            </div>
-          </div>
+          {isIOS ? (
+            <>
+              <div className="flex items-start gap-3 p-3 bg-slate-50/70 rounded-2xl border border-slate-100/80">
+                <Share className="w-5 h-5 text-[#0b57d0] shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-slate-900">1. Toca el botón Compartir</p>
+                  <p className="text-slate-500 mt-0.5 leading-relaxed">
+                    En la barra inferior de Safari, pulsa el icono de Compartir (el cuadro con una flecha hacia arriba).
+                  </p>
+                </div>
+              </div>
 
-          <div className="flex items-start gap-3 p-3 bg-slate-50/70 rounded-2xl border border-slate-100/80">
-            <PlusSquare className="w-5 h-5 text-[#0b57d0] shrink-0 mt-0.5" />
-            <div>
-              <p className="font-semibold text-slate-900">2. Selecciona "Añadir a pantalla de inicio"</p>
-              <p className="text-slate-500 mt-0.5 leading-relaxed">
-                Desplázate por el menú hacia abajo y selecciona la opción para anclar la app a tu pantalla principal.
-              </p>
-            </div>
-          </div>
+              <div className="flex items-start gap-3 p-3 bg-slate-50/70 rounded-2xl border border-slate-100/80">
+                <PlusSquare className="w-5 h-5 text-[#0b57d0] shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-slate-900">2. Selecciona "Añadir a pantalla de inicio"</p>
+                  <p className="text-slate-500 mt-0.5 leading-relaxed">
+                    Desplázate por el menú hacia abajo y pulsa para anclar Ateneo+ a tu pantalla principal.
+                  </p>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex items-start gap-3 p-3 bg-slate-50/70 rounded-2xl border border-slate-100/80">
+                <Download className="w-5 h-5 text-[#0b57d0] shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-slate-900">1. Barra de direcciones del navegador</p>
+                  <p className="text-slate-500 mt-0.5 leading-relaxed">
+                    Haz clic en el icono de instalación (pantalla con flecha o símbolo <strong>⊕</strong>) situado a la derecha de la barra de direcciones de Chrome o Edge.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3 bg-slate-50/70 rounded-2xl border border-slate-100/80">
+                <ArrowRight className="w-5 h-5 text-[#0b57d0] shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-slate-900">2. O desde el menú de opciones</p>
+                  <p className="text-slate-500 mt-0.5 leading-relaxed">
+                    Abre el menú de opciones del navegador (los tres puntos <strong>⋮</strong> arriba a la derecha) y selecciona <strong>"Instalar Ateneo+"</strong> o <strong>"Instalar aplicación"</strong>.
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Botón de Cierre */}
