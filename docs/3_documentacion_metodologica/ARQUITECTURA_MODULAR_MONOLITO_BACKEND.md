@@ -188,12 +188,21 @@ La capa de base de datos discrimina automáticamente entre entornos de desarroll
 
 ### 6.1 Salas Colaborativas con WebSockets (`routers/collaboration.py`)
 * **Endpoint de Conexión:** `ws://localhost:8000/api/ateneo/ws/{room_code}?token={jwt_token}`.
-* **Gestor de Conexiones:** `ConnectionManager` gestiona el diccionario en memoria de conexiones vivas por sala (`Dict[str, List[WebSocket]]`).
-* **Protocolo de Eventos:**
-  - `join`: Registro de presencia y difusión a participantes.
-  - `typing`: Estado de redacción colaborativa en tiempo real.
-  - `chat`: Mensajes clínicos y deliberación diagnóstica.
-  - `vote`: Emisión de hipótesis diagnóstica para cálculo de consenso de cohorte.
+* **Gestor de Conexiones:** `ConnectionManager` gestiona el diccionario en memoria de conexiones vivas por sala (`Dict[str, List[WebSocket]]`), difusión reactiva y desacoplamiento limpio al desconectar.
+* **Modalidades de Resolución:**
+  - `individual`: Cada participante somete su propio dictamen diagnóstico estructurado; el docente audita entregas y dispersión de calificaciones en vivo.
+  - `grupal`: Co-escritura en tiempo real sobre un lienzo común sincronizado con *debounce* de 150 ms e indicadores de redacción activa (`activeTypers`), emitiendo un veredicto colegiado único.
+* **Moderación en 4 Fases Clínicas:**
+  - `espera`: Antesala con código institucional (`ATENEO-XXXX`), contador de quórum en vivo y banner de investigación piloto formativa.
+  - `resolucion`: Desbloqueo del caso clínico y del panel de captura diagnóstica.
+  - `discusion`: Bloqueo de escritura (modo solo lectura), apertura de deliberación y audio WebRTC.
+  - `finalizado`: Publicación inmediata de la tabla consolidada de calificaciones, porcentaje de quórum y auditoría transparente entre pares.
+* **Protocolo de Mensajería WebSocket:**
+  - `IDENTIFY` / `join`: Registro de identidad clínica y difusión a participantes.
+  - `COLLAB_TEXT_UPDATE` / `COLLAB_TEXT_SYNC`: Difusión bidireccional del borrador grupal en tiempo real.
+  - `COLLAB_TYPING` / `COLLAB_TYPING_INDICATOR`: Presencia y telemetría de redactores activos.
+  - `PHASE_TRANSITION` / `ROOM_STATE_UPDATED`: Transición atómica de estados gobernada por el moderador.
+  - `GROUP_ANSWER_SUBMITTED`: Notificación masiva de evaluación colegiada contra las GPC del MSP.
   - `leave`: Desconexión controlada y actualización del panel de miembros activos.
 
 ### 6.2 Debriefing Socrático Multiturno con Server-Sent Events (`routers/evaluation.py`)

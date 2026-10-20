@@ -252,12 +252,20 @@ frontend/src/
   - `ClinicalStudyViewer.tsx`: Visor diagnóstico interactivo acelerado en Canvas HTML5 para paraclínicos (ECG y Rx) a 60 FPS con ventana radiológica y calibrador milimétrico.
   - `SocraticDebriefModal.tsx`: Modal conversacional de tutoría socrática multiturno con streaming en tiempo real (SSE).
 
-### 5.4 Módulo `collaboration` (Ateneo Room Sincrónico)
-* **Responsabilidad:** Salas de discusión clínica grupal donde múltiples estudiantes analizan un caso de forma concurrente, emiten votos de hipótesis diagnóstica y visualizan el consenso de la cohorte en tiempo real mediante WebSockets.
+### 5.4 Módulo `collaboration` (Ateneo Room Sincrónico y Consenso Hospitalario)
+* **Responsabilidad:** Salas de discusión clínica sincrónica y debate diagnóstico moderadas por docentes, donde cohortes de estudiantes analizan un caso clínico en tiempo real bajo dos dinámicas formativas configurables:
+  - **Modalidad de Resolución Individual:** Cada estudiante redacta y somete de forma autónoma su dictamen diagnóstico estructurado. El docente audita en vivo las entregas, consulta los puntajes emitidos por el evaluador RAG y visualiza la distribución de brechas formativas de la cohorte.
+  - **Modalidad de Ateneo en Grupo (Co-escritura en Vivo):** Los estudiantes redactan colectivamente en un lienzo sincrónico compartido impulsado por WebSockets. Las adiciones se difunden con debounce de 150 ms, mostrando indicadores de presencia activa de quién está redactando (`activeTypers`), y emitiendo un único dictamen consensuado de junta médica evaluado contra las GPC de Ecuador.
+* **Ciclo Secuencial de Moderación en 4 Fases Clínicas:**
+  1. *Fase 1 (Espera y Quórum):* Antesala de conexión con visualización prominente del código institucional (`ATENEO-XXXX`) optimizado para proyección en aula o teleconferencia, contador de participantes en línea y aviso formal de investigación formativa y prueba piloto.
+  2. *Fase 2 (Resolución Diagnóstica):* Desbloqueo del formulario individual o del lienzo de co-escritura grupal con sincronización reactiva en tiempo real.
+  3. *Fase 3 (Discusión y Debriefing Socrático):* Sellado del lienzo en modo solo lectura, apertura del debriefing clínico colectivo y activación opcional de canal de audio WebRTC bidireccional (`VoiceRoomBar`).
+  4. *Fase 4 (Ateneo Finalizado y Resultados Consolidados):* Publicación inmediata de la tabla consolidada de resultados para docentes y estudiantes, ranking de calificaciones sobre 10, porcentaje de quórum y auditoría transparente de dictámenes clínicos entre pares para el aprendizaje socrático.
 * **Hook ViewModel (`useAteneoRoom`):**
-  - Integra suscripción reactiva a eventos WebSocket y gestión síncrona en `useAteneoRoomStore.ts`.
-  - Normaliza la distribución de votos de los participantes y calcula el porcentaje de consenso dinámicamente.
-  - Provee la función `submitVote(diagnosis)` con retroalimentación optimista inmediata y presencia activa.
+  - Orquesta la conexión full-duplex con `AteneoSocketClient`, persistencia local de estado en `useAteneoRoomStore` y reconciliación reactiva ante reconexiones.
+  - Administra el estado de red (`CONNECTED`, `CONNECTING`, `RECONNECTING`, `DISCONNECTED`), contador en vivo y degradación a sondeo de respaldo (2.5s).
+  - Gestiona la co-escritura (`collaborativeText`, `handleCollaborativeTextChange`), indicadores de mecanografía y envío de veredicto colectivo (`submitGroupVerdict`).
+  - Provee la transición de fases gobernada por el moderador (`updateRoomStatus`) y normalización automática de códigos de acceso.
 
 ### 5.5 Módulo `adaptive` (Motor de Currículo Adaptativo)
 * **Responsabilidad:** Integrar la teoría de espacios de conocimiento (*Knowledge Space Theory - KST*) y el rastreo de conocimiento bayesiano (*Bayesian Knowledge Tracing - BKT*) para guiar al estudiante hacia la Zona de Desarrollo Próximo (ZDP).
@@ -382,9 +390,20 @@ La arquitectura implementada incorpora formalmente cinco subsistemas de alta tec
 
 ### 8.2 Salas Colaborativas de Consenso en Tiempo Real con WebSockets
 * **Implementación:** `src/core/realtime/socketClient.ts`, `useAteneoRoom.ts`, `useAteneoRoomStore.ts` y vista interactiva en `AteneoRoom.tsx`.
-* **Mecanismo:** Conexión persistente full-duplex vía WebSocket (`ws://` / `wss://`) hacia `@router.websocket("/ws/{room_code}")`.
-* **Presencia y Latidos:** Emisión periódica de pings de presencia cada 20 segundos y reconexión exponencial con *jitter* defensivo.
-* **Degradación Gradual:** Si la conexión de socket se interrumpe prolongadamente, el cliente degrada automáticamente a sondeo periódico desacelerado (10s) sin bloquear la interfaz del estudiante ni del docente moderador.
+* **Mecanismo:** Conexión persistente full-duplex vía WebSocket (`ws://` / `wss://`) hacia `@router.websocket("/ws/{room_code}")` con proxy reverso en Vite (`ws: true`) hacia el backend FastAPI.
+* **Protocolo de Mensajería y Co-escritura en Vivo:**
+  - `IDENTIFY`: Registro reactivo de identidad clínica del estudiante/docente al conectar.
+  - `COLLAB_TEXT_UPDATE` $\rightarrow$ `COLLAB_TEXT_SYNC`: Difusión en tiempo real del borrador colectivo de ateneo con *debounce* de 150 ms para mitigar colisiones y sobrecarga de red.
+  - `COLLAB_TYPING` $\rightarrow$ `COLLAB_TYPING_INDICATOR`: Presencia y telemetría de redactores activos en el lienzo compartido.
+  - `PHASE_TRANSITION` y `ROOM_STATE_UPDATED`: Orquestación atómica de las 4 fases de moderación clínica del ateneo.
+  - `GROUP_ANSWER_SUBMITTED`: Notificación masiva con el veredicto colegiado evaluado por el motor RAG contra las GPC de Ecuador.
+* **Ciclo de Vida Defensivo en React 18 (StrictMode Safe):**
+  - Desacoplamiento previo de listeners en `disconnect()` antes de invocar `ws.close()`, eliminando el warning de Chromium si el socket se cierra en estado transitorio `CONNECTING` (0).
+* **Resiliencia y Reconciliación Híbrida:**
+  - Latidos periódicos cada 20 segundos y reconexión exponencial con *jitter*.
+  - *Fallback* de sondeo rápido cada 2.5 segundos ante desconexión o desincronización transitoria, y revalidación reactiva ante eventos de foco de ventana (`focus` y `visibilitychange`).
+* **Resultados Consolidados de la Cohorte:**
+  - Al transicionar a la fase `finalizado`, se despliega una tarjeta de auditoría completa con el ranking de calificaciones, desglose de aciertos, omisiones normativas y acceso a los dictámenes entre pares para debriefing pedagógico.
 
 ### 8.3 Visor Diagnóstico de Paraclínicos en Canvas Acelerado por GPU
 * **Implementación:** `src/modules/evaluation/components/ClinicalStudyViewer.tsx`.

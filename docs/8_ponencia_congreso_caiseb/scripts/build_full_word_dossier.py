@@ -640,12 +640,78 @@ def main():
         "citando textualmente la seccion de la norma ministerial."
     )
 
-    add_heading_2(doc, "9.5 Salas Colaborativas Hospitalarias (AteneoRoom)")
+    add_heading_2(doc, "9.5 Salas Colaborativas Hospitalarias (AteneoRoom) y Consenso en Tiempo Real")
     add_body_paragraph(
         doc,
-        "Modulo sincronico en tiempo real basado en WebSockets nativos (/ws/{room_code}) donde docentes y coordinadores de internado "
-        "lideran ateneos clinicos con decenas de internos conectados simultaneamente, visualizando el consenso grupal, la dispersion de diagnosticos "
-        "y el debate de casos complejos en vivo."
+        "Las Salas Colaborativas Hospitalarias (AteneoRoom) constituyen el subsistema sincronico de deliberacion clinica y debate colegiado "
+        "en tiempo real de Ateneo+. Diseñado para simular las reuniones de ateneo bibliografico, entrega de guardia y juntas medicas docentes, "
+        "permite que un docente o coordinador hospitalario modere a decenas de internos y residentes conectados en simultaneo, evaluando la "
+        "toma de decisiones clinicas colegiada bajo normativas del Ministerio de Salud Publica (MSP) de Ecuador."
+    )
+    add_body_paragraph(
+        doc,
+        "El subsistema se encuentra orquestado mediante una arquitectura full-duplex sobre WebSockets nativos (@router.websocket('/ws/{room_code}')) "
+        "en FastAPI, gestionada por ConnectionManager y respaldada en el cliente React mediante AteneoSocketClient y useAteneoRoomStore.",
+        bold_prefix="Arquitectura de Comunicación en Tiempo Real: "
+    )
+    add_bullet_item(
+        doc,
+        "Cada estudiante redacta y somete de manera autonoma su dictamen clinico estructurado. El docente visualiza en su consola en vivo "
+        "las entregas individuales, los puntajes asignados por el evaluador RAG y la dispersion de hipotesis diagnosticas de la cohorte.",
+        bold_prefix="1. Modalidad de Resolucion Individual: "
+    )
+    add_bullet_item(
+        doc,
+        "Los estudiantes redactan colaborativamente en un lienzo compartido sincronizado bidireccionalmente. Las modificaciones se difunden con "
+        "un debounce de 150 ms para mitigar colisiones y sobrecarga de red, visualizando en vivo indicadores de presencia y redactores activos (activeTypers). "
+        "La junta medica somete un unico dictamen colegiado evaluado contra la Guia de Practica Clinica (GPC) ministerial.",
+        bold_prefix="2. Modalidad de Ateneo en Grupo (Co-escritura en Vivo): "
+    )
+
+    add_heading_3(doc, "Ciclo Secuencial de Moderación en 4 Fases Clínicas")
+    add_body_paragraph(
+        doc,
+        "Para garantizar orden pedagogico durante las sesiones clinicas, el docente gobierna la transicion secuencial a traves de 4 fases sincronizadas en todos los clientes:"
+    )
+    add_bullet_item(
+        doc,
+        "Antesala de conexion con renderizado prominente del codigo institucional de sala (ATENEO-XXXX) optimizado para proyeccion en auditorios y sesiones remotas, "
+        "contador de internos conectados en tiempo real y banner formal de investigacion formativa y prueba piloto.",
+        bold_prefix="Fase 1 (Espera y Quorum): "
+    )
+    add_bullet_item(
+        doc,
+        "Desbloqueo simultaneo del caso clinico y del panel de resolucion (individual o co-escritura grupal), capturando diagnostico diferencial, "
+        "solicitud de paraclinicos y propuesta terapeutica inicial.",
+        bold_prefix="Fase 2 (Resolucion Diagnostica): "
+    )
+    add_bullet_item(
+        doc,
+        "Bloqueo del lienzo de escritura en modo solo lectura para congelar las entregas, apertura del debriefing socratico grupal y activacion "
+        "opcional del canal de voz bidireccional WebRTC (VoiceRoomBar) para la discusion oral guiada por el docente.",
+        bold_prefix="Fase 3 (Discusion y Debriefing): "
+    )
+    add_bullet_item(
+        doc,
+        "Publicacion inmediata de la tabla consolidada de resultados para docentes y alumnos, ranking de calificaciones sobre 10, porcentaje de quorum "
+        "diagnostico, brechas normativas detectadas y auditoria transparente de dictamenes clinicos entre pares para el aprendizaje reflexivo.",
+        bold_prefix="Fase 4 (Ateneo Finalizado y Resultados de Cohorte): "
+    )
+
+    add_heading_3(doc, "Motor de Inteligencia Colectiva y Resiliencia de Red")
+    add_body_paragraph(
+        doc,
+        "AteneoRoom incorpora un motor de consenso diagnostico que agrega las respuestas de los participantes calculando: (a) promedio ponderado de calificacion "
+        "de la cohorte sobre 10 puntos, (b) porcentaje de quorum sobre el diagnostico principal CIE-10, y (c) consolidacion de las 4 brechas normativas mas frecuentes "
+        "frente a las GPC del MSP. En el ambito de infraestructura, el sistema implementa un ciclo de vida defensivo en React 18 (StrictMode Safe), latidos "
+        "cada 20 segundos con reconexion exponencial, y un mecanismo de sondeo de respaldo reactivo (polling cada 2.5s) ante interrupciones de red hospitalaria."
+    )
+    add_callout_box(
+        doc,
+        "El modulo AteneoRoom transforma la evaluacion clinica individual en un ejercicio socratico y colegiado. "
+        "Al contrastar las decisiones individuales con el consenso de la cohorte y la norma ministerial, "
+        "se fomenta el razonamiento basado en evidencia y se reducen los sesgos de anclaje diagnostico en la formacion medica.",
+        title="VALOR PEDAGOGICO HOSPITALARIO / APRENDIZAJE COLECTIVO"
     )
 
     # =========================================================================
