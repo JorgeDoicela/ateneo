@@ -409,7 +409,7 @@ docker compose exec backend python tests/run_kst_simulation.py
 # 7. Compilar el Compendio Unificado en PDF:
 docker compose exec backend python scripts/generate_paper_tables_pdf.py
 
-# 8. Ejecutar suite unitaria frontend Vitest (22 suites, 106 tests PASS):
+# 8. Ejecutar suite unitaria frontend Vitest (32 suites, 156 tests PASS):
 docker compose exec frontend npm test
 
 # 9. Ejecutar pruebas End-to-End con Playwright (15 tests PASS):
