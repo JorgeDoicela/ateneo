@@ -38,7 +38,7 @@ La auditoría integral ejecutada sobre la plataforma **Ateneo+** certifica el 10
   - `evaluation_history`: 52 evaluaciones clínicas registradas con desglose dimensional y citas normativas.
   - `ateneo_rooms`: 124 salas de simulación colaborativa gestionadas.
   - `student_mastery` & `student_snapshots`: Registros longitudinales de trazabilidad de competencias.
-* **Resiliencia Docker:** Implementación de fallback defensivo a `PRAGMA journal_mode=DELETE` en [database.py](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/backend/core/database.py) para neutralizar bloqueos de concurrencia y errores de E/S (`disk I/O error`) en montajes NTFS compartidos entre Windows y Linux.
+* **Resiliencia Docker:** Implementación de fallback defensivo a `PRAGMA journal_mode=DELETE` en [`backend/core/database.py`](../../backend/core/database.py) para neutralizar bloqueos de concurrencia y errores de E/S (`disk I/O error`) en montajes NTFS compartidos entre Windows y Linux.
 
 ---
 
@@ -86,7 +86,7 @@ La auditoría integral ejecutada sobre la plataforma **Ateneo+** certifica el 10
 
 ## 5. Validación del Estudio Piloto de Aprendizaje
 
-Los datos del estudio piloto generados y exportados formalmente a [tabla_pilot_study_paper.tex](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/docs/1_tablas_latex/tabla_pilot_study_paper.tex) arrojaron los siguientes estimadores estadísticos:
+Los datos del estudio piloto generados y exportados formalmente a [`docs/1_tablas_latex/tabla_pilot_study_paper.tex`](../1_tablas_latex/tabla_pilot_study_paper.tex) arrojaron los siguientes estimadores estadísticos:
 
 | Parámetro Estadístico | Valor Empírico | Interpretación Científica |
 | :--- | :---: | :--- |

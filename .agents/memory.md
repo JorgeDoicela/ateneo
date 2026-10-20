@@ -1739,5 +1739,8 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
     - Paquetes `python-docx` y `python-pptx` instalados y verificados en el entorno virtual (`backend/.venv`).
     - Artefactos compilados y sincronizados al 100%:
       - `ATENEO_DOSSIER_TECNICO_Y_PONENCIA_CAISEB.docx` (2.53 MB, 21 secciones, portada y pie de página corregidos).
-      - `CAISEB.pptx` (3.96 MB, 13 diapositivas panorámicas con diseño formal para el atril).
       - `DOSSIER_PONENCIA_MAGISTRAL_CAISEB_40MIN.md` y `README.md` alineados con la nomenclatura y filiación canónica.
+* **Saneamiento de Documentación y Purga de Scripts PPTX Obsoletos (2026-10-20):**
+  - **Eliminación de Script PPTX Deprecado:** Se purgó `docs/8_ponencia_congreso_caiseb/scripts/build_caiseb_pptx.py` que contenía marcadores provisionales obsoletos (Milvus, Cohere, Mistral-Large). La presentación se gestiona de forma directa por el autor.
+  - **Normalización de Enlaces en Documentación:** Se erradicaron todas las referencias a rutas absolutas locales (`file:///c:/Users/...`) y el nombre de repositorio antiguo (`clinical_rag`), sustituyéndolas por enlaces relativos estándar en `docs/README.md`, `DOSIER_TECNICO_MARKDOWN_CLINICO_Y_SEGURIDAD_DEEP_LINKING.md`, `CERTIFICACION_SISTEMA_IA_RAG_INVESTIGACION.md` y `RULE.md`.
+  - **Actualización de Métrica de Pruebas:** Se actualizó la tabla de certificación en `docs/README.md` reflejando los 156 tests unitarios e integración aprobados de frontend (100% PASS).

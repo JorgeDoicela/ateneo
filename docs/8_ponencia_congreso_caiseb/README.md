@@ -23,7 +23,6 @@ Este directorio consolida todos los recursos, documentos oficiales, diapositivas
 | **`DOSSIER_PONENCIA_MAGISTRAL_CAISEB_40MIN.md`** | Markdown | Guía maestra en texto estructurado: cronograma minuto a minuto, guion narrativo para el orador, fórmulas de BKT/KST/Hake, tablas empíricas y banco de 11 preguntas de defensa (Q&A). |
 | **`RULE.md`** | Markdown | Regla de aislamiento estricto para proteger el resto del repositorio. |
 | **`scripts/build_full_word_dossier.py`** | Python | Script automatizado en Python (`python-docx`) para compilar y regenerar el documento Word oficial sin dependencias externas complejas. |
-| **`scripts/build_caiseb_pptx.py`** | Python | Script automatizado en Python (`python-pptx`) para compilar la presentación oficial panorámica CAISEB.pptx (13 diapositivas exactas). |
 
 ---
 

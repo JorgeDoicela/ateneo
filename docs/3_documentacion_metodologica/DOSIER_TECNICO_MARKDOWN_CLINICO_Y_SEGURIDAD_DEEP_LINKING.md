@@ -159,5 +159,5 @@ La totalidad de las funcionalidades implementadas cuentan con verificación auto
 ## 5. Mantenimiento y Extensibilidad
 
 1. **Adición de Nuevas Reglas Markdown:** Extender `ClinicalMarkdownRenderer.tsx` agregando componentes al objeto `components` de `ReactMarkdown`. No utilizar expresiones regulares en componentes de vista.
-2. **Nuevos Roles de Usuario:** Para incorporar nuevos perfiles clínicos (ej. `evaluador_externo` o `residente_jefe`), actualizar el enum `UserRole` en `backend/models/schemas.py`, el tipo en `frontend/src/types/index.ts` y las listas `allowedRoles` en [AppRoutes.tsx](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/frontend/src/routes/AppRoutes.tsx).
+2. **Nuevos Roles de Usuario:** Para incorporar nuevos perfiles clínicos (ej. `evaluador_externo` o `residente_jefe`), actualizar el enum `UserRole` en `backend/models/schemas.py`, el tipo en `frontend/src/types/index.ts` y las listas `allowedRoles` en [`frontend/src/routes/AppRoutes.tsx`](../../frontend/src/routes/AppRoutes.tsx).
 3. **Persistencia de Memoria:** Cualquier decisión sobre tokens, rutas o esquemas debe actualizarse en el archivo `.agents/memory.md` en el mismo turno de desarrollo.

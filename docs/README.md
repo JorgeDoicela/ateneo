@@ -32,17 +32,17 @@ docs/
 ## 2. Documentos Metodológicos Principales
 
 ### 2.1 Arquitectura e Ingeniería de Software
-* [ARQUITECTURA_MODULAR_FRONTEND.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/docs/3_documentacion_metodologica/ARQUITECTURA_MODULAR_FRONTEND.md): Detalla la partición del cliente React + Vite PWA en módulos de dominio clínico (`cases`, `evaluation`, `collaboration`, `analytics`, `teacher`, `admin`), ViewModels desacoplados mediante custom hooks, y el sistema de diseño clínico normativo (Material 3 Canvas `#f0f4f9`, sin emojis, iconos planos transparentes).
-* [ARQUITECTURA_MODULAR_MONOLITO_BACKEND.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/docs/3_documentacion_metodologica/ARQUITECTURA_MODULAR_MONOLITO_BACKEND.md): Especifica el monolito modular en FastAPI, la inyección de dependencias, repositorios relacionales y el patrón Unit of Work.
-* [ARQUITECTURA_Y_MODELADO_BASE_DE_DATOS.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/docs/3_documentacion_metodologica/ARQUITECTURA_Y_MODELADO_BASE_DE_DATOS.md): Detalla el modelo relacional ACID en `ateneo_clinical.db`, tablas maestras (`users`, `tenants`, `user_sessions`, `evaluation_history`), claves foráneas e integridad referencial.
-* [DOSIER_TECNICO_MARKDOWN_CLINICO_Y_SEGURIDAD_DEEP_LINKING.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/docs/3_documentacion_metodologica/DOSIER_TECNICO_MARKDOWN_CLINICO_Y_SEGURIDAD_DEEP_LINKING.md): Especifica el motor de compilación AST de Markdown clínico (`ClinicalMarkdownRenderer.tsx`), los modos visuales (`standard`, `dense`, `academic`), la preservación de deep-linking con mitigación de Open Redirect (CWE-601), y el ciclo de captura reactiva de errores HTTP 401 en tiempo real.
+* [ARQUITECTURA_MODULAR_FRONTEND.md](./3_documentacion_metodologica/ARQUITECTURA_MODULAR_FRONTEND.md): Detalla la partición del cliente React + Vite PWA en módulos de dominio clínico (`cases`, `evaluation`, `collaboration`, `analytics`, `teacher`, `admin`), ViewModels desacoplados mediante custom hooks, y el sistema de diseño clínico normativo (Material 3 Canvas `#f0f4f9`, sin emojis, iconos planos transparentes).
+* [ARQUITECTURA_MODULAR_MONOLITO_BACKEND.md](./3_documentacion_metodologica/ARQUITECTURA_MODULAR_MONOLITO_BACKEND.md): Especifica el monolito modular en FastAPI, la inyección de dependencias, repositorios relacionales y el patrón Unit of Work.
+* [ARQUITECTURA_Y_MODELADO_BASE_DE_DATOS.md](./3_documentacion_metodologica/ARQUITECTURA_Y_MODELADO_BASE_DE_DATOS.md): Detalla el modelo relacional ACID en `ateneo_clinical.db`, tablas maestras (`users`, `tenants`, `user_sessions`, `evaluation_history`), claves foráneas e integridad referencial.
+* [DOSIER_TECNICO_MARKDOWN_CLINICO_Y_SEGURIDAD_DEEP_LINKING.md](./3_documentacion_metodologica/DOSIER_TECNICO_MARKDOWN_CLINICO_Y_SEGURIDAD_DEEP_LINKING.md): Especifica el motor de compilación AST de Markdown clínico (`ClinicalMarkdownRenderer.tsx`), los modos visuales (`standard`, `dense`, `academic`), la preservación de deep-linking con mitigación de Open Redirect (CWE-601), y el ciclo de captura reactiva de errores HTTP 401 en tiempo real.
 
 ### 2.2 Inteligencia Artificial y RAG
-* [ARQUITECTURA_RAG_Y_FINE_TUNING.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/docs/3_documentacion_metodologica/ARQUITECTURA_RAG_Y_FINE_TUNING.md): Pipeline de recuperación híbrida, indexación vectorial con FAISS y BGE-M3, fine-tuning y evaluación contra Guías de Práctica Clínica del MSP Ecuador.
-* [ARQUITECTURA_RESILIENTE_LLM_Y_CONFIGURACION.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/docs/3_documentacion_metodologica/ARQUITECTURA_RESILIENTE_LLM_Y_CONFIGURACION.md): Estrategia de resiliencia ante contingencias de cuota o caídas de API con conmutación por error (*fallback*) a modelos alternativos.
+* [ARQUITECTURA_RAG_Y_FINE_TUNING.md](./3_documentacion_metodologica/ARQUITECTURA_RAG_Y_FINE_TUNING.md): Pipeline de recuperación híbrida, indexación vectorial con ChromaDB v2 y BGE-M3, fine-tuning y evaluación contra Guías de Práctica Clínica del MSP Ecuador.
+* [ARQUITECTURA_RESILIENTE_LLM_Y_CONFIGURACION.md](./3_documentacion_metodologica/ARQUITECTURA_RESILIENTE_LLM_Y_CONFIGURACION.md): Estrategia de resiliencia ante contingencias de cuota o caídas de API con conmutación por error (*fallback*) a modelos alternativos.
 
 ### 2.3 Analítica del Aprendizaje y Educación Médica
-* [CURRICULO_ADAPTATIVO_KST_Y_LEARNING_ANALYTICS.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/docs/3_documentacion_metodologica/CURRICULO_ADAPTATIVO_KST_Y_LEARNING_ANALYTICS.md): Formalización matemática de la Teoría de Espacios del Conocimiento (*Knowledge Space Theory - KST*) aplicada a la navegación curricular adaptativa de casos clínicos según maestría diagnóstica.
+* [CURRICULO_ADAPTATIVO_KST_Y_LEARNING_ANALYTICS.md](./3_documentacion_metodologica/CURRICULO_ADAPTATIVO_KST_Y_LEARNING_ANALYTICS.md): Formalización matemática de la Teoría de Espacios del Conocimiento (*Knowledge Space Theory - KST*) aplicada a la navegación curricular adaptativa de casos clínicos según maestría diagnóstica.
 
 ---
 
@@ -50,7 +50,7 @@ docs/
 
 | Batería de Pruebas | Entorno | Casos de Prueba | Resultado |
 | :--- | :--- | :---: | :---: |
-| **Frontend Unit & Integration** | Vitest 5 + React Testing Library | 137 / 137 | **100% PASS** |
+| **Frontend Unit & Integration** | Vitest 5 + React Testing Library | 156 / 156 | **100% PASS** |
 | **Backend API Endpoints** | Pytest + FastAPI TestClient | 10 / 10 | **100% PASS** |
 | **Seguridad de Autenticación** | Pytest (RBAC, JTI, Lockout) | 6 / 6 | **100% PASS** |
 | **Verificación de Tipos Estricta** | TypeScript 5 (`tsc --noEmit`) | 0 errores | **100% PASS** |
