@@ -37,7 +37,7 @@ El sistema organiza sus pruebas en 4 niveles complementarios que garantizan la i
 
 ## 2. Catálogo de Pruebas de Frontend (Vitest + React Testing Library & Playwright)
 
-El frontend dispone de **23 suites de prueba y 111 especificaciones unitarias y de integración** en Vitest, junto con 4 suites E2E multi-navegador en Playwright (15 pruebas), que convalidan el árbol de componentes, auto-registro multi-tenant, imagenología DICOM, exámenes OSCE, tele-audio WebRTC, temas multi-tenancy, i18n tipado, observabilidad forense y estándar de diseño:
+El frontend dispone de **32 suites de prueba y 156 especificaciones unitarias y de integración** en Vitest, junto con 4 suites E2E multi-navegador en Playwright (15 pruebas), que convalidan el árbol de componentes, auto-registro multi-tenant, imagenología DICOM, exámenes OSCE, tele-audio WebRTC, temas multi-tenancy, i18n tipado, observabilidad forense y estándar de diseño:
 
 ### 2.1 Ejecución de Pruebas Unitarias e Integración (Vitest)
 ```bash
@@ -103,23 +103,36 @@ docker compose exec backend python tests/run_all_tests.py
 ```
 
 ### 3.2 Batería Estándar con Pytest
-Ejecuta la suite de 21 especificaciones con recolección de aserciones:
+Ejecuta la suite completa de 22 módulos de prueba y 108 especificaciones unitarias e integración con recolección de aserciones al 100% PASS:
 ```bash
 backend/.venv/Scripts/pytest backend/tests/ -v
 ```
 
-### 3.3 Detalle de Suites Backend
+### 3.3 Detalle de Suites Backend (108 Tests Aprobados)
 | Archivo de Prueba | Dominio Evaluado | Detalle de Validación |
 |:---|:---|:---|
 | `test_auth_security.py` | Seguridad y RBAC | Hashing Bcrypt, ciclo de vida de tokens JWT (HMAC-SHA256) y validación de usuarios demo. |
 | `test_adaptive_curriculum.py` | Currículo Adaptativo | Grafo KST (7 competencias), actualización bayesiana BKT ($P(L)$), motor de recomendación en ZDP y endpoints `/api/adaptive/*`. |
 | `test_paper_differentiators.py` | Métricas Científicas | Algoritmo de cálculo de Faithfulness Score, cálculo de IBF global y por eje, y endpoints de analítica B2B. |
-| `pilot_study_analyzer.py` | Análisis Inferencial | Procesamiento de `resultados_pilot.csv`, cálculo de ganancia de Hake ($g=0.74$), $t$-test pareado y exportación de Tabla IV LaTeX. |
 | `test_api_endpoints.py` | Integración HTTP | Pruebas de endpoints FastAPI (Auth, Cases, Benchmark, History, Salas Colaborativas, PDF y Fases). |
-| `test_multimodal_and_cases.py` | Casos GPC y Multimodal | Recuperación de los 10 casos canónicos del MSP, evaluación multi-imagen con Gemini Vision y generación de reportes PDF con sello SHA-256. |
-| `test_background_tasks.py` | Pool Asíncrono de Reportes | Despachador en segundo plano (ThreadPoolExecutor), exportación asíncrona HTTP 202 y prueba de estrés concurrente. |
-| `test_structured_logging.py` | Observabilidad y Logs JSON | Formateador estructurado OpenTelemetry, inyección de contextvars (request_id, user_id, tenant_id) y ofuscación de secretos. |
-| `load_test_simulation.py` | Estrés y Concurrencia | Concurrencia de 100 usuarios, SQLite WAL 0% locks, Rate Limit 429 RFC 7807 y Circuit Breakers. |
+| `test_learning_events.py` | Telemetría Formativa | Ingesta de eventos granulares, persistencia en SQLite/Postgres y consultas de auditoría B2B. |
+| `test_openai_compatible_gateway.py` | Adaptador Universal LLM | Conector desacoplado agnóstico a proveedores (Ollama, vLLM, DeepSeek-R1, LLaMA-3). |
+| `test_multimodal_and_cases.py` | Casos GPC y Multimodal | Recuperación de los 10 casos canónicos del MSP, evaluación multi-imagen con Gemini Vision y reportes PDF con SHA-256. |
+| `test_multimodal_audio_evaluation.py` | Evaluación de Voz | Transcripción médica y evaluación de notas de voz clínicas con Web Speech API y Gemini Audio. |
+| `test_background_tasks.py` | Pool Asíncrono de Reportes | Despachador en segundo plano (ThreadPoolExecutor), exportación asíncrona HTTP 202 y prueba concurrente. |
+| `test_structured_logging.py` | Observabilidad y Logs JSON | Formateador estructurado OpenTelemetry, inyección de contextvars (request_id, user_id, tenant_id) y ofuscación. |
+| `test_telemetry.py` | Métricas RUM y Latencias | Medición de latencia de inferencia P50/P95, disponibilidad de servicio y telemetría de modelos. |
+| `test_rate_limiter.py` | Protección de Cuota y DoS | Rate limiting por IP/token conforme a RFC 7807 (Problem Details) con ventanas deslizantes. |
+| `test_prompt_security.py` | Sanitización y Anti-Inyección | Detección de jailbreaks, prompt injections y validación estricta de entradas clínicas. |
+| `test_rag_cache.py` | Caché Semántica y Léxica | Invalidación reactiva, persistencia TTL y optimización de tokens de inferencia RAG. |
+| `test_multi_tenancy.py` | Aislamiento Institucional | Segregación estricta de datos por universidad (UCE, USFQ, Sede Central) y políticas multi-inquilino. |
+| `test_health_probes.py` | Sondas de Disponibilidad | Health probes Liveness/Readiness (`/health`, `/health/ready`, `/health/live`) para Kubernetes/Docker. |
+| `test_gamification.py` | Gamificación Clínica | Hitos clínicos, cálculo de XP, rangos formativos, rachas de estudio y desbloqueo de insignias. |
+| `test_magic_links_endpoints.py` | Enlaces Mágicos Passwordless | Generación de tokens de un solo uso con expiración criptográfica y autenticación directa. |
+| `test_magic_links_repository.py` | Persistencia de Magic Links | Ciclo de vida transaccional, consumo único y revocación de tokens de acceso temporal. |
+| `test_unit_of_work.py` | Patrón Unit of Work | Coordinación transaccional atómica entre múltiples repositorios relacionales. |
+| `test_evaluation_pipeline.py` | Pipeline de Evaluación RAG | Orquestación end-to-end de recuperación vectorial, reranker y puntuación psicométrica. |
+| `test_retriever_pipeline.py` | Recuperador Híbrido | Fusión RRF entre BGE-M3 denso y BM25 léxico sobre el corpus de 23 GPCs del MSP. |
 
 ---
 

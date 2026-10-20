@@ -7,12 +7,15 @@ export interface AuthState {
   user: User | null;
   token: string | null;
   loading: boolean;
+  sessionConsentAcknowledged: boolean;
   login: (email: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
   verifyAuth: () => Promise<void>;
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
   setAuth: (user: User, token: string) => void;
+  setSessionConsentAcknowledged: (acknowledged: boolean) => void;
+  acceptTermsAndUnlockSession: (version?: string) => Promise<User>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -21,6 +24,9 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       loading: true,
+      sessionConsentAcknowledged: typeof sessionStorage !== 'undefined' 
+        ? sessionStorage.getItem('ateneo_session_consent_acknowledged') === 'true' 
+        : false,
 
       setUser: (user) => set({ user }),
       setToken: (token) => {
@@ -40,6 +46,26 @@ export const useAuthStore = create<AuthState>()(
         set({ user, token, loading: false });
       },
 
+      setSessionConsentAcknowledged: (acknowledged: boolean) => {
+        if (typeof sessionStorage !== 'undefined') {
+          if (acknowledged) {
+            sessionStorage.setItem('ateneo_session_consent_acknowledged', 'true');
+          } else {
+            sessionStorage.removeItem('ateneo_session_consent_acknowledged');
+          }
+        }
+        set({ sessionConsentAcknowledged: acknowledged });
+      },
+
+      acceptTermsAndUnlockSession: async (version?: string): Promise<User> => {
+        const updatedUser = await authApi.acceptTerms(version);
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.setItem('ateneo_session_consent_acknowledged', 'true');
+        }
+        set({ user: updatedUser, sessionConsentAcknowledged: true });
+        return updatedUser;
+      },
+
       login: async (email: string, password: string): Promise<User> => {
         set({ loading: true });
         try {
@@ -47,10 +73,14 @@ export const useAuthStore = create<AuthState>()(
           if (typeof localStorage !== 'undefined') {
             localStorage.setItem('ateneo_token', data.access_token);
           }
+          if (typeof sessionStorage !== 'undefined') {
+            sessionStorage.removeItem('ateneo_session_consent_acknowledged');
+          }
           set({
             token: data.access_token,
             user: data.user,
             loading: false,
+            sessionConsentAcknowledged: false,
           });
           return data.user;
         } catch (error) {
@@ -68,10 +98,14 @@ export const useAuthStore = create<AuthState>()(
           if (typeof localStorage !== 'undefined') {
             localStorage.removeItem('ateneo_token');
           }
+          if (typeof sessionStorage !== 'undefined') {
+            sessionStorage.removeItem('ateneo_session_consent_acknowledged');
+          }
           set({
             user: null,
             token: null,
             loading: false,
+            sessionConsentAcknowledged: false,
           });
         }
       },

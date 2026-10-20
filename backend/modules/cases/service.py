@@ -54,4 +54,8 @@ class CaseService:
         pdf_path = self.pdfs_base_dir / pdf_filename
         if pdf_path.exists() and pdf_path.is_file():
             return pdf_path
+        # Búsqueda recursiva en subdirectorios de raw_pdfs
+        for matched in self.pdfs_base_dir.rglob(pdf_filename):
+            if matched.is_file():
+                return matched
         return None

@@ -19,13 +19,15 @@ class UnifiedTestClient(httpx.Client):
         return tc.websocket_connect(url, **kwargs)
 
 def get_test_client():
-    live_url = "http://127.0.0.1:8000"
-    try:
-        r = httpx.get(f"{live_url}/health", timeout=2.0)
-        if r.status_code == 200:
-            return UnifiedTestClient(base_url=live_url, timeout=httpx.Timeout(120.0, connect=10.0))
-    except Exception:
-        pass
+    import os
+    if os.getenv("TEST_USE_LIVE_SERVER", "0") == "1":
+        live_url = os.getenv("LIVE_SERVER_URL", "http://127.0.0.1:8000")
+        try:
+            r = httpx.get(f"{live_url}/health", timeout=2.0)
+            if r.status_code == 200:
+                return UnifiedTestClient(base_url=live_url, timeout=httpx.Timeout(120.0, connect=10.0))
+        except Exception:
+            pass
 
     from fastapi.testclient import TestClient
     from main import app

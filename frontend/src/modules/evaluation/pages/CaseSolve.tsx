@@ -4,6 +4,7 @@ import {
   ArrowLeft, 
   Send, 
   AlertCircle, 
+  AlertTriangle,
   FileImage, 
   Stethoscope, 
   Activity, 
@@ -231,6 +232,14 @@ export default function CaseSolve() {
           </div>
         );
       })()}
+
+      {/* Aviso de Simulación e Investigación en Desarrollo Activo */}
+      <div className="flex items-center gap-2 text-xs text-slate-500">
+        <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+        <span>
+          <strong className="text-slate-700">Investigación en Desarrollo Activo:</strong> Caso clínico ficticio dentro de un protocolo científico en curso. Por protección legal institucional, el uso es de momento formativo y experimental rumbo a una versión oficial; no apto para decisiones en pacientes reales.
+        </span>
+      </div>
 
       {/* 2. Barra de Progreso Secuencial por Fases */}
       {isPhaseMode && !resultado && (
@@ -477,10 +486,18 @@ export default function CaseSolve() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100">
               <div className="space-y-0.5">
                 <h3 className="text-base font-normal text-[#1f1f1f] font-heading">
-                  Tu Resolución Clínica
+                  {isPhaseMode ? `Tu Resolución Clínica — Fase ${currentPhase}` : 'Tu Resolución Clínica'}
                 </h3>
                 <p className="text-xs text-[#747775]">
-                  Escribe o dicta tu análisis estructurado según la metodología SOAP
+                  {isPhaseMode
+                    ? currentPhase === 1
+                      ? 'Escribe o dicta tu sospecha diagnóstica, signos de alarma y criterios de severidad para esta fase'
+                      : currentPhase === 2
+                        ? 'Escribe o dicta tu solicitud e interpretación de paraclínicos y afectación orgánica'
+                        : currentPhase === 3
+                          ? 'Escribe o dicta tu esquema terapéutico, dosificación normada y conducta clínica'
+                          : `Responde a la interrogante formativa de la Fase ${currentPhase} según la GPC Ecuador`
+                    : 'Escribe o dicta tu análisis estructurado según la metodología SOAP (Subjetivo, Objetivo, Análisis, Plan)'}
                 </p>
               </div>
 
@@ -511,7 +528,15 @@ export default function CaseSolve() {
                   placeholder={
                     audioBlob 
                       ? "Opcional: agrega notas escritas complementarias a tu nota de voz..."
-                      : "Detalla tu impresión diagnóstica, paraclínicos solicitados, hidratación, dosificación y criterios de seguimiento según la norma oficial..."
+                      : isPhaseMode
+                        ? currentPhase === 1
+                          ? "Describe tu sospecha diagnóstica sindrómica, signos de severidad identificados y conducta clínica inicial según la GPC..."
+                          : currentPhase === 2
+                            ? "Detalla los estudios paraclínicos solicitados, interpretación de hallazgos analíticos u órganos afectados y confirmación diagnóstica..."
+                            : currentPhase === 3
+                              ? "Detalla el esquema terapéutico normado, fármacos de primera línea, dosificación, vías de administración y plan de seguimiento..."
+                              : "Redacta tu fundamentación clínica orientada a responder puntualmente la interrogante formativa de esta fase..."
+                        : "Detalla tu impresión diagnóstica, paraclínicos solicitados, hidratación, dosificación y criterios de seguimiento según la norma oficial (metodología SOAP)..."
                   }
                   className="w-full p-4 bg-[#f0f4f9] rounded-[20px] text-sm text-[#1f1f1f] border border-slate-200/80 focus:outline-none focus:border-[#0b57d0] focus:bg-white transition-all leading-relaxed placeholder:text-[#747775] resize-none"
                   required={!audioBlob}

@@ -166,10 +166,17 @@ export default function Register() {
               </p>
             </div>
 
-            <div className="hidden md:flex items-center gap-3 text-xs text-[#747775] pt-6 border-t border-slate-100">
-              <span className="font-medium text-slate-600">Normativa GPC Ecuador</span>
-              <span className="text-slate-300">•</span>
-              <span className="font-medium text-slate-600">Registro Institucional</span>
+            <div className="pt-6 border-t border-slate-100 space-y-1">
+              <div className="flex items-center gap-2 text-xs">
+                <span className="font-bold text-[10px] text-amber-700 uppercase tracking-wider">
+                  Fase Experimental
+                </span>
+                <span className="text-slate-300">•</span>
+                <span className="text-[11px] text-slate-500 font-medium">Investigación en Desarrollo Activo</span>
+              </div>
+              <p className="text-[11px] text-slate-400 leading-normal">
+                Plataforma en protocolo de investigación científica y validación formativa. De momento restringida a simulación médica por protección legal, con proyección a una versión oficial.
+              </p>
             </div>
           </div>
 

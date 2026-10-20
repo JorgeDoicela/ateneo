@@ -72,6 +72,8 @@ def test_learning_event_database_lifecycle():
         print("  [PASS] Ciclo de vida y consultas de LearningEventRepository validados.")
     finally:
         db.close()
+        from core.database import engine
+        engine.dispose()
 
 
 def test_service_event_recording_and_listing():
@@ -108,12 +110,15 @@ def test_service_event_recording_and_listing():
         print("  [PASS] Métodos record_learning_event y list_learning_events de AnalyticsHistoryService validados.")
     finally:
         db.close()
+        from core.database import engine
+        engine.dispose()
 
 
 def test_http_endpoints_learning_events():
     """Valida los endpoints HTTP reales POST /api/analytics/events y GET /api/analytics/events."""
-    from tests.client_helper import get_test_client
-    client = get_test_client()
+    from fastapi.testclient import TestClient
+    from main import app
+    client = TestClient(app)
 
     # 1. Ingesta mediante /api/analytics/events
     payload = {
@@ -153,6 +158,8 @@ def test_http_endpoints_learning_events():
         db.commit()
     finally:
         db.close()
+        from core.database import engine
+        engine.dispose()
 
     print("  [PASS] Integración HTTP POST /api/analytics/events y GET /api/analytics/events (201 Created & 200 OK) validada.")
 

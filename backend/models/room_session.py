@@ -8,8 +8,7 @@ from modules.collaboration.repository import RoomRepository
 from modules.collaboration.service import CollaborationService
 from modules.cases.dependencies import get_case_service
 
-init_database()
-
+# Tablas inicializadas en el ciclo de vida principal de la aplicación (main.py lifespan)
 ATENEO_ROOMS_DB: Dict[str, Dict[str, Any]] = {}
 
 

@@ -51,6 +51,7 @@ docs/
 | Batería de Pruebas | Entorno | Casos de Prueba | Resultado |
 | :--- | :--- | :---: | :---: |
 | **Frontend Unit & Integration** | Vitest 5 + React Testing Library | 156 / 156 | **100% PASS** |
-| **Backend API Endpoints** | Pytest + FastAPI TestClient | 10 / 10 | **100% PASS** |
-| **Seguridad de Autenticación** | Pytest (RBAC, JTI, Lockout) | 6 / 6 | **100% PASS** |
+| **Backend Total Suite (Pytest)** | Pytest 9 + FastAPI TestClient | 108 / 108 | **100% PASS** |
+| **Seguridad de Autenticación & RBAC** | Pytest (RBAC, JTI, Lockout) | 6 / 6 | **100% PASS** |
 | **Verificación de Tipos Estricta** | TypeScript 5 (`tsc --noEmit`) | 0 errores | **100% PASS** |
+| **Compilación de Producción PWA** | Vite 6 + Rollup | 0 errores | **100% PASS** |

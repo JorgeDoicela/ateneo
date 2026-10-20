@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, ArrowRight, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthContext';
 import casesApi from '../../cases/api/casesApi';
 import collaborationApi from '../../collaboration/api/collaborationApi';
 import ClinicalButton from '../../../core/ui/ClinicalButton';
@@ -12,6 +13,7 @@ import { resolveGpcMeta } from '../../cases/hooks/useCases';
  * Permite a los docentes moderar ateneos y simular casos en tiempo real.
  */
 export const TeacherCasesPage: React.FC = () => {
+  const { user } = useAuth();
   const [cases, setCases] = useState<ExtendedClinicalCase[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [creatingRoomId, setCreatingRoomId] = useState<string | null>(null);
@@ -41,8 +43,8 @@ export const TeacherCasesPage: React.FC = () => {
     try {
       const room = await collaborationApi.createRoom(
         caseId,
-        'usr_docente_001',
-        'Dr. Carlos Andrade (Docente)'
+        user?.id || 'usr_docente_001',
+        user?.nombre ? `${user.nombre} (Docente)` : 'Dr. Carlos Andrade (Docente)'
       );
       const targetCode = room.room_code || room.codigo || '';
       navigate(`/ateneo/${targetCode}`);

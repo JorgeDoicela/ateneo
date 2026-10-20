@@ -21,6 +21,15 @@ export interface User {
   login_count?: number;
   email_verified?: boolean;
   activo?: boolean;
+  terminos_aceptados?: boolean;
+  fecha_terminos_aceptados?: string;
+  version_terminos?: string;
+}
+
+export interface AcceptTermsRequest {
+  version_terminos?: string;
+  acepta_investigacion?: boolean;
+  acepta_tratamiento_datos?: boolean;
 }
 
 export interface LoginResponse {
@@ -146,6 +155,7 @@ export interface EvaluationResult {
   case_id?: string;
   case_title?: string;
   cita_normativa?: NormativeCitation;
+  citas_normativas?: NormativeCitation[];
   faithfulness_score?: number;
   competencias_deficientes?: DeficientCompetency[];
   competencias_por_eje?: AxisCompetencyItem[];
@@ -186,6 +196,7 @@ export interface PhaseEvaluationResult {
   score_fase: number;
   aciertos: string[];
   omisiones: string[];
+  competencias_deficientes?: DeficientCompetency[];
   cita_normativa?: NormativeCitation;
   retroalimentacion_fase?: string;
   datos_fase_siguiente?: string | NextPhaseData | null;

@@ -17,17 +17,18 @@ else:
 
 engine = create_engine(settings.database_url, **engine_kwargs)
 
-# Si es SQLite, activar modo WAL y busy_timeout para máxima concurrencia sin bloqueos
+# Si es SQLite, configurar journal_mode compatible con bind mounts y busy_timeout defensivo
 if settings.is_sqlite:
     @event.listens_for(engine, "connect")
     def set_sqlite_pragma(dbapi_connection, connection_record):
         cursor = dbapi_connection.cursor()
+        journal_mode = os.getenv("SQLITE_JOURNAL_MODE", "MEMORY").upper()
         try:
-            cursor.execute("PRAGMA journal_mode=WAL")
+            cursor.execute(f"PRAGMA journal_mode={journal_mode}")
         except Exception:
-            cursor.execute("PRAGMA journal_mode=DELETE")
+            cursor.execute("PRAGMA journal_mode=MEMORY")
         cursor.execute("PRAGMA busy_timeout=60000")
-        cursor.execute("PRAGMA synchronous=NORMAL")
+        cursor.execute("PRAGMA synchronous=OFF")
         cursor.execute("PRAGMA foreign_keys=ON")
         cursor.close()
 
@@ -111,6 +112,23 @@ def init_database() -> None:
     )
 
     Base.metadata.create_all(bind=engine)
+
+    # Migración defensiva e idempotente de columnas para SQLite
+    if settings.is_sqlite:
+        from sqlalchemy import text
+        with engine.connect() as conn:
+            try:
+                res = conn.execute(text("PRAGMA table_info(users)"))
+                existing_cols = {row[1] for row in res.fetchall()}
+                if "terminos_aceptados" not in existing_cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN terminos_aceptados BOOLEAN DEFAULT 0 NOT NULL"))
+                if "fecha_terminos_aceptados" not in existing_cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN fecha_terminos_aceptados DATETIME"))
+                if "version_terminos" not in existing_cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN version_terminos VARCHAR(50) DEFAULT 'v1.0-investigacion-2026'"))
+                conn.commit()
+            except Exception:
+                pass
 
     # Siembra defensiva e idempotente de tenant por defecto y usuarios institucionales
     with SessionLocal() as db:

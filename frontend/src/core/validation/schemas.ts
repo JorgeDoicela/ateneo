@@ -23,6 +23,9 @@ export const UserSchema = z.object({
   login_count: z.number().optional(),
   email_verified: z.boolean().optional(),
   activo: z.boolean().optional(),
+  terminos_aceptados: z.boolean().optional(),
+  fecha_terminos_aceptados: z.string().nullable().optional(),
+  version_terminos: z.string().nullable().optional(),
 });
 
 export const LoginResponseSchema = z.object({

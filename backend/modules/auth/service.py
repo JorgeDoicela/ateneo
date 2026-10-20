@@ -204,7 +204,10 @@ class AuthService:
             tenant_id=resolved_tenant,
             last_login_at=last_login_str,
             login_count=user_record.login_count,
-            email_verified=bool(getattr(user_record, "email_verified", False))
+            email_verified=bool(getattr(user_record, "email_verified", False)),
+            terminos_aceptados=bool(getattr(user_record, "terminos_aceptados", False)),
+            fecha_terminos_aceptados=user_record.fecha_terminos_aceptados.isoformat() if getattr(user_record, "fecha_terminos_aceptados", None) else None,
+            version_terminos=getattr(user_record, "version_terminos", "v1.0-investigacion-2026") or "v1.0-investigacion-2026"
         )
 
         token_jti = str(uuid.uuid4())
@@ -225,23 +228,52 @@ class AuthService:
             )
             self.session_repository.create(session_record)
 
-        user_res = UserResponse(
-            id=user_record.id,
-            email=user_record.email,
-            nombre=user_record.nombre,
-            rol=role_enum,
-            tenant_id=resolved_tenant,
-            last_login_at=last_login_str,
-            login_count=user_record.login_count,
-            email_verified=bool(getattr(user_record, "email_verified", False)),
-            activo=user_record.activo
-        )
+        user_res = self.to_user_response(user_record)
 
         return TokenResponse(
             access_token=access_token,
             token_type="bearer",
             user=user_res
         )
+
+    def to_user_response(self, u: UserModel) -> UserResponse:
+        """Serializa de forma canónica y defensiva una entidad UserModel a UserResponse."""
+        role_enum = UserRole(u.rol)
+        resolved_tenant = getattr(u, "tenant_id", "tenant_default") or "tenant_default"
+        last_login_str = u.last_login_at.isoformat() if getattr(u, "last_login_at", None) else None
+        fecha_terminos_str = u.fecha_terminos_aceptados.isoformat() if getattr(u, "fecha_terminos_aceptados", None) else None
+
+        return UserResponse(
+            id=u.id,
+            email=u.email,
+            nombre=u.nombre,
+            rol=role_enum,
+            tenant_id=resolved_tenant,
+            last_login_at=last_login_str,
+            login_count=getattr(u, "login_count", 0) or 0,
+            email_verified=bool(getattr(u, "email_verified", False)),
+            activo=bool(getattr(u, "activo", True)),
+            terminos_aceptados=bool(getattr(u, "terminos_aceptados", False)),
+            fecha_terminos_aceptados=fecha_terminos_str,
+            version_terminos=getattr(u, "version_terminos", "v1.0-investigacion-2026") or "v1.0-investigacion-2026"
+        )
+
+    def accept_terms(self, user_id: str, version_terminos: str = "v1.0-investigacion-2026") -> UserResponse:
+        """
+        Registra la aceptación legal obligatoria de términos de investigación científica,
+        políticas de privacidad LOPDP y descargo de responsabilidad clínica.
+        """
+        user_record = self.repository.get_by_id(user_id)
+        if not user_record:
+            raise LookupError(f"Usuario con ID '{user_id}' no encontrado.")
+
+        now_utc = datetime.datetime.now(datetime.timezone.utc)
+        user_record.terminos_aceptados = True
+        user_record.fecha_terminos_aceptados = now_utc
+        user_record.version_terminos = version_terminos or "v1.0-investigacion-2026"
+        self.repository.update(user_record)
+
+        return self.to_user_response(user_record)
 
     def logout_session(self, jti: str) -> bool:
         """Revoca inmediatamente la sesión identificada por su claim criptográfico JTI."""
@@ -267,20 +299,7 @@ class AuthService:
 
     def list_users(self, tenant_id: Optional[str] = None) -> List[UserResponse]:
         records = self.repository.get_all(tenant_id=tenant_id)
-        return [
-            UserResponse(
-                id=u.id,
-                email=u.email,
-                nombre=u.nombre,
-                rol=UserRole(u.rol),
-                tenant_id=getattr(u, "tenant_id", "tenant_default") or "tenant_default",
-                last_login_at=u.last_login_at.isoformat() if getattr(u, "last_login_at", None) else None,
-                login_count=getattr(u, "login_count", 0) or 0,
-                email_verified=bool(getattr(u, "email_verified", False)),
-                activo=u.activo
-            )
-            for u in records
-        ]
+        return [self.to_user_response(u) for u in records]
 
     def register_user(self, req: RegisterRequest) -> RegisterResponse:
         """
@@ -665,17 +684,7 @@ class AuthService:
             jti=session_jti
         )
 
-        user_profile = UserResponse(
-            id=user_record.id,
-            email=user_record.email,
-            nombre=user_record.nombre,
-            rol=UserRole(user_record.rol),
-            tenant_id=user_record.tenant_id,
-            last_login_at=user_record.last_login_at.isoformat() if getattr(user_record, "last_login_at", None) else None,
-            login_count=getattr(user_record, "login_count", 1) or 1,
-            email_verified=getattr(user_record, "email_verified", False) or False,
-            activo=getattr(user_record, "activo", True)
-        )
+        user_profile = self.to_user_response(user_record)
 
         return MagicLinkConsumeResponse(
             access_token=access_token,

@@ -234,6 +234,52 @@ def test_user_session_lifecycle_and_revocation():
 
         print("  [PASS] Ciclo de vida de sesiones, persistencia JTI y revocación por logout validados.")
 
+def test_accept_terms_and_legal_consent():
+    """Valida la persistencia inmutable del consentimiento informado y LOPDP por usuario."""
+    from core.database import SessionLocal
+    from modules.auth.repository import UserRepository, TenantRepository, UserSessionRepository, MagicLinkRepository
+    from modules.auth.service import AuthService
+    from models.schemas import LoginRequest
+    from fastapi.security import HTTPAuthorizationCredentials
+
+    with SessionLocal() as db:
+        user_repo = UserRepository(db)
+        tenant_repo = TenantRepository(db)
+        session_repo = UserSessionRepository(db)
+        magic_repo = MagicLinkRepository(db)
+        auth_service = AuthService(user_repo, tenant_repo, session_repo, magic_repo)
+        auth_service.seed_demo_users_if_needed()
+
+        # 1. Obtener usuario alumno y verificar aceptación de términos
+        user_record = user_repo.get_by_email("alumno@ateneo.edu.ec")
+        assert user_record is not None
+
+        # 2. Registrar consentimiento informado
+        version = "v1.0-test-investigacion-2026"
+        res = auth_service.accept_terms(user_id=user_record.id, version_terminos=version)
+
+        assert res.terminos_aceptados is True
+        assert res.version_terminos == version
+        assert res.fecha_terminos_aceptados is not None
+
+        # 3. Validar persistencia real en base de datos
+        db_user = user_repo.get_by_id(user_record.id)
+        assert db_user.terminos_aceptados is True
+        assert db_user.version_terminos == version
+        assert db_user.fecha_terminos_aceptados is not None
+
+        # 4. Validar resolución en get_current_user
+        from auth.security import get_current_user
+        token_res = auth_service.authenticate(
+            LoginRequest(email="alumno@ateneo.edu.ec", password="Alumno123!")
+        )
+        creds = HTTPAuthorizationCredentials(scheme="Bearer", credentials=token_res.access_token)
+        resolved = get_current_user(credentials=creds, user_repo=user_repo, session_repo=session_repo)
+        assert resolved.terminos_aceptados is True
+        assert resolved.version_terminos == version
+
+        print("  [PASS] Persistencia de consentimiento legal e investigación validada.")
+
 if __name__ == "__main__":
     print("\n" + "="*70)
     print(" SUITE DE PRUEBAS UNITARIAS DE SEGURIDAD Y RBAC - ATENEO+")
@@ -244,6 +290,7 @@ if __name__ == "__main__":
     test_brute_force_lockout_and_login_metrics()
     test_register_user_multi_tenant_flow()
     test_user_session_lifecycle_and_revocation()
+    test_accept_terms_and_legal_consent()
     print("="*70)
     print(" TODAS LAS PRUEBAS DE SEGURIDAD PASARON (PASS)\n")
 

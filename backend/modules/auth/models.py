@@ -46,6 +46,9 @@ class UserModel(Base):
     failed_login_attempts = Column(Integer, nullable=False, default=0, server_default="0")
     locked_until = Column(SafeDateTime, nullable=True)
     email_verified = Column(Boolean, nullable=False, default=False, server_default="0")
+    terminos_aceptados = Column(Boolean, nullable=False, default=False, server_default="0")
+    fecha_terminos_aceptados = Column(SafeDateTime, nullable=True)
+    version_terminos = Column(String(50), nullable=True, default="v1.0-investigacion-2026", server_default="v1.0-investigacion-2026")
     created_at = Column(SafeDateTime, server_default=func.now(), nullable=False)
 
 

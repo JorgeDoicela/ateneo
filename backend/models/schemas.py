@@ -143,11 +143,20 @@ class User(BaseModel):
     failed_login_attempts: Optional[int] = 0
     locked_until: Optional[str] = None
     email_verified: Optional[bool] = False
+    terminos_aceptados: Optional[bool] = False
+    fecha_terminos_aceptados: Optional[str] = None
+    version_terminos: Optional[str] = "v1.0-investigacion-2026"
 
 
 class LoginRequest(BaseModel):
     email: str
     password: str
+
+
+class AcceptTermsRequest(BaseModel):
+    version_terminos: Optional[str] = Field(default="v1.0-investigacion-2026", description="Versión del consentimiento informado")
+    acepta_investigacion: bool = Field(default=True, description="Consentimiento para fines de investigación académica y prueba piloto")
+    acepta_tratamiento_datos: bool = Field(default=True, description="Consentimiento para tratamiento de datos personales conforme a la LOPDP")
 
 
 class UserResponse(BaseModel):
@@ -160,6 +169,9 @@ class UserResponse(BaseModel):
     login_count: Optional[int] = 0
     email_verified: Optional[bool] = False
     activo: Optional[bool] = True
+    terminos_aceptados: Optional[bool] = False
+    fecha_terminos_aceptados: Optional[str] = None
+    version_terminos: Optional[str] = "v1.0-investigacion-2026"
 
 
 class TokenResponse(BaseModel):

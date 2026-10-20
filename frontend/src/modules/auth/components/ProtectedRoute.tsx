@@ -1,8 +1,10 @@
 import { ReactNode } from 'react';
 import { Navigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
+import { useAuthStore } from '../../../core/stores/useAuthStore';
 import { ShieldAlert } from 'lucide-react';
 import type { UserRole } from '../../../types';
+import ResearchConsentModal from './ResearchConsentModal';
 
 export interface ProtectedRouteProps {
   children: ReactNode;
@@ -11,9 +13,11 @@ export interface ProtectedRouteProps {
 
 /**
  * ProtectedRoute — Guardián de navegación con verificación de rol (RBAC)
+ * y bloqueo obligatorio de consentimiento de investigación y LOPDP por sesión.
  */
 export default function ProtectedRoute({ children, allowedRoles = [] }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
+  const sessionConsentAcknowledged = useAuthStore((state) => state.sessionConsentAcknowledged);
   const location = useLocation();
 
   if (loading) {
@@ -27,6 +31,11 @@ export default function ProtectedRoute({ children, allowedRoles = [] }: Protecte
 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Guardián estricto: Bloquea navegación completa hasta confirmar consentimiento informado en la sesión
+  if (!sessionConsentAcknowledged) {
+    return <ResearchConsentModal />;
   }
 
   if (allowedRoles.length > 0 && !allowedRoles.includes(user.rol)) {

@@ -8,7 +8,8 @@ import {
   Users, 
   BookOpen, 
   Search, 
-  ArrowLeft 
+  ArrowLeft,
+  BarChart3
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import GlobalSearchBar from './components/GlobalSearchBar';
@@ -36,6 +37,11 @@ export default function Navbar() {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const isAnalyticsView = location.pathname === '/analytics' || location.pathname === '/performance';
   const isCatalogRoute = location.pathname === '/' || location.pathname === '/cases';
+  const homePath = user?.rol === 'docente' 
+    ? '/teacher/cases' 
+    : user?.rol === 'administrador' 
+      ? '/admin/users' 
+      : '/';
 
   return (
     <header className="bg-white/85 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-50 transition-colors w-full">
@@ -60,7 +66,7 @@ export default function Navbar() {
           <>
             {/* 1. Logo & Identidad de Marca Ateneo+ */}
             <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-              <Link to="/" className="flex items-center gap-2 sm:gap-2.5 select-none" title="Ateneo+">
+              <Link to={homePath} className="flex items-center gap-2 sm:gap-2.5 select-none" title="Ateneo+">
                 <img
                   src="/ateneo.png"
                   alt="Ateneo+ Logo"
@@ -99,93 +105,135 @@ export default function Navbar() {
 
               {user ? (
                 <>
-                  {/* Enlace Dinámico Desempeño / Catálogo (Exclusivo de escritorio) */}
-                  <Link
-                    to={isAnalyticsView ? '/cases' : '/analytics'}
-                    data-tour="analytics-nav"
-                    title={isAnalyticsView ? 'Volver al Catálogo de Casos' : 'Mi Desempeño y Tendencias Clínicas'}
-                    className={`hidden md:flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 select-none ${
-                      isAnalyticsView
-                        ? 'bg-gradient-to-r from-cyan-100/80 via-blue-100/70 to-indigo-100/80 text-[#0b57d0] font-semibold border border-blue-300/80 shadow-xs'
-                        : 'bg-gradient-to-r from-cyan-50/50 via-blue-50/40 to-indigo-50/50 hover:from-cyan-100/70 hover:via-blue-100/60 hover:to-indigo-100/70 text-slate-700 hover:text-[#0b57d0] border border-blue-200/60 hover:border-blue-300/90 shadow-xs hover:shadow-sm'
-                    }`}
-                  >
-                    {isAnalyticsView ? (
-                      <>
+                  {/* 1. Navegación Exclusiva de Alumnos */}
+                  {user.rol === 'alumno' && (
+                    <>
+                      <Link
+                        to={isAnalyticsView ? '/cases' : '/analytics'}
+                        data-tour="analytics-nav"
+                        title={isAnalyticsView ? 'Volver al Catálogo de Casos' : 'Mi Desempeño y Tendencias Clínicas'}
+                        className={`hidden md:flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 select-none ${
+                          isAnalyticsView
+                            ? 'bg-gradient-to-r from-cyan-100/80 via-blue-100/70 to-indigo-100/80 text-[#0b57d0] font-semibold border border-blue-300/80 shadow-xs'
+                            : 'bg-gradient-to-r from-cyan-50/50 via-blue-50/40 to-indigo-50/50 hover:from-cyan-100/70 hover:via-blue-100/60 hover:to-indigo-100/70 text-slate-700 hover:text-[#0b57d0] border border-blue-200/60 hover:border-blue-300/90 shadow-xs hover:shadow-sm'
+                        }`}
+                      >
+                        {isAnalyticsView ? (
+                          <>
+                            <BookOpen className="w-4 h-4 text-[#0b57d0]" />
+                            <span className="hidden sm:inline">Catálogo</span>
+                          </>
+                        ) : (
+                          <>
+                            <TrendingUp className="w-4 h-4 text-[#0b57d0]" />
+                            <span className="hidden sm:inline">Desempeño</span>
+                          </>
+                        )}
+                      </Link>
+
+                      <div data-tour="career-nav" className="hidden md:block">
+                        <CareerBadgeButton />
+                      </div>
+
+                      <button
+                        type="button"
+                        data-tour="join-room-nav"
+                        onClick={() => setShowJoinModal(true)}
+                        title="Unirse a Sala de Ateneo"
+                        className="hidden md:flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-full text-xs font-medium transition-colors text-slate-600 hover:text-[#0b57d0] hover:bg-slate-100/60 cursor-pointer select-none"
+                      >
+                        <Users className="w-4 h-4 text-[#0b57d0]" />
+                        <span className="hidden md:inline">Unirse a Sala</span>
+                      </button>
+                    </>
+                  )}
+
+                  {/* 2. Navegación Exclusiva de Docentes */}
+                  {user.rol === 'docente' && (
+                    <>
+                      <Link
+                        to="/teacher/cases"
+                        title="Consola de Casos y Moderación de Ateneos"
+                        className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors select-none ${
+                          location.pathname.startsWith('/teacher/cases')
+                            ? 'text-blue-700 font-semibold bg-blue-50/70'
+                            : 'text-slate-600 hover:text-blue-700 hover:bg-slate-100/60'
+                        }`}
+                      >
+                        <UserCheck className="w-4 h-4 text-blue-600" />
+                        <span>Casos y Salas</span>
+                      </Link>
+
+                      <Link
+                        to="/teacher/analytics"
+                        title="Analítica de Cohorte y Brechas Clínicas"
+                        className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors select-none ${
+                          location.pathname.startsWith('/teacher/analytics')
+                            ? 'text-blue-700 font-semibold bg-blue-50/70'
+                            : 'text-slate-600 hover:text-blue-700 hover:bg-slate-100/60'
+                        }`}
+                      >
+                        <BarChart3 className="w-4 h-4 text-blue-600" />
+                        <span className="hidden lg:inline">Analítica de Cohorte</span>
+                      </Link>
+
+                      <Link
+                        to="/cases"
+                        title="Catálogo de Casos Clínicos"
+                        className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors select-none ${
+                          location.pathname === '/cases'
+                            ? 'text-[#0b57d0] font-semibold bg-blue-50/70'
+                            : 'text-slate-600 hover:text-[#0b57d0] hover:bg-slate-100/60'
+                        }`}
+                      >
                         <BookOpen className="w-4 h-4 text-[#0b57d0]" />
-                        <span className="hidden sm:inline">Catálogo</span>
-                      </>
-                    ) : (
-                      <>
-                        <TrendingUp className="w-4 h-4 text-[#0b57d0]" />
-                        <span className="hidden sm:inline">Desempeño</span>
-                      </>
-                    )}
-                  </Link>
-
-                  {/* Indicador de Carrera Formativa e Hitos */}
-                  <div data-tour="career-nav" className="hidden md:block">
-                    <CareerBadgeButton />
-                  </div>
-
-                  {/* Botón Unirse a Sala Colaborativa (Exclusivo de escritorio) */}
-                  <button
-                    type="button"
-                    data-tour="join-room-nav"
-                    onClick={() => setShowJoinModal(true)}
-                    title="Unirse a Sala de Ateneo"
-                    className="hidden md:flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 bg-gradient-to-r from-cyan-50/50 via-blue-50/40 to-indigo-50/50 hover:from-cyan-100/70 hover:via-blue-100/60 hover:to-indigo-100/70 text-slate-700 hover:text-[#0b57d0] border border-blue-200/60 hover:border-blue-300/90 shadow-xs hover:shadow-sm cursor-pointer select-none"
-                  >
-                    <Users className="w-4 h-4 text-[#0b57d0]" />
-                    <span className="hidden md:inline">Unirse a Sala</span>
-                  </button>
-
-                  {/* Enlace Benchmark (Restringido a Administradores) */}
-                  {user.rol === 'administrador' && (
-                    <Link
-                      to="/benchmark"
-                      title="Benchmark Científico"
-                      className={`flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 select-none ${
-                        location.pathname === '/benchmark'
-                          ? 'bg-gradient-to-r from-cyan-100/80 via-blue-100/70 to-indigo-100/80 text-[#0b57d0] font-semibold border border-blue-300/80 shadow-xs'
-                          : 'bg-gradient-to-r from-cyan-50/50 via-blue-50/40 to-indigo-50/50 hover:from-cyan-100/70 hover:via-blue-100/60 hover:to-indigo-100/70 text-slate-700 hover:text-[#0b57d0] border border-blue-200/60 hover:border-blue-300/90 shadow-xs hover:shadow-sm'
-                      }`}
-                    >
-                      <Award className="w-4 h-4 text-[#0b57d0]" />
-                      <span className="hidden lg:inline">Benchmark</span>
-                    </Link>
+                        <span className="hidden lg:inline">Catálogo</span>
+                      </Link>
+                    </>
                   )}
 
-                  {/* Acceso Consola Administrador */}
+                  {/* 3. Navegación Exclusiva de Administradores */}
                   {user.rol === 'administrador' && (
-                    <Link
-                      to="/admin/users"
-                      title="Consola Administrador"
-                      className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 select-none ${
-                        location.pathname.startsWith('/admin')
-                          ? 'bg-gradient-to-r from-purple-100/80 via-indigo-100/70 to-violet-100/80 text-purple-800 font-semibold border border-purple-300/80 shadow-xs'
-                          : 'bg-gradient-to-r from-purple-50/50 via-indigo-50/40 to-violet-50/50 hover:from-purple-100/70 hover:via-indigo-100/60 hover:to-violet-100/70 text-slate-700 hover:text-purple-800 border border-purple-200/60 hover:border-purple-300/90 shadow-xs hover:shadow-sm'
-                      }`}
-                    >
-                      <ShieldCheck className="w-4 h-4 text-purple-600" />
-                      <span className="hidden lg:inline">Admin</span>
-                    </Link>
-                  )}
+                    <>
+                      <Link
+                        to="/benchmark"
+                        title="Benchmark Científico"
+                        className={`flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-full text-xs font-medium transition-colors select-none ${
+                          location.pathname === '/benchmark'
+                            ? 'text-[#0b57d0] font-semibold bg-blue-50/70'
+                            : 'text-slate-600 hover:text-[#0b57d0] hover:bg-slate-100/60'
+                        }`}
+                      >
+                        <Award className="w-4 h-4 text-[#0b57d0]" />
+                        <span className="hidden lg:inline">Benchmark</span>
+                      </Link>
 
-                  {/* Acceso Consola Docente */}
-                  {(user.rol === 'docente' || user.rol === 'administrador') && (
-                    <Link
-                      to="/teacher/cases"
-                      title="Consola Docente"
-                      className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 select-none ${
-                        location.pathname.startsWith('/teacher')
-                          ? 'bg-gradient-to-r from-blue-100/80 via-sky-100/70 to-indigo-100/80 text-blue-800 font-semibold border border-blue-300/80 shadow-xs'
-                          : 'bg-gradient-to-r from-cyan-50/50 via-blue-50/40 to-indigo-50/50 hover:from-cyan-100/70 hover:via-blue-100/60 hover:to-indigo-100/70 text-slate-700 hover:text-blue-800 border border-blue-200/60 hover:border-blue-300/90 shadow-xs hover:shadow-sm'
-                      }`}
-                    >
-                      <UserCheck className="w-4 h-4 text-blue-600" />
-                      <span className="hidden lg:inline">Docente</span>
-                    </Link>
+                      <Link
+                        to="/admin/users"
+                        title="Consola Administrador"
+                        className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors select-none ${
+                          location.pathname.startsWith('/admin')
+                            ? 'text-indigo-700 font-semibold bg-indigo-50/70'
+                            : 'text-slate-600 hover:text-indigo-700 hover:bg-slate-100/60'
+                        }`}
+                      >
+                        <ShieldCheck className="w-4 h-4 text-indigo-600" />
+                        <span className="hidden lg:inline">Admin</span>
+                      </Link>
+
+                      <Link
+                        to="/teacher/cases"
+                        title="Consola Docente"
+                        className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors select-none ${
+                          location.pathname.startsWith('/teacher')
+                            ? 'text-blue-700 font-semibold bg-blue-50/70'
+                            : 'text-slate-600 hover:text-blue-700 hover:bg-slate-100/60'
+                        }`}
+                      >
+                        <UserCheck className="w-4 h-4 text-blue-600" />
+                        <span className="hidden lg:inline">Docente</span>
+                      </Link>
+                    </>
                   )}
 
                   {/* Bandeja de Notificaciones (Visible en escritorio / En móvil vive en la barra inferior) */}

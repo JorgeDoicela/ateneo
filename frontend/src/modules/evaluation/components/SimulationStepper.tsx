@@ -44,8 +44,8 @@ export default function SimulationStepper({
       </div>
 
       {/* Barra de progreso de pasos */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-        {[1, 2, 3].map((faseNum) => {
+      <div className={`grid grid-cols-1 sm:grid-cols-${Math.min(totalPhases, 4)} gap-3 pt-1`}>
+        {Array.from({ length: totalPhases }, (_, i) => i + 1).map((faseNum) => {
           const isCompleted = completedPhases.includes(faseNum);
           const isActive = currentPhase === faseNum;
           const isLocked = !isCompleted && !isActive;
@@ -90,7 +90,7 @@ export default function SimulationStepper({
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs font-medium truncate leading-tight">
-                    {PHASE_LABELS[faseNum]}
+                    {PHASE_LABELS[faseNum] || `Fase ${faseNum}`}
                   </p>
                   <p className="text-[10px] text-[#747775] truncate mt-0.5">
                     {isCompleted

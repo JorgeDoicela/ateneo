@@ -119,7 +119,10 @@ def get_current_user(
             email=fallback.email,
             nombre=fallback.nombre,
             rol=fallback.rol,
-            tenant_id=resolved_tenant
+            tenant_id=resolved_tenant,
+            terminos_aceptados=bool(getattr(fallback, "terminos_aceptados", False)),
+            fecha_terminos_aceptados=getattr(fallback, "fecha_terminos_aceptados", None),
+            version_terminos=getattr(fallback, "version_terminos", "v1.0-investigacion-2026") or "v1.0-investigacion-2026"
         )
 
     if not user_record.activo:
@@ -144,6 +147,7 @@ def get_current_user(
 
     resolved_tenant = token_tenant_id or getattr(user_record, "tenant_id", "tenant_default") or "tenant_default"
     last_login_iso = user_record.last_login_at.isoformat() if getattr(user_record, "last_login_at", None) else None
+    fecha_terminos_iso = user_record.fecha_terminos_aceptados.isoformat() if getattr(user_record, "fecha_terminos_aceptados", None) else None
     return UserResponse(
         id=user_record.id,
         email=user_record.email,
@@ -153,7 +157,10 @@ def get_current_user(
         last_login_at=last_login_iso,
         login_count=getattr(user_record, "login_count", 0) or 0,
         email_verified=bool(getattr(user_record, "email_verified", False)),
-        activo=user_record.activo
+        activo=user_record.activo,
+        terminos_aceptados=bool(getattr(user_record, "terminos_aceptados", False)),
+        fecha_terminos_aceptados=fecha_terminos_iso,
+        version_terminos=getattr(user_record, "version_terminos", "v1.0-investigacion-2026") or "v1.0-investigacion-2026"
     )
 
 

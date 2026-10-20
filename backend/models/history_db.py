@@ -7,8 +7,7 @@ from core.database import SessionLocal, init_database
 from modules.analytics_history.repository import HistoryRepository
 from modules.analytics_history.service import AnalyticsHistoryService
 
-# Garantizar que las tablas de SQLAlchemy existan en la base de datos
-init_database()
+# Las tablas e inicialización se orquestan en el lifespan de FastAPI (main.py)
 
 
 def _get_service() -> AnalyticsHistoryService:
@@ -90,6 +89,3 @@ def analyze_coordinator_cohort_analytics(cohorte_id: Optional[str] = None) -> Di
     finally:
         db.close()
 
-
-# Sembrar datos de demostración automáticamente al cargar el módulo si la BD está vacía
-seed_rich_history_data()

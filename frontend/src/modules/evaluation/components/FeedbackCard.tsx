@@ -475,6 +475,14 @@ export default function FeedbackCard({ result, studentAnswer = '', audioBlob = n
         </div>
       )}
 
+      {/* Descargo Legal y Advertencia de Investigación en Desarrollo Activo */}
+      <div className="pt-4 border-t border-slate-100 flex items-start gap-2.5 text-[11px] text-slate-500 leading-relaxed">
+        <ShieldAlert className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+        <p>
+          <strong className="text-slate-700">Investigación en Desarrollo Activo:</strong> Esta evaluación y sus sugerencias normativas forman parte de una investigación clínica real en curso. Por protección legal institucional, el uso es de momento exclusivamente formativo con proyección a una versión oficial tras la validación experimental; no constituyen criterio médico vinculante ni deben emplearse en pacientes reales.
+        </p>
+      </div>
+
       {/* Botón de Reinicio */}
       {onReset && (
         <div className="flex justify-center pt-4">

@@ -488,11 +488,33 @@ def generate_clinical_feedback_pdf(
         elements.append(cita_table)
         elements.append(Spacer(1, 8))
 
+    # 6.5. Descargo Legal de Investigación y Pruebas Piloto
+    legal_disclaimer = (
+        "<b>AVISO LEGAL Y DESCARGO DE RESPONSABILIDAD (INVESTIGACIÓN EN DESARROLLO ACTIVO):</b> "
+        "Ateneo+ es una plataforma de software desarrollada en el marco de una investigación científica real sobre simulación clínica formativa con IA y RAG normativo. "
+        "Actualmente se encuentra en fase de validación experimental en desarrollo activo con miras a una versión oficial. "
+        "Por protección legal institucional durante esta etapa, sus evaluaciones tienen propósito exclusivamente formativo y pedagógico; "
+        "no constituyen diagnósticos médicos formales, peritajes vinculantes ni recomendaciones para pacientes reales."
+    )
+    disclaimer_p = Paragraph(legal_disclaimer, ParagraphStyle('LegalP', parent=styles['Normal'], fontName='Helvetica', fontSize=6.5, leading=8.5, textColor=TEXT_MUTED))
+    disclaimer_table = Table([[disclaimer_p]], colWidths=[540])
+    disclaimer_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#f8fafc")),
+        ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor("#cbd5e1")),
+        ('ROUNDEDCORNERS', [4, 4, 4, 4]),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('LEFTPADDING', (0, 0), (-1, -1), 6),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+    ]))
+    elements.append(disclaimer_table)
+    elements.append(Spacer(1, 4))
+
     # 7. Hash Criptográfico de Integridad Académica (Footer)
     verif_payload = f"{student_name}_{case_id}_{score}_{now_str}"
     integrity_hash = hashlib.sha256(verif_payload.encode('utf-8')).hexdigest()[:16].upper()
 
-    elements.append(Spacer(1, 4))
+    elements.append(Spacer(1, 2))
     footer_text = f"Código de Verificación Académica: <b>ATENEO-GPC-{integrity_hash}</b> • Motor RAG Híbrido (Dense BGE-M3 + BM25 + Gemini)"
     elements.append(Paragraph(footer_text, ParagraphStyle('FooterText', parent=styles['Normal'], fontName='Helvetica', fontSize=7, leading=9, textColor=TEXT_MUTED, alignment=1)))
 
@@ -707,11 +729,32 @@ def generate_cohort_analytics_pdf(
         elements.append(dist_table)
         elements.append(Spacer(1, 14))
 
+    # 5.5. Descargo Legal de Investigación y Pruebas Piloto
+    legal_disclaimer = (
+        "<b>AVISO LEGAL Y DESCARGO DE RESPONSABILIDAD (INVESTIGACIÓN EN DESARROLLO ACTIVO):</b> "
+        "Este reporte analítico de cohorte forma parte de una investigación científica real y pedagógica en desarrollo activo. "
+        "Por protección legal institucional durante esta etapa experimental con miras a una versión oficial, las métricas y promedios son insumos formativos de apoyo docente; "
+        "no constituyen diagnósticos clínicos ni valoraciones periciales de competencia médica vinculantes en ámbitos asistenciales reales."
+    )
+    disclaimer_p = Paragraph(legal_disclaimer, ParagraphStyle('CohortLegalP', parent=styles['Normal'], fontName='Helvetica', fontSize=6.5, leading=8.5, textColor=TEXT_MUTED))
+    disclaimer_table = Table([[disclaimer_p]], colWidths=[540])
+    disclaimer_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#f8fafc")),
+        ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor("#cbd5e1")),
+        ('ROUNDEDCORNERS', [4, 4, 4, 4]),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('LEFTPADDING', (0, 0), (-1, -1), 6),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+    ]))
+    elements.append(disclaimer_table)
+    elements.append(Spacer(1, 4))
+
     # 6. Sello Criptográfico SHA-256 (Footer)
     hash_payload = f"{cohorte_id}_{tenant_name}_{total_evals}_{promedio}_{now_str}"
     integrity_hash = hashlib.sha256(hash_payload.encode('utf-8')).hexdigest()[:16].upper()
 
-    elements.append(Spacer(1, 8))
+    elements.append(Spacer(1, 4))
     footer_text = (
         f"Certificación Institucional de Auditoría Académica: <b>ATENEO-COHORTE-{integrity_hash}</b> • "
         f"Algoritmo IBF (GPC Ecuador) • Validez Oficial Formativa"

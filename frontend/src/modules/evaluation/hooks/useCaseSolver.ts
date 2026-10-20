@@ -5,7 +5,7 @@ import evaluationApi from '../api/evaluationApi';
 import offlineDb from '../../../core/storage/offlineDb';
 import { useClinicalCaseSessionStore } from '../../../core/stores/useClinicalCaseSessionStore';
 import { FEATURE_FLAGS } from '../../../core/config/featureFlags';
-import type { ClinicalCase, CasePhase, EvaluationResult, PhaseEvaluationResult } from '../../../types';
+import type { ClinicalCase, CasePhase, EvaluationResult, PhaseEvaluationResult, NormativeCitation } from '../../../types';
 
 /**
  * useCaseSolver — Hook controlador de la simulación clínica y evaluación
@@ -288,6 +288,20 @@ export function useCaseSolver(caseId?: string) {
         (r) => r.omisiones || []
       );
 
+      const allCompetenciasDeficientes = Object.values(phaseResults).flatMap(
+        (r) => r.competencias_deficientes || []
+      );
+
+      const allCitasNormativas: NormativeCitation[] = Object.values(phaseResults)
+        .map((r) => r.cita_normativa)
+        .filter((c): c is NormativeCitation => Boolean(c));
+
+      const primaryCita = allCitasNormativas[0] || {
+        guia: caso?.guia_asociada || 'GPC Ecuador',
+        seccion: 'Resolución Multicomponente por Fases',
+        texto_relevante: 'Evaluación formativa secuencial basada en Guías de Práctica Clínica del MSP Ecuador.'
+      };
+
       const finalOutcome: EvaluationResult = {
         case_id: caseId,
         case_title: caso?.titulo || 'Caso Clínico Formativo',
@@ -295,13 +309,15 @@ export function useCaseSolver(caseId?: string) {
         score_max: 10,
         aciertos: allAciertos,
         omisiones: allOmisiones,
-        competencias_deficientes: [],
+        competencias_deficientes: allCompetenciasDeficientes,
+        cita_normativa: primaryCita,
+        citas_normativas: allCitasNormativas,
         retroalimentacion_general: `Simulación clínica multicomponente completada exitosamente a través de las ${totalPhases} fases normativas de la GPC de Ecuador.`,
       };
 
       setResultado(finalOutcome);
     }
-  }, [currentPhase, totalPhases, phaseScores, phaseResults, setRespuesta, caseId, caso?.titulo]);
+  }, [currentPhase, totalPhases, phaseScores, phaseResults, setRespuesta, caseId, caso?.titulo, caso?.guia_asociada]);
 
   // Reiniciar caso para reintentar
   const resetCase = useCallback(() => {

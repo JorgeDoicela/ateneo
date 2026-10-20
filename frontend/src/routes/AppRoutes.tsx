@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from '../modules/auth/components/ProtectedRoute';
 import AppLayout from '../core/layouts/AppLayout';
 import { Activity } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 // Carga perezosa (Code-Splitting) por módulo de dominio
 const CaseList = lazy(() => import('../modules/cases/pages/CaseList'));
@@ -29,6 +30,36 @@ function RouteLoader() {
   );
 }
 
+/**
+ * RootRoleRedirect — Despachador de la ruta raíz '/' según el rol de la sesión
+ * - Docente: Redirige automáticamente a su panel de gestión (/teacher/cases)
+ * - Administrador: Redirige a la consola de usuarios (/admin/users)
+ * - Alumno: Carga el catálogo de simulación formativa (CaseList)
+ */
+function RootRoleRedirect() {
+  const { user } = useAuth();
+  if (user?.rol === 'docente') {
+    return <Navigate to="/teacher/cases" replace />;
+  }
+  if (user?.rol === 'administrador') {
+    return <Navigate to="/admin/users" replace />;
+  }
+  return <CaseList />;
+}
+
+/**
+ * AnalyticsRoleRedirect — Encamina la analítica según el rol
+ * - Docente: Redirige a la analítica de cohorte (/teacher/analytics)
+ * - Alumno / Otros: Renderiza la analítica individual del estudiante (StudentAnalyticsPage)
+ */
+function AnalyticsRoleRedirect() {
+  const { user } = useAuth();
+  if (user?.rol === 'docente') {
+    return <Navigate to="/teacher/analytics" replace />;
+  }
+  return <StudentAnalyticsPage />;
+}
+
 export default function AppRoutes() {
   return (
     <AppLayout>
@@ -43,7 +74,7 @@ export default function AppRoutes() {
             path="/"
             element={
               <ProtectedRoute>
-                <CaseList />
+                <RootRoleRedirect />
               </ProtectedRoute>
             }
           />
@@ -97,7 +128,7 @@ export default function AppRoutes() {
             path="/analytics"
             element={
               <ProtectedRoute>
-                <StudentAnalyticsPage />
+                <AnalyticsRoleRedirect />
               </ProtectedRoute>
             }
           />

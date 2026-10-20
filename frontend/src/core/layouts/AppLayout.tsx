@@ -1,7 +1,6 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
-import { HeartPulse } from 'lucide-react';
 
 export interface AppLayoutProps {
   children: ReactNode;
@@ -45,17 +44,19 @@ export default function AppLayout({ children }: AppLayoutProps) {
         {children}
       </main>
 
-      <footer className="bg-white border-t border-slate-200/80 py-6 text-center text-xs text-[#747775]">
-        <div className="w-full max-w-[1680px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <footer className="bg-white/80 backdrop-blur-md border-t border-slate-200/60 py-4 text-xs text-slate-500 relative z-10">
+        <div className="w-full max-w-[1680px] mx-auto px-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-center sm:text-left">
           <div className="flex items-center gap-2">
-            <HeartPulse className="w-4 h-4 text-[#0b57d0]" />
-            <span>ATENEO+ • Simulador Clínico Basado en Guías de Práctica Clínica (GPC Ecuador)</span>
+            <span className="font-semibold text-slate-800">ATENEO+</span>
+            <span className="text-slate-300">•</span>
+            <span className="text-[11px] text-slate-500">Prototipo experimental en desarrollo activo</span>
+            <span className="text-slate-300 hidden md:inline">•</span>
+            <span className="text-[11px] text-slate-400 hidden md:inline">GPC Ecuador</span>
           </div>
-          <div className="flex items-center gap-4 text-[11px]">
-            <span>GPC Ecuador</span>
-            <span>•</span>
-            <span>Inteligencia Artificial Clínica</span>
-          </div>
+
+          <p className="text-[11px] text-slate-400">
+            Uso formativo de simulación • No apto para pacientes reales
+          </p>
         </div>
       </footer>
     </div>

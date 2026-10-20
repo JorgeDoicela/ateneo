@@ -61,6 +61,20 @@ export const authApi = {
     return res.data;
   },
 
+  async acceptTerms(version_terminos: string = 'v1.0-investigacion-2026'): Promise<User> {
+    const res = await httpClient.post<unknown>('/api/auth/accept-terms', {
+      version_terminos,
+      acepta_investigacion: true,
+      acepta_tratamiento_datos: true,
+    });
+    const parsed = UserSchema.safeParse(res.data);
+    if (!parsed.success) {
+      console.warn('Discrepancia en contrato de aceptación de términos:', parsed.error.issues);
+      return res.data as User;
+    }
+    return parsed.data as User;
+  },
+
   async createMagicLink(data: MagicLinkCreatePayload): Promise<MagicLinkRecord> {
     const res = await httpClient.post<MagicLinkRecord>('/api/auth/magic-links', data);
     return res.data;

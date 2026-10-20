@@ -5,7 +5,9 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import ProtectedRoute from '../modules/auth/components/ProtectedRoute';
 import * as AuthContextModule from '../context/AuthContext';
 
-describe('Componente ProtectedRoute (Seguridad RBAC)', () => {
+import { useAuthStore } from '../core/stores/useAuthStore';
+
+describe('Componente ProtectedRoute (Seguridad RBAC y Consentimiento de Sesión)', () => {
   it('debe mostrar pantalla de carga mientras loading sea true', () => {
     vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({
       user: null,
@@ -48,7 +50,34 @@ describe('Componente ProtectedRoute (Seguridad RBAC)', () => {
     expect(screen.getByText('Página de Login')).toBeInTheDocument();
   });
 
-  it('debe denegar el acceso si el rol del usuario no está autorizado', () => {
+  it('debe bloquear el acceso y presentar el modal de consentimiento si no se ha aceptado en la sesión', () => {
+    useAuthStore.setState({ sessionConsentAcknowledged: false });
+    vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({
+      user: { id: 'usr_02', rol: 'docente' },
+      loading: false
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/docente']}>
+        <Routes>
+          <Route
+            path="/docente"
+            element={
+              <ProtectedRoute allowedRoles={['docente']}>
+                <div>Panel Docente Autorizado</div>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText(/Consentimiento Informado y Descargo Legal/i)).toBeInTheDocument();
+    expect(screen.queryByText('Panel Docente Autorizado')).not.toBeInTheDocument();
+  });
+
+  it('debe denegar el acceso si el rol del usuario no está autorizado incluso con consentimiento', () => {
+    useAuthStore.setState({ sessionConsentAcknowledged: true });
     vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({
       user: { id: 'usr_01', rol: 'alumno' },
       loading: false
@@ -73,7 +102,8 @@ describe('Componente ProtectedRoute (Seguridad RBAC)', () => {
     expect(screen.queryByText('Panel Admin Secreto')).not.toBeInTheDocument();
   });
 
-  it('debe permitir el acceso si el usuario cuenta con el rol requerido', () => {
+  it('debe permitir el acceso si el usuario cuenta con el rol requerido y el consentimiento de sesión está confirmado', () => {
+    useAuthStore.setState({ sessionConsentAcknowledged: true });
     vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({
       user: { id: 'usr_02', rol: 'docente' },
       loading: false

@@ -14,6 +14,7 @@ from models.schemas import (
     MagicLinkConsumeRequest,
     MagicLinkConsumeResponse,
     MagicLinkVerifyResponse,
+    AcceptTermsRequest,
 )
 from auth.security import get_current_user, require_roles, security_scheme, decode_access_token
 from modules.auth.dependencies import get_auth_service
@@ -97,6 +98,32 @@ async def logout(
 @router.get("/me", response_model=UserResponse)
 async def get_my_profile(current_user: UserResponse = Depends(get_current_user)):
     return current_user
+
+@router.post("/accept-terms", response_model=UserResponse)
+async def accept_terms(
+    req: AcceptTermsRequest,
+    current_user: UserResponse = Depends(get_current_user),
+    auth_service: AuthService = Depends(get_auth_service)
+):
+    """
+    Registra de forma persistente e inmutable la aceptación del consentimiento informado,
+    tratamiento de datos personales (LOPDP) y descargo de responsabilidad para investigación médica.
+    """
+    try:
+        return auth_service.accept_terms(
+            user_id=current_user.id,
+            version_terminos=req.version_terminos or "v1.0-investigacion-2026"
+        )
+    except LookupError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error registrando aceptación de términos: {str(e)}"
+        )
 
 @router.get("/users", response_model=List[UserResponse])
 async def list_users(
