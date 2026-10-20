@@ -714,6 +714,53 @@ def main():
         title="VALOR PEDAGOGICO HOSPITALARIO / APRENDIZAJE COLECTIVO"
     )
 
+    add_heading_2(doc, "9.6 Ciclo Formativo Cerrado: Pre-Test Diagnóstico, Plan Heurístico Prescriptivo y Post-Test Isomórfico")
+    add_body_paragraph(
+        doc,
+        "Para superar el paradigma de la evaluacion terminal estatica y garantizar el cierre efectivo del bucle didactico formativo "
+        "(closing the clinical loop), Ateneo+ integra un ciclo cerrado de intervencion clinica estructurado en tres fases secuenciales: "
+        "(1) Evaluacion Diagnostica Inicial (Pre-Test) orientada a la identificacion de brechas normativas, (2) Sintesis Heuristica de un Plan "
+        "de Estudio Prescriptivo dosificado en la Zona de Desarrollo Proximo (ZDP), y (3) Reevaluacion de Salida (Post-Test) generada mediante "
+        "variantes clinicas isomorficas con medicion de la Ganancia Normalizada de Hake (g)."
+    )
+    add_bullet_item(
+        doc,
+        "La evaluacion de entrada presenta una bateria controlada de reactivos clinicos de alta prevalencia epidemiologica (Preeclampsia, "
+        "Codigo Rojo Obstetrico, Tuberculosis, Dengue, Neumonia bacteriana, etc.). Al someter sus decisiones, el motor RAG extrae no solo la nota "
+        "cuantitativa, sino un vector pormenorizado de omisiones clinicas y competencias KST afectadas, registrandolas en diagnostic_assessments.",
+        bold_prefix="1. Pre-Test Diagnóstico y Detección de Brechas: "
+    )
+    add_bullet_item(
+        doc,
+        "El algoritmo heuristico pondera cada omision clínica detectada mediante la funcion de severidad psicometrica: W_i = Severidad(omision) * (1.05 - P(L_k)), "
+        "donde la severidad clasifica riesgos criticos (shock, parada cardiaca, eclampsia, muerte fetal) con peso 1.0, moderados con 0.6 y menores con 0.3, "
+        "modulados inversamente por la maestria BKT del estudiante. El motor prescribe un plan atomico dosificado en 3 modalidades: lecturas guiadas de secciones "
+        "especificas de la GPC del MSP, simulacion de casos en ZDP y debriefing socratico reflexivo.",
+        bold_prefix="2. Motor Heurístico de Prescripción Pedagógica: "
+    )
+    add_bullet_item(
+        doc,
+        "Para neutralizar el sesgo de memorizacion que invalida las pruebas identicas repetidas, el generador de post-test sintetiza escenarios "
+        "clinicos paralelos e isomorficos. Las variantes preservan la misma encrucijada fisiopatologica, el mismo estandar de oro de la GPC ministerial y "
+        "las mismas competencias de Bloom, pero modifican la demografia del paciente, edad gestacional, cifras hemodinamicas y parametros de laboratorio "
+        "dentro del mismo umbral normativo. El pipeline se apoya en el ResilientLLMGateway respaldado por un banco curado calibrado de 10 patologias canonicas.",
+        bold_prefix="3. Post-Test Isomórfico Asistido por Inteligencia Artificial: "
+    )
+    add_bullet_item(
+        doc,
+        "Al concluir el post-test, el backend calcula en tiempo real la Ganancia Normalizada de Hake: g = (Score_Post - Score_Pre) / (10.0 - Score_Pre). "
+        "Este coeficiente, consolidado en investigacion en educacion medica (Hake, 1998), desacopla el efecto de la nota de entrada y cuantifica la proporcion "
+        "del aprendizaje maximo posible alcanzado por el estudiante: Ganancia Alta (g >= 0.70), Ganancia Media (0.30 <= g < 0.70) o Ganancia Baja (g < 0.30).",
+        bold_prefix="4. Cuantificación Psicométrica de la Ganancia de Hake (g): "
+    )
+    add_callout_box(
+        doc,
+        "La transicion desde una evaluacion formativa abierta hacia un bucle cerrado prescriptivo permite a los directores medicos y docentes "
+        "obtener evidencia cientifica verificable sobre el impacto pedagogico de la plataforma. La ganancia de Hake cuantifica objetivamente "
+        "como el estudio prescriptivo guiado por las GPC de Ecuador transforma brechas clinicas basales en competencia diagnostica consolidada.",
+        title="EVIDENCIA CIENTIFICA DEL APRENDIZAJE FORMATIVO / GANANCIA DE HAKE"
+    )
+
     # =========================================================================
     # SECCION 10: MODELADO PSICOMETRICO FORMAL (KST + BKT + ZDP)
     # =========================================================================

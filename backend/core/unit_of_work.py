@@ -8,6 +8,8 @@ from modules.analytics_history.repository import HistoryRepository
 from modules.adaptive.repository import AdaptiveRepository
 from modules.collaboration.repository import RoomRepository
 from modules.gamification.repository import GamificationRepository
+from modules.assessments.repository import AssessmentRepository
+from modules.study_plans.repository import StudyPlanRepository
 
 
 class AbstractUnitOfWork(ABC):
@@ -23,6 +25,8 @@ class AbstractUnitOfWork(ABC):
     adaptive: AdaptiveRepository
     rooms: RoomRepository
     gamification: GamificationRepository
+    assessments: AssessmentRepository
+    study_plans: StudyPlanRepository
 
     def __enter__(self) -> "AbstractUnitOfWork":
         return self
@@ -61,6 +65,8 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
         self.adaptive = AdaptiveRepository(self.session)
         self.rooms = RoomRepository(self.session)
         self.gamification = GamificationRepository(self.session)
+        self.assessments = AssessmentRepository(self.session)
+        self.study_plans = StudyPlanRepository(self.session)
         return self
 
 

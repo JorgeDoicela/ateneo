@@ -1969,4 +1969,57 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
   - **Documentación Metodológica Markdown:** Actualizados `ARQUITECTURA_MODULAR_FRONTEND.md` (secciones 5.4 y 8.2) y `ARQUITECTURA_MODULAR_MONOLITO_BACKEND.md` (sección 6.1) con los protocolos de co-escritura en tiempo real, debounce de 150 ms, telemetría de redactores activos (`activeTypers`), 4 fases secuenciales de moderación, modos duales (`individual` vs `grupal`) y consolidación de resultados de cohorte.
   - **Generador del Dossier Word Oficial (`build_full_word_dossier.py`):** Expandida en su totalidad la Sección 9.5 ("Salas Colaborativas Hospitalarias (AteneoRoom) y Consenso en Tiempo Real") detallando la arquitectura de WebSockets, resiliencia ante reconexión, sondeo de respaldo a 2.5s, ciclo de vida seguro en React 18, flujo de las 4 fases y callout box de valor pedagógico hospitalario.
   - **Compilación de Artefacto DOCX:** Recompilado exitosamente `docs/8_ponencia_congreso_caiseb/ATENEO_DOSSIER_TECNICO_Y_PONENCIA_CAISEB.docx` (2.54 MB) con Python 3.11 del entorno virtual, reflejando el 100% de las innovaciones implementadas en la sesión.
-
+* **Fase 1 Completada: Persistencia Relacional y Repositorios para Pre/Post-Test y Planes de Estudio (`modules/assessments`, `modules/study_plans`, `unit_of_work.py`, 2026-10-20):**
+  - **Entidades Creadas:**
+    1. `DiagnosticAssessmentModel`: Seguimiento de pre-tests, post-tests, línea base, puntajes totales, ganancia de Hake ($g$) y relación Many-to-One / One-to-Many reflexiva (`pre_test` y `post_tests`).
+    2. `DiagnosticItemModel`: Almacenamiento de cada reactivo/caso evaluado, respuesta del alumno, omisiones detectadas frente a GPC y competencias afectadas.
+    3. `PrescriptiveStudyPlanModel`: Plan de remediación activo/completado, diagnóstico de brechas, duración estimada y porcentaje de avance.
+    4. `StudyPlanTaskModel`: Tareas formativas atómicas (lecturas de GPC, simulaciones clínicas en ZDP, debriefings socráticos) con recálculo automático de progreso.
+  - **Integración Transaccional (ACID):** Repositorios `AssessmentRepository` y `StudyPlanRepository` registrados e inyectados en `SqlAlchemyUnitOfWork` (`core/unit_of_work.py`) y en `init_database()` (`core/database.py`).
+  - **Validación:** 3/3 tests unitarios e integrados aprobados en `backend/tests/test_assessments_db.py`, y suite completa de regresión backend (`test_gamification.py`, `test_unit_of_work.py`, `test_teacher_rooms.py`) en 100% PASS (8/8).
+* **Fase 2 Completada: Motor Heurístico de Planes Prescriptivos y Servicio de Dominio (`modules/study_plans/heuristic_engine.py`, `service.py`, 2026-10-20):**
+  - **Algoritmo Heurístico de Priorización ($W_i$):**
+    - Ponderación formal de omisiones clínicas: $W_i = \text{Severidad}(\text{omisión}) \times (1.05 - P(L_k))$, donde la severidad clasifica riesgos críticos (shock, paro, eclampsia, muerte fetal) con peso 1.0, moderados con 0.6 y menores con 0.3, modulados por la probabilidad de maestría BKT del nodo de conocimiento ($P(L_k)$).
+    - Prescripción dosificada en 3 niveles pedagógicos: Lecturas normativas de GPC Ecuador, Simulación práctica de casos clínicos en Zona de Desarrollo Próximo (ZDP) y Debriefing Socrático reflexivo.
+  - **Servicio de Dominio Transaccional (`StudyPlanService`):**
+    - `generate_plan_from_assessment`: Lee reactivos y omisiones del Pre-Test, sintetiza el plan heurístico, expira planes activos previos y persiste el nuevo plan con sus tareas atómicas en una única transacción de Unit of Work.
+    - `complete_task`: Marca tareas completadas y recalcula el progreso porcentual y estado del plan de forma determinística.
+  - **Robustez Arquitectónica (Cero Parches):**
+    - Relaciones SQLAlchemy configuradas con `lazy="selectin"` en `PrescriptiveStudyPlanModel.tasks` y `DiagnosticAssessmentModel.items`, erradicando `DetachedInstanceError` al salir del contexto del Unit of Work.
+    - Alineación canónica con los atributos del modelo `ClinicalCaseSchema` (`guia_asociada`).
+* **Fase 3 Completada: Pipeline de Generación de Post-Test Isomórfico (`backend/rag/isomorphic_generator.py`, 2026-10-20):**
+  - **Banco Isomórfico Curado de Alta Fidelidad (10/10 Patologías Canónicas):**
+    - Preeclampsia severa, Hemorragia posparto (Código Rojo), Tuberculosis pulmonar (RHZE), VIH avanzado (TLD + profilaxis), Emergencia hipertensiva, Enfermedad renal crónica con hiperpotasemia, Encefalopatía hipóxico-isquémica neonatal (Hipotermia 33.5°C), Neumonía adquirida en la comunidad (CURB-65), Sepsis neonatal temprana (Ampicilina+Gentamicina) y Aborto incompleto (AMEU + Anti-D).
+    - Fidelidad 100% a las Guías de Práctica Clínica oficiales del MSP Ecuador.
+  - **Generación Asistida por LLM con Gateway Resiliente:**
+    - Generación dinámica mediante `llm_gateway.generate` con Circuit Breaker, prompt psicométrico de Bloom (análisis y toma de decisiones) y fallback transparente automático al banco curado ante agotamiento de cuota o fallo de red.
+  - **Validación Psicométrica de Isomorfismo (`validate_case_isomorphism`):**
+    - Valida equivalencia normativa: misma guía de práctica clínica, viñeta clínica paralela no idéntica, solapamiento de competencias KST >= 50% y anclaje normativo (*Faithfulness*) >= 0.80.
+* **Fase 4 Completada: Endpoints RESTful y Cálculo Psicométrico de Ganancia de Hake ($g$) (`modules/assessments/router.py`, `modules/study_plans/router.py`, `main.py`, 2026-10-20):**
+  - **Endpoints de Evaluaciones Diagnósticas (`/api/assessments`):**
+    - `POST /pre-test/start`: Inicia sesión de Pre-Test con selección de reactivos basales y persistencia en estado `in_progress`.
+    - `POST /{assessment_id}/submit`: Califica las respuestas del estudiante; si es Pre-Test, dispara automáticamente la síntesis del Plan de Estudio Prescriptivo; si es Post-Test, calcula la Ganancia de Hake ($g$).
+    - `POST /post-test/start`: Valida la culminación del Pre-Test y sintetiza la batería paralela isomórfica para el Post-Test.
+    - `GET /{assessment_id}`: Consulta detalles, reactivos y respuestas.
+    - `GET /history/me`: Historial longitudinal de pre-tests y post-tests del estudiante.
+  - **Endpoints de Planes de Estudio Prescriptivos (`/api/study-plans`):**
+    - `GET /me`: Consulta el plan prescriptivo activo y sus tareas formativas dosificadas.
+    - `GET /{plan_id}`: Consulta un plan por ID con validación estricta de propiedad de usuario.
+    - `POST /tasks/{task_id}/complete`: Marca la tarea como completada y recalcula el progreso porcentual.
+  - **Cálculo de Ganancia Normalizada de Hake ($g$):**
+    - Implementado bajo rigor psicométrico formal: $g = \frac{\text{Post} - \text{Pre}}{\text{Max} - \text{Pre}}$ con manejo defensivo de bordes (maestría previa y regresión diagnóstica acotada).
+* **Fase 5 Completada: Integración Frontend React + Vite PWA (`modules/assessments`, `modules/study_plans`, `StudentAnalyticsPage.tsx`, 2026-10-20):**
+  - **Clientes de Red API (`assessmentApi.ts`, `studyPlanApi.ts`):**
+    - Enlace desacoplado con endpoints FastAPI mediante `httpClient`, tipado con contratos TypeScript simétricos.
+  - **Componentes Institucionales Ateneo+ (Cero Emojis / Diseño Clínico Puro):**
+    - `HakeGainBadge.tsx`: Badge tipográfico con código de color institucional para Ganancia Alta ($g \ge 0.70$), Media ($0.30 \le g < 0.70$) y Baja ($g < 0.30$).
+    - `PrescriptivePlanCard.tsx`: Tarjeta blanca `rounded-[28px]` con barra de progreso fluida tricolor, resumen de brechas, checklist interactivo de tareas dosificadas (lectura GPC, simulación ZDP, debriefing socrático) y CTA para iniciar Post-Test Isomórfico.
+    - `AssessmentRunnerModal.tsx`: Diálogo modal desacoplado con `createPortal` para resolución guiada de reactivos clínicos, soporte para tecla `Escape` y dictamen evaluativo en tiempo real.
+    - `StudentAnalyticsPage.tsx`: Integración armónica en la consola del estudiante, mostrando el plan prescriptivo activo o el banner de activación del Pre-Test.
+  - **Validación Exhaustiva:**
+    - TypeScript: 0 errores estáticos (`tsc --noEmit`).
+    - Vitest: 39/39 suites aprobadas (188/188 tests PASS al 100%).
+* **Fase 6 Completada: Sincronización Metodológica y Dossier Oficial Word CAISEB (`2026-10-20`):**
+  - **Dosier Metodológico Markdown:** Sincronizado `docs/3_documentacion_metodologica/DOSIER_POST_TEST_Y_PLAN_ESTUDIOS_HEURISTICO.md` con los contratos de API oficiales, componentes React implementados y métricas de cobertura de pruebas.
+  - **Dossier Oficial Word CAISEB (`build_full_word_dossier.py`):** Incorporada la Sección 9.6 ("Ciclo Formativo Cerrado: Pre-Test Diagnóstico, Plan Heurístico Prescriptivo y Post-Test Isomórfico con Ganancia de Hake") con 4 subapartados metodológicos y callout box de evidencia científica en educación médica.
+  - **Compilación de Artefacto DOCX:** Recompilado exitosamente `docs/8_ponencia_congreso_caiseb/ATENEO_DOSSIER_TECNICO_Y_PONENCIA_CAISEB.docx` (2.54 MB).

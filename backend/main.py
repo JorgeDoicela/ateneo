@@ -24,6 +24,8 @@ from routers.adaptive import router as adaptive_router
 from routers.health import router as health_router
 from routers.telemetry import router as telemetry_router
 from routers.gamification import router as gamification_router
+from modules.assessments.router import router as assessments_router
+from modules.study_plans.router import router as study_plans_router
 
 from contextlib import asynccontextmanager
 from core.config import settings
@@ -127,6 +129,8 @@ app.include_router(adaptive_router)
 app.include_router(gamification_router)
 app.include_router(health_router)
 app.include_router(telemetry_router)
+app.include_router(assessments_router, prefix="/api/assessments")
+app.include_router(study_plans_router, prefix="/api/study-plans")
 
 if __name__ == "__main__":
     import uvicorn

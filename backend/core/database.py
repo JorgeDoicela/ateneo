@@ -110,6 +110,8 @@ def init_database() -> None:
         StudentGamificationProfileModel,
         StudentUnlockedAchievementModel
     )
+    from modules.assessments.models import DiagnosticAssessmentModel, DiagnosticItemModel
+    from modules.study_plans.models import PrescriptiveStudyPlanModel, StudyPlanTaskModel
 
     Base.metadata.create_all(bind=engine)
 
