@@ -207,6 +207,22 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
     - `StudentAnalyticsPage.tsx`: Reemplazado `"Diagnóstico formativo RAG"` por *"Diagnóstico formativo estructurado"*; icono `Sparkles` sustituido por `Activity`.
     - `Login.tsx` / `Register.tsx`: Eliminada la coletilla comercial *"con Inteligencia Artificial"* en los subtítulos institucionales en favor de *"basada en las Guías de Práctica Clínica del MSP Ecuador"*.
     - Validación: 122/122 pruebas unitarias pasando al 100% en Vitest y TypeScript sin errores.
+* **Salas Sincrónicas de Ateneo Colaborativo (Ateneo+ Rooms & Split-Screen):**
+  - **Causa Raíz de Desalineación UI y Sobrecarga del Alumno:**
+    1. Previamente, la sala presentaba en la cabecera superior el bloque analítico de cohorte ("Consenso Diagnóstico de la Cohorte", "Puntaje Promedio de Sala: 0/10", "Sin entregas aún", "0% de quórum") a los estudiantes antes de emitir su dictamen, introduciendo sesgo de juicio clínico y ruido visual innecesario.
+    2. La columna izquierda acumulaba tanto la viñeta del caso como el lienzo/formulario de respuesta, desplazando la resolución diagnóstica hacia abajo y dejando la columna derecha (50% de la pantalla) ocupada exclusivamente por una lista pasiva de participantes.
+  - **Estándar Oficial Ateneo+ (Split-Screen Canónico 50/50 y Segregación Pedagógica):**
+    1. *Segregación Pedagógica de Analítica:* El panel de consenso de cohorte y promedio de sala se oculta para los estudiantes durante las fases activas (`espera` y `resolucion`). Solo se revela para los estudiantes cuando el docente moderador transiciona la sala a las fases de `discusion` o `finalizado`. El docente tutor lo visualiza de manera permanente para monitorear el quórum.
+    2. *Layout Split-Screen 50/50:*
+       - Columna Izquierda (50%): Cuadro clínico (anamnesis, signos vitales, laboratorio/paraclínicos, interrogante formativa e instrucciones pedagógicas docentes).
+       - Columna Derecha (50%): Resolución activa directamente adyacente (Lienzo de co-escritura sincrónica en modo grupal o formulario de dictamen individual en modo individual), seguido de la bandeja compacta de participantes con indicadores de presencia y edición en tiempo real (`activeTypers`, `En Línea`, `Redactando...`).
+    3. *Sincronización WebSockets y Proxy:* Configurado `ws: true` en el proxy `/api` de Vite (`frontend/vite.config.ts`) y discriminación de `client_id` (`clientIdRef`) para evitar ecos en la misma pestaña y permitir pruebas sincrónicas multi-pestaña entre docentes y alumnos. Normalización de `room_code.upper().strip()` en `ConnectionManager` del backend y sondeo activo a 2.5s en fallback cuando no está `CONNECTED`.
+    4. *Diferenciación Pedagógica Estricta de las 4 Fases del Ateneo:*
+       - **Fase 1 (Espera / Lobby):** Antesala formal. El lienzo/formulario de respuesta está bloqueado; se muestra tarjeta de bienvenida, código de acceso para compartir, conteo de participantes y botón para que el docente inicie la simulación.
+       - **Fase 2 (Resolución Activa):** El lienzo de co-escritura sincrónica (modo grupal) o formulario de dictamen individual (modo individual) se desbloquea con presencia en tiempo real, contador de palabras y botón de emisión de dictamen.
+       - **Fase 3 (Discusión / Debriefing Socrático):** Las entregas y redacción se sellan en modo solo lectura. Se despliega la evaluación formativa del motor RAG frente a la GPC (calificación, aciertos, omisiones, cita normativa), el panel de consenso de cohorte con promedios y brechas colectivas, y se promueve el debate clínico a través del canal de voz WebRTC.
+       - **Fase 4 (Finalizado / Archivo):** Cierre formal del ateneo clínico. El expediente de la cohorte queda inmutable y archivado con opciones de retorno a la consola o catálogo.
+       - *Interactividad del Stepper para Docentes:* Los 4 pasos del stepper superior actúan como botones interactivos en un clic para que el docente pueda conmutar de fase directamente en cualquier momento.
 * **Vinculación Integral de Identidad en Currículo Adaptativo BKT/KST y Base de Datos Relacional:**
   - **Causa Raíz del 23% Uniforme:**
     1. En `frontend/src/modules/adaptive/api/adaptiveApi.ts`, los métodos de consulta adaptativa (`getNextCase`, `getKnowledgeState`, `getLearningPath`) tenían el parámetro con valor por defecto hardcodeado `studentId: string = 'usr_alumno_001'`.
@@ -1878,5 +1894,75 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
   - **Comportamiento:** Al completar un caso y recibir la respuesta con `gamification_update`, `FeedbackCard` emite `ateneo:gamification-updated`. `CareerBadgeButton` escucha este evento y refresca su estado de inmediato en el Navbar, actualizando los puntos XP y el nivel del estudiante sin necesidad de recargar la página ni cerrar modales.
   - **Aislamiento Multiusuario:** Cada usuario (nuevo o existente) opera con su propio perfil independiente persistido en base de datos (`student_gamification_profiles` y `student_unlocked_achievements`), inicializándose en 0 XP y desbloqueando progresivamente sus hitos conforme completa evaluaciones.
   - **Validación:** 172/172 tests aprobados en Vitest (37 suites de pruebas).
-
+* **Diseño Arquitectónico: Sistema de Pre/Post-Test con IA y Motor Heurístico de Planes de Estudio (`DOSIER_POST_TEST_Y_PLAN_ESTUDIOS_HEURISTICO.md`, 2026-10-20):**
+  - **Motivación y Requerimiento:** Trascender la evaluación diagnóstica aislada hacia un bucle formativo cerrado: Pre-Test (Línea Base) -> Práctica en ZDP y Debriefing Socrático -> Post-Test Isomórfico Generativo con IA -> Plan de Estudio Prescriptivo con Ganancia de Hake ($g$).
+  - **Auditoría de Datos:** Base relacional con 129 usuarios, 76 evaluaciones, 35 estados de maestría BKT, 73 snapshots longitudinales y 606 eventos de telemetría.
+  - **Post-Test Isomórfico con IA:** Genera escenarios clínicos con diferente perfil de paciente pero idéntica encrucijada fisiopatológica/farmacológica, focalizados estrictamente en las omisiones normativas previas del estudiante para evaluar razonamiento real y eliminar el sesgo de memorización.
+  - **Plan Heurístico Prescriptivo:** Motor determinístico que pondera severidad clínica ($W_i$), extrae fragmentos canónicos de la GPC de ChromaDB v2, dosifica casos en ZDP y genera un cronograma con metas de maestría SMART.
+  - **Modelo de Datos:** Cuatro entidades planificadas: `diagnostic_assessments`, `diagnostic_assessment_items`, `prescriptive_study_plans`, `study_plan_tasks`.
+  - **Métrica Psicométrica:** Cálculo en tiempo real de la ganancia normalizada de Hake ($g = \frac{\text{Post} - \text{Pre}}{10 - \text{Pre}}$) con visualización de radar dual (Pre vs Post).
+* **Consola Docente, Ciclo de Vida de Salas e Inspector de Dictámenes Clínicos (`TeacherCasesPage.tsx`, `AteneoRoom.tsx`, `service.py`, 2026-10-20):**
+  - **Causa Raíz de Fallos en Experiencia Docente:**
+    1. *Desalineación Fatal de Fases:* El backend validaba estrictamente `["espera", "resolucion", "discusion", "finalizado"]`, pero el frontend enviaba los alias `'resolviendo'`, `'consenso'`, `'cerrada'`, lo que provocaba errores HTTP 400 silenciados en consola e impedía transicionar las fases de la sala.
+    2. *Ausencia de Gestión de Salas para Docentes:* El docente solo contaba con botones para crear salas; no disponía de ninguna interfaz para visualizar sus salas activas, consultar códigos de acceso, reingresar a una sesión en curso o archivar salas concluídas.
+    3. *Ceguera Diagnóstica en la Sala:* Durante el ateneo clínico, la lista de participantes solo mostraba badges pasivos ("Pensando..." / "Voto Registrado"). El profesor no tenía forma de auditar qué había respondido cada alumno, su puntaje RAG, sus aciertos ni las omisiones detectadas frente a la GPC.
+    4. *Desconexión de Métricas de Consenso:* El componente leía campos obsoletos (`porcentaje_participacion`, `score_promedio`), dejando vacíos los indicadores de quórum y calificación promedio de la sala.
+  - **Solución Arquitectónica (Cero Parches):**
+    1. *Normalización Defensiva en Backend (`CollaborationService.py`):* Diccionario de alias (`STATE_ALIASES`) que mapea automáticamente `'resolviendo'` -> `'resolucion'`, `'consenso'` -> `'discusion'`, `'cerrada'` -> `'finalizado'`, garantizando compatibilidad multi-cliente y WebSocket.
+    2. *Endpoints de Gestión Docente (`routers/collaboration.py`):*
+       - `GET /api/ateneo/teacher/rooms`: Retorna las salas moderadas por el docente autenticado con analítica de consenso e inteligencia colectiva enriquecida.
+       - `DELETE /api/ateneo/room/{room_code}`: Eliminación/cierre de salas bajo autorización RBAC estricta (solo docente creador o administrador).
+    3. *Dashboard de Salas en Vivo (`TeacherCasesPage.tsx`):*
+       - Sección superior destacada: *"Salas de Simulación en Vivo"* con tarjetas en diseño Ateneo+, badges de fase, conteo de quórum, promedio grupal, botón de copiado de código con feedback visual y botón de ingreso *"Entrar a Sala"*.
+       - Sección inferior: Catálogo de casos para apertura de nuevas salas sincrónicas.
+    4. *Inspector de Dictámenes Clínicos para Docentes (`AteneoRoom.tsx`):*
+       - Los docentes pueden pulsar sobre cualquier estudiante que haya enviado su dictamen para expandir un panel de auditoría clínica con su hipótesis completa, puntaje RAG formativo, aciertos normativos, omisiones frente a la GPC y cita textual de referencia.
+       - Panel de Inteligencia Colectiva con top de brechas clínicas grupales y porcentaje de estudiantes afectados para orientar el debriefing socrático.
+       - Pipeline visual de 4 fases (`1. Espera` -> `2. Resolución` -> `3. Discusión` -> `4. Finalizado`) con botones de avance secuencial del moderador.
+  - **Validación:**
+    - Backend: 10/10 pruebas en `test_api_endpoints.py` y suite dedicada en `backend/tests/test_teacher_rooms.py` aprobadas al 100%.
+    - Frontend: 176/176 pruebas en Vitest (38 suites completas) aprobadas sin errores.
+    - TypeScript: 0 errores en `tsc --noEmit`.
+* **Salas Ateneo+ con Modos Duales de Resolución y Co-escritura en Vivo con WebSockets (`TeacherCasesPage.tsx`, `AteneoRoom.tsx`, `socketClient.ts`, `service.py`, 2026-10-20):**
+  - **Causa Raíz de Requerimiento y Errores:**
+    1. *Rigidez en Dinámica Pedagógica:* La sala operaba bajo una única dinámica donde cada estudiante enviaba su dictamen por separado, sin permitir la modalidad de discusión en junta médica o debate clínico en tiempo real donde los estudiantes redactan un diagnóstico colectivo consensuado.
+    2. *Warning de WebSocket en Consola (`WebSocket is closed before the connection is established`):* En React 18 (modo StrictMode o desmontaje veloz de efectos al navegar), si el cleanup del `useEffect` invocaba `ws.close()` mientras el socket se encontraba en estado `CONNECTING` (readyState 0), Chromium registraba un warning uncaught en la consola de depuración del navegador.
+    3. *Fuga de Telemetría Interna de Modelos:* En la vista analítica del coordinador (`CoordinatorAnalytics.tsx`), se mostraba un badge interno no apto para usuarios finales: *"Distribución de Inferencia: gemini-3.8-flash: 76 dictámenes"*.
+    4. *Frustración con Códigos de Sala sin Prefijo:* Al recibir un código como `W578`, si el estudiante no escribía `ATENEO-W578`, el sistema rechazaba la sala con un 404.
+  - **Solución Arquitectónica (Cero Parches):**
+    1. *Dualidad de Modos de Resolución (`individual` vs `grupal`):*
+       - Modal de apertura en `TeacherCasesPage.tsx` que permite al docente elegir la dinámica pedagógica antes de abrir la sala:
+         - **Resolución Individual:** Cada estudiante redacta y envía su dictamen individualmente; el docente audita diagnósticos individuales e identifica brechas formativas de la cohorte.
+         - **Ateneo en Grupo (Co-escritura en Vivo):** Se habilita un lienzo clínico compartido sincronizado en tiempo real mediante WebSockets. Los estudiantes redactan juntos de forma colaborativa viendo los cambios de sus compañeros y los indicadores de quién está redactando (`activeTypers`), enviando una resolución colectiva única evaluada por el evaluador RAG contra las GPC de Ecuador.
+       - El docente puede conmutar el modo en vivo en cualquier momento desde la cabecera de la sala (`POST /api/ateneo/room/{room_code}/mode`), notificando a todos los clientes conectados vía el evento WebSocket `MODE_CHANGED`.
+    2. *Sincronización WebSocket en Tiempo Real para Co-escritura:*
+       - Contratos de mensajería: `COLLAB_TEXT_UPDATE` (envío cliente con debounce de 150ms) -> `COLLAB_TEXT_SYNC` (difusión a la sala), y `COLLAB_TYPING` -> `COLLAB_TYPING_INDICATOR` (presencia de redactores en vivo).
+       - Envío de veredicto colectivo consensuado vía `POST /api/ateneo/room/{room_code}/submit-group`, que ejecuta la evaluación RAG y emite `GROUP_ANSWER_SUBMITTED` a todos los participantes con el dictamen formativo.
+    3. *Desconexión Segura de WebSockets en Ciclo de Vida React (`socketClient.ts`):*
+       - En `disconnect()`, se desacoplan primero todos los event listeners (`onopen`, `onmessage`, `onerror`, `onclose`) para evitar que handlers en desmontaje capturen eventos residuales.
+       - Si el socket se encuentra en estado `WebSocket.CONNECTING` (0), se suprime el listener `onerror` y se programa el cierre diferido una vez alcanzado el estado `OPEN`, erradicando el error en consola de Chromium.
+    4. *Tolerancia Flexible a Prefijos de Sala:*
+       - En `JoinRoomModal.tsx` y en el backend `CollaborationService.get_room()`, si el usuario ingresa un código alfanumérico corto (ej. `W578`), el sistema lo normaliza automáticamente a `ATENEO-W578`, garantizando ingreso infalible.
+    5. *Purga Definitiva de Telemetría Interna:*
+       - Eliminado completamente el contenedor de telemetría de inferencia de modelos en `CoordinatorAnalytics.tsx`.
+  - **Validación:**
+    - TypeScript: 0 errores (`tsc --noEmit`).
+    - Vitest: 38/38 suites aprobadas (177 tests pasando al 100%).
+    - Pytest: `test_teacher_rooms.py` aprobado con evaluación grupal RAG simulada.
+    - Infraestructura Docker / Cloudflare Tunnel: `docker-compose.yml` actualizado con `command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload` para propagar automáticamente cambios de rutas FastAPI hacia `https://ateneo.doicela.dev`.
+    - Registro Reactivo de Participantes (`IDENTIFY` / `joinRoom`): Se unificó el registro de estudiantes en `JoinRoomModal.tsx` y `fetchRoomState` vía `collaborationApi.joinRoom`, y en el WebSocket receive loop ante el evento `IDENTIFY`, persistiendo al participante en SQLite y emitiendo `ROOM_STATE_UPDATED` en tiempo real a la consola del docente.
+    - Proxy de WebSockets en Vite (`ws: true`): En `frontend/vite.config.ts`, se incorporó `ws: true` en la regla de proxy `/api` (sin la cual Vite rechazaba el handshake 101 de WebSockets provocando `WebSocket is closed before connection is established`), y se desacopló la co-escritura sincrónica mediante `clientIdRef` para permitir sincronización bidireccional en tiempo real entre múltiples pestañas, dispositivos y cuentas.
+* **Consolidación y Transparencia de Resultados al Finalizar Sala (`AteneoRoom.tsx`, 2026-10-20):**
+  - **Causa Raíz:** Al finalizar la sala, los participantes y docentes no contaban con un panel centralizado de calificaciones. Los alumnos solo veían su dictamen individual (si enviaron) y en la lista de participantes solo aparecía un rótulo opaco *"Voto Registrado"* sin notas ni posibilidad de expandir los dictámenes de sus pares, impidiendo el debriefing formativo colectivo.
+  - **Solución Implementada:**
+    1. *Panel Central de Resultados Finales:* En `activePhase === 'finalizado'`, se despliega una tarjeta completa visible para docentes y estudiantes con:
+       - Resumen estadístico: Promedio general de la sala, total de entregas, porcentaje de quórum y modalidad.
+       - En Modo Individual: Ranking ordenado de todos los participantes con su calificación (`score / 10`), chip distintivo `(Tú)` para el usuario activo, y acordeón interactivo para examinar el dictamen clínico, aciertos y omisiones frente a la GPC del MSP.
+       - En Modo Grupal: Dictamen de consenso evaluado por IA, calificación colectiva y desglose normativo.
+* **Homologación de Aviso de Prueba Piloto e Investigación Activa (`AteneoRoom.tsx`, `TeacherCasesPage.tsx`, 2026-10-20):**
+  - **Requerimiento:** Incorporar en las salas sincrónicas de Ateneo y en la consola docente el mensaje legal e institucional de advertencia formativa que se muestra en los casos clínicos individuales (`CaseSolve.tsx`).
+  - **Implementación:** Se incluyó el banner normalizado con icono plano `AlertTriangle`:
+    *"Investigación en Desarrollo Activo: Caso clínico ficticio dentro de un protocolo científico en curso. Por protección legal institucional, el uso es de momento formativo y experimental rumbo a una versión oficial; no apto para decisiones en pacientes reales."*
+* **Limpieza de Cabecera de Sala (`AteneoRoom.tsx`, 2026-10-20):**
+  - Se eliminó el botón redundante *"Cambiar a Individual / Grupal"* de la cabecera. La modalidad queda fijada de forma limpia por la píldora informativa institucional elegida al crear la sala.
 

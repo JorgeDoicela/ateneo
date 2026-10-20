@@ -204,6 +204,25 @@ def test_collaboration_rooms_endpoints():
     assert res_room.status_code == 200
     print(f"  [PASS] GET /api/ateneo/room/{room_code} -> 200 OK (Estado sincrónico)")
 
+    # Probar transición canónica de fase a 'resolucion'
+    res_status1 = client.post(f"/api/ateneo/room/{room_code}/status", data={"nuevo_estado": "resolucion"}, headers=headers)
+    assert res_status1.status_code == 200
+    assert res_status1.json()["estado"] == "resolucion"
+
+    # Probar normalización defensiva de alias ('consenso' -> 'discusion')
+    res_status2 = client.post(f"/api/ateneo/room/{room_code}/status", data={"nuevo_estado": "consenso"}, headers=headers)
+    assert res_status2.status_code == 200
+    assert res_status2.json()["estado"] == "discusion"
+    print(f"  [PASS] POST /api/ateneo/room/{room_code}/status -> 200 OK (Fases y normalización de alias)")
+
+    # Probar listado de salas para el docente
+    res_teacher_rooms = client.get("/api/ateneo/teacher/rooms", headers=headers)
+    assert res_teacher_rooms.status_code == 200
+    teacher_rooms = res_teacher_rooms.json()
+    assert isinstance(teacher_rooms, list)
+    assert any(r["room_code"] == room_code for r in teacher_rooms)
+    print(f"  [PASS] GET /api/ateneo/teacher/rooms -> 200 OK ({len(teacher_rooms)} salas recuperadas)")
+
 
 def test_pdf_export_endpoint():
     payload = {

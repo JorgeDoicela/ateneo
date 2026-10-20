@@ -43,6 +43,7 @@ docs/
 
 ### 2.3 Analítica del Aprendizaje y Educación Médica
 * [CURRICULO_ADAPTATIVO_KST_Y_LEARNING_ANALYTICS.md](./3_documentacion_metodologica/CURRICULO_ADAPTATIVO_KST_Y_LEARNING_ANALYTICS.md): Formalización matemática de la Teoría de Espacios del Conocimiento (*Knowledge Space Theory - KST*) aplicada a la navegación curricular adaptativa de casos clínicos según maestría diagnóstica.
+* [DOSIER_POST_TEST_Y_PLAN_ESTUDIOS_HEURISTICO.md](./3_documentacion_metodologica/DOSIER_POST_TEST_Y_PLAN_ESTUDIOS_HEURISTICO.md): Especificación técnica del sistema de Pre-Test / Post-Test con IA y motor heurístico de planes de estudio prescriptivos basados en brechas clínicas GPC y ganancia de Hake.
 
 ---
 

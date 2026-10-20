@@ -23,8 +23,8 @@ class RoomRepository:
         return query.order_by(AteneoRoomModel.updated_at.desc()).all()
 
     def get_active_rooms(self, tenant_id: Optional[str] = None) -> List[AteneoRoomModel]:
-        """Retorna las salas activas en estado de espera o discusión clínica, con filtro opcional por tenant."""
-        query = self.db.query(AteneoRoomModel).filter(AteneoRoomModel.estado.in_(["espera", "discusion"]))
+        """Retorna las salas activas en estado de espera, resolución o discusión clínica, con filtro opcional por tenant."""
+        query = self.db.query(AteneoRoomModel).filter(AteneoRoomModel.estado.in_(["espera", "resolucion", "discusion"]))
         if tenant_id:
             query = query.filter(AteneoRoomModel.tenant_id == tenant_id)
         return query.order_by(AteneoRoomModel.updated_at.desc()).all()

@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { Users, X } from 'lucide-react';
 import ClinicalButton from '../../../core/ui/ClinicalButton';
+import { useAuth } from '../../../context/AuthContext';
+import { collaborationApi } from '../api/collaborationApi';
 
 export interface JoinRoomModalProps {
   isOpen: boolean;
@@ -16,8 +18,10 @@ export interface JoinRoomModalProps {
  */
 export default function JoinRoomModal({ isOpen, onClose }: JoinRoomModalProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [roomInput, setRoomInput] = useState('');
   const [joinError, setJoinError] = useState<string | null>(null);
+  const [isJoining, setIsJoining] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -34,17 +38,41 @@ export default function JoinRoomModal({ isOpen, onClose }: JoinRoomModalProps) {
 
   if (!isOpen) return null;
 
-  const handleJoinRoom = (e: FormEvent) => {
+  const handleJoinRoom = async (e: FormEvent) => {
     e.preventDefault();
-    const cleanCode = roomInput.trim().toUpperCase();
+    let cleanCode = roomInput.trim().toUpperCase();
     if (!cleanCode) {
       setJoinError('Por favor ingresa un código válido');
       return;
     }
+    if (!cleanCode.startsWith('ATENEO-') && cleanCode.length <= 6) {
+      cleanCode = `ATENEO-${cleanCode}`;
+    }
+
+    setIsJoining(true);
     setJoinError(null);
-    setRoomInput('');
-    onClose();
-    navigate(`/ateneo/${cleanCode}`);
+
+    try {
+      if (user && user.rol !== 'docente') {
+        await collaborationApi.joinRoom(
+          cleanCode,
+          user.id,
+          user.email,
+          user.nombre,
+          user.rol
+        );
+      } else {
+        await collaborationApi.getRoom(cleanCode);
+      }
+      setRoomInput('');
+      onClose();
+      navigate(`/ateneo/${cleanCode}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'La sala especificada no existe o no se encuentra activa.';
+      setJoinError(msg);
+    } finally {
+      setIsJoining(false);
+    }
   };
 
   const handleClose = () => {
@@ -146,7 +174,7 @@ export default function JoinRoomModal({ isOpen, onClose }: JoinRoomModalProps) {
             >
               Cancelar
             </button>
-            <ClinicalButton type="submit" variant="primary" size="md">
+            <ClinicalButton type="submit" variant="primary" size="md" loading={isJoining}>
               Ingresar a la Sala
             </ClinicalButton>
           </div>

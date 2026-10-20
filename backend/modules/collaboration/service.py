@@ -30,10 +30,13 @@ class CollaborationService:
         if not respondidos:
             return {
                 "promedio_sala": 0.0,
+                "score_promedio": 0.0,
                 "total_respondidos": 0,
                 "total_conectados": len(participantes),
+                "porcentaje_participacion": 0,
                 "nivel_consenso": "Sin entregas aún",
-                "top_brechas_sala": []
+                "top_brechas_sala": [],
+                "diagnostico_mayoritario": "Pendiente de dictamen"
             }
 
         scores = [p["resultado_evaluacion"].get("score", 0) for p in respondidos]
@@ -61,12 +64,17 @@ class CollaborationService:
                   else "Brecha Colectiva Crítica Detectada")
         )
 
+        porcentaje_participacion = round((len(respondidos) / len(participantes)) * 100) if participantes else 0
+
         return {
             "promedio_sala": promedio,
+            "score_promedio": promedio,
             "total_respondidos": len(respondidos),
             "total_conectados": len(participantes),
+            "porcentaje_participacion": porcentaje_participacion,
             "nivel_consenso": nivel_consenso,
-            "top_brechas_sala": top_brechas
+            "top_brechas_sala": top_brechas,
+            "diagnostico_mayoritario": nivel_consenso
         }
 
     def _save_to_storage(self, room_data: Dict[str, Any]) -> None:
@@ -98,7 +106,8 @@ class CollaborationService:
         docente_id: str,
         docente_nombre: str,
         custom_code: Optional[str] = None,
-        tenant_id: str = "tenant_default"
+        tenant_id: str = "tenant_default",
+        modo_resolucion: str = "individual"
     ) -> Dict[str, Any]:
         caso = self.case_service.get_case(case_id)
         if not caso:
@@ -110,6 +119,7 @@ class CollaborationService:
 
         room_code = custom_code.upper() if custom_code else self.generate_room_code()
         now = datetime.datetime.utcnow().isoformat()
+        clean_modo = modo_resolucion if modo_resolucion in ["individual", "grupal"] else "individual"
 
         room_data = {
             "room_code": room_code,
@@ -124,8 +134,17 @@ class CollaborationService:
             "docente_id": docente_id,
             "docente_nombre": docente_nombre,
             "estado": "espera",
+            "modo_resolucion": clean_modo,
             "creado_en": now,
             "participantes": {},
+            "borrador_grupal": {
+                "texto": "",
+                "ultimo_editor_id": None,
+                "ultimo_editor_nombre": None,
+                "actualizado_en": now
+            },
+            "resultado_evaluacion_grupal": None,
+            "dictamen_grupal_emitido": False
         }
 
         self._save_to_storage(room_data)
@@ -134,9 +153,18 @@ class CollaborationService:
     def get_room(self, room_code: str) -> Optional[Dict[str, Any]]:
         code = room_code.upper().strip()
         room = self._memory_cache.get(code)
+        if not room and not code.startswith("ATENEO-"):
+            alt_code = f"ATENEO-{code}"
+            room = self._memory_cache.get(alt_code)
+            if room:
+                code = alt_code
 
         if not room:
             db_record = self.repository.get(code)
+            if not db_record and not code.startswith("ATENEO-"):
+                db_record = self.repository.get(f"ATENEO-{code}")
+                if db_record:
+                    code = f"ATENEO-{code}"
             if db_record:
                 try:
                     room = json.loads(db_record.data_json)
@@ -144,8 +172,20 @@ class CollaborationService:
                 except Exception as e:
                     logger.error(f"Error al deserializar sala {code}: {e}", extra={"action": "room_deserialization_error", "room_code": code})
 
-
         if room:
+            if "modo_resolucion" not in room:
+                room["modo_resolucion"] = "individual"
+            if "borrador_grupal" not in room:
+                room["borrador_grupal"] = {
+                    "texto": "",
+                    "ultimo_editor_id": None,
+                    "ultimo_editor_nombre": None,
+                    "actualizado_en": datetime.datetime.utcnow().isoformat()
+                }
+            if "resultado_evaluacion_grupal" not in room:
+                room["resultado_evaluacion_grupal"] = None
+            if "dictamen_grupal_emitido" not in room:
+                room["dictamen_grupal_emitido"] = False
             room["analitica_consenso"] = self.calculate_room_analytics(room)
 
         return room
@@ -169,21 +209,40 @@ class CollaborationService:
                 custom_code=code
             )
 
-        user_key = user_email.lower()
+        clean_email = (user_email or f"{user_id}@ateneo.edu.ec").strip()
+        user_key = clean_email.lower()
         if user_key not in room["participantes"]:
             room["participantes"][user_key] = {
                 "id": user_id,
-                "email": user_email,
-                "nombre": user_nombre,
-                "rol": user_rol,
+                "email": clean_email,
+                "nombre": user_nombre or "Estudiante",
+                "rol": user_rol or "alumno",
                 "respuesta": None,
                 "resultado_evaluacion": None,
                 "respondido": False,
                 "unido_en": datetime.datetime.utcnow().isoformat()
             }
+            room["analitica_consenso"] = self.calculate_room_analytics(room)
             self._save_to_storage(room)
+        else:
+            changed = False
+            if user_nombre and room["participantes"][user_key].get("nombre") != user_nombre:
+                room["participantes"][user_key]["nombre"] = user_nombre
+                changed = True
+            if user_id and room["participantes"][user_key].get("id") != user_id:
+                room["participantes"][user_key]["id"] = user_id
+                changed = True
+            if changed:
+                self._save_to_storage(room)
 
         return room
+
+    STATE_ALIASES = {
+        "resolviendo": "resolucion",
+        "consenso": "discusion",
+        "cerrada": "finalizado",
+        "finalizada": "finalizado",
+    }
 
     def change_room_status(self, room_code: str, nuevo_estado: str, docente_id: str) -> Dict[str, Any]:
         code = room_code.upper().strip()
@@ -191,13 +250,35 @@ class CollaborationService:
         if not room:
             raise ValueError(f"La sala '{code}' no existe.")
 
+        raw_state = (nuevo_estado or "").lower().strip()
+        normalized_state = self.STATE_ALIASES.get(raw_state, raw_state)
+
         estados_validos = ["espera", "resolucion", "discusion", "finalizado"]
-        if nuevo_estado not in estados_validos:
+        if normalized_state not in estados_validos:
             raise ValueError(f"Estado '{nuevo_estado}' no válido. Opciones: {estados_validos}")
 
-        room["estado"] = nuevo_estado
+        room["estado"] = normalized_state
         self._save_to_storage(room)
         return room
+
+    def get_rooms_by_docente(self, docente_id: str, tenant_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Retorna todas las salas moderadas por un docente con analítica enriquecida."""
+        records = self.repository.get_by_docente(docente_id, tenant_id)
+        rooms: List[Dict[str, Any]] = []
+        for rec in records:
+            try:
+                data = json.loads(rec.data_json)
+                data["analitica_consenso"] = self.calculate_room_analytics(data)
+                rooms.append(data)
+            except Exception as e:
+                logger.error(f"Error al deserializar sala {rec.room_code}: {e}")
+        return rooms
+
+    def delete_room(self, room_code: str, docente_id: str) -> bool:
+        """Elimina una sala de base de datos y de la caché en memoria."""
+        code = room_code.upper().strip()
+        self._memory_cache.pop(code, None)
+        return self.repository.delete(code)
 
     def submit_student_answer(
         self,
@@ -231,6 +312,63 @@ class CollaborationService:
         p["respondido_en"] = datetime.datetime.utcnow().isoformat()
 
         room["analitica_consenso"] = self.calculate_room_analytics(room)
+        self._save_to_storage(room)
+        return room
+
+    def change_resolution_mode(self, room_code: str, nuevo_modo: str, docente_id: str) -> Dict[str, Any]:
+        """Modifica el modo de resolución de la sala: 'individual' o 'grupal'."""
+        code = room_code.upper().strip()
+        room = self.get_room(code)
+        if not room:
+            raise ValueError(f"La sala '{code}' no existe.")
+
+        clean_modo = (nuevo_modo or "").lower().strip()
+        if clean_modo not in ["individual", "grupal"]:
+            raise ValueError(f"Modo de resolución '{nuevo_modo}' no válido. Opciones: ['individual', 'grupal']")
+
+        room["modo_resolucion"] = clean_modo
+        self._save_to_storage(room)
+        return room
+
+    def update_collaborative_text(self, room_code: str, texto: str, user_id: str, user_nombre: str) -> Dict[str, Any]:
+        """Actualiza el borrador sincrónico compartido en modo grupal."""
+        code = room_code.upper().strip()
+        room = self.get_room(code)
+        if not room:
+            raise ValueError(f"La sala '{code}' no existe.")
+
+        now = datetime.datetime.utcnow().isoformat()
+        room["borrador_grupal"] = {
+            "texto": texto,
+            "ultimo_editor_id": user_id,
+            "ultimo_editor_nombre": user_nombre,
+            "actualizado_en": now
+        }
+        self._save_to_storage(room)
+        return room
+
+    def submit_group_answer(
+        self,
+        room_code: str,
+        texto_grupal: str,
+        eval_result: Dict[str, Any],
+        submitted_by_nombre: str
+    ) -> Dict[str, Any]:
+        """Registra el dictamen de consenso colectivo en modo grupal evaluado por RAG."""
+        code = room_code.upper().strip()
+        room = self.get_room(code)
+        if not room:
+            raise ValueError(f"La sala '{code}' no existe.")
+
+        now = datetime.datetime.utcnow().isoformat()
+        room["borrador_grupal"]["texto"] = texto_grupal
+        room["borrador_grupal"]["ultimo_editor_nombre"] = submitted_by_nombre
+        room["borrador_grupal"]["actualizado_en"] = now
+        room["resultado_evaluacion_grupal"] = eval_result
+        room["dictamen_grupal_emitido"] = True
+        room["dictamen_grupal_emitido_en"] = now
+        room["dictamen_grupal_por"] = submitted_by_nombre
+
         self._save_to_storage(room)
         return room
 

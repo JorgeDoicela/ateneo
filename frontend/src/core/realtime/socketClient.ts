@@ -231,8 +231,29 @@ export class AteneoSocketClient {
     this.isIntentionallyClosed = true;
     this.clearTimers();
     if (this.ws) {
-      this.ws.close();
+      const currentWs = this.ws;
       this.ws = null;
+      // Desasociar handlers para evitar ruido en consola ante desmontajes o desconexiones intencionales
+      currentWs.onopen = null;
+      currentWs.onmessage = null;
+      currentWs.onerror = null;
+      currentWs.onclose = null;
+
+      if (currentWs.readyState === WebSocket.OPEN) {
+        try {
+          currentWs.close(1000, 'Normal Closure');
+        } catch (_) {}
+      } else if (currentWs.readyState === WebSocket.CONNECTING) {
+        // En navegadores Chromium, cerrar un socket en estado CONNECTING genera el warning:
+        // "WebSocket connection to '...' failed: WebSocket is closed before the connection is established".
+        // Adjuntamos un onopen diferido para cerrar limpiamente apenas se resuelva el apretón de manos.
+        currentWs.onopen = () => {
+          try {
+            currentWs.close(1000, 'Normal Closure');
+          } catch (_) {}
+        };
+        currentWs.onerror = () => {};
+      }
     }
     this.setStatus('DISCONNECTED');
   }
