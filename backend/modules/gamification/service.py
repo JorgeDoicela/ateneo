@@ -67,12 +67,29 @@ class GamificationService:
         }
 
     def get_student_profile(self, user_id: str) -> GamificationProfileDTO:
-        """Retorna el perfil consolidado del estudiante con métricas de carrera médica."""
-        profile = self.repo.get_or_create_profile(user_id)
-        lvl_info = self.get_level_info_for_xp(profile.puntos_xp)
+        """Retorna el perfil consolidado del estudiante con métricas de carrera médica (solo lectura, sin mutación de BD)."""
+        profile = self.repo.get_profile(user_id)
         unlocked_count = self.repo.count_user_achievements(user_id)
         all_defs = self.repo.get_all_active_definitions()
 
+        if not profile:
+            lvl_info = self.get_level_info_for_xp(0)
+            return GamificationProfileDTO(
+                user_id=user_id,
+                puntos_xp=0,
+                nivel_actual=lvl_info["level"],
+                titulo_rango=lvl_info["title"],
+                casos_resueltos=0,
+                racha_dias=1,
+                xp_actual_en_nivel=lvl_info["xp_in_level"],
+                xp_requerido_siguiente_nivel=lvl_info["needed_for_next"],
+                porcentaje_avance_nivel=lvl_info["percentage"],
+                siguiente_rango=lvl_info["next_title"],
+                total_logros_desbloqueados=unlocked_count,
+                total_logros_disponibles=len(all_defs)
+            )
+
+        lvl_info = self.get_level_info_for_xp(profile.puntos_xp)
         return GamificationProfileDTO(
             user_id=user_id,
             puntos_xp=profile.puntos_xp,

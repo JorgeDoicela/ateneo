@@ -251,10 +251,31 @@ def init_database() -> None:
                 "criterio_valor": 1.0
             }
         ]
-        from modules.gamification.models import AchievementDefinitionModel
+        from modules.gamification.models import AchievementDefinitionModel, StudentGamificationProfileModel
         for ach in default_achievements:
             existing_ach = db.get(AchievementDefinitionModel, ach["id"])
             if not existing_ach:
                 db.add(AchievementDefinitionModel(**ach))
+
+        demo_profiles = [
+            ("usr_alumno_001", "Estudiante Clínico Inicial"),
+            ("usr_estudiante_002", "Estudiante Clínico Inicial"),
+            ("usr_estudiante_003", "Estudiante Clínico Inicial"),
+            ("usr_estudiante_004", "Estudiante Clínico Inicial"),
+            ("usr_docente_001", "Docente de Medicina"),
+            ("usr_admin_001", "Administrador Institucional")
+        ]
+        for uid, title in demo_profiles:
+            existing_prof = db.get(StudentGamificationProfileModel, uid)
+            if not existing_prof:
+                db.add(StudentGamificationProfileModel(
+                    user_id=uid,
+                    puntos_xp=0,
+                    nivel_actual=1,
+                    titulo_rango=title,
+                    casos_resueltos=0,
+                    racha_dias=1,
+                    ultimo_acceso_fecha=datetime.datetime.now(datetime.timezone.utc)
+                ))
         db.commit()
 

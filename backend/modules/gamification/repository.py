@@ -27,10 +27,14 @@ class GamificationRepository:
         stmt = select(AchievementDefinitionModel).where(AchievementDefinitionModel.id == achievement_id)
         return self.session.execute(stmt).scalar_one_or_none()
 
+    def get_profile(self, user_id: str) -> Optional[StudentGamificationProfileModel]:
+        """Obtiene el perfil de progresión de un estudiante sin mutar la base de datos (solo lectura)."""
+        stmt = select(StudentGamificationProfileModel).where(StudentGamificationProfileModel.user_id == user_id)
+        return self.session.execute(stmt).scalar_one_or_none()
+
     def get_or_create_profile(self, user_id: str) -> StudentGamificationProfileModel:
         """Obtiene el perfil de progresión del estudiante o lo inicializa si es su primera actividad."""
-        stmt = select(StudentGamificationProfileModel).where(StudentGamificationProfileModel.user_id == user_id)
-        profile = self.session.execute(stmt).scalar_one_or_none()
+        profile = self.get_profile(user_id)
         if not profile:
             profile = StudentGamificationProfileModel(
                 user_id=user_id,

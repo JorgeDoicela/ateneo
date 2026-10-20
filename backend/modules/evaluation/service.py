@@ -184,6 +184,8 @@ class EvaluationService:
                         dificultad = (getattr(case, "dificultad", "") or "").lower()
                         es_emergencia = "rojo" in dificultad or "alta" in dificultad or "emergencia" in dificultad or getattr(case, "codigo_rojo", False)
 
+                        especialidad_val = getattr(case, "especialidad", None) or getattr(case, "guia_asociada", "Medicina General")
+
                         gamif_result = gamification_svc.process_evaluation_event(
                             user_id=user_id,
                             case_id=case.id,
@@ -191,7 +193,7 @@ class EvaluationService:
                             faithfulness_score=float(eval_dict.get("faithfulness_score", 0.0)) if eval_dict.get("faithfulness_score") is not None else None,
                             tiempo_segundos=float(eval_dict.get("tiempo_segundos", 0.0)) if eval_dict.get("tiempo_segundos") is not None else 0.0,
                             es_fases=es_fases,
-                            especialidad=case.especialidad,
+                            especialidad=especialidad_val,
                             es_emergencia=es_emergencia
                         )
                         if hasattr(eval_result, "gamification_update"):
