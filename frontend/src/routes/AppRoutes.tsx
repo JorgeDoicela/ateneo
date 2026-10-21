@@ -44,7 +44,7 @@ function RootRoleRedirect() {
   if (user?.rol === 'administrador') {
     return <Navigate to="/admin/users" replace />;
   }
-  return <CaseList />;
+  return <Navigate to="/cases" replace />;
 }
 
 /**

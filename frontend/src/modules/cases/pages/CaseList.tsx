@@ -7,7 +7,6 @@ import {
 import useCases, { resolveGpcMeta } from '../hooks/useCases';
 import CaseCard from '../components/CaseCard';
 import CaseFilterTabs from '../components/CaseFilterTabs';
-import DiagnosticPreTestBanner from '../components/DiagnosticPreTestBanner';
 import AdaptiveNextCase from '../../adaptive/components/AdaptiveNextCase';
 import KnowledgeSpaceGraph from '../../adaptive/components/KnowledgeSpaceGraph';
 import { TourHelpButton, StudentTourGuide } from '../../../core/tour';
@@ -52,10 +51,7 @@ export default function CaseList() {
         </p>
       </div>
 
-      {/* 2. Banner de Integración Formativa: Pre-Test CACES / Plan Prescriptivo Activo */}
-      <DiagnosticPreTestBanner />
-
-      {/* 3. Motor Adaptativo ZDP (KST + BKT) */}
+      {/* 2. Motor Adaptativo ZDP (KST + BKT) */}
       <AdaptiveNextCase
         onSelectCase={(clinicalCase) => navigate(`/cases/${clinicalCase.id}`)}
         onToggleGraph={() => setShowKstGraph(true)}

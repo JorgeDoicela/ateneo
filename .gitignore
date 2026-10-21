@@ -23,8 +23,14 @@ ENV/
 .pytest_cache/
 .coverage
 *.log
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
 *.db-wal
 *.db-shm
+backend/data/*.db
+backend/*.db
 backend/data/evaluation_history.db
 
 # ==========================================

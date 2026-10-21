@@ -369,22 +369,7 @@ export default function ReasoningTrends() {
           </div>
         </div>
 
-        {/* Tooltip Dinámico Flotante de Cristal Líquido si hay punto activo */}
-        {activePoint && (
-          <div className="p-3 bg-gradient-to-r from-cyan-50/80 via-blue-50/60 to-indigo-50/80 border border-blue-200/80 rounded-[18px] flex flex-wrap items-center justify-between gap-2 text-xs animate-fadeIn">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-900">{activePoint.case_title || 'Caso Clínico'}</span>
-              <span className="text-slate-400 font-light">•</span>
-              <span className="text-slate-600 font-medium">{activePoint.guia_asociada}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-slate-500 font-mono text-[11px]">{activePoint.fechaLabel}</span>
-              <span className="font-bold text-[#0b57d0] font-mono text-sm px-2.5 py-0.5 rounded-full bg-white border border-blue-200/80 shadow-2xs">
-                {activePoint.score.toFixed(1)} / 10 pts
-              </span>
-            </div>
-          </div>
-        )}
+
 
         {pointsSVG.length > 0 ? (
           <div 

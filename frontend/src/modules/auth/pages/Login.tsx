@@ -19,8 +19,17 @@ function sanitizeRedirectUrl(target: unknown): string | null {
     path = `${loc.pathname || ''}${loc.search || ''}${loc.hash || ''}`.trim();
   }
 
-  // Debe ser una ruta interna relativa estricta, sin prefijos de protocolo ni barra doble
-  if (path.startsWith('/') && !path.startsWith('//') && !path.startsWith('/login') && !path.startsWith('/register')) {
+  // Debe ser una ruta interna relativa estricta, sin prefijos de protocolo ni barra doble,
+  // excluyendo rutas de autenticación y analíticas para que el inicio de sesión siempre aterrice en el espacio principal
+  if (
+    path.startsWith('/') && 
+    !path.startsWith('//') && 
+    !path.startsWith('/login') && 
+    !path.startsWith('/register') &&
+    !path.startsWith('/analytics') &&
+    !path.startsWith('/teacher/analytics') &&
+    !path.startsWith('/performance')
+  ) {
     return path;
   }
   return null;
@@ -47,11 +56,11 @@ export default function Login() {
       if (redirectTarget && redirectTarget !== '/') {
         navigate(redirectTarget, { replace: true });
       } else if (currentUser.rol === 'administrador') {
-        navigate('/admin', { replace: true });
+        navigate('/admin/users', { replace: true });
       } else if (currentUser.rol === 'docente') {
-        navigate('/teacher', { replace: true });
+        navigate('/teacher/cases', { replace: true });
       } else {
-        navigate('/', { replace: true });
+        navigate('/cases', { replace: true });
       }
     }
   }, [currentUser, authLoading, redirectTarget, navigate]);
@@ -82,11 +91,11 @@ export default function Login() {
       if (redirectTarget && redirectTarget !== '/') {
         navigate(redirectTarget);
       } else if (user.rol === 'administrador') {
-        navigate('/admin');
+        navigate('/admin/users');
       } else if (user.rol === 'docente') {
-        navigate('/teacher');
+        navigate('/teacher/cases');
       } else {
-        navigate('/');
+        navigate('/cases');
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Contraseña incorrecta. Inténtalo de nuevo.';
