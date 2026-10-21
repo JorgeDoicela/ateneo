@@ -215,3 +215,131 @@ describe('Servicios de Red API (assessmentApi y studyPlanApi)', () => {
     expect(res).toEqual(mockData);
   });
 });
+
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
+import { DiagnosticPreTestBanner } from '../modules/cases/components/DiagnosticPreTestBanner';
+import * as AuthContextModule from '../context/AuthContext';
+
+describe('Componente DiagnosticPreTestBanner (Integración en Catálogo de Inicio)', () => {
+  let queryClient: QueryClient;
+
+  beforeEach(() => {
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false, gcTime: 0 },
+      },
+    });
+    vi.clearAllMocks();
+  });
+
+  const renderWithProviders = (ui: React.ReactElement) => {
+    return render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          {ui}
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+  };
+
+  it('no renderiza nada si el usuario no es alumno (ej. docente)', () => {
+    vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({
+      user: { id: 'usr_docente', rol: 'docente', nombre: 'Dr. Carlos' },
+      isAuthenticated: true,
+      token: 'fake',
+      login: vi.fn(),
+      logout: vi.fn(),
+      loading: false,
+      loginWithMagicLink: vi.fn(),
+    } as any);
+
+    const { container } = renderWithProviders(<DiagnosticPreTestBanner />);
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('muestra invitación al Pre-Test CACES si el alumno no tiene plan ni historial previo', async () => {
+    vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({
+      user: { id: 'usr_alumno_001', rol: 'alumno', nombre: 'Estudiante María' },
+      isAuthenticated: true,
+      token: 'fake',
+      login: vi.fn(),
+      logout: vi.fn(),
+      loading: false,
+      loginWithMagicLink: vi.fn(),
+    } as any);
+
+    vi.mocked(httpClient.get).mockImplementation((url: string) => {
+      if (url === '/api/study-plans/me') return Promise.resolve({ data: null, status: 200, ok: true } as any);
+      if (url === '/api/assessments/history/me') return Promise.resolve({ data: [], status: 200, ok: true } as any);
+      return Promise.resolve({ data: null, status: 200, ok: true } as any);
+    });
+
+    renderWithProviders(<DiagnosticPreTestBanner />);
+
+    expect(await screen.findByText(/Inicia tu Pre-Test Diagnóstico/i)).toBeInTheDocument();
+    expect(screen.getByText(/Marco CACES \/ MSP/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Iniciar Pre-Test CACES/i })).toBeInTheDocument();
+  });
+
+  it('muestra el progreso del Plan Prescriptivo cuando el alumno tiene un plan activo', async () => {
+    vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({
+      user: { id: 'usr_alumno_001', rol: 'alumno', nombre: 'Estudiante María' },
+      isAuthenticated: true,
+      token: 'fake',
+      login: vi.fn(),
+      logout: vi.fn(),
+      loading: false,
+      loginWithMagicLink: vi.fn(),
+    } as any);
+
+    const mockPlan: PrescriptiveStudyPlan = {
+      id: 'plan_active_123',
+      user_id: 'usr_alumno_001',
+      title: 'Plan de Refuerzo en Preeclampsia y Sepsis',
+      diagnosis_summary: 'Brechas en Zuspan',
+      target_duration_days: 7,
+      progress_percentage: 50.0,
+      status: 'active',
+      created_at: new Date().toISOString(),
+      tasks: [
+        {
+          id: 1,
+          plan_id: 'plan_active_123',
+          task_type: 'gpc_reading',
+          title: 'Lectura GPC',
+          description: 'Lectura de guía',
+          resource_reference: 'GPC Preeclampsia',
+          competency_id: 'diagnostico_final',
+          is_completed: true,
+          estimated_minutes: 15,
+        },
+        {
+          id: 2,
+          plan_id: 'plan_active_123',
+          task_type: 'case_simulation',
+          title: 'Simulación ZDP',
+          description: 'Caso práctico',
+          resource_reference: 'case_preeclampsia_01',
+          competency_id: 'plan_terapeutico_msp',
+          is_completed: false,
+          estimated_minutes: 20,
+        },
+      ],
+    };
+
+    vi.mocked(httpClient.get).mockImplementation((url: string) => {
+      if (url === '/api/study-plans/me') return Promise.resolve({ data: mockPlan, status: 200, ok: true } as any);
+      if (url === '/api/assessments/history/me') return Promise.resolve({ data: [], status: 200, ok: true } as any);
+      return Promise.resolve({ data: null, status: 200, ok: true } as any);
+    });
+
+    renderWithProviders(<DiagnosticPreTestBanner />);
+
+    expect(await screen.findByText(/Plan de Refuerzo en Preeclampsia y Sepsis/i)).toBeInTheDocument();
+    expect(screen.getByText(/50%/i)).toBeInTheDocument();
+    expect(screen.getByText(/1 de 2 actividades formativas/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Continuar Plan de Estudio/i })).toBeInTheDocument();
+  });
+});
+
