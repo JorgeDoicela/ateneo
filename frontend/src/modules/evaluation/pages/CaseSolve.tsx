@@ -79,6 +79,9 @@ export default function CaseSolve() {
   const [studyViewerTab, setStudyViewerTab] = useState<'standard' | 'dicom'>('standard');
   const [isViewerModalOpen, setIsViewerModalOpen] = useState<boolean>(false);
 
+  // Determinar la imagen médica activa (priorizando la fase clínica actual o el caso general)
+  const activeImageUrl = isPhaseMode ? activePhaseData?.imagen_url : (caso?.imagen_url || activePhaseData?.imagen_url);
+
   // Estados de manipulación diagnóstica (Zoom, Paneo, Ventana y Rejilla ECG)
   const [studyZoom, setStudyZoom] = useState<number>(1.0);
   const [studyPan, setStudyPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -103,7 +106,7 @@ export default function CaseSolve() {
 
   const openStudyModal = () => {
     resetStudyTransformations();
-    setShowEcgGrid(Boolean(caso?.id?.toLowerCase().includes('ecg')));
+    setShowEcgGrid(Boolean(caso?.id?.toLowerCase().includes('ecg') || activeImageUrl?.toLowerCase().includes('ecg')));
     setIsViewerModalOpen(true);
   };
 
@@ -307,7 +310,6 @@ export default function CaseSolve() {
 
             {/* Visor Diagnóstico de Estudio Paraclínico (Condicionado estrictamente a los estudios reales del caso) */}
             {(() => {
-              const activeImageUrl = isPhaseMode && activePhaseData?.imagen_url ? activePhaseData.imagen_url : caso?.imagen_url;
               const hasStandardImage = Boolean(activeImageUrl);
               const activeDicom = isPhaseMode && activePhaseData?.dicom_study ? activePhaseData.dicom_study : caso?.dicom_study;
               const hasDicomStudy = Boolean(activeDicom);
@@ -327,7 +329,7 @@ export default function CaseSolve() {
                 if (targetId.includes('ecg') || targetImg.includes('ecg')) {
                   return 'Electrocardiograma';
                 }
-                if (targetImg.includes('rx') || targetId.includes('rx') || targetId.includes('nac')) {
+                if (targetImg.includes('rx') || targetId.includes('rx') || targetId.includes('nac') || targetImg.includes('cavitacion')) {
                   return 'Estudio Radiológico';
                 }
                 return 'Estudio Paraclínico';
@@ -499,7 +501,7 @@ export default function CaseSolve() {
                         : currentPhase === 3
                           ? 'Escribe o dicta tu esquema terapéutico, dosificación normada y conducta clínica'
                           : `Responde a la interrogante formativa de la Fase ${currentPhase} según la GPC Ecuador`
-                    : 'Escribe o dicta tu análisis estructurado según la metodología SOAP (Subjetivo, Objetivo, Análisis, Plan)'}
+                    : 'Escribe o dicta tu razonamiento clínico estructurado (Diagnóstico, Tratamiento, Prevención y Seguimiento normado)'}
                 </p>
               </div>
 
@@ -540,7 +542,7 @@ export default function CaseSolve() {
                             : currentPhase === 3
                               ? "Detalla el esquema terapéutico normado, fármacos de primera línea, dosificación, vías de administración y plan de seguimiento..."
                               : "Redacta tu fundamentación clínica orientada a responder puntualmente la interrogante formativa de esta fase..."
-                        : "Detalla tu impresión diagnóstica, paraclínicos solicitados, hidratación, dosificación y criterios de seguimiento según la norma oficial (metodología SOAP)..."
+                        : "Detalla tu sospecha diagnóstica, estudios prioritarios, esquema terapéutico de primera línea y plan de seguimiento según la GPC oficial del MSP Ecuador..."
                   }
                   className="w-full p-4 bg-[#f0f4f9] rounded-[20px] text-sm text-[#1f1f1f] border border-slate-200/80 focus:outline-none focus:border-[#0b57d0] focus:bg-white transition-all leading-relaxed placeholder:text-[#747775] resize-none"
                   required={!audioBlob}
@@ -592,7 +594,7 @@ export default function CaseSolve() {
       <SocraticDebriefModal />
 
       {/* Modal de Estudio Paraclínico de Referencia (Ateneo+ Design System con Herramientas) */}
-      {isViewerModalOpen && caso?.imagen_url && (
+      {isViewerModalOpen && activeImageUrl && (
         <div
           role="dialog"
           aria-modal="true"
@@ -616,7 +618,7 @@ export default function CaseSolve() {
                     Estudio Paraclínico de Referencia
                   </h2>
                   <p className="text-xs text-slate-500 font-medium truncate max-w-xs sm:max-w-md md:max-w-lg">
-                    {caso.titulo || 'Simulación Clínica Formativa'}
+                    {caso?.titulo || 'Simulación Clínica Formativa'}
                   </p>
                 </div>
               </div>
@@ -792,8 +794,8 @@ export default function CaseSolve() {
                 }}
               >
                 <img
-                  src={caso.imagen_url}
-                  alt={caso.titulo || 'Estudio paraclínico de referencia'}
+                  src={activeImageUrl}
+                  alt={caso?.titulo || 'Estudio paraclínico de referencia'}
                   draggable={false}
                   className="max-h-[66vh] max-w-full w-auto object-contain rounded-[16px] shadow-xs select-none pointer-events-none"
                   style={{

@@ -4,6 +4,7 @@
       "id": "case_preeclampsia_01",
       "guia_asociada": "MSP_Trastornos-hipertensivos-del-embarazo-con-portada-3.pdf",
       "titulo": "Gestante con Trastorno Hipertensivo y Signos de Criterio de Severidad",
+      "imagen_url": "/static/images/preeclampsia_lab.jpg",
       "enunciado": "Gestante de 32 semanas por FUM, 28 años de edad, acude al servicio de urgencias por presentar cefalea holocraneana intensa de inicio reciente, fosfenos y epigastralgia en barra.\n\n**Examen físico:**\n- **Presión Arterial:** 165/110 mmHg (confirmada en dos tomas separadas por 15 minutos en decúbito lateral izquierdo).\n- **Neurológico:** Reflejos osteotendinosos exaltados (+++/++++).\n- **Examen de orina:** Proteinuria cualitativa con tirilla de +++.",
       "pregunta": "De acuerdo con la GPC de Trastornos Hipertensivos del MSP Ecuador:\n1. Identifique el diagnóstico clínico específico.\n2. Establezca el manejo farmacológico normado de prevención de eclampsia (Sulfato de Magnesio: esquema Zuspan).\n3. Indique la conducta antihipertensiva de emergencia (fármacos de primera línea y vías de administración).",
       "nivel_esperado": "pregrado_avanzado",
@@ -29,6 +30,10 @@
           "fase_numero": 2,
           "titulo": "Fase 2: Interpretación de Paraclínicos y Afectación Orgánica",
           "descripcion": "Se canalizan dos vías venosas y se procesa batería laboratorial de emergencia para preeclampsia grave.",
+          "imagen_url": "/static/images/preeclampsia_lab.jpg",
+          "estudios_adjuntos": [
+            "/static/images/preeclampsia_lab.jpg"
+          ],
           "datos_revelados": "**Analítica de urgencias:**\n- **Examen de orina:** Proteinuria con tirilla reactiva +++ (estimada > 300 mg/dL).\n- **Plaquetas:** 92.000 /uL (trombocitopenia moderada).\n- **Creatinina sérica:** 1.2 mg/dL (elevación respecto a niveles basales del embarazo).\n- **TGO (AST):** 96 U/L | **TGP (ALT):** 105 U/L (duplicación de enzimas hepáticas).\n- **LDH:** 680 U/L (indica hemólisis y daño tisular).",
           "pregunta_evaluativa": "Interprete los resultados de laboratorio identificando los órganos blanco afectados (plaquetario, hepático y renal) y ratifique el diagnóstico definitivo normado por el MSP (Preeclampsia con Criterios de Severidad).",
           "ejes_evaluados": [
@@ -103,6 +108,7 @@
       "id": "case_tb_01",
       "guia_asociada": "GP_Tuberculosis-1.pdf",
       "titulo": "Sintomático Respiratorio con Sospecha de Tuberculosis Pulmonar Sensible",
+      "imagen_url": "/static/images/tb_rx_cavitacion.jpg",
       "enunciado": "Paciente masculino de 35 años, acude al centro de salud por presentar tos con expectoración mucopurulenta de 3 semanas de evolución (mayor a 15 días), sudores nocturnos, astenia, hiporexia y pérdida de peso de 5 kg.\n\n**Examen físico:**\n- Estado general: Pálido, **IMC:** 18.5 kg/m².\n- Auscultación pulmonar: Murmullo vesicular disminuido con estertores en ápex pulmonar derecho.\n- Exámenes solicitados: Baciloscopía seriada de esputo y prueba molecular GeneXpert MTB/RIF.",
       "pregunta": "Según la GPC de Tuberculosis del MSP Ecuador:\n1. Defina la condición operacional del paciente.\n2. Establezca el algoritmo diagnóstico microbiológico/molecular de primera línea.\n3. Formule el esquema de tratamiento acortado estrictamente supervisado (TAES/DOTS: fase inicial y fase de consolidación).",
       "nivel_esperado": "pregrado_avanzado",
@@ -129,6 +135,10 @@
           "fase_numero": 2,
           "titulo": "Fase 2: Confirmación Diagnóstica Microbiológica y Molecular",
           "descripcion": "Se recolectan dos muestras seriadas de esputo para baciloscopía y se solicita prueba de biología molecular rápida.",
+          "imagen_url": "/static/images/tb_rx_cavitacion.jpg",
+          "estudios_adjuntos": [
+            "/static/images/tb_rx_cavitacion.jpg"
+          ],
           "datos_revelados": "**Reporte microbiológico y radiológico:**\n- **Baciloscopía (Ziehl-Neelsen):** Muestra 1 (+), Muestra 2 (++).\n- **GeneXpert MTB/RIF:** Complejo Mycobacterium tuberculosis DETECTADO. Resistencia a Rifampicina: NO DETECTADA (Sensible).\n- **Radiografía de tórax:** Infiltrado cavitario apical derecho con áreas de consolidación periférica.",
           "pregunta_evaluativa": "Interprete los resultados para clasificar el caso clínico (Tuberculosis Pulmonar Bacteriológicamente Confirmada Sensible) y detalle los tamizajes serológicos y metabólicos complementarios que deben solicitarse de rigor normado.",
           "ejes_evaluados": [
@@ -204,6 +214,7 @@
       "id": "case_hta_01",
       "guia_asociada": "gpc_hta192019.pdf",
       "titulo": "Paciente con Hipertensión Arterial Primaria Grado 2 y Riesgo Cardiovascular",
+      "imagen_url": "/static/images/hta_ecg.jpg",
       "enunciado": "Paciente femenina de 58 años, acude a consulta externa de medicina general para chequeo preventivo. Refiere cefalea occipital matutina ocasional de 2 meses de evolución.\n\n**Signos vitales (promedio de 3 tomas en días distintos):**\n- **Presión Arterial:** 155/96 mmHg\n- **Frecuencia Cardíaca:** 74 lpm\n- **IMC:** 27.8 kg/m² (sobrepeso)\n\n**Laboratorio y Paraclínicos:**\n- **Creatinina sérica:** 0.9 mg/dL\n- **Glucemia en ayunas:** 98 mg/dL\n- **Colesterol total:** 230 mg/dL\n- **Electrocardiograma (ECG):** Signos de sobrecarga ventricular izquierda (Sokolow-Lyon > 35 mm).",
       "pregunta": "De acuerdo con la GPC de Hipertensión Arterial del MSP Ecuador:\n1. Clasifique el estadio clínico de la presión arterial (HTA Grado 2).\n2. Defina la meta terapéutica de presión arterial (< 140/90 mmHg).\n3. Fundamente el esquema farmacológico de primera línea normado (terapia combinada dual en dosis fija: IECA o ARA-II asociado a Calcioantagonista o Tiazida a dosis bajas).",
       "nivel_esperado": "pregrado_intermedio",
@@ -223,6 +234,10 @@
           "fase_numero": 2,
           "titulo": "Fase 2: Interpretación de Paraclínicos y ECG",
           "descripcion": "Se obtienen resultados de laboratorio sanguíneo y trazado electrocardiográfico de 12 derivaciones.",
+          "imagen_url": "/static/images/hta_ecg.jpg",
+          "estudios_adjuntos": [
+            "/static/images/hta_ecg.jpg"
+          ],
           "datos_revelados": "**Analítica sanguínea:**\n- **Creatinina sérica:** 0.9 mg/dL\n- **Glucemia en ayunas:** 98 mg/dL\n- **Colesterol Total:** 230 mg/dL\n- **LDL:** 152 mg/dL\n\n**ECG de 12 derivaciones:**\n- Índice Sokolow-Lyon: 38 mm (signo de Hipertrofia Ventricular Izquierda).",
           "pregunta_evaluativa": "Interprete los hallazgos de daño de órgano blanco subclínico en el ECG y la estratificación del riesgo cardiovascular del paciente.",
           "ejes_evaluados": [
@@ -306,6 +321,7 @@
       "id": "case_ehirn_01",
       "guia_asociada": "gpc_ehirn2019.pdf",
       "titulo": "Recién Nacido a Término con Encefalopatía Hipóxico-Isquémica (EHI-RN)",
+      "imagen_url": "/static/images/ehirn_coagulograma.png",
       "enunciado": "Recién nacido a término (39 semanas de gestación, peso 3,200 g), producto de parto vaginal complicado por desprendimiento prematuro de placenta normoinserta y sufrimiento fetal agudo. Presenta líquido amniótico meconial espeso, apnea y bradicardia severa al nacer, requiriendo reanimación neonatal avanzada con intubación endotraqueal.\n\n**Evaluación Neonatal Inmediata:**\n- **Puntuación de APGAR:** 2 al minuto 1 | 3 a los 5 minutos\n- **Gasometría de cordón umbilical:** pH 6.95, PaCO2 58 mmHg, HCO3 12 mmol/L, Exceso de Bases (EB) -16 mmol/L\n\n**Evolución a las 2 horas de vida:**\n- Letargia marcada e hipotonía generalizada\n- Reflejos arcaicos (succión y moro) ausentes\n- Crisis convulsivas sutiles (movimientos de pedaleo y parpadeo repetitivo)",
       "pregunta": "Conforme a la GPC oficial de Encefalopatía Hipóxico-Isquémica (EHI-RN) del MSP Ecuador:\n1. Clasifique la gravedad del cuadro clínico según la escala de Sarnat (EHI Moderada-Grave / Estadio II-III).\n2. Determine los criterios e indicación de inicio de Hipotermia Terapéutica corporal total antes de las 6 horas de vida.\n3. Establezca las directrices de neuroprotección, soporte hemodinámico y control metabólico en UCIN.",
       "nivel_esperado": "pregrado_avanzado",
@@ -331,6 +347,10 @@
           "fase_numero": 2,
           "titulo": "Fase 2: Evaluación Neurológica y Estadificación de Sarnat",
           "descripcion": "El paciente ingresa a la Unidad de Cuidados Intensivos Neonatales (UCIN) a las 2 horas de vida para examen neurológico seriado.",
+          "imagen_url": "/static/images/ehirn_coagulograma.png",
+          "estudios_adjuntos": [
+            "/static/images/ehirn_coagulograma.png"
+          ],
           "datos_revelados": "**Examen neurológico neonatal:**\n- **Sensorio:** Letárgico con respuesta mínima a estímulos dolorosos.\n- **Tono y postura:** Hipotonía generalizada con disminución de movimientos espontáneos.\n- **Reflejos arcaicos:** Reflejo de succión y reflejo de Moro completamente ausentes.\n- **Actividad paroxística:** Movimientos convulsivos sutiles de pedaleo y parpadeo repetitivo.\n- **Coagulograma paraclínico:** Plaquetas 105.000 /uL, TP e INR prolongados.",
           "pregunta_evaluativa": "Clasifique el grado de encefalopatía hipóxico-isquémica según la escala de Sarnat (Estadio II / Moderada a Grave) e interprete los criterios de elegibilidad para neuromonitoreo y neuroprotección activa.",
           "ejes_evaluados": [
@@ -355,6 +375,7 @@
       "id": "case_nac_01",
       "guia_asociada": "GPC_neumonía-adquirida_2017.pdf",
       "titulo": "Preescolar con Neumonía Adquirida en la Comunidad Grave y Criterios de Hospitalización",
+      "imagen_url": "/static/images/neumonia_rx.png",
       "enunciado": "Paciente masculino de 3 años de edad (peso 14 kg), es llevado a emergencias por presentar fiebre de 38.9 °C de 3 días de evolución, tos frecuente, decaimiento e hiporexia. Desde hace 8 horas presenta taquipnea y dificultad respiratoria progresiva.\n\n**Examen físico y signos vitales:**\n- **Frecuencia Cardíaca:** 138 lpm\n- **Frecuencia Respiratoria:** 46 rpm (taquipnea para rango de 1 a 5 años: >= 40 rpm)\n- **Saturación O2:** 89% al aire ambiente\n- **Temperatura:** 38.9 °C axilar\n- **Estado general:** Letárgico, tiraje subcostal e intercostal marcado, aleteo nasal\n- **Auscultación pulmonar:** Estertores crepitantes y disminución del murmullo vesicular en base pulmonar derecha",
       "pregunta": "De acuerdo con la GPC de Neumonía Adquirida en la Comunidad en Pediatría del MSP Ecuador:\n1. Identifique los signos de gravedad clínica y criterios de ingreso hospitalario inmediato.\n2. Indique el manejo inicial de soporte oxigenatorio y monitoreo continuo.\n3. Prescriba el esquema antibiótico empírico parenteral de primera línea normado por el MSP (Ampicilina parenteral 150-200 mg/kg/día IV cada 6 horas).",
       "nivel_esperado": "pregrado_avanzado",
@@ -381,6 +402,10 @@
           "fase_numero": 2,
           "titulo": "Fase 2: Correlación Radiológica y Hallazgos Auscultatorios",
           "descripcion": "Se estabiliza oxigenación mediante cánula nasal a 2 L/min y se realiza estudio radiológico de tórax.",
+          "imagen_url": "/static/images/neumonia_rx.png",
+          "estudios_adjuntos": [
+            "/static/images/neumonia_rx.png"
+          ],
           "datos_revelados": "**Auscultación y Radiografía de tórax:**\n- **Auscultación pulmonar:** Disminución focal del murmullo vesicular y estertores crepitantes inspiratorios en base derecha.\n- **Radiografía de tórax (Rx):** Opacidad de consolidación alveolar en lóbulo inferior derecho con broncograma aéreo evidente, sin evidencia de derrame pleural ni neumotórax.",
           "pregunta_evaluativa": "Correlacione los hallazgos semiológicos con el patrón radiológico para confirmar la sospecha de neumonía bacteriana típica (Streptococcus pneumoniae) y descarte complicaciones pleuropulmonares inmediatas.",
           "ejes_evaluados": [

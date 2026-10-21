@@ -20,9 +20,9 @@ const CLINICAL_PEARLS: ClinicalPearl[] = [
     text: "El sistema vectoriza el caso y recupera fragmentos exactos de la norma nacional para contrastar el diagnóstico y plan del estudiante."
   },
   {
-    tag: "Metodología SOAP",
+    tag: "Ejes Clínicos MSP Ecuador",
     icon: Lightbulb,
-    text: "Se evalúa la concatenación lógica entre la anamnesis (Subjetivo), hallazgos (Objetivo), juicio (Análisis) y tratamiento (Plan)."
+    text: "La evaluación formativa contrasta de forma equilibrada cuatro ejes: Diagnóstico inicial, Tratamiento farmacológico, Prevención y Seguimiento normado."
   },
   {
     tag: "Ponderación Formativa",
@@ -36,16 +36,26 @@ export interface EvaluationGameLoaderProps {
 }
 
 export default function EvaluationGameLoader({ hasImage = false }: EvaluationGameLoaderProps) {
-  const [progress, setProgress] = useState<number>(10);
+  const [progress, setProgress] = useState<number>(12);
   const [pearlIndex, setPearlIndex] = useState<number>(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 95) return 95;
-        return prev + Math.floor(Math.random() * 8) + 3;
+        let increment = 0;
+        if (prev < 40) {
+          increment = Math.floor(Math.random() * 8) + 4; // 4% a 11%
+        } else if (prev < 70) {
+          increment = Math.floor(Math.random() * 5) + 3; // 3% a 7%
+        } else if (prev < 88) {
+          increment = Math.floor(Math.random() * 3) + 2; // 2% a 4%
+        } else {
+          increment = 1; // Avance milimétrico final
+        }
+        return Math.min(prev + increment, 95);
       });
-    }, 450);
+    }, 400);
 
     return () => clearInterval(timer);
   }, []);

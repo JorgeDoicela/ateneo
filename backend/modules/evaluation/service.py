@@ -236,6 +236,19 @@ class EvaluationService:
         if not case:
             raise ValueError(f"Caso clínico '{case_id}' no encontrado.")
 
+        resolved_images = list(imagenes_estudio) if imagenes_estudio else []
+        if not resolved_images and case.fases:
+            target_phase = next(
+                (f for f in case.fases if (getattr(f, "fase_numero", None) == fase_id or (isinstance(f, dict) and f.get("fase_numero") == fase_id))),
+                None
+            )
+            if target_phase:
+                p_img = getattr(target_phase, "imagen_url", None) if not isinstance(target_phase, dict) else target_phase.get("imagen_url")
+                if p_img:
+                    resolved_images = self._load_case_preset_image(p_img)
+        if not resolved_images and case.imagen_url:
+            resolved_images = self._load_case_preset_image(case.imagen_url)
+
         ans_clean = respuesta_alumno.strip()
         if not ans_clean and audio_bytes:
             query_rag = f"{case.titulo} fase {fase_id}"[:120].strip()
@@ -255,7 +268,7 @@ class EvaluationService:
             respuesta_estudiante=respuesta_alumno,
             chunk=chunk,
             historial_previo=antecedentes_previos or "",
-            imagenes_list=imagenes_estudio,
+            imagenes_list=resolved_images,
             audio_bytes=audio_bytes
         )
 

@@ -76,6 +76,7 @@ class PhaseSchema(BaseModel):
     descripcion: str = Field(..., description="Contexto del paciente revelado en esta fase")
     datos_revelados: Optional[str] = Field(None, description="Datos de anamnesis o paraclínicos que se desbloquean")
     estudios_adjuntos: Optional[List[str]] = Field(default_factory=list, description="Lista de URLs de imágenes o estudios disponibles")
+    imagen_url: Optional[str] = Field(None, description="URL del estudio de imagen o paraclínico principal asociado a esta fase")
     pregunta_evaluativa: str = Field(..., description="Pregunta específica a responder en esta fase")
     ejes_evaluados: List[str] = Field(default_factory=lambda: ["diagnóstico"], description="Ejes clínicos foco de la fase")
 
