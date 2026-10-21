@@ -190,6 +190,33 @@ La validez de Ateneo+ se demuestra cuantitativamente en tres niveles: recuperaci
 **Fórmula de Hake Aplicada:**
 $$g = \frac{\%Post - \%Pre}{100\% - \%Pre} = \frac{86.4\% - 48.7\%}{100\% - 48.7\%} = \frac{37.7\%}{51.3\%} \approx 0.735 \quad (0.74)$$
 
+#### 2.4. Ciclo Didáctico Cerrado: Pre-Test CACES, Plan Prescriptivo y Post-Test Isomórfico con IA
+
+Para superar las limitaciones de las pruebas diagnósticas estáticas y cerrar la brecha formativa individual (*closing the clinical loop*), Ateneo+ formaliza un ciclo cerrado de intervención clínica estructurado en tres fases:
+
+1. **Pre-Test Diagnóstico y Muestreo Estratificado CACES / MSP:**
+   La batería de entrada aplica muestreo estratificado en correspondencia con las cuatro áreas troncales del Examen de Habilitación para el Ejercicio Profesional de la Carrera de Medicina (CACES) y las normativas del MSP de Ecuador. Se erradica la subrepresentación de constructo (*construct underrepresentation*) seleccionando exactamente un reactivo por troncal (balance 1:1:1:1 con 2.50 pts cada uno sobre 10.0):
+
+   | Área Troncal Oficial CACES / MSP | Reactivos Basales Canónicos | Normativa Ministerial Asociada | Ponderación |
+   | :--- | :--- | :--- | :---: |
+   | **Ginecología y Obstetricia** | Preeclampsia severa / Choque hipovolémico / Código Rojo | GPC Trastornos Hipertensivos del Embarazo y Hemorragia Posparto | 25% (2.50 pts) |
+   | **Pediatría y Neonatología** | Crisis asmática grave / Sepsis neonatal temprana / Bronquiolitis | GPC Asma Pediátrica, Sepsis Neonatal y Bronquiolitis | 25% (2.50 pts) |
+   | **Medicina Interna y Crónicos** | Cetoacidosis diabética / Síndrome coronario agudo sin elevación ST | GPC Diabetes Mellitus Tipo 2 y Síndrome Coronario Agudo | 25% (2.50 pts) |
+   | **Infectología y Salud Pública** | Neumonía adquirida en la comunidad grave / Dengue con signos de alarma | GPC Neumonía Bacteriana y Guía de Manejo de Dengue | 25% (2.50 pts) |
+
+2. **Motor Heurístico de Prescripción Pedagógica:**
+   Las omisiones clínicas detectadas se ponderan mediante la función psicométrica de riesgo:
+   $$W_i = \text{Severidad}(\text{omisión}_i) \times (1.05 - P(L_k))$$
+   Donde la severidad clasifica riesgos críticos (shock, paro cardíaco, eclampsia) con peso 3.0, moderados con 2.0 y menores con 1.0, modulados inversamente por la maestría BKT ($P(L_k)$). El motor prescribe tareas en tres ejes: lectura normativa de la GPC (`gpc_reading`), simulación práctica en Zona de Desarrollo Próximo (`case_simulation`) y debriefing socrático interactivo (`socratic_review`).
+
+3. **Post-Test Isomórfico Asistido por Inteligencia Artificial:**
+   Para neutralizar el sesgo de memorización (*testing effect*), el generador de post-test sintetiza escenarios clínicos paralelos e isomórficos con correspondencia 1:1 con las cuatro troncales. Las variantes preservan la misma encrucijada fisiopatológica, el mismo estándar de oro de la GPC y las mismas competencias de Bloom, modificando edad, antecedentes y valores paraclínicos dentro del mismo rango normativo. Se respalda en el `ResilientLLMGateway` con fallback a un banco calibrado de 10 patologías canónicas.
+
+4. **Cuantificación Psicométrica en Tiempo Real:**
+   Al enviar el post-test, el backend calcula la Ganancia Normalizada de Hake:
+   $$g = \frac{\text{Score}_{\text{Post}} - \text{Score}_{\text{Pre}}}{10.0 - \text{Score}_{\text{Pre}}}$$
+   Clasificando el resultado en Ganancia Alta ($g \ge 0.70$), Media ($0.30 \le g < 0.70$), Baja ($g < 0.30$) o Regresión Diagnóstica ($g < 0.0$).
+
 ---
 
 ### BLOQUE VII: Discusión, Ética, Gobernanza y Escalabilidad (35:00 – 38:00)
@@ -269,6 +296,10 @@ Ateneo+ trasciende el concepto de simulador: establece un nuevo paradigma de ana
 * **Respuesta de Soberanía e Infraestructura:**  
   *Ateneo+ no depende de forma cautiva de Google ni de ninguna nube extranjera. El sistema integra el patrón Adapter desacoplado en ResilientLLMGateway: basta con configurar `LLM_PROVIDER=openai_compatible` y `CUSTOM_LLM_BASE_URL` en el archivo `.env` para conectar cualquier modelo evaluador médico de código abierto (LLaMA-3.1-8B, BioMistral, Meditron o modelos propios fine-tuneados) alojado en servidores locales mediante Ollama, vLLM o llama.cpp. El evaluador opera con inyección estricta de formato JSON (score, aciertos, omisiones, cita de GPC) y serialización multimodal de radiografías en Base64. De esta manera, el 100% de la inferencia, los embeddings vectoriales BGE-M3 y la base de datos se ejecutan dentro de la red privada del hospital, garantizando soberanía técnica y cumplimiento estricto de la LOPDP.*
 
+### P12: En el diseño experimental de la investigación, ¿cómo garantizan que el Post-Test mida aprendizaje clínico real y no el sesgo de memorización del Pre-Test (*testing effect*)?
+* **Respuesta Metodológica y Psicométrica:**  
+  *Este es el núcleo innovador del pipeline generativo de Ateneo+: para neutralizar el efecto de práctica repetida (testing effect), el sistema no repite los casos basales en el Post-Test. En su lugar, el `IsomorphicCaseGenerator` sintetiza formas paralelas funcionalmente equivalentes: mantiene idéntico el nivel de Bloom (Análisis y Toma de Decisiones), el estándar de oro de la GPC del MSP y las competencias KST evaluadas, pero introduce una viñeta clínica diferente con variación controlada en demografía, edad gestacional y paraclínicos dentro del mismo rango normativo. De este modo, la Ganancia Normalizada de Hake ($g$) cuantifica la transferencia de razonamiento clínico normativo y no el recuerdo de memoria episódica. Adicionalmente, el sistema cuenta con un banco curado calibrado de 10 patologías canónicas que respalda la reproducibilidad experimental del 100% de las pruebas.*
+
 ---
 
 ## 4. RELACIÓN ENTRE LAS 20 DIAPOSITIVAS Y EL GUIÓN DE APOYO (40 MINUTOS)
@@ -292,7 +323,7 @@ Ateneo+ trasciende el concepto de simulador: establece un nuevo paradigma de ana
 | **Slide 15** | Resultados IR: Pre vs. Post Fine-Tuning | Tabla comparativa de métricas (+369% Hit@1) | 2:00 min | Cuadruplicación de precisión en primera posición. |
 | **Slide 16** | Benchmark Ciego Out-of-Distribution | Prueba de Wilcoxon ($W=365.0, p < 0.001$) | 2:00 min | Validación de generalización en 283 consultas clínicas. |
 | **Slide 17** | Auditoría Anti-Alucinación (Faithfulness) | Tabla: 100% afirmaciones normadas | 2:00 min | Estándar RAGAS y erradicación de alucinación médica. |
-| **Slide 18** | Impacto Educativo y Ganancia de Hake | **Figura 300 DPI:** Pre vs. Post ($g = 0.74$) | 2:30 min | Salto de 4.87 a 8.64 pts ($p < 0.0001$, $d > 2.0$, $N=25$). |
+| **Slide 18** | Impacto Educativo y Ganancia de Hake | **Figura 300 DPI:** Pre vs. Post ($g = 0.74$) | 2:30 min | Salto de 4.87 a 8.64 pts ($p < 0.0001$, $d > 2.0$, $N=25$) y ciclo cerrado con post-test isomórfico y planes heurísticos. |
 | **Slide 19** | Analítica de Cohorte: Índice IBF | **Figura 300 DPI:** Panel docente de cohorte | 2:00 min | Detección precoz de brechas formativas institucionales. |
 | **Slide 20** | Conclusiones y Datos de Investigadores | Resumen de aportes y apertura a Q&A | 1:30 min | Datos de contacto de ambos investigadores y debate con tribunal. |
 
