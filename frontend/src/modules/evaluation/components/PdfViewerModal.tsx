@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, ExternalLink, FileText, Maximize2, Minimize2, AlertCircle, Loader2 } from 'lucide-react';
+import { X, ExternalLink, FileText, Maximize2, Minimize2, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react';
 import httpClient from '../../../core/http/httpClient';
 
 export interface PdfViewerModalProps {
@@ -8,6 +8,9 @@ export interface PdfViewerModalProps {
   guiaId?: string;
   pagina?: number;
   seccion?: string;
+  onConfirmReading?: () => void;
+  isCompleted?: boolean;
+  confirmButtonText?: string;
 }
 
 interface PdfLocationResponse {
@@ -20,7 +23,10 @@ export default function PdfViewerModal({
   onClose,
   guiaId,
   pagina = 1,
-  seccion = ""
+  seccion = "",
+  onConfirmReading,
+  isCompleted = false,
+  confirmButtonText = "Confirmar Lectura Realizada"
 }: PdfViewerModalProps) {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [filename, setFilename] = useState<string>("");
@@ -59,11 +65,9 @@ export default function PdfViewerModal({
         }`}
       >
         {/* Barra Superior del Visor */}
-        <div className="px-6 py-4 bg-white text-[#1f1f1f] flex items-center justify-between border-b border-slate-200/80">
+        <div className="px-6 py-4 bg-white text-[#1f1f1f] flex items-center justify-between border-b border-slate-200/80 gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="p-2 bg-sky-50 text-[#0b57d0] rounded-full shrink-0">
-              <FileText className="w-5 h-5" />
-            </div>
+            <FileText className="w-5 h-5 text-blue-600 shrink-0" />
             <div className="truncate">
               <h3 className="text-sm font-medium truncate text-[#1f1f1f] font-heading">
                 {filename || `GPC Oficial: ${guiaId}`}
@@ -74,7 +78,24 @@ export default function PdfViewerModal({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
+            {onConfirmReading && (
+              isCompleted ? (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-emerald-700 text-xs font-semibold select-none">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span>Lectura Verificada</span>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onConfirmReading}
+                  className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-xs cursor-pointer flex items-center gap-1.5"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>{confirmButtonText}</span>
+                </button>
+              )
+            )}
             {pdfUrl && (
               <a
                 href={pdfUrl}

@@ -57,6 +57,20 @@ flowchart TD
 2. **Focalización Quirúrgica en Omisiones Previas:** Si el estudiante omitió la administración oportuna de Sulfato de Magnesio o la dosis de carga en preeclampsia, el post-test introduce deliberadamente un caso que pone a prueba ese dilema farmacológico específico.
 3. **Control Anti-Alucinación y Grounding Normativo:** El generador de post-test consulta los fragmentos vectoriales de la GPC oficial en ChromaDB v2 y verifica que la clave diagnóstica y terapéutica coincida 100% con las recomendaciones del MSP de Ecuador.
 
+### 2.3. Validez Psicométrica de Contenido: Muestreo Estratificado Balanceado por Troncales CACES
+
+Para investigaciones clínicas, publicaciones científicas y compatibilidad con el Consejo de Aseguramiento de la Calidad de la Educación Superior (CACES) y el Ministerio de Salud Pública (MSP) de Ecuador, la selección de reactivos basales no puede depender de un corte lineal arbitrario (`all_cases[:num_cases]`).
+
+| Área Troncal Oficial CACES / MSP | Casos Canónicos Asignados | Ponderación Formativa Batería General |
+| :--- | :--- | :--- |
+| **1. Ginecología y Obstetricia** | `case_preeclampsia_01`, `case_hemorragia_posparto_02`, `case_choque_hipovolemico_03` | 25% (2.50 puntos / 10.0) |
+| **2. Pediatría y Neonatología** | `case_crisis_asmatica_ped_04`, `case_sepsis_neonatal_05`, `case_bronquiolitis_06` | 25% (2.50 puntos / 10.0) |
+| **3. Medicina Interna y Crónicos** | `case_cetoacidosis_diabetica_07`, `case_sindrome_coronario_08` | 25% (2.50 puntos / 10.0) |
+| **4. Infectología y Salud Pública** | `case_nac_grave_09`, `case_dengue_alarma_10` | 25% (2.50 puntos / 10.0) |
+
+* **Erradicación del Sesgo de Constructo (*Construct Underrepresentation*):** La selección arbitraria previa concentraba el 67% de los reactivos en emergencias obstétricas, distorsionando la línea base diagnóstica. El muestreo estratificado determinístico garantiza una distribución 1:1:1:1 con exactamente un reactivo representativo por área troncal.
+* **Isomorfismo 1:1 Garantizado en el Post-Test:** Las variantes isomórficas generadas en la fase de salida mantienen correspondencia estricta con las mismas cuatro áreas troncales evaluadas en la entrada, garantizando comparabilidad métrica directa para el cálculo de la ganancia normalizada de Hake ($g$).
+
 ---
 
 ## 3. Modelo de Datos Relacional Propuesto
@@ -172,23 +186,32 @@ $$g = \frac{\text{Score}_{\text{Post}} - \text{Score}_{\text{Pre}}}{10.0 - \text
 
 ## 5. Especificación de Contratos de API REST (Implementados y Validados)
 
-| Método | Endpoint | Rol Mínimo | Descripción |
+| Método | Endpoint | Payload / Parámetros | Descripción |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/assessments/pre-test/start` | Alumno | Inicia una sesión de diagnóstico pre-test con casos basales representativos. |
-| `POST` | `/api/assessments/{id}/submit` | Alumno | Califica reactivos diagnósticos. Dispara plan prescriptivo (Pre) o calcula Hake (Post). |
-| `POST` | `/api/assessments/post-test/start` | Alumno | Sintetiza la batería isomórfica paralela para post-test basada en omisiones previas. |
-| `GET` | `/api/assessments/{id}` | Alumno | Consulta detalles, reactivos y retroalimentación de una evaluación. |
-| `GET` | `/api/assessments/history/me` | Alumno | Historial longitudinal de pre-tests y post-tests con ganancia de Hake ($g$). |
-| `GET` | `/api/study-plans/me` | Alumno | Consulta el plan de estudio prescriptivo activo y sus tareas dosificadas. |
-| `GET` | `/api/study-plans/{plan_id}` | Alumno | Consulta el detalle de un plan prescriptivo verificando propiedad de usuario. |
-| `POST` | `/api/study-plans/tasks/{taskId}/complete` | Alumno | Registra el cumplimiento de una tarea y recalcula el progreso porcentual. |
+| `POST` | `/api/assessments/pre-test/start` | `{ "specialty_scope": "Batería Troncal CACES (Multidisciplinar)", "num_cases": 4 }` | Inicia una sesión de diagnóstico pre-test aplicando muestreo estratificado balanceado (4 troncales). |
+| `POST` | `/api/assessments/{id}/submit` | `{ "assessment_id": "...", "answers": [...] }` | Califica reactivos diagnósticos. Dispara plan prescriptivo (Pre) o calcula Hake (Post). |
+| `POST` | `/api/assessments/post-test/start` | `{ "pre_test_id": "..." }` | Sintetiza la batería isomórfica paralela para post-test basada en omisiones previas. |
+| `GET` | `/api/assessments/{id}` | Parámetro de ruta `{id}` | Consulta detalles, reactivos y retroalimentación de una evaluación. |
+| `GET` | `/api/assessments/history/me` | Autenticación JWT Bearer | Historial longitudinal de pre-tests y post-tests con ganancia de Hake ($g$). |
+| `GET` | `/api/study-plans/me` | Autenticación JWT Bearer | Consulta el plan de estudio prescriptivo activo y sus tareas dosificadas. |
+| `GET` | `/api/study-plans/{plan_id}` | Parámetro de ruta `{plan_id}` | Consulta el detalle de un plan prescriptivo verificando propiedad de usuario. |
+| `POST` | `/api/study-plans/tasks/{taskId}/complete` | Parámetro de ruta `{taskId}` | Registra el cumplimiento de una tarea y recalcula el progreso porcentual. |
 
 ---
 
 ## 6. Diseño de Interfaz y Experiencia de Usuario (Ateneo+ Design System)
 
-* **Cero Emojis:** Todos los estados y categorías se expresan mediante tipografía médica limpia e iconos planos de `lucide-react`.
-* **Fondo Clínico `#f0f4f9` y Tarjetas Blancas `rounded-[28px]`:** Superficies amplias sin bordes artificiales pesados.
+* **Cero Emojis:** Todos los estados y categorías se expresan mediante tipografía médica limpia e iconos planos de `lucide-react` sin envoltorios de fondo de color.
+* **Fondo Clínico `#f0f4f9` y Tarjetas Blancas `rounded-[28px]`:** Superficies amplias sin bordes perimetrales pesados.
+* **Selector Institucional de Ámbito de Evaluación (`StudentAnalyticsPage.tsx`):**
+  * Desplegado en el banner de inicio de Pre-Test para permitir al estudiante o investigador seleccionar entre:
+    1. *Batería Troncal CACES (Multidisciplinar):* 4 casos balanceados (2.50 pts c/u, cobertura 100% troncales).
+    2. *Ginecología y Obstetricia:* 3 casos troncales materno-fetales (3.33 pts c/u).
+    3. *Pediatría y Neonatología:* 3 casos troncales pediátricos (3.33 pts c/u).
+    4. *Medicina Interna y Crónicos:* 2 casos troncales de adultos (5.00 pts c/u).
+    5. *Infectología y Salud Pública:* 2 casos troncales infecciosos (5.00 pts c/u).
+* **Homologación de Renderizado Tipográfico Médico (`ClinicalMarkdownRenderer.tsx`):**
+  * Todos los reactivos clínicos basales e isomórficos son procesados a través del motor AST de Markdown estructurado en `AssessmentRunnerModal.tsx`, garantizando renderizado de jerarquías `h3`, citas normativas de GPC (`>`), negritas de fármacos y tablas sin texto plano sin procesar.
 * **Componente `PrescriptivePlanCard.tsx`:**
   * Tarjeta de diagnóstico de entrada con indicador de avance porcentual en gradiente tricolor (`cyan-500`, `blue-600`, `indigo-600`).
   * Tareas formativas dosificadas: Lectura GPC (`BookOpen`), Simulación en ZDP (`Stethoscope`), Debriefing Socrático (`MessageSquare`).
@@ -210,15 +233,16 @@ $$g = \frac{\text{Score}_{\text{Post}} - \text{Score}_{\text{Pre}}}{10.0 - \text
 
 El ciclo completo ha sido implementado y auditado con estándares senior de producción (cero parches):
 
-* **Backend (Pytest): 20/20 tests aprobados (100% PASS)**
-  - `tests/test_assessments_db.py`: 3/3 tests aprobados.
-  - `tests/test_study_plan_engine.py`: 3/3 tests aprobados.
-  - `tests/test_isomorphic_generator.py`: 5/5 tests aprobados.
-  - `tests/test_assessments_endpoints.py`: 1/1 test de integración de ciclo cerrado aprobado.
-  - `tests/test_gamification.py`: 4/4 tests aprobados.
-  - `tests/test_unit_of_work.py`: 2/2 tests aprobados.
-  - `tests/test_teacher_rooms.py`: 2/2 tests aprobados.
+* **Backend (Pytest): 21/21 tests aprobados (100% PASS)**
+  - `tests/test_assessments_endpoints.py`: Ciclo formativo cerrado completo y validación psicométrica `test_stratified_caces_pre_test_selection` (aprobado).
+  - `tests/test_assessments_db.py`: Persistencia y recálculo de progreso (aprobado).
+  - `tests/test_study_plan_engine.py`: Síntesis heurística en 3 niveles (aprobado).
+  - `tests/test_isomorphic_generator.py`: Generación resiliente de variantes paralelas (aprobado).
+  - `tests/test_gamification.py`: Progresión y XP (aprobado).
+  - `tests/test_unit_of_work.py`: Transacciones atómicas (aprobado).
+  - `tests/test_teacher_rooms.py`: Salas colaborativas sincrónicas (aprobado).
 * **Frontend (Vitest y TypeScript): 39/39 suites aprobadas (188/188 tests PASS)**
   - `src/__tests__/StudyPlansAndAssessments.test.tsx`: 11/11 tests aprobados.
   - `tsc --noEmit`: 0 errores de tipado estático en TypeScript.
+
 

@@ -719,39 +719,90 @@ def main():
         doc,
         "Para superar el paradigma de la evaluacion terminal estatica y garantizar el cierre efectivo del bucle didactico formativo "
         "(closing the clinical loop), Ateneo+ integra un ciclo cerrado de intervencion clinica estructurado en tres fases secuenciales: "
-        "(1) Evaluacion Diagnostica Inicial (Pre-Test) orientada a la identificacion de brechas normativas, (2) Sintesis Heuristica de un Plan "
+        "(1) Evaluacion Diagnostica Inicial (Pre-Test) estratificada por areas troncales, (2) Sintesis Heuristica de un Plan "
         "de Estudio Prescriptivo dosificado en la Zona de Desarrollo Proximo (ZDP), y (3) Reevaluacion de Salida (Post-Test) generada mediante "
-        "variantes clinicas isomorficas con medicion de la Ganancia Normalizada de Hake (g)."
+        "variantes clinicas isomorficas con medicion psicometrica de la Ganancia Normalizada de Hake (g)."
     )
     add_bullet_item(
         doc,
-        "La evaluacion de entrada presenta una bateria controlada de reactivos clinicos de alta prevalencia epidemiologica (Preeclampsia, "
-        "Codigo Rojo Obstetrico, Tuberculosis, Dengue, Neumonia bacteriana, etc.). Al someter sus decisiones, el motor RAG extrae no solo la nota "
-        "cuantitativa, sino un vector pormenorizado de omisiones clinicas y competencias KST afectadas, registrandolas en diagnostic_assessments.",
-        bold_prefix="1. Pre-Test Diagnóstico y Detección de Brechas: "
+        "La evaluacion de entrada implementa muestreo estratificado balanceado en correspondencia directa con las cuatro areas troncales "
+        "del Examen de Habilitacion para el Ejercicio Profesional de la Carrera de Medicina del Consejo de Aseguramiento de la Calidad de la "
+        "Educacion Superior (CACES) y las normativas del Ministerio de Salud Publica (MSP) de Ecuador. Se erradica el sesgo de sub-representacion "
+        "de constructo (Construct Underrepresentation) seleccionando exactamente un reactivo basal por area (balance 1:1:1:1 con ponderacion "
+        "equitativa de 2.50 puntos cada uno sobre base 10.0):",
+        bold_prefix="1. Pre-Test Diagnóstico y Muestreo Estratificado CACES: "
+    )
+
+    # Tabla de Troncales CACES y Reactivos Basales
+    t_troncales = doc.add_table(rows=5, cols=4)
+    t_troncales.alignment = WD_TABLE_ALIGNMENT.CENTER
+    tr_heads = ["Área Troncal CACES / MSP", "Reactivos Basales Canónicos", "Normativa Ministerial Asociada", "Ponderación"]
+    for c_i, h_t in enumerate(tr_heads):
+        cell = t_troncales.cell(0, c_i)
+        set_cell_background(cell, "0F4C81")
+        set_cell_margins(cell, top=100, bottom=100, left=120, right=120)
+        p = cell.paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r = p.add_run(h_t)
+        r.font.name = "Arial"
+        r.font.size = Pt(8.5)
+        r.font.bold = True
+        r.font.color.rgb = RGBColor(255, 255, 255)
+
+    troncales_data = [
+        ("Ginecología y Obstetricia", "Preeclampsia severa / Choque hipovolemico / Codigo Rojo", "GPC Trastornos Hipertensivos del Embarazo y Hemorragia Posparto MSP", "25% (2.50 pts)"),
+        ("Pediatría y Neonatología", "Crisis asmatica grave / Sepsis neonatal temprana / Bronquiolitis", "GPC Asma Pediatrica, Sepsis Neonatal y Bronquiolitis MSP", "25% (2.50 pts)"),
+        ("Medicina Interna y Crónicos", "Cetoacidosis diabetica / Sindrome coronario agudo sin elevacion ST", "GPC Diabetes Mellitus Tipo 2 y Sindrome Coronario Agudo MSP", "25% (2.50 pts)"),
+        ("Infectología y Salud Pública", "Neumonia adquirida en la comunidad grave / Dengue con signos de alarma", "GPC Neumonia Bacteriana y Guia de Manejo de Dengue MSP", "25% (2.50 pts)")
+    ]
+
+    for r_i, (troncal, casos, guia, pond) in enumerate(troncales_data, 1):
+        bg = "F8FAFC" if r_i % 2 == 0 else "FFFFFF"
+        for c_i, val in enumerate([troncal, casos, guia, pond]):
+            cell = t_troncales.cell(r_i, c_i)
+            set_cell_background(cell, bg)
+            set_cell_margins(cell, top=70, bottom=70, left=100, right=100)
+            p = cell.paragraphs[0]
+            p.alignment = WD_ALIGN_PARAGRAPH.LEFT if c_i in [0, 1, 2] else WD_ALIGN_PARAGRAPH.CENTER
+            r = p.add_run(val)
+            r.font.name = "Arial"
+            r.font.size = Pt(8)
+            if c_i in [0, 3]: r.font.bold = True
+
+    p_sp_tr = doc.add_paragraph()
+    p_sp_tr.paragraph_format.space_after = Pt(4)
+
+    add_bullet_item(
+        doc,
+        "La interfaz del estudiante (StudentAnalyticsPage) integra un selector institucional adaptativo en lienzo #f0f4f9 con tarjetas "
+        "rounded-[28px] y cero envoltorios decorativos. Permite optar por la Bateria Troncal CACES (4 casos multidisciplinares) o por baterias "
+        "monotematicas por especialidad. Todos los reactivos son renderizados mediante ClinicalMarkdownRenderer, interpretando jerarquias tipograficas, "
+        "citas normativas y tablas farmacologicas sin texto plano crudo.",
+        bold_prefix="2. Selector Institucional y Renderizado Tipográfico Médico: "
     )
     add_bullet_item(
         doc,
-        "El algoritmo heuristico pondera cada omision clínica detectada mediante la funcion de severidad psicometrica: W_i = Severidad(omision) * (1.05 - P(L_k)), "
+        "El algoritmo heuristico pondera cada omision clinica detectada mediante la funcion de severidad psicometrica: W_i = Severidad(omision) * (1.05 - P(L_k)), "
         "donde la severidad clasifica riesgos criticos (shock, parada cardiaca, eclampsia, muerte fetal) con peso 1.0, moderados con 0.6 y menores con 0.3, "
         "modulados inversamente por la maestria BKT del estudiante. El motor prescribe un plan atomico dosificado en 3 modalidades: lecturas guiadas de secciones "
         "especificas de la GPC del MSP, simulacion de casos en ZDP y debriefing socratico reflexivo.",
-        bold_prefix="2. Motor Heurístico de Prescripción Pedagógica: "
+        bold_prefix="3. Motor Heurístico de Prescripción Pedagógica: "
     )
     add_bullet_item(
         doc,
         "Para neutralizar el sesgo de memorizacion que invalida las pruebas identicas repetidas, el generador de post-test sintetiza escenarios "
-        "clinicos paralelos e isomorficos. Las variantes preservan la misma encrucijada fisiopatologica, el mismo estandar de oro de la GPC ministerial y "
-        "las mismas competencias de Bloom, pero modifican la demografia del paciente, edad gestacional, cifras hemodinamicas y parametros de laboratorio "
-        "dentro del mismo umbral normativo. El pipeline se apoya en el ResilientLLMGateway respaldado por un banco curado calibrado de 10 patologias canonicas.",
-        bold_prefix="3. Post-Test Isomórfico Asistido por Inteligencia Artificial: "
+        "clinicos paralelos e isomorficos preservando estricta correspondencia 1:1 con las cuatro troncales evaluadas en la entrada. Las variantes "
+        "preservan la misma encrucijada fisiopatologica, el mismo estandar de oro de la GPC ministerial y las mismas competencias de Bloom, "
+        "pero modifican la demografia del paciente, edad gestacional, cifras hemodinamicas y parametros de laboratorio dentro del mismo umbral normativo. "
+        "El pipeline se apoya en el ResilientLLMGateway respaldado por un banco curado calibrado de 10 patologias canonicas.",
+        bold_prefix="4. Post-Test Isomórfico Asistido por Inteligencia Artificial: "
     )
     add_bullet_item(
         doc,
         "Al concluir el post-test, el backend calcula en tiempo real la Ganancia Normalizada de Hake: g = (Score_Post - Score_Pre) / (10.0 - Score_Pre). "
         "Este coeficiente, consolidado en investigacion en educacion medica (Hake, 1998), desacopla el efecto de la nota de entrada y cuantifica la proporcion "
         "del aprendizaje maximo posible alcanzado por el estudiante: Ganancia Alta (g >= 0.70), Ganancia Media (0.30 <= g < 0.70) o Ganancia Baja (g < 0.30).",
-        bold_prefix="4. Cuantificación Psicométrica de la Ganancia de Hake (g): "
+        bold_prefix="5. Cuantificación Psicométrica de la Ganancia de Hake (g): "
     )
     add_callout_box(
         doc,

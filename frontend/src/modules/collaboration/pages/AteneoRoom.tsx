@@ -25,6 +25,7 @@ import useAteneoRoom, { RoomParticipantDetail } from '../hooks/useAteneoRoom';
 import VoiceRoomBar from '../components/VoiceRoomBar';
 import ClinicalButton from '../../../core/ui/ClinicalButton';
 import ClinicalBadge from '../../../core/ui/ClinicalBadge';
+import { ClinicalMarkdownRenderer } from '../../../core/ui';
 import type { User as UserType, UserRole } from '../../../types';
 
 /**
@@ -449,14 +450,14 @@ export default function AteneoRoom() {
             </h2>
           </div>
 
-          <div className="p-4 bg-[#f0f4f9] rounded-[20px] text-xs sm:text-sm text-[#1f1f1f] leading-relaxed whitespace-pre-wrap">
-            {roomDetails.case_enunciado}
+          <div className="p-4 bg-[#f0f4f9] rounded-[20px] text-xs sm:text-sm text-[#1f1f1f] leading-relaxed">
+            <ClinicalMarkdownRenderer content={roomDetails.case_enunciado} />
           </div>
 
           {roomDetails.case_pregunta && (
             <div className="p-4 bg-white rounded-[18px] border border-blue-200 text-xs text-slate-800 space-y-1">
               <span className="text-[11px] font-semibold text-[#0b57d0] block">Interrogante Formativa del Ateneo:</span>
-              <p className="leading-relaxed">{roomDetails.case_pregunta}</p>
+              <ClinicalMarkdownRenderer content={roomDetails.case_pregunta} compact />
             </div>
           )}
 
@@ -810,8 +811,8 @@ export default function AteneoRoom() {
                       <span className="text-xs font-semibold text-slate-700 block">
                         Dictamen Clínico Consensuado (Solo Lectura):
                       </span>
-                      <div className="p-4 bg-[#f0f4f9] rounded-[20px] text-xs sm:text-sm text-[#1f1f1f] leading-relaxed border border-slate-200/80 whitespace-pre-wrap">
-                        {collaborativeText}
+                      <div className="p-4 bg-[#f0f4f9] rounded-[20px] text-xs sm:text-sm text-[#1f1f1f] leading-relaxed border border-slate-200/80">
+                        <ClinicalMarkdownRenderer content={collaborativeText} />
                       </div>
                     </div>
                   )}
@@ -1073,8 +1074,8 @@ export default function AteneoRoom() {
                   {collaborativeText.trim() && (
                     <div className="space-y-1.5">
                       <span className="text-xs font-semibold text-slate-700 block">Texto del Dictamen Consensuado:</span>
-                      <div className="p-4 bg-[#f0f4f9] rounded-[20px] text-xs sm:text-sm text-[#1f1f1f] leading-relaxed border border-slate-200/80 whitespace-pre-wrap">
-                        {collaborativeText}
+                      <div className="p-4 bg-[#f0f4f9] rounded-[20px] text-xs sm:text-sm text-[#1f1f1f] leading-relaxed border border-slate-200/80">
+                        <ClinicalMarkdownRenderer content={collaborativeText} />
                       </div>
                     </div>
                   )}
@@ -1180,9 +1181,9 @@ export default function AteneoRoom() {
                                       <FileText className="w-3.5 h-3.5 text-[#0b57d0]" />
                                       Dictamen Clínico Emitido:
                                     </span>
-                                    <p className="p-3 bg-white rounded-[14px] text-slate-800 leading-relaxed border border-slate-200/60 whitespace-pre-wrap">
-                                      {p.respuesta}
-                                    </p>
+                                    <div className="p-3 bg-white rounded-[14px] text-slate-800 leading-relaxed border border-slate-200/60">
+                                      <ClinicalMarkdownRenderer content={p.respuesta} compact />
+                                    </div>
                                   </div>
                                 )}
 
@@ -1331,9 +1332,9 @@ export default function AteneoRoom() {
                                 <FileText className="w-3 h-3 text-[#0b57d0]" />
                                 Dictamen Clínico Emitido:
                               </span>
-                              <p className="p-2.5 bg-white rounded-[12px] text-slate-800 leading-relaxed border border-slate-200/60 whitespace-pre-wrap">
-                                {p.respuesta}
-                              </p>
+                              <div className="p-2.5 bg-white rounded-[12px] text-slate-800 leading-relaxed border border-slate-200/60">
+                                <ClinicalMarkdownRenderer content={p.respuesta} compact />
+                              </div>
                             </div>
                           )}
 

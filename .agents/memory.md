@@ -38,6 +38,7 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
   - Etiquetas normativas y de estado (GPC, metadatos de casos) en texto plano tipográfico directo (`text-xs font-semibold`), sin píldoras con fondos coloreados (`bg-rose-50`, `bg-sky-50`) ni bordes artificiales envolventes.
   - Eliminados los relojes e indicadores de tiempo estimado fijos (`Clock`, `12-15 min`) en las tarjetas de casos (`CaseCard.tsx`), reduciendo la sobrecarga de elementos y preservando una jerarquía visual limpia.
   - **Purga de Iconos SVG Decorativos en Analítica ([`/analytics`](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/clinical_rag/frontend/src/modules/analytics/pages/StudentAnalyticsPage.tsx)):** Eliminados los iconos SVG decorativos (`Activity`, `TrendingUp`, `AlertTriangle`, `Target`) de las cabeceras, tarjeta de punto débil, tarjeta de radar y gráfica longitudinal, consolidando un diseño tipográfico sobrio, académico y clínico.
+  - **Eliminación de Controles Redundantes en Curva Temporal (`ReasoningTrends.tsx`):** Se eliminó la barra superior con botones de flecha y etiquetas auxiliares ("← Anteriores", "Arrastra o usa las flechas para mover", "Más recientes →"), aprovechando la interacción táctil y gestual nativa del contenedor (`touch-pan-x`, arrastre con ratón y scroll horizontal), maximizando el espacio para la visualización de la curva clínica.
 * **Gradiente de Marca:** Cyan Clínico (`#06b6d4`), Azul Royal (`#2563eb`), Violeta IA (`#7c3aed`).
 * **Estándar de Selectores Desplegables Institucionales (Patrón Píldora Ateneo+ vs. `<select>` nativo):**
   - Todo selector de filtros o selección en la plataforma Ateneo+ (como en `CaseFilterTabs.tsx`, `ReasoningTrends.tsx` y `CoordinatorAnalytics.tsx`) debe implementar el patrón de selector desplegable institucional con:
@@ -2023,3 +2024,56 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
   - **Dosier Metodológico Markdown:** Sincronizado `docs/3_documentacion_metodologica/DOSIER_POST_TEST_Y_PLAN_ESTUDIOS_HEURISTICO.md` con los contratos de API oficiales, componentes React implementados y métricas de cobertura de pruebas.
   - **Dossier Oficial Word CAISEB (`build_full_word_dossier.py`):** Incorporada la Sección 9.6 ("Ciclo Formativo Cerrado: Pre-Test Diagnóstico, Plan Heurístico Prescriptivo y Post-Test Isomórfico con Ganancia de Hake") con 4 subapartados metodológicos y callout box de evidencia científica en educación médica.
   - **Compilación de Artefacto DOCX:** Recompilado exitosamente `docs/8_ponencia_congreso_caiseb/ATENEO_DOSSIER_TECNICO_Y_PONENCIA_CAISEB.docx` (2.54 MB).
+* **Fase 7 Completada: Aprovisionamiento y Verificación de Artefactos MLOps desde Hugging Face Hub (`2026-10-20`):**
+  - **Cliente HTTP Nativo Resiliente en `setup_mlops_artifacts.py`:** Incorporada la descarga por streaming de bloques HTTP con indicador de velocidad y progreso (`download_file_http`), permitiendo aprovisionar artefactos sin dependencias previas de `huggingface_hub` en cualquier entorno de producción o desarrollo.
+  - **Pesos del Modelo BGE-M3 Fine-Tuned (`doiceladev/ateneo-bge-m3-ecuador-v2`):** Descargados e instalados en `backend/data/models/ateneo-bge-m3-ecuador-v2/` (`model.safetensors` de 2.16 GB, tokenizador y metadatos sanitizados para `sentence_transformers`).
+  - **Base Vectorial ChromaDB v2 (`doiceladev/ateneo-chroma-v2`):** Descargada y extraída en `backend/data/chroma_db_v2/` con 7,052 fragmentos normativos indivisibles y colección `gpc_msp_v2`. Reconstrucción e integridad SQLite verificada con éxito (`PRAGMA integrity_check: ok`).
+* **Fase 8 Completada: Homologación Universal de `ClinicalMarkdownRenderer` (`2026-10-20`):**
+  - **Causa Raíz:** En `AssessmentRunnerModal.tsx` y `AteneoRoom.tsx`, los enunciados, preguntas formativas y dictámenes clínicos se inyectaban en contenedores con `whitespace-pre-wrap` en texto plano, impidiendo que el motor AST interpretara negritas (`**`), listas y tablas.
+  - **Solución Canónica:** Se integró el componente institucional `ClinicalMarkdownRenderer` en el modal de evaluaciones ([AssessmentRunnerModal.tsx](file:///home/jorge/Escritorio/Proyectos/ateneo/frontend/src/modules/assessments/components/AssessmentRunnerModal.tsx)) y en las 5 secciones de salas grupales colaborativas ([AteneoRoom.tsx](file:///home/jorge/Escritorio/Proyectos/ateneo/frontend/src/modules/collaboration/pages/AteneoRoom.tsx)), garantizando renderizado tipográfico médico enriquecido y 100% libre de texto crudo.
+* **Fase 9 Completada: Muestreo Estratificado Balanceado CACES y Selector Institucional de Pre-Test (`2026-10-20`):**
+  - **Causa Raíz Metodológica:** La selección original de reactivos del Pre-Test tomaba rígidamente los 3 primeros casos (`[:3]`), provocando sub-representación de constructo (*Construct Underrepresentation*: 67% Obstetricia, 0% Pediatría, 0% Medicina Interna). Esto vulneraba la validez de contenido psicométrica requerida para publicaciones científicas y tesis en el marco del CACES / MSP Ecuador.
+  - **Muestreo Estratificado por Áreas Troncales Canónicas (`backend/modules/assessments/service.py`):**
+    - Se definieron formalmente las 4 troncales de la carrera de medicina en Ecuador: (1) `Ginecología y Obstetricia`, (2) `Pediatría y Neonatología`, (3) `Medicina Interna y Crónicos`, y (4) `Infectología y Salud Pública`.
+    - Se implementó `select_stratified_pre_test_cases` que selecciona exactamente 1 caso representativo por troncal en el modo multidisicplinar oficial (4 casos basales, ponderación equitativa de 2.5 pts cada uno, base 10.0), asegurando una distribución balanceada 1:1:1:1.
+    - Soporte completo para evaluaciones monotemáticas por troncal específica (ej. 3 casos para Gineco-Obstetricia o Pediatría, 2 casos para Medicina Interna o Infectología).
+  - **Selector Institucional Adaptativo en Frontend (`StudentAnalyticsPage.tsx`, `assessmentApi.ts`):**
+    - Se implementó en el banner de entrada un selector táctil institucional con las 5 opciones de ámbito formativo, descripción clínica nosológica, contador de casos y badge de ponderación formativa.
+    - Actualizados los endpoints REST en `router.py` y `assessmentApi.ts` con defaults a 4 reactivos troncales.
+  - **Certificación de Pruebas:**
+    - Prueba unitaria `test_stratified_caces_pre_test_selection` en `test_assessments_endpoints.py` validando la no-redundancia y cobertura total del 100% de troncales.
+* **Fase 10 Completada: Auditoría Psicométrica Exhaustiva y Cierre de Ciclo Formativo CACES (`2026-10-20`):**
+  - **Homologación Isomórfica Markdown:** Los reactivos del Post-Test en `service.py` incorporan la misma estructura jerárquica médica que el Pre-Test (`### {titulo}`, blockquote con área troncal y GPC oficial), eliminando divergencias de estilo.
+  - **Calificación Heurística y Detección de Omisiones (10 Patologías Canónicas):** Se amplió `norm_keywords` y la detección de omisiones críticas en `_evaluate_item_answer` para abarcar el 100% de patologías del banco (asma, cetoacidosis, dengue con alarma, sepsis neonatal, hiperpotasemia/ERC, tuberculosis, VIH, preeclampsia, hemorragia y aborto).
+  - **Catálogo GPC Exhaustivo en Motor Prescriptivo:** Se incorporaron las 10 Guías de Práctica Clínica oficiales a `GPC_NORMATIVE_RESOURCES` en `heuristic_engine.py`, garantizando prescripciones con sección clave y tiempos de lectura exactos.
+  - **Prueba Integral de Ciclo Cerrado CACES (`test_full_caces_stratified_cycle_with_isomorphic_battery_and_hake_gain`):**
+    - Pre-Test multidisciplinar estratificado (4 troncales) -> Calificación basal -> Plan Prescriptivo -> Post-Test isomórfico (4 troncales) -> Calificación mejorada -> Cálculo de Ganancia Normalizada de Hake ($g > 0.0$ con categoría formativa).
+  - **Certificación Total de Pruebas:**
+    - Backend Pytest: 14/14 tests aprobados al 100%.
+    - Frontend Vitest: 39 suites y 189/189 tests aprobados al 100%.
+* **Fase 11 Completada: Accesos Directos a Recursos Formativos y Erradicación de Bypass Manual (`2026-10-20`):**
+  - **Causa Raíz de Bypass y Brecha de UX:**
+    - En `PrescriptivePlanCard.tsx`, el círculo de checklist a la izquierda era un botón interactivo no diferenciado que ejecutaba `onCompleteTask(task.id)` directamente, permitiendo al estudiante marcar como completada cualquier simulación o debriefing con un simple clic sin haber ingresado a la actividad formativa.
+    - Asimismo, las tareas de "Lectura Normativa GPC" y "Debriefing Socrático" carecían de botones directos de acción interactiva, impidiendo al estudiante abrir la guía ministerial oficial o iniciar el debate formativo directamente desde el plan.
+  - **Solución Arquitectural e Integridad Pedagógica (Cero Parches):**
+    - **Diferenciación Estricta entre Indicadores Fácticos y Acciones:**
+      - Las tareas de `case_simulation` y `socratic_review` presentan círculos como *indicadores visuales de estado de solo lectura* (`Circle` gris tenue si está pendiente, `CheckCircle2` verde si está completado). Se eliminó cualquier mecanismo de checklist manual arbitrario.
+    - **Accesos Directos Contextuales Institucionales:**
+      - `case_simulation`: Botón `Resolver ->` que navega directamente al caso en ZDP (`/cases/:caseId`).
+      - `gpc_reading`: Botón `Leer GPC ->` que abre el visor integrado `PdfViewerModal` con la GPC oficial del MSP y la sección indicada. Además, el propio círculo de la lectura abre el visor interactivo.
+      - `socratic_review`: Botón `Debatir ->` que abre `SocraticDebriefModal` mediante `useSocraticDebriefStore.openDebrief` vinculando el caso y la omisión clínica detectada en la evaluación diagnóstica.
+    - **Confirmación Verificada de Lectura en `PdfViewerModal`:**
+      - Se incorporó soporte para `onConfirmReading` y badge de estado `Lectura Verificada` en el visor oficial. El estudiante lee el documento normativo en Ateneo+ y confirma su lectura desde el visor, actualizando el plan de estudio con rigor fáctico.
+    - **Sincronización Automática en Backend (`EvaluationService` y `socratic_turn_stream`):**
+      - Al resolver y calificar un caso en el simulador clínico (`evaluate_reasoning`), si el caso pertenece a una tarea de `case_simulation` del plan activo, se marca automáticamente como completada en la base de datos dentro de la transacción UoW.
+      - Al enviar réplicas en el debriefing socrático (`/api/evaluate/socratic-turn`), se sincroniza y completa la tarea de `socratic_review`.
+    - **Búsqueda Semántica Resiliente de PDFs de GPCs (`cases.py`):**
+      - Se ampliaron los alias canónicos y se incorporó búsqueda por tokens significativos para resolver sin error el 100% de las GPCs normadas (sepsis neonatal, aborto, asma, hemorragia posparto, preeclampsia, hipertensión, nefrología, tuberculosis, VIH).
+  - **Certificación de Pruebas:**
+    - Frontend Vitest: 39 suites y 189/189 tests aprobados al 100%.
+    - Backend Pytest: 14/14 tests aprobados al 100%.
+    - TypeScript: 0 errores estáticos (`tsc --noEmit`).
+
+
+
+

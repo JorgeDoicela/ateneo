@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Filter, Activity, ChevronDown, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Filter, Activity, ChevronDown, Check } from 'lucide-react';
 import analyticsApi from '../api/analyticsApi';
 import SkillRadarChart from './SkillRadarChart';
 import type { AxisCompetencyItem } from '../../../types';
@@ -119,16 +119,6 @@ export default function ReasoningTrends() {
       if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
         chartScrollContainerRef.current.scrollLeft += e.deltaY;
       }
-    }
-  };
-
-  const handleScrollBy = (amount: number) => {
-    if (!chartScrollContainerRef.current) return;
-    const container = chartScrollContainerRef.current;
-    if (typeof container.scrollBy === 'function') {
-      container.scrollBy({ left: amount, behavior: 'smooth' });
-    } else {
-      container.scrollLeft += amount;
     }
   };
 
@@ -397,52 +387,18 @@ export default function ReasoningTrends() {
         )}
 
         {pointsSVG.length > 0 ? (
-          <div className="space-y-2">
-            {/* Controles y Referencias de Navegación Temporal */}
-            <div className="flex items-center justify-between text-xs text-[#747775] px-1 select-none">
-              <span className="text-[11px] font-mono text-slate-400">
-                ← Anteriores
-              </span>
-              <div className="flex items-center gap-2">
-                <span className="hidden sm:inline text-[11px] text-slate-400 font-sans">
-                  Arrastra o usa las flechas para mover
-                </span>
-                <button
-                  type="button"
-                  onClick={() => handleScrollBy(-240)}
-                  className="p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer"
-                  title="Ver evaluaciones anteriores"
-                  aria-label="Ver evaluaciones anteriores"
-                >
-                  <ChevronLeft className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleScrollBy(240)}
-                  className="p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer"
-                  title="Ver evaluaciones recientes"
-                  aria-label="Ver evaluaciones recientes"
-                >
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-              <span className="text-[11px] font-mono font-semibold text-[#0b57d0]">
-                Más recientes →
-              </span>
-            </div>
-
-            <div 
-              ref={chartScrollContainerRef}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseLeave}
-              onWheel={handleWheel}
-              className={`w-full overflow-x-auto touch-pan-x py-2 select-none ${
-                isDraggingState ? 'cursor-grabbing' : 'cursor-grab'
-              } scrollbar-thin scrollbar-thumb-slate-200 hover:scrollbar-thumb-slate-300 scrollbar-track-transparent`}
-            >
-              <div style={{ minWidth: `${chartWidth}px` }}>
+          <div 
+            ref={chartScrollContainerRef}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
+            onWheel={handleWheel}
+            className={`w-full overflow-x-auto touch-pan-x py-2 select-none ${
+              isDraggingState ? 'cursor-grabbing' : 'cursor-grab'
+            } scrollbar-thin scrollbar-thumb-slate-200 hover:scrollbar-thumb-slate-300 scrollbar-track-transparent`}
+          >
+            <div style={{ minWidth: `${chartWidth}px` }}>
                 <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-auto font-sans overflow-visible select-none">
                 <defs>
                   {/* Gradiente de relleno luminoso bajo la curva */}
@@ -571,8 +527,7 @@ export default function ReasoningTrends() {
               </svg>
             </div>
           </div>
-        </div>
-      ) : (
+        ) : (
           <p className="text-xs text-[#747775] italic text-center py-6">No hay datos registrados para esta GPC.</p>
         )}
 

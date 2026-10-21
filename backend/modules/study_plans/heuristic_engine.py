@@ -34,34 +34,79 @@ GPC_NORMATIVE_RESOURCES = {
         "seccion_clave": "Sección 5.1: Activación del Código Rojo Obstétrico y Secuencia de Uterotónicos",
         "tiempo_lectura": 15
     },
-    "dengue": {
-        "guia": "GPC Manejo del Dengue en el Primer y Segundo Nivel (MSP Ecuador)",
-        "seccion_clave": "Sección 3.3: Hidratación con Cristaloides en Dengue con Signos de Alarma y Choque",
+    "aborto": {
+        "guia": "GPC Atención del Aborto y sus Complicaciones (MSP Ecuador)",
+        "seccion_clave": "Sección 3.2: Evacuación Uterina por AMEU y Profilaxis con Inmunoglobulina Anti-D",
         "tiempo_lectura": 12
+    },
+    "asma": {
+        "guia": "GPC Diagnóstico y Tratamiento del Asma en Pediatría (MSP Ecuador)",
+        "seccion_clave": "Sección 5.3: Manejo Escalonado de Crisis Asmática Grave con SABA y Corticoide Sistémico",
+        "tiempo_lectura": 15
+    },
+    "bronquiolitis": {
+        "guia": "GPC Diagnóstico y Manejo de la Bronquiolitis Aguda (MSP Ecuador)",
+        "seccion_clave": "Sección 4.1: Oxigenoterapia y Criterios de Soporte No Invasivo en Lactantes",
+        "tiempo_lectura": 12
+    },
+    "sepsis": {
+        "guia": "GPC Prevención, Diagnóstico y Tratamiento de la Sepsis Neonatal (MSP Ecuador)",
+        "seccion_clave": "Sección 3.2: Esquemas Antimicrobianos de Primera Línea en Sepsis Temprana (Ampicilina + Gentamicina)",
+        "tiempo_lectura": 15
+    },
+    "ehirn": {
+        "guia": "GPC Encefalopatía Hipóxico-Isquémica en el Recién Nacido (MSP Ecuador)",
+        "seccion_clave": "Sección 5: Criterios de Elegibilidad para Hipotermia Terapéutica Corporal Total y Ventana de 6 Horas",
+        "tiempo_lectura": 15
+    },
+    "cetoacidosis": {
+        "guia": "GPC Diabetes Mellitus Tipo 2 y Complicaciones Agudas (MSP Ecuador)",
+        "seccion_clave": "Sección 4.2: Protocolo de Rehidratación con Cristaloides, Insulinoterapia y Reposición de Potasio",
+        "tiempo_lectura": 15
+    },
+    "diabetes": {
+        "guia": "GPC Diabetes Mellitus Tipo 2 y Complicaciones Agudas (MSP Ecuador)",
+        "seccion_clave": "Sección 4.2: Protocolo de Rehidratación con Cristaloides, Insulinoterapia y Reposición de Potasio",
+        "tiempo_lectura": 15
+    },
+    "hta": {
+        "guia": "GPC Diagnóstico y Tratamiento de la Hipertensión Arterial (MSP Ecuador)",
+        "seccion_clave": "Sección 6.2: Manejo de Emergencias Hipertensivas y Reducción Tensional Controlada",
+        "tiempo_lectura": 12
+    },
+    "erc": {
+        "guia": "GPC Abordaje de la Enfermedad Renal Crónica (MSP Ecuador)",
+        "seccion_clave": "Sección 4.4: Manejo de Hiperpotasemia Grave con Estabilizadores de Membrana y Criterios Dialíticos",
+        "tiempo_lectura": 15
+    },
+    "renal": {
+        "guia": "GPC Abordaje de la Enfermedad Renal Crónica (MSP Ecuador)",
+        "seccion_clave": "Sección 4.4: Manejo de Hiperpotasemia Grave con Estabilizadores de Membrana y Criterios Dialíticos",
+        "tiempo_lectura": 15
     },
     "nac": {
         "guia": "GPC Neumonía Adquirida en la Comunidad en Pediatría y Adultos (MSP Ecuador)",
         "seccion_clave": "Sección 4.1: Estratificación de Riesgo CURB-65 y Antibioticoterapia Empírica Inicial",
         "tiempo_lectura": 15
     },
-    "sepsis": {
-        "guia": "GPC Prevención, Diagnóstico y Tratamiento de la Sepsis Neonatal (MSP Ecuador)",
-        "seccion_clave": "Sección 3.2: Esquemas Antimicrobianos de Primera Línea en Sepsis Temprana",
+    "neumonia": {
+        "guia": "GPC Neumonía Adquirida en la Comunidad en Pediatría y Adultos (MSP Ecuador)",
+        "seccion_clave": "Sección 4.1: Estratificación de Riesgo CURB-65 y Antibioticoterapia Empírica Inicial",
         "tiempo_lectura": 15
     },
-    "hta": {
-        "guia": "GPC Diagnóstico y Tratamiento de la Hipertensión Arterial (MSP Ecuador)",
-        "seccion_clave": "Sección 6.2: Manejo de Urgencias y Emergencias Hipertensivas con Daño de Órgano Blanco",
+    "dengue": {
+        "guia": "GPC Manejo del Dengue en el Primer y Segundo Nivel (MSP Ecuador)",
+        "seccion_clave": "Sección 3.3: Hidratación con Cristaloides en Dengue con Signos de Alarma y Choque",
         "tiempo_lectura": 12
     },
     "tb": {
         "guia": "Guía de Práctica Clínica para la Prevención y Tratamiento de la Tuberculosis (MSP Ecuador)",
-        "seccion_clave": "Sección 4.3: Esquema de Tratamiento Fase Intensiva con Dosis Fijas Combinadas",
+        "seccion_clave": "Sección 4.3: Esquema de Tratamiento Fase Intensiva con Dosis Fijas Combinadas (RHZE)",
         "tiempo_lectura": 15
     },
-    "ehirn": {
-        "guia": "GPC Encefalopatía Hipóxico-Isquémica en el Recién Nacido (MSP Ecuador)",
-        "seccion_clave": "Sección 5: Criterios de Elegibilidad para Hipotermia Terapéutica y Ventana de 6 Horas",
+    "vih": {
+        "guia": "GPC Atención Integral de Personas con VIH (MSP Ecuador)",
+        "seccion_clave": "Sección 4.1: Profilaxis de Infecciones Oportunistas con Cotrimoxazol e Inicio de Esquema TLD",
         "tiempo_lectura": 15
     }
 }

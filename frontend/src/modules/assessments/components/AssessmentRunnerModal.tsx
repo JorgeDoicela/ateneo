@@ -4,6 +4,7 @@ import { X, ArrowRight, ArrowLeft, Send, AlertTriangle } from 'lucide-react';
 import type { DiagnosticAssessment, AssessmentSummaryReport } from '../types';
 import { assessmentApi } from '../api/assessmentApi';
 import { HakeGainBadge } from './HakeGainBadge';
+import { ClinicalMarkdownRenderer } from '../../../core/ui';
 
 interface AssessmentRunnerModalProps {
   isOpen: boolean;
@@ -150,9 +151,9 @@ export const AssessmentRunnerModal: React.FC<AssessmentRunnerModalProps> = ({
                 </span>
               </div>
 
-              {/* Enunciado del caso */}
-              <div className="bg-[#f0f4f9] rounded-[20px] p-5 text-xs sm:text-sm text-slate-800 leading-relaxed whitespace-pre-wrap">
-                {currentItem.prompt_text}
+              {/* Enunciado del caso renderizado con Markdown clínico */}
+              <div className="bg-[#f0f4f9] rounded-[20px] p-5 text-xs sm:text-sm text-slate-800 leading-relaxed">
+                <ClinicalMarkdownRenderer content={currentItem.prompt_text} />
               </div>
 
               {/* Área de Respuesta del Estudiante */}

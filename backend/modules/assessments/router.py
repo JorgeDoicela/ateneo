@@ -19,8 +19,11 @@ router = APIRouter(prefix="", tags=["Evaluaciones Diagnósticas (Pre/Post-Test)"
 
 
 class StartPreTestRequest(BaseModel):
-    specialty_scope: str = Field(default="Multidisciplinar GPC", description="Ámbito o especialidad clínica de la evaluación")
-    num_cases: int = Field(default=3, ge=1, le=10, description="Cantidad de reactivos clínicos basales a evaluar")
+    specialty_scope: str = Field(
+        default="Batería Troncal CACES (Multidisciplinar)",
+        description="Ámbito o especialidad clínica de la evaluación (Troncal CACES, Gineco-Obstetricia, Pediatría, Medicina Interna, Infectología)"
+    )
+    num_cases: int = Field(default=4, ge=1, le=10, description="Cantidad de reactivos clínicos basales a evaluar")
 
 
 class StartPostTestRequest(BaseModel):

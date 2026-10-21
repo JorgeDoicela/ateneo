@@ -33,7 +33,7 @@ async def get_pdf_location(guia_id: str) -> Dict[str, Any]:
         raw_dir.mkdir(parents=True, exist_ok=True)
     clean_query = _normalize_filename_key(guia_id)
     
-    # Mapeo de alias semánticos para casos clínicos canónicos
+    # Mapeo de alias semánticos para casos clínicos y GPCs canónicas
     SEMANTIC_ALIASES = {
         "preeclampsia": ["trastornoshipertensivos", "preeclampsia", "eclampsia"],
         "hemorragia": ["hemorragiapostparto", "hemorragiaposparto", "hemorragia"],
@@ -45,7 +45,15 @@ async def get_pdf_location(guia_id: str) -> Dict[str, Any]:
         "hipertension": ["hta", "gpchta", "hipertensiv"],
         "erc": ["enfermedadrenalcronica", "renal"],
         "renal": ["enfermedadrenalcronica", "renal"],
+        "sepsis": ["sepsis", "sepsisneonatal", "gpcsepsisneonatal"],
+        "neonato": ["sepsisneonatal", "reciennacidoprepaturo", "dificultadpararespirar", "ehirn"],
+        "neonatal": ["sepsisneonatal", "reciennacidoprepaturo", "dificultadpararespirar", "ehirn"],
         "ehirn": ["ehirn", "gpcehirn"],
+        "aborto": ["aborto", "abortoespontaneo", "abortoincompleto", "abortoterapeutico"],
+        "asma": ["asma", "dificultadpararespirar"],
+        "bronquiolitis": ["bronquiolitis", "dificultadpararespirar"],
+        "diabetes": ["diabetes", "cetoacidosis", "hta192019"],
+        "cetoacidosis": ["cetoacidosis", "diabetes", "hta192019"],
         "parto": ["trabajopartoposparto", "partoporcesarea"],
         "dengue": ["dengue", "fiebre"],
         "neumonia": ["neumonia", "gpcneumonia", "neumoniaadquirida"]
@@ -55,25 +63,36 @@ async def get_pdf_location(guia_id: str) -> Dict[str, Any]:
     for key, aliases in SEMANTIC_ALIASES.items():
         if key in clean_query or clean_query in key:
             target_keywords.extend([_normalize_filename_key(a) for a in aliases])
-            break
 
     all_pdfs = list(raw_dir.rglob("*.pdf"))
     matched_pdf = None
 
-    # 1. Búsqueda por palabras clave objetivo
+    # 1. Coincidencia exacta de nombre de archivo o subcadena de keywords objetivo
     for kw in target_keywords:
         for pdf in all_pdfs:
             pdf_name_clean = _normalize_filename_key(pdf.stem)
-            if kw in pdf_name_clean:
+            if kw == pdf_name_clean or kw in pdf_name_clean or pdf_name_clean in kw:
                 matched_pdf = pdf
                 break
         if matched_pdf:
             break
 
-    # 2. Si no hay coincidencia exacta para la guía
+    # 2. Búsqueda por tokens significativos de la consulta (longitud >= 4, ignorando stopwords)
     if not matched_pdf:
-        # Si no existe PDF físico local para esa guía (ej. Dengue con fragmentos sembrados),
-        # buscar si existe algún PDF de medicina general o el primer archivo normativo afín
+        import re
+        stopwords = {"para", "como", "sobre", "guia", "gpc", "msp", "ecuador", "practica", "clinica", "manejo", "tratamiento", "diagnostico", "prevencion"}
+        tokens = [t for t in re.findall(r"[a-z]{4,}", clean_query) if t not in stopwords]
+        for token in tokens:
+            for pdf in all_pdfs:
+                pdf_clean = _normalize_filename_key(pdf.stem)
+                if token in pdf_clean:
+                    matched_pdf = pdf
+                    break
+            if matched_pdf:
+                break
+
+    # 3. Si no hay coincidencia exacta para la guía, fallback afín
+    if not matched_pdf:
         for pdf in all_pdfs:
             if "componente" in pdf.stem.lower() or "general" in pdf.stem.lower():
                 matched_pdf = pdf

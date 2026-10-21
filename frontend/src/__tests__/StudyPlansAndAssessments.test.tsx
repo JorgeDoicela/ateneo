@@ -105,16 +105,53 @@ describe('Componente PrescriptivePlanCard (Plan de Estudio Heurístico)', () => 
     expect(screen.getByText('Simulación Práctica: Preeclampsia con Criterios de Severidad')).toBeInTheDocument();
   });
 
-  it('permite marcar una tarea pendiente como completada al hacer clic', () => {
-    const handleComplete = vi.fn();
-    render(<PrescriptivePlanCard plan={mockPlan} onCompleteTask={handleComplete} />);
+  it('ofrece accesos directos contextuales (Resolver, Debatir, Leer GPC) y salvaguarda la integridad formativa', () => {
+    const handleNavigate = vi.fn();
+    const handleDebrief = vi.fn();
+    const handleReadGpc = vi.fn();
 
-    // Buscar los botones de checklist (hay 3 tareas)
-    const taskButtons = screen.getAllByRole('button', { name: /Marcar como completada/i });
-    expect(taskButtons.length).toBe(2);
+    const planConLecturaPendiente: PrescriptiveStudyPlan = {
+      ...mockPlan,
+      tasks: [
+        {
+          ...mockPlan.tasks[0],
+          is_completed: false,
+        },
+        mockPlan.tasks[1],
+        mockPlan.tasks[2],
+      ],
+    };
 
-    fireEvent.click(taskButtons[0]);
-    expect(handleComplete).toHaveBeenCalledWith(102);
+    render(
+      <PrescriptivePlanCard
+        plan={planConLecturaPendiente}
+        onNavigateToCase={handleNavigate}
+        onOpenDebrief={handleDebrief}
+        onReadGpc={handleReadGpc}
+      />
+    );
+
+    // 1. Acceso directo para resolver simulación clínica en ZDP
+    const resolverBtn = screen.getByRole('button', { name: /Resolver/i });
+    expect(resolverBtn).toBeInTheDocument();
+    fireEvent.click(resolverBtn);
+    expect(handleNavigate).toHaveBeenCalledWith('case_preeclampsia_01');
+
+    // 2. Acceso directo a debriefing socrático interactivo
+    const debatirBtn = screen.getByRole('button', { name: /Debatir/i });
+    expect(debatirBtn).toBeInTheDocument();
+    fireEvent.click(debatirBtn);
+    expect(handleDebrief).toHaveBeenCalledWith(expect.objectContaining({ id: 103 }));
+
+    // 3. Acceso directo a lectura de la GPC oficial del MSP
+    const leerGpcBtn = screen.getByRole('button', { name: /Leer GPC/i });
+    expect(leerGpcBtn).toBeInTheDocument();
+    fireEvent.click(leerGpcBtn);
+    expect(handleReadGpc).toHaveBeenCalledWith(expect.objectContaining({ id: 101 }));
+
+    // 4. Bloqueo de bypass: No se permite marcar arbitrariamente simulación o debate con un clic vacío
+    const fakeCheckboxBtn = screen.queryByRole('button', { name: /Marcar como completada/i });
+    expect(fakeCheckboxBtn).toBeNull();
   });
 
   it('dispara onStartPostTest con el ID del Pre-Test al presionar el botón de Post-Test', () => {
@@ -142,6 +179,18 @@ describe('Servicios de Red API (assessmentApi y studyPlanApi)', () => {
     expect(httpClient.post).toHaveBeenCalledWith('/api/assessments/pre-test/start', {
       specialty_scope: 'Obstetricia',
       num_cases: 2,
+    });
+    expect(res).toEqual(mockData);
+  });
+
+  it('assessmentApi.startPreTest aplica por defecto la Batería Troncal CACES de 4 reactivos', async () => {
+    const mockData = { id: 'eval_pre_caces', assessment_type: 'pre_test' };
+    vi.mocked(httpClient.post).mockResolvedValueOnce({ data: mockData, status: 201, ok: true });
+
+    const res = await assessmentApi.startPreTest();
+    expect(httpClient.post).toHaveBeenCalledWith('/api/assessments/pre-test/start', {
+      specialty_scope: 'Batería Troncal CACES (Multidisciplinar)',
+      num_cases: 4,
     });
     expect(res).toEqual(mockData);
   });

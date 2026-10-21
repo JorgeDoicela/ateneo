@@ -149,3 +149,131 @@ def test_full_formative_cycle_pre_test_plan_post_test_and_hake_gain():
     assessment_ids = [a["id"] for a in history]
     assert pre_test_id in assessment_ids
     assert post_test_id in assessment_ids
+
+
+def test_stratified_caces_pre_test_selection():
+    """
+    Valida psicométricamente que el inicio de Pre-Test por defecto:
+    1. Seleccione 4 reactivos clínicos basales.
+    2. Cada reactivo corresponda de forma no redundante a una de las 4 troncales CACES / MSP:
+       - Ginecología y Obstetricia
+       - Pediatría y Neonatología
+       - Medicina Interna y Crónicos
+       - Infectología y Salud Pública
+    3. Garantice 25% de paridad por área troncal (balance 1:1:1:1) sin sesgo de representatividad.
+    """
+    from modules.assessments.service import CASE_TRONCAL_MAP, TRONCALES_CANONICAS
+
+    client = TestClient(app)
+    resp = client.post("/api/assessments/pre-test/start", json={})
+    assert resp.status_code == 201, resp.text
+    data = resp.json()
+
+    assert data["assessment_type"] == "pre_test"
+    assert data["specialty_scope"] == "Batería Troncal CACES (Multidisciplinar)"
+    items = data["items"]
+    assert len(items) == 4, f"Se esperaban 4 reactivos troncales, se obtuvieron {len(items)}"
+
+    evaluated_troncales = set()
+    for item in items:
+        case_id = item["case_id"]
+        troncal = CASE_TRONCAL_MAP.get(case_id)
+        assert troncal is not None, f"El caso {case_id} no está catalogado en CASE_TRONCAL_MAP"
+        assert troncal in TRONCALES_CANONICAS, f"Troncal {troncal} no es una de las 4 canónicas CACES"
+        assert troncal not in evaluated_troncales, f"Troncal {troncal} repetida en el Pre-Test estratificado"
+        evaluated_troncales.add(troncal)
+
+    assert evaluated_troncales == set(TRONCALES_CANONICAS), "El Pre-Test no cubrió la totalidad de las 4 troncales CACES"
+
+
+def test_full_caces_stratified_cycle_with_isomorphic_battery_and_hake_gain():
+    """
+    Valida el ciclo de investigación cerrado bajo el estándar CACES / MSP:
+    1. Pre-Test multidisciplinar estratificado (4 reactivos, 1 por troncal).
+    2. Calificación basal con omisiones formativas.
+    3. Síntesis y verificación del Plan de Estudio Prescriptivo.
+    4. Post-Test isomórfico paralelo de 4 reactivos (isomorfismo 1:1 por troncal).
+    5. Calificación mejorada del Post-Test y cálculo de Ganancia de Hake (g).
+    """
+    client = TestClient(app)
+
+    # 1. Iniciar Pre-Test CACES por defecto
+    start_resp = client.post("/api/assessments/pre-test/start", json={})
+    assert start_resp.status_code == 201, start_resp.text
+    pre_test = start_resp.json()
+    pre_test_id = pre_test["id"]
+    pre_items = pre_test["items"]
+    assert len(pre_items) == 4
+
+    # 2. Enviar respuestas basales con omisiones parciales
+    pre_answers = []
+    for it in pre_items:
+        pre_answers.append({
+            "item_id": it["id"],
+            "student_answer": "Sospecho cuadro agudo, solicito biometría y observación en sala."
+        })
+    submit_pre_resp = client.post(f"/api/assessments/{pre_test_id}/submit", json={
+        "assessment_id": pre_test_id,
+        "answers": pre_answers
+    })
+    assert submit_pre_resp.status_code == 200, submit_pre_resp.text
+    pre_report = submit_pre_resp.json()
+    assert pre_report["assessment_type"] == "pre_test"
+    pre_score = pre_report["score_total"]
+    assert pre_score < 7.0, f"Calificación basal esperada < 7.0, se obtuvo {pre_score}"
+
+    # 3. Verificar Plan Prescriptivo generado
+    plan_resp = client.get("/api/study-plans/me")
+    assert plan_resp.status_code == 200
+    plan = plan_resp.json()
+    assert plan is not None
+    assert plan["source_assessment_id"] == pre_test_id
+    assert len(plan["tasks"]) > 0
+
+    # 4. Iniciar Post-Test Isomórfico paralelo
+    start_post_resp = client.post("/api/assessments/post-test/start", json={"pre_test_id": pre_test_id})
+    assert start_post_resp.status_code == 201, start_post_resp.text
+    post_test = start_post_resp.json()
+    post_test_id = post_test["id"]
+    post_items = post_test["items"]
+    assert len(post_items) == 4, f"Se esperaban 4 reactivos isomórficos paralelos, se obtuvieron {len(post_items)}"
+
+    # Verificar que los reactivos del Post-Test tengan formato Markdown médico enriquecido
+    for p_item in post_items:
+        assert "###" in p_item["prompt_text"]
+        assert "Área Troncal" in p_item["prompt_text"]
+
+    # 5. Enviar respuestas optimizadas con evidencia de la GPC al Post-Test
+    post_answers = []
+    for p_it in post_items:
+        prompt_low = p_it["prompt_text"].lower()
+        if "preeclampsia" in prompt_low or "hipertens" in prompt_low:
+            ans = "Preeclampsia severa. Neuroprotección con Sulfato de Magnesio esquema Zuspan e Hidralazina según GPC MSP."
+        elif "asma" in prompt_low or "respirat" in prompt_low or "salbutamol" in prompt_low:
+            ans = "Crisis asmática. Salbutamol inhalado más Corticoide sistémico y oxigenoterapia normada."
+        elif "diabet" in prompt_low or "cetoacidosis" in prompt_low:
+            ans = "Cetoacidosis diabética. Rehidratación con cristaloides e infusión continua de Insulina rápida."
+        else:
+            ans = "Manejo según GPC del MSP con Ceftriaxona o esquema antimicrobiano normado de primera línea."
+
+        post_answers.append({
+            "item_id": p_it["id"],
+            "student_answer": ans
+        })
+
+    submit_post_resp = client.post(f"/api/assessments/{post_test_id}/submit", json={
+        "assessment_id": post_test_id,
+        "answers": post_answers
+    })
+    assert submit_post_resp.status_code == 200, submit_post_resp.text
+    post_report = submit_post_resp.json()
+    post_score = post_report["score_total"]
+    assert post_score > pre_score, f"Post-Score {post_score} debe superar Pre-Score {pre_score}"
+
+    # 6. Validar Ganancia de Hake (g)
+    hake_g = post_report["hake_gain_g"]
+    assert hake_g is not None
+    assert hake_g > 0.0
+    assert "Ganancia" in (post_report["hake_category"] or "")
+
+

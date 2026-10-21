@@ -365,6 +365,7 @@ class SocraticTurnRequest(BaseModel):
 @router.post("/socratic-turn", dependencies=[Depends(rate_limit_inference)])
 async def socratic_turn_stream(
     req: SocraticTurnRequest,
+    current_user: Optional[UserResponse] = Depends(get_optional_current_user),
     case_service: CaseService = Depends(get_case_service),
     evaluation_service: EvaluationService = Depends(get_evaluation_service)
 ):
@@ -388,8 +389,22 @@ async def socratic_turn_stream(
     elif req.omision_clinica and req.omision_clinica.strip():
         omisiones_list = [req.omision_clinica.strip()]
 
-    if not omisiones_list:
-        omisiones_list = ["Aspectos normativos y criterios de manejo según la GPC Ecuador."]
+    # Sincronizar automáticamente la tarea de debriefing socrático si el estudiante tiene un plan activo
+    if current_user:
+        try:
+            from core.unit_of_work import SQLAlchemyUnitOfWork
+            uow = SQLAlchemyUnitOfWork()
+            with uow:
+                active_plan = uow.study_plans.get_active_plan_by_user(current_user.id)
+                if active_plan:
+                    for task in (active_plan.tasks or []):
+                        if task.task_type == "socratic_review" and not task.is_completed:
+                            uow.study_plans.mark_task_completed(task.id)
+                            uow.commit()
+                            logger.info("[SocraticTurn] Tarea socrática #%s completada en plan de estudio", task.id)
+                            break
+        except Exception as debrief_sync_err:
+            logger.warning("[SocraticTurn] Aviso al sincronizar tarea socrática del plan: %s", debrief_sync_err)
 
     try:
         event_generator = evaluation_service.generate_socratic_turn_stream(

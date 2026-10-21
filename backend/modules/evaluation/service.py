@@ -199,6 +199,18 @@ class EvaluationService:
                         if hasattr(eval_result, "gamification_update"):
                             eval_result.gamification_update = gamif_result.model_dump()
 
+                    # 4. Sincronizar automáticamente tareas de simulación en el Plan Prescriptivo activo si aplica
+                    if hasattr(uow, "study_plans"):
+                        try:
+                            active_plan = uow.study_plans.get_active_plan_by_user(user_id)
+                            if active_plan:
+                                for task in (active_plan.tasks or []):
+                                    if task.task_type == "case_simulation" and task.resource_reference == case.id and not task.is_completed:
+                                        uow.study_plans.mark_task_completed(task.id)
+                                        logger.info("[EvaluationService] Tarea formativa #%s del plan prescriptivo completada tras simulación de %s", task.id, case.id)
+                        except Exception as plan_err:
+                            logger.warning("[EvaluationService] Error al sincronizar plan prescriptivo: %s", plan_err)
+
                     # Confirmar toda la transacción multi-repositorio
                     uow.commit()
             except Exception as tx_err:

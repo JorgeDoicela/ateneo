@@ -7,6 +7,8 @@ interface PrescriptivePlanCardProps {
   onCompleteTask?: (taskId: number) => void;
   onStartPostTest?: (preTestId: string) => void;
   onNavigateToCase?: (caseId: string) => void;
+  onReadGpc?: (task: StudyPlanTask) => void;
+  onOpenDebrief?: (task: StudyPlanTask) => void;
   isCompletingTask?: boolean;
 }
 
@@ -15,6 +17,8 @@ export const PrescriptivePlanCard: React.FC<PrescriptivePlanCardProps> = ({
   onCompleteTask,
   onStartPostTest,
   onNavigateToCase,
+  onReadGpc,
+  onOpenDebrief,
   isCompletingTask = false,
 }) => {
   const getTaskIcon = (type: string) => {
@@ -90,28 +94,39 @@ export const PrescriptivePlanCard: React.FC<PrescriptivePlanCardProps> = ({
         </span>
         <div className="divide-y divide-slate-100">
           {plan.tasks.map((task: StudyPlanTask) => {
-            const isClickable = !task.is_completed && !isCompletingTask;
-
             return (
               <div
                 key={task.id || task.title}
                 className="py-3 flex items-start justify-between gap-3 group"
               >
                 <div className="flex items-start gap-3 flex-1 min-w-0">
-                  {/* Botón interactivo de checklist */}
-                  <button
-                    type="button"
-                    onClick={() => task.id && isClickable && onCompleteTask?.(task.id)}
-                    disabled={!isClickable}
-                    className="mt-0.5 shrink-0 transition-opacity hover:opacity-80 disabled:cursor-default"
-                    title={task.is_completed ? 'Tarea completada' : 'Marcar como completada'}
-                  >
-                    {task.is_completed ? (
+                  {/* Indicador de estado formativo (solo lecturas pueden abrir visor desde el icono; simulaciones y debates requieren resolución real) */}
+                  {task.is_completed ? (
+                    <div className="mt-0.5 shrink-0" title="Actividad completada">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    ) : (
-                      <Circle className="w-4 h-4 text-slate-300 group-hover:text-blue-500" />
-                    )}
-                  </button>
+                    </div>
+                  ) : task.task_type === 'gpc_reading' ? (
+                    <button
+                      type="button"
+                      onClick={() => onReadGpc ? onReadGpc(task) : (task.id && onCompleteTask?.(task.id))}
+                      disabled={isCompletingTask}
+                      className="mt-0.5 shrink-0 transition-opacity hover:opacity-80 cursor-pointer disabled:cursor-default"
+                      title="Abrir visor de lectura de la Guía Oficial"
+                    >
+                      <Circle className="w-4 h-4 text-slate-300 group-hover:text-cyan-600 transition-colors" />
+                    </button>
+                  ) : (
+                    <div
+                      className="mt-0.5 shrink-0"
+                      title={
+                        task.task_type === 'case_simulation'
+                          ? 'Requiere resolución práctica en el simulador'
+                          : 'Requiere sesión interactiva de debriefing socrático'
+                      }
+                    >
+                      <Circle className="w-4 h-4 text-slate-300" />
+                    </div>
+                  )}
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -140,17 +155,68 @@ export const PrescriptivePlanCard: React.FC<PrescriptivePlanCardProps> = ({
                   </div>
                 </div>
 
-                {/* Acciones contextuales (resolver caso) */}
-                {task.task_type === 'case_simulation' && task.resource_reference && !task.is_completed && onNavigateToCase && (
-                  <button
-                    type="button"
-                    onClick={() => onNavigateToCase(task.resource_reference)}
-                    className="shrink-0 text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors mt-0.5"
-                  >
-                    <span>Resolver</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                )}
+                {/* Acciones contextuales directas por tipo de tarea */}
+                <div className="shrink-0 flex items-center gap-2">
+                  {task.task_type === 'case_simulation' && (
+                    task.is_completed ? (
+                      <span className="text-[11px] font-medium text-emerald-600 mt-0.5 select-none">
+                        Resuelto
+                      </span>
+                    ) : (
+                      onNavigateToCase && task.resource_reference && (
+                        <button
+                          type="button"
+                          onClick={() => onNavigateToCase(task.resource_reference)}
+                          className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors mt-0.5 cursor-pointer"
+                          title="Resolver caso clínico en ZDP"
+                        >
+                          <span>Resolver</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      )
+                    )
+                  )}
+
+                  {task.task_type === 'gpc_reading' && (
+                    task.is_completed ? (
+                      <span className="text-[11px] font-medium text-emerald-600 mt-0.5 select-none">
+                        Leída
+                      </span>
+                    ) : (
+                      onReadGpc && (
+                        <button
+                          type="button"
+                          onClick={() => onReadGpc(task)}
+                          className="text-xs font-semibold text-cyan-600 hover:text-cyan-700 flex items-center gap-1 transition-colors mt-0.5 cursor-pointer"
+                          title="Abrir y estudiar la GPC oficial del MSP"
+                        >
+                          <span>Leer GPC</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      )
+                    )
+                  )}
+
+                  {task.task_type === 'socratic_review' && (
+                    task.is_completed ? (
+                      <span className="text-[11px] font-medium text-emerald-600 mt-0.5 select-none">
+                        Debatido
+                      </span>
+                    ) : (
+                      onOpenDebrief && (
+                        <button
+                          type="button"
+                          onClick={() => onOpenDebrief(task)}
+                          className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 transition-colors mt-0.5 cursor-pointer"
+                          title="Iniciar interrogatorio reflexivo socrático"
+                        >
+                          <span>Debatir</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      )
+                    )
+                  )}
+                </div>
               </div>
             );
           })}

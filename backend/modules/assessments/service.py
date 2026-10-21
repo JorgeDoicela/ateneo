@@ -25,6 +25,91 @@ def _default_uow():
     return SqlAlchemyUnitOfWork()
 
 
+# Mapeo nosológico canónico de casos clínicos a las 4 Áreas Troncales (CACES / MSP Ecuador)
+TRONCAL_GINECO_OBSTETRICIA = "Ginecología y Obstetricia"
+TRONCAL_PEDIATRIA_NEONATOLOGIA = "Pediatría y Neonatología"
+TRONCAL_MEDICINA_INTERNA = "Medicina Interna y Crónicos"
+TRONCAL_INFECTOLOGIA_SALUD_PUBLICA = "Infectología y Salud Pública"
+
+TRONCALES_CANONICAS = [
+    TRONCAL_GINECO_OBSTETRICIA,
+    TRONCAL_PEDIATRIA_NEONATOLOGIA,
+    TRONCAL_MEDICINA_INTERNA,
+    TRONCAL_INFECTOLOGIA_SALUD_PUBLICA,
+]
+
+CASE_TRONCAL_MAP: Dict[str, str] = {
+    "case_preeclampsia_01": TRONCAL_GINECO_OBSTETRICIA,
+    "case_hemorragia_01": TRONCAL_GINECO_OBSTETRICIA,
+    "case_aborto_01": TRONCAL_GINECO_OBSTETRICIA,
+    "case_nac_01": TRONCAL_PEDIATRIA_NEONATOLOGIA,
+    "case_sepsis_neonatal_01": TRONCAL_PEDIATRIA_NEONATOLOGIA,
+    "case_ehirn_01": TRONCAL_PEDIATRIA_NEONATOLOGIA,
+    "case_hta_01": TRONCAL_MEDICINA_INTERNA,
+    "case_erc_01": TRONCAL_MEDICINA_INTERNA,
+    "case_tb_01": TRONCAL_INFECTOLOGIA_SALUD_PUBLICA,
+    "case_vih_01": TRONCAL_INFECTOLOGIA_SALUD_PUBLICA,
+}
+
+
+def select_stratified_pre_test_cases(
+    all_cases: List[Any],
+    specialty_scope: str,
+    user_id: str,
+    num_cases: int = 4
+) -> List[Any]:
+    """
+    Selecciona los reactivos del Pre-Test mediante muestreo estratificado balanceado:
+    1. Si el scope es Multidisciplinar / CACES: selecciona exactamente 1 caso representativo
+       por cada una de las 4 áreas troncales de la carrera de medicina en Ecuador.
+       Garantiza validez de contenido psicométrica, paridad diagnóstica (25% por troncal)
+       y erradica el sesgo de sobredimensionar una sola especialidad.
+    2. Si el scope es monotemático (ej. solo Pediatría): filtra rigurosamente los casos
+       pertenecientes a dicha especialidad troncal.
+    """
+    scope_lower = (specialty_scope or "").strip().lower()
+    is_multidisciplinar = (
+        not specialty_scope or
+        "multidisciplinar" in scope_lower or
+        "caces" in scope_lower or
+        "general" in scope_lower or
+        "troncal" in scope_lower
+    )
+
+    if is_multidisciplinar:
+        # Agrupar casos por troncal
+        cases_by_troncal: Dict[str, List[Any]] = {t: [] for t in TRONCALES_CANONICAS}
+        for c in all_cases:
+            t = CASE_TRONCAL_MAP.get(c.id)
+            if t and t in cases_by_troncal:
+                cases_by_troncal[t].append(c)
+
+        selected: List[Any] = []
+        hash_seed = sum(ord(ch) for ch in user_id) if user_id else 0
+
+        # Seleccionar 1 caso representativo de cada una de las 4 troncales
+        for troncal in TRONCALES_CANONICAS:
+            bucket = cases_by_troncal.get(troncal, [])
+            if bucket:
+                idx = (hash_seed + len(selected)) % len(bucket)
+                selected.append(bucket[idx])
+
+        if num_cases and num_cases > 0 and num_cases < len(selected):
+            return selected[:num_cases]
+        return selected
+
+    # Ámbito monotemático específico
+    matched_cases = [
+        c for c in all_cases
+        if CASE_TRONCAL_MAP.get(c.id, "").lower() == scope_lower or
+           scope_lower in CASE_TRONCAL_MAP.get(c.id, "").lower()
+    ]
+    if matched_cases:
+        return matched_cases[:num_cases]
+
+    return all_cases[:num_cases]
+
+
 class AssessmentService:
     """
     Servicio de Dominio para la Gestión de Evaluaciones Diagnósticas (Pre-Test / Post-Test).
@@ -92,12 +177,12 @@ class AssessmentService:
     def start_pre_test(
         self,
         user_id: str,
-        specialty_scope: str = "Multidisciplinar GPC",
-        num_cases: int = 3
+        specialty_scope: str = "Batería Troncal CACES (Multidisciplinar)",
+        num_cases: int = 4
     ) -> DiagnosticAssessmentModel:
         """
-        Inicia una sesión de Pre-Test seleccionando casos basales representativos.
-        Persiste los reactivos en estado 'in_progress'.
+        Inicia una sesión de Pre-Test seleccionando casos basales mediante muestreo estratificado balanceado.
+        Garantiza que una prueba general evalúe las 4 troncales (Gineco-Obstetricia, Pediatría, Medicina Interna, Infectología).
         """
         uow = self.uow_factory()
         with uow:
@@ -106,7 +191,12 @@ class AssessmentService:
             if not all_cases:
                 raise ValueError("No existen casos clínicos disponibles para iniciar el Pre-Test.")
 
-            selected_cases = all_cases[:num_cases]
+            selected_cases = select_stratified_pre_test_cases(
+                all_cases=all_cases,
+                specialty_scope=specialty_scope,
+                user_id=user_id,
+                num_cases=num_cases
+            )
 
             assessment = DiagnosticAssessmentModel(
                 user_id=user_id,
@@ -120,10 +210,12 @@ class AssessmentService:
             created_assessment = uow.assessments.create_assessment(assessment)
 
             for case in selected_cases:
+                troncal = CASE_TRONCAL_MAP.get(case.id, "Troncal Clínica")
                 prompt_text = (
-                    f"**{case.titulo}**\n\n"
+                    f"### {case.titulo}\n\n"
+                    f"> **Área Troncal:** {troncal} • **Guía Oficial:** {case.guia_asociada}\n\n"
                     f"{case.enunciado}\n\n"
-                    f"**Pregunta Formativa:**\n{case.pregunta}"
+                    f"**Pregunta Formativa:**\n\n{case.pregunta}"
                 )
                 item = DiagnosticItemModel(
                     assessment_id=created_assessment.id,
@@ -180,10 +272,13 @@ class AssessmentService:
             created_post_test = uow.assessments.create_assessment(post_test)
 
             for iso_case in isomorphic_battery:
+                troncal = CASE_TRONCAL_MAP.get(iso_case.base_case_id, "Troncal Clínica")
+                guia = iso_case.guia_asociada or "Guía de Práctica Clínica MSP Ecuador"
                 prompt_text = (
-                    f"**{iso_case.titulo}**\n\n"
+                    f"### {iso_case.titulo} (Variante Isomórfica Post-Test)\n\n"
+                    f"> **Área Troncal:** {troncal} • **Guía Oficial:** {guia}\n\n"
                     f"{iso_case.enunciado}\n\n"
-                    f"**Pregunta Formativa:**\n{iso_case.pregunta}"
+                    f"**Pregunta Formativa:**\n\n{iso_case.pregunta}"
                 )
                 item = DiagnosticItemModel(
                     assessment_id=created_post_test.id,
@@ -330,34 +425,89 @@ class AssessmentService:
         omisiones: List[str] = []
         competencias: List[str] = []
 
-        # Análisis de fidelidad normativa con base en palabras clave diagnósticas/terapéuticas
+        # Análisis de fidelidad normativa con base en palabras clave diagnósticas/terapéuticas (10 patologías canónicas)
         norm_keywords = [
+            # Ginecología y Obstetricia
             ("sulfato de magnesio", 2.0, "Manejo farmacológico con Sulfato de Magnesio"),
             ("zuspan", 1.5, "Esquema normado Zuspan"),
-            ("codigo rojo", 2.0, "Activación de Código Rojo"),
-            ("oxitocina", 1.5, "Uso de uterotónicos normados"),
-            ("curb-65", 2.0, "Estratificación de CURB-65"),
-            ("ceftriaxona", 1.5, "Antibioticoterapia de primera línea"),
+            ("codigo rojo", 2.0, "Activación de Código Rojo Obstétrico"),
+            ("oxitocina", 1.5, "Uso de uterotónicos normados de primera línea"),
+            ("ameu", 2.0, "Evacuación uterina por AMEU según edad gestacional"),
+            ("anti-d", 1.5, "Profilaxis con Inmunoglobulina Anti-D en madre Rh-"),
+            # Pediatría y Neonatología
+            ("salbutamol", 2.0, "Broncodilatador de acción rápida (SABA)"),
+            ("corticoide", 1.5, "Corticoide sistémico en crisis asmática"),
+            ("curb-65", 2.0, "Estratificación objetiva de CURB-65"),
+            ("ceftriaxona", 1.5, "Antibioticoterapia parenteral normada"),
             ("hipotermia", 2.5, "Hipotermia terapéutica neonatal a 33.5°C"),
-            ("ameu", 2.0, "Evacuación uterina por AMEU según edad gestacional")
+            ("ampicilina", 1.5, "Ampicilina parenteral en sepsis neonatal"),
+            ("gentamicina", 1.5, "Gentamicina parenteral en sepsis neonatal"),
+            # Medicina Interna y Crónicos
+            ("insulina", 2.0, "Insulinoterapia en cetoacidosis diabética"),
+            ("cristaloides", 1.5, "Hidratación parenteral con solución salina / cristaloides"),
+            ("gluconato de calcio", 2.5, "Estabilizador de membrana miocárdica en hiperpotasemia"),
+            ("emergencia hipertensiva", 1.5, "Identificación de emergencia hipertensiva"),
+            # Infectología y Salud Pública
+            ("ringer lactato", 2.0, "Rehidratación vigorosa en Dengue con signos de alarma"),
+            ("rhze", 2.5, "Esquema antituberculoso de fase intensiva en DFC"),
+            ("tld", 2.0, "Esquema TARGA de primera línea Tenofovir/Lamivudina/Dolutegravir"),
+            ("cotrimoxazol", 1.5, "Profilaxis de infecciones oportunistas ante CD4 < 200")
         ]
 
         for kw, pts, label in norm_keywords:
             if kw in ans:
                 score += pts
 
-        # Penalizaciones por omisiones detectadas
-        if "sulfato" not in ans and ("preeclampsia" in item.prompt_text.lower() or "hipertens" in item.prompt_text.lower()):
-            omisiones.append("Omisión de neuroprotección con Sulfato de Magnesio según GPC MSP")
+        # Penalizaciones por omisiones diagnósticas o terapéuticas críticas
+        p_lower = item.prompt_text.lower()
+
+        if "sulfato" not in ans and ("preeclampsia" in p_lower or "criterios de severidad" in p_lower):
+            omisiones.append("Omisión de neuroprotección con Sulfato de Magnesio bajo esquema Zuspan según GPC MSP")
             competencias.append("plan_terapeutico_msp")
 
-        if "codigo rojo" not in ans and "hemorragia" in item.prompt_text.lower():
+        if "codigo rojo" not in ans and "hemorragia" in p_lower:
             omisiones.append("Demora en activación inmediata del protocolo de Código Rojo Obstétrico")
             competencias.append("plan_terapeutico_msp")
 
-        if "curb" not in ans and "neumonia" in item.prompt_text.lower():
+        if "anti-d" not in ans and "inmunoglobulina" not in ans and "aborto" in p_lower and "negativo" in p_lower:
+            omisiones.append("Omisión de profilaxis con Inmunoglobulina Anti-D en paciente Rh negativo")
+            competencias.append("plan_terapeutico_msp")
+
+        if "salbutamol" not in ans and "inhalad" not in ans and "asma" in p_lower:
+            omisiones.append("Omisión de broncodilatador de acción rápida (Salbutamol) en crisis asmática")
+            competencias.append("plan_terapeutico_msp")
+
+        if "ampicilina" not in ans and "gentamicina" not in ans and "sepsis" in p_lower:
+            omisiones.append("Omisión del esquema antimicrobiano sinérgico empírico (Ampicilina + Gentamicina)")
+            competencias.append("plan_terapeutico_msp")
+
+        if "hipotermia" not in ans and ("ehirn" in p_lower or "asfixia" in p_lower or "sarnat" in p_lower):
+            omisiones.append("Omisión de indicación oportuna de Hipotermia Terapéutica dentro de la ventana de 6 horas")
+            competencias.append("plan_terapeutico_msp")
+
+        if "curb" not in ans and "neumonia" in p_lower:
             omisiones.append("Omisión de estratificación objetiva de severidad mediante escala CURB-65")
             competencias.append("diagnostico_final")
+
+        if "insulina" not in ans and "cetoacidosis" in p_lower:
+            omisiones.append("Omisión de infusión de insulina cristalina continua en cetoacidosis diabética")
+            competencias.append("plan_terapeutico_msp")
+
+        if "gluconato" not in ans and ("hiperpotasemia" in p_lower or "potasio" in p_lower):
+            omisiones.append("Omisión de estabilizador de membrana cardiaca (Gluconato de Calcio) ante hiperpotasemia severa")
+            competencias.append("plan_terapeutico_msp")
+
+        if "ringer" not in ans and "salina" not in ans and "dengue" in p_lower:
+            omisiones.append("Omisión de reposición hídrica parenteral inmediata con cristaloides en Dengue con signos de alarma")
+            competencias.append("plan_terapeutico_msp")
+
+        if "rhze" not in ans and "tuberculosis" in p_lower:
+            omisiones.append("Omisión de prescripción normada de Fase Inicial en Dosis Fija Combinada (RHZE)")
+            competencias.append("plan_terapeutico_msp")
+
+        if "cotrimoxazol" not in ans and "tld" not in ans and "vih" in p_lower:
+            omisiones.append("Omisión de profilaxis con Cotrimoxazol ante CD4 < 200 e inicio normado de TLD")
+            competencias.append("plan_terapeutico_msp")
 
         final_score = min(10.0, max(0.0, round(score, 1)))
         return {

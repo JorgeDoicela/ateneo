@@ -105,8 +105,60 @@ def rebuild_chroma_fts5(chroma_db_dir: Path) -> bool:
         return False
 
 
+def download_file_http(url: str, dest_path: Path, desc: str = "") -> bool:
+    """Descarga un archivo con streaming y reporte de progreso sin dependencias externas."""
+    import urllib.request
+    import time
+
+    dest_path.parent.mkdir(parents=True, exist_ok=True)
+    temp_path = dest_path.with_suffix(dest_path.suffix + ".part")
+
+    req = urllib.request.Request(
+        url,
+        headers={"User-Agent": "Ateneo-MLOps/1.0 (Linux; x86_64)"}
+    )
+
+    try:
+        with urllib.request.urlopen(req) as resp, open(temp_path, "wb") as f_out:
+            total_size = int(resp.headers.get("Content-Length", 0))
+            downloaded = 0
+            chunk_size = 2 * 1024 * 1024  # 2 MB
+            start_time = time.time()
+            last_print = 0
+
+            while True:
+                chunk = resp.read(chunk_size)
+                if not chunk:
+                    break
+                f_out.write(chunk)
+                downloaded += len(chunk)
+
+                now = time.time()
+                if now - last_print >= 1.5 or (total_size > 0 and downloaded == total_size):
+                    last_print = now
+                    elapsed = now - start_time
+                    speed = (downloaded / (1024 * 1024)) / elapsed if elapsed > 0 else 0
+                    if total_size > 0:
+                        pct = (downloaded / total_size) * 100
+                        mb_done = downloaded / (1024 * 1024)
+                        mb_tot = total_size / (1024 * 1024)
+                        print(f"   [{desc}] {pct:.1f}% ({mb_done:.1f}/{mb_tot:.1f} MB) a {speed:.2f} MB/s", end="\r", flush=True)
+                    else:
+                        mb_done = downloaded / (1024 * 1024)
+                        print(f"   [{desc}] {mb_done:.1f} MB descargados a {speed:.2f} MB/s", end="\r", flush=True)
+            print()
+        temp_path.replace(dest_path)
+        return True
+    except Exception as e:
+        if temp_path.exists():
+            temp_path.unlink()
+        print(f"\n   [ERROR] Error descargando {url}: {e}")
+        return False
+
+
 def download_from_hf(repo_id: str, target_dir: Path, repo_type: str = "model") -> bool:
-    """Descarga automáticamente artefactos de Hugging Face Hub sin requerir descargas manuales."""
+    """Descarga automáticamente artefactos de Hugging Face Hub (usando huggingface_hub o HTTP directo)."""
+    target_dir.mkdir(parents=True, exist_ok=True)
     try:
         from huggingface_hub import snapshot_download
         print(f"-> Descargando {repo_id} ({repo_type}) desde Hugging Face Hub...")
@@ -116,14 +168,61 @@ def download_from_hf(repo_id: str, target_dir: Path, repo_type: str = "model") -
             local_dir=str(target_dir),
             local_dir_use_symlinks=False
         )
-        print(f"   [OK] Descarga de Hugging Face completada en {target_dir}")
+        print(f"   [OK] Descarga completada en {target_dir}")
         return True
     except ImportError:
-        print("   [ERROR] huggingface_hub no está instalado. Ejecute: pip install huggingface_hub")
-        return False
+        pass
+    except Exception as hf_err:
+        print(f"   [WARN] snapshot_download reportó: {hf_err}. Alternando a cliente HTTP nativo...")
+
+    print(f"-> Consultando API de Hugging Face para {repo_type}/{repo_id}...")
+    import urllib.request
+    api_type = "models" if repo_type == "model" else "datasets"
+    api_url = f"https://huggingface.co/api/{api_type}/{repo_id}"
+    req = urllib.request.Request(api_url, headers={"User-Agent": "Ateneo-MLOps/1.0"})
+    try:
+        with urllib.request.urlopen(req) as resp:
+            data = json.loads(resp.read().decode())
     except Exception as e:
-        print(f"   [ERROR] Falló la descarga de Hugging Face ({repo_id}): {e}")
+        print(f"   [ERROR] No se pudo consultar la API de Hugging Face ({repo_id}): {e}")
         return False
+
+    siblings = data.get("siblings", [])
+    if not siblings:
+        print(f"   [ERROR] No se encontraron archivos en el repositorio {repo_id}")
+        return False
+
+    url_prefix = f"https://huggingface.co/datasets/{repo_id}/resolve/main" if repo_type == "dataset" else f"https://huggingface.co/{repo_id}/resolve/main"
+
+    print(f"-> Descargando {len(siblings)} archivo(s) desde {repo_id} hacia {target_dir.name}...")
+    for s in siblings:
+        rfilename = s.get("rfilename")
+        if not rfilename or rfilename.startswith(".git"):
+            continue
+        dest_file = target_dir / rfilename
+        if dest_file.exists():
+            print(f"   [SKIP] {rfilename} ya existe localmente.")
+            continue
+        file_url = f"{url_prefix}/{rfilename}"
+        ok = download_file_http(file_url, dest_file, desc=rfilename)
+        if not ok:
+            return False
+    return True
+
+
+def extract_chroma_zip(zip_file: Path, backend_data_dir: Path, chroma_dir: Path) -> bool:
+    """Descomprime el zip de ChromaDB detectando automáticamente la raíz."""
+    print(f"\n-> Descomprimiendo {zip_file.name}...")
+    with zipfile.ZipFile(zip_file, "r") as z:
+        names = z.namelist()
+        has_folder_prefix = any(n.startswith("chroma_db_v2/") for n in names)
+        if has_folder_prefix:
+            z.extractall(path=backend_data_dir)
+        else:
+            chroma_dir.mkdir(parents=True, exist_ok=True)
+            z.extractall(path=chroma_dir)
+    print("   [OK] ChromaDB v2 descomprimido con éxito.")
+    return True
 
 
 def setup_artifacts(source_path: Path, hf_model: str = "", hf_chroma: str = "", force: bool = False) -> bool:
@@ -179,15 +278,14 @@ def setup_artifacts(source_path: Path, hf_model: str = "", hf_chroma: str = "", 
             found_zip = list(download_target.glob("*.zip"))
             if found_zip:
                 for zf in found_zip:
-                    print(f"\n-> Descomprimiendo {zf.name} descargado desde Hugging Face...")
-                    with zipfile.ZipFile(zf, "r") as z:
-                        z.extractall(path=BACKEND_DATA_DIR)
-                    print("   [OK] ChromaDB v2 descomprimido con éxito.")
-            else:
-                if (download_target / "chroma.sqlite3").exists():
-                    import shutil
-                    for item in download_target.iterdir():
-                        shutil.move(str(item), str(CHROMA_DIR / item.name))
+                    extract_chroma_zip(zf, BACKEND_DATA_DIR, CHROMA_DIR)
+            elif (download_target / "chroma.sqlite3").exists():
+                import shutil
+                for item in download_target.iterdir():
+                    shutil.move(str(item), str(CHROMA_DIR / item.name))
+            # Limpiar temporal
+            import shutil
+            shutil.rmtree(download_target, ignore_errors=True)
     else:
         zip_chroma = None
         if source_path.is_file() and "chroma" in source_path.name and source_path.name.endswith(".zip"):
@@ -199,10 +297,7 @@ def setup_artifacts(source_path: Path, hf_model: str = "", hf_chroma: str = "", 
                     break
 
         if zip_chroma and zip_chroma.exists():
-            print(f"\n-> Descomprimiendo base vectorial desde {zip_chroma.name}...")
-            with zipfile.ZipFile(zip_chroma, "r") as z:
-                z.extractall(path=BACKEND_DATA_DIR)
-            print("   [OK] ChromaDB v2 descomprimido con éxito.")
+            extract_chroma_zip(zip_chroma, BACKEND_DATA_DIR, CHROMA_DIR)
         elif (CHROMA_DIR / "chroma.sqlite3").exists():
             print("\n-> ChromaDB ya existe en backend/data/chroma_db_v2.")
         else:
@@ -219,7 +314,6 @@ def setup_artifacts(source_path: Path, hf_model: str = "", hf_chroma: str = "", 
 
     print("\n" + "=" * 70)
     print(" APROVISIONAMIENTO COMPLETADO EXITOSAMENTE")
-    print(" El proyecto está listo para ejecutar: docker compose up -d")
     print("=" * 70)
     return True
 

@@ -12,8 +12,12 @@ export interface SubmitAnswerPayload {
 export const assessmentApi = {
   /**
    * Inicia una sesión de Pre-Test diagnóstico seleccionando casos basales.
+   * Por defecto aplica la Batería Troncal CACES balanceada (4 troncales formativas).
    */
-  async startPreTest(specialtyScope: string = 'Multidisciplinar GPC', numCases: number = 3): Promise<DiagnosticAssessment> {
+  async startPreTest(
+    specialtyScope: string = 'Batería Troncal CACES (Multidisciplinar)',
+    numCases: number = 4
+  ): Promise<DiagnosticAssessment> {
     const res = await httpClient.post<DiagnosticAssessment>('/api/assessments/pre-test/start', {
       specialty_scope: specialtyScope,
       num_cases: numCases,
