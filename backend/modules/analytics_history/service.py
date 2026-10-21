@@ -312,12 +312,37 @@ class AnalyticsHistoryService:
             comps = h["competencias_deficientes"]
             if isinstance(comps, list):
                 for c in comps:
-                    eje = c.get("eje", "general").lower()
+                    if isinstance(c, dict):
+                        eje = str(c.get("eje") or c.get("competencia") or "general").lower()
+                    elif isinstance(c, str):
+                        eje = c.lower()
+                    else:
+                        eje = str(c).lower()
+
+                    matched = False
                     for k in eje_stats.keys():
                         if k in eje:
                             eje_stats[k]["penalizacion"] += 12
                             eje_stats[k]["brechas"] += 1
+                            matched = True
                             break
+
+                    if not matched:
+                        if "terapeutico" in eje or "plan" in eje:
+                            eje_stats["tratamiento"]["penalizacion"] += 12
+                            eje_stats["tratamiento"]["brechas"] += 1
+                        elif "anamnesis" in eje or "semiologia" in eje:
+                            eje_stats["diagnostico"]["penalizacion"] += 12
+                            eje_stats["diagnostico"]["brechas"] += 1
+                        elif "examenes" in eje or "complementarios" in eje:
+                            eje_stats["paraclinicos"]["penalizacion"] += 12
+                            eje_stats["paraclinicos"]["brechas"] += 1
+                        elif "prevencion" in eje:
+                            eje_stats["prevencion"]["penalizacion"] += 12
+                            eje_stats["prevencion"]["brechas"] += 1
+                        elif "seguimiento" in eje:
+                            eje_stats["seguimiento"]["penalizacion"] += 12
+                            eje_stats["seguimiento"]["brechas"] += 1
 
             for om in h["omisiones"]:
                 om_str = str(om).strip()
@@ -421,10 +446,17 @@ class AnalyticsHistoryService:
                 }
 
             for comp in competencias:
-                desc = comp.get("descripcion", "")
-                if desc:
+                if isinstance(comp, dict):
+                    desc = comp.get("descripcion", "")
+                    if desc:
+                        deficiencias_detalle[desc] = {
+                            "modulo": comp.get("eje", "general").capitalize(),
+                            "conteo": deficiencias_detalle.get(desc, {}).get("conteo", 0) + 1
+                        }
+                elif isinstance(comp, str) and comp.strip():
+                    desc = comp.strip()
                     deficiencias_detalle[desc] = {
-                        "modulo": comp.get("eje", "general").capitalize(),
+                        "modulo": "Clínico",
                         "conteo": deficiencias_detalle.get(desc, {}).get("conteo", 0) + 1
                     }
 

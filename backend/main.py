@@ -46,19 +46,11 @@ async def lifespan(app: FastAPI):
             # Ejecutar en thread pool para no bloquear el bucle de eventos asíncrono
             loop = asyncio.get_running_loop()
             def _load_sync():
-                from rag.retriever import get_embedding_model, get_bm25_index, retrieve_relevant_chunk
+                from rag.retriever import get_embedding_model, get_bm25_index
                 get_embedding_model()
                 get_bm25_index()
-                # Precalentar caché RAG para los casos clínicos precargados (0ms en primera evaluación)
-                try:
-                    from modules.cases.repository import CaseRepository
-                    repo = CaseRepository()
-                    for c in repo.get_all():
-                        retrieve_relevant_chunk(query=c.titulo[:120].strip(), guia_filtro=c.guia_asociada)
-                except Exception as warm_err:
-                    logger.warning(f"Aviso al precalentar caché RAG de casos: {warm_err}")
             await loop.run_in_executor(None, _load_sync)
-            logger.info("Precarga en segundo plano de embeddings, BM25 y caché RAG completada.", extra={"action": "preload_done"})
+            logger.info("Precarga en segundo plano de embeddings y BM25 completada.", extra={"action": "preload_done"})
         except Exception as e:
             logger.error(f"Error al precargar modelo de embeddings: {e}", extra={"action": "embedding_preload_error"})
 

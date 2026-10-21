@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Activity, ClipboardCheck, ArrowRight } from 'lucide-react';
 import ReasoningTrends from '../components/ReasoningTrends';
 import { PrescriptivePlanCard } from '../../study_plans/components/PrescriptivePlanCard';
@@ -69,6 +69,7 @@ const ASSESSMENT_SCOPES: AssessmentScopeOption[] = [
  */
 export default function StudentAnalyticsPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [activePlan, setActivePlan] = useState<PrescriptiveStudyPlan | null>(null);
   const [loadingPlan, setLoadingPlan] = useState(true);
@@ -183,6 +184,29 @@ export default function StudentAnalyticsPage() {
     }
   };
 
+  // Auto-apertura inmediata del Post-Test cuando se navega desde el banner con action=start_post_test
+  useEffect(() => {
+    const action = searchParams.get('action');
+    if (
+      action === 'start_post_test' &&
+      activePlan &&
+      activePlan.source_assessment_id &&
+      !isAssessmentModalOpen &&
+      !activeAssessment &&
+      !startingAssessment
+    ) {
+      handleStartPostTest(activePlan.source_assessment_id);
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.delete('action');
+          return next;
+        },
+        { replace: true }
+      );
+    }
+  }, [searchParams, activePlan, isAssessmentModalOpen, activeAssessment, startingAssessment, setSearchParams]);
+
   const handleAssessmentCompleted = (_report: AssessmentSummaryReport) => {
     // Recargar el plan prescriptivo tras finalizar la evaluación
     fetchActivePlan();
@@ -230,6 +254,7 @@ export default function StudentAnalyticsPage() {
             onReadGpc={handleReadGpc}
             onOpenDebrief={handleOpenDebrief}
             isCompletingTask={isCompletingTask}
+            isStartingAssessment={startingAssessment}
           />
         ) : (
           /* Banner para Iniciar Pre-Test Diagnóstico con Selector Institucional */

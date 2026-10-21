@@ -209,8 +209,8 @@ def get_embedding_model(model_name: str = EMBEDDING_MODEL_NAME) -> SentenceTrans
     if model_name not in _MODEL_CACHE:
         import torch
         import os
-        # Aprovechar todos los núcleos de CPU asignados al contenedor Docker para inferencia paralela
-        cpu_cores = os.cpu_count() or 4
+        # Limitar hilos PyTorch a 4 para balancear inferencia y responsividad del servidor web
+        cpu_cores = min(os.cpu_count() or 4, 4)
         torch.set_num_threads(cpu_cores)
         logger.info(f"Cargando modelo de embeddings ({model_name}) con {cpu_cores} hilos PyTorch...", extra={"action": "load_embedding_model_start", "model_name": model_name})
         _sanitize_model_metadata_if_needed(model_name)

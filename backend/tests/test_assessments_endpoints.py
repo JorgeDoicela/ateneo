@@ -141,6 +141,16 @@ def test_full_formative_cycle_pre_test_plan_post_test_and_hake_gain():
     assert hake_g > 0.0
     assert "Ganancia" in (post_report["hake_category"] or "")
 
+    # Validar que el Post-Test autogeneró el nuevo Plan de Consolidación y Maestría Clínica
+    post_plan_resp = client.get("/api/study-plans/me")
+    assert post_plan_resp.status_code == 200, post_plan_resp.text
+    post_plan = post_plan_resp.json()
+    assert post_plan is not None
+    assert post_plan["source_assessment_id"] == post_test_id
+    assert "Consolidación" in post_plan["title"] or "Maestría" in post_plan["title"]
+    assert post_plan["status"] == "active"
+    assert len(post_plan["tasks"]) >= 3
+
     # 7. Consultar Historial Longitudinal
     history_resp = client.get("/api/assessments/history/me")
     assert history_resp.status_code == 200

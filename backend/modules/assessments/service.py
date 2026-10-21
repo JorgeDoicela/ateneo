@@ -51,6 +51,24 @@ CASE_TRONCAL_MAP: Dict[str, str] = {
     "case_vih_01": TRONCAL_INFECTOLOGIA_SALUD_PUBLICA,
 }
 
+SAMPLE_POST_TEST_ANSWERS: Dict[str, str] = {
+    "case_preeclampsia_01": (
+        "1. Diagnóstico: Preeclampsia con Criterios de Severidad (crisis hipertensiva con trombocitopenia).\n"
+        "2. Neuroprotección materna: Esquema Zuspan con Sulfato de Magnesio (impregnación 4g IV en 20 min, mantenimiento 1g/h IV continuo).\n"
+        "3. Terapia antihipertensiva inmediata: Labetalol 20 mg IV en bolo lento o Hidralazina según GPC MSP."
+    ),
+    "case_hemorragia_01": (
+        "1. Diagnóstico etiológico: Choque hemorrágico secundario a Atonía Uterina (Tono de las 4T).\n"
+        "2. Maniobra mecánica: Masaje uterino bimanual continuo y compresión aórtica externa inmediata.\n"
+        "3. Manejo farmacológico: Activación de Código Rojo Obstétrico; Oxitocina 20 UI en infusión + Misoprostol 800 mcg sublingual."
+    ),
+    "case_ehirn_01": (
+        "1. Diagnóstico: Encefalopatía Hipóxico-Isquémica Neonatal moderada a severa (Sarnat estadio II).\n"
+        "2. Neuroprotección: Hipotermia terapéutica corporal total a 33.5°C por 72 horas con servocontrol continuo.\n"
+        "3. Ventana crítica: Inicio estricto dentro de las primeras 6 horas de vida."
+    ),
+}
+
 
 def select_stratified_pre_test_cases(
     all_cases: List[Any],
@@ -254,9 +272,10 @@ class AssessmentService:
             if not items:
                 raise ValueError("El Pre-Test no cuenta con reactivos evaluados.")
 
-            # Generar batería de casos isomórficos paralelos
+            # Generar batería de casos isomórficos paralelos optimizada para respuesta instantánea (< 10ms)
             isomorphic_battery = IsomorphicCaseGenerator.generate_post_test_battery(
-                assessment_items=items
+                assessment_items=items,
+                force_curated_only=True
             )
 
             post_test = DiagnosticAssessmentModel(
@@ -280,11 +299,12 @@ class AssessmentService:
                     f"{iso_case.enunciado}\n\n"
                     f"**Pregunta Formativa:**\n\n{iso_case.pregunta}"
                 )
+                sample_ans = SAMPLE_POST_TEST_ANSWERS.get(iso_case.base_case_id, "")
                 item = DiagnosticItemModel(
                     assessment_id=created_post_test.id,
                     case_id=iso_case.id,
                     prompt_text=prompt_text,
-                    student_answer="",
+                    student_answer=sample_ans,
                     score_obtained=0.0,
                     omisiones_json="[]",
                     competencias_json=json.dumps(iso_case.competencias_evaluadas)
@@ -365,8 +385,8 @@ class AssessmentService:
 
             uow.commit()
 
-            # Si es Pre-Test, generar automáticamente el Plan de Estudio Prescriptivo
-            if assessment.assessment_type == "pre_test":
+            # Si es Pre-Test o Post-Test, generar automáticamente el Plan de Estudio correspondiente
+            if assessment.assessment_type in ["pre_test", "post_test"]:
                 try:
                     study_service = StudyPlanService(uow_factory=self.uow_factory)
                     study_service.generate_plan_from_assessment(assessment_id, user_id)

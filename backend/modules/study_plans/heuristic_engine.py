@@ -155,14 +155,16 @@ class StudyPlanHeuristicEngine:
     def synthesize_prescriptive_plan(
         cls,
         assessment_items: List[Dict[str, Any]],
-        knowledge_state: Dict[str, float]
+        knowledge_state: Dict[str, float],
+        assessment_type: str = "pre_test",
+        hake_gain_g: Optional[float] = None
     ) -> Dict[str, Any]:
         """
         Sintetiza un plan prescriptivo personalizado:
         1. Identifica y pondera las brechas clínicas ($W_i = \text{severidad} \times (1.05 - P(L_k))$).
         2. Selecciona la evidencia GPC específica para lectura guiada.
         3. Identifica casos recomendados en la Zona de Desarrollo Próximo (ZDP).
-        4. Genera tareas secuenciales y dosificadas.
+        4. Genera tareas secuenciales y dosificadas (nivelación para Pre-Test o maestría/consolidación para Post-Test).
         """
         scored_gaps: List[Dict[str, Any]] = []
 
@@ -214,13 +216,121 @@ class StudyPlanHeuristicEngine:
         zdp_competencies = detect_zone_of_proximal_development(knowledge_state)
         all_cases = load_all_cases()
 
-        # Construir tareas formativas atómicas dosificadas
         tasks_payload: List[Dict[str, Any]] = []
         used_cases = set()
 
-        # 1. Tareas de lectura de GPC para las 2 principales brechas críticas
+        if assessment_type == "post_test":
+            # Ruta de Consolidación y Maestría Clínica (Post-Test)
+            top_gaps = scored_gaps[:2] if scored_gaps else []
+            if top_gaps:
+                for gap in top_gaps:
+                    tasks_payload.append({
+                        "task_type": "gpc_reading",
+                        "title": f"Lectura de Maestría GPC: {gap['gpc_resource']['guia']}",
+                        "description": f"Estudio avanzado en {gap['gpc_resource']['seccion_clave']} para perfeccionar la brecha residual: '{gap['omision']}'.",
+                        "resource_reference": gap["gpc_resource"]["guia"],
+                        "competency_id": gap["competency_id"],
+                        "estimated_minutes": gap["gpc_resource"]["tiempo_lectura"],
+                        "is_completed": False
+                    })
+            else:
+                tasks_payload.append({
+                    "task_type": "gpc_reading",
+                    "title": "Lectura Normativa Avanzada: Protocolos Críticos MSP Ecuador",
+                    "description": "Estudio de directrices avanzadas y algoritmo de manejo en situaciones de emergencia médica y quirúrgica.",
+                    "resource_reference": "GPC Trastornos Hipertensivos del Embarazo (MSP Ecuador)",
+                    "competency_id": "plan_terapeutico_msp",
+                    "estimated_minutes": 15,
+                    "is_completed": False
+                })
+
+            target_comps = set(g["competency_id"] for g in top_gaps) or set(zdp_competencies) or {"plan_terapeutico_msp"}
+            for case in all_cases:
+                case_comps = CASE_COMPETENCY_MAP.get(case.id, [])
+                if any(tc in case_comps for tc in target_comps) and case.id not in used_cases:
+                    tasks_payload.append({
+                        "task_type": "case_simulation",
+                        "title": f"Simulación de Maestría: {case.titulo}",
+                        "description": f"Resolución autónoma de caso clínico ({case.guia_asociada}) para afianzar toma de decisiones en internado rotativo.",
+                        "resource_reference": case.id,
+                        "competency_id": list(target_comps)[0] if target_comps else "plan_terapeutico_msp",
+                        "estimated_minutes": 20,
+                        "is_completed": False
+                    })
+                    used_cases.add(case.id)
+                    if len(tasks_payload) >= 3:
+                        break
+
+            # Asegurar al menos 2 simulaciones clínicas en el plan de maestría
+            if len([t for t in tasks_payload if t["task_type"] == "case_simulation"]) < 2:
+                for case in all_cases:
+                    if case.id not in used_cases:
+                        tasks_payload.append({
+                            "task_type": "case_simulation",
+                            "title": f"Simulación de Maestría: {case.titulo}",
+                            "description": f"Resolución autónoma de caso clínico ({case.guia_asociada}) para consolidar autonomía clínica.",
+                            "resource_reference": case.id,
+                            "competency_id": "diagnostico_final",
+                            "estimated_minutes": 20,
+                            "is_completed": False
+                        })
+                        used_cases.add(case.id)
+                        if len(tasks_payload) >= 3:
+                            break
+
+            # Debriefing socrático de auditoría y maestría
+            if scored_gaps:
+                primary_gap = scored_gaps[0]
+                tasks_payload.append({
+                    "task_type": "socratic_review",
+                    "title": "Auditoría Clínica de Maestría: Justificación de Decisión Normada",
+                    "description": f"Debriefing socrático interactivo sobre: '{primary_gap['omision']}' para asegurar criterio normativo independiente.",
+                    "resource_reference": primary_gap.get("case_id") or "case_preeclampsia_01",
+                    "competency_id": primary_gap["competency_id"],
+                    "estimated_minutes": 10,
+                    "is_completed": False
+                })
+            else:
+                tasks_payload.append({
+                    "task_type": "socratic_review",
+                    "title": "Auditoría y Liderazgo Clínico: Análisis Socrático de Casos Críticos",
+                    "description": "Evaluación reflexiva sobre toma de decisiones de emergencia, manejo de recursos y priorización clínica según normativa MSP.",
+                    "resource_reference": "case_preeclampsia_01",
+                    "competency_id": "diagnostico_final",
+                    "estimated_minutes": 10,
+                    "is_completed": False
+                })
+
+            if hake_gain_g is not None:
+                plan_title = f"Plan de Consolidación y Maestría Clínica (Post-Test - Ganancia de Hake: {hake_gain_g:.2f})"
+            else:
+                plan_title = "Plan de Consolidación y Maestría Clínica (Post-Test GPC MSP)"
+
+            if scored_gaps:
+                hake_txt = f" con Ganancia de Hake g={hake_gain_g:.2f}" if hake_gain_g is not None else ""
+                diagnosis_summary = (
+                    f"Evaluación final completada{hake_txt}. Se identificaron {len(scored_gaps)} brechas clínicas residuales. "
+                    f"Prioridad formativa de consolidación en: {', '.join(set(g['competency_name'] for g in scored_gaps[:2]))}. "
+                    f"Ruta prescriptiva dosificada para afianzar la autonomía y el juicio diagnóstico previo al internado rotativo."
+                )
+            else:
+                hake_txt = f" (Ganancia de Hake g={hake_gain_g:.2f} - Alto Rendimiento)" if hake_gain_g is not None else ""
+                diagnosis_summary = (
+                    f"Evaluación final completada con dominio clínico sobresaliente{hake_txt}. "
+                    "No se identificaron omisiones normativas críticas. Plan de maestría clínica orientado a casos de alta complejidad y liderazgo asistencial."
+                )
+
+            return {
+                "title": plan_title,
+                "diagnosis_summary": diagnosis_summary,
+                "target_duration_days": 7,
+                "scored_gaps": scored_gaps,
+                "tasks": tasks_payload
+            }
+
+        # Ruta estándar de Nivelación Basal (Pre-Test)
         top_gaps = scored_gaps[:2] if scored_gaps else []
-        for idx, gap in enumerate(top_gaps, 1):
+        for gap in top_gaps:
             tasks_payload.append({
                 "task_type": "gpc_reading",
                 "title": f"Lectura Normativa GPC: {gap['gpc_resource']['guia']}",
@@ -231,8 +341,18 @@ class StudyPlanHeuristicEngine:
                 "is_completed": False
             })
 
-        # 2. Tareas de simulación clínica en ZDP alineadas con las competencias deficitarias
-        target_comps = set(g["competency_id"] for g in top_gaps) or set(zdp_competencies)
+        if not top_gaps:
+            tasks_payload.append({
+                "task_type": "gpc_reading",
+                "title": "Lectura Normativa GPC: Marco Troncal MSP Ecuador",
+                "description": "Estudio general de guías normativas para consolidación de competencias clínicas.",
+                "resource_reference": "Guías de Práctica Clínica Oficiales (MSP Ecuador)",
+                "competency_id": "plan_terapeutico_msp",
+                "estimated_minutes": 15,
+                "is_completed": False
+            })
+
+        target_comps = set(g["competency_id"] for g in top_gaps) or set(zdp_competencies) or {"plan_terapeutico_msp"}
 
         for case in all_cases:
             case_comps = CASE_COMPETENCY_MAP.get(case.id, [])
@@ -250,7 +370,22 @@ class StudyPlanHeuristicEngine:
                 if len(tasks_payload) >= 4:
                     break
 
-        # 3. Tarea de consolidación y debriefing socrático
+        if len([t for t in tasks_payload if t["task_type"] == "case_simulation"]) < 2:
+            for case in all_cases:
+                if case.id not in used_cases:
+                    tasks_payload.append({
+                        "task_type": "case_simulation",
+                        "title": f"Simulación Práctica: {case.titulo}",
+                        "description": f"Resolución de caso clínico ({case.guia_asociada}) enfocado en adherencia a la GPC.",
+                        "resource_reference": case.id,
+                        "competency_id": "diagnostico_final",
+                        "estimated_minutes": 20,
+                        "is_completed": False
+                    })
+                    used_cases.add(case.id)
+                    if len(tasks_payload) >= 4:
+                        break
+
         if scored_gaps:
             primary_gap = scored_gaps[0]
             tasks_payload.append({
@@ -262,8 +397,17 @@ class StudyPlanHeuristicEngine:
                 "estimated_minutes": 10,
                 "is_completed": False
             })
+        else:
+            tasks_payload.append({
+                "task_type": "socratic_review",
+                "title": "Debriefing Socrático: Razonamiento y Justificación de Decisión",
+                "description": "Interrogación socrática interactiva para afianzar el criterio normativo y la autonomía diagnóstica.",
+                "resource_reference": "case_preeclampsia_01",
+                "competency_id": "diagnostico_final",
+                "estimated_minutes": 10,
+                "is_completed": False
+            })
 
-        # Título y resumen diagnóstico
         critical_count = sum(1 for g in scored_gaps if g["severidad_peso"] >= 3.0)
         plan_title = (
             f"Plan de Refuerzo Clínico Prioritario ({len(tasks_payload)} tareas dosificadas)"

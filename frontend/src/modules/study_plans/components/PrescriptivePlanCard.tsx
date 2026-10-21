@@ -10,6 +10,7 @@ interface PrescriptivePlanCardProps {
   onReadGpc?: (task: StudyPlanTask) => void;
   onOpenDebrief?: (task: StudyPlanTask) => void;
   isCompletingTask?: boolean;
+  isStartingAssessment?: boolean;
 }
 
 export const PrescriptivePlanCard: React.FC<PrescriptivePlanCardProps> = ({
@@ -20,6 +21,7 @@ export const PrescriptivePlanCard: React.FC<PrescriptivePlanCardProps> = ({
   onReadGpc,
   onOpenDebrief,
   isCompletingTask = false,
+  isStartingAssessment = false,
 }) => {
   const getTaskIcon = (type: string) => {
     switch (type) {
@@ -49,14 +51,17 @@ export const PrescriptivePlanCard: React.FC<PrescriptivePlanCardProps> = ({
 
   const completedTasksCount = plan.tasks.filter((t) => t.is_completed).length;
   const isPlanFinished = plan.progress_percentage >= 100 || plan.status === 'completed';
+  const isMasteryPlan = plan.title.toLowerCase().includes('post-test') ||
+                        plan.title.toLowerCase().includes('maestría') ||
+                        plan.title.toLowerCase().includes('consolidación');
 
   return (
     <div className="bg-white rounded-[28px] p-6 shadow-sm space-y-6">
       {/* Cabecera del Plan */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
-            Plan de Estudio Prescriptivo
+          <span className={`text-xs font-semibold uppercase tracking-wider ${isMasteryPlan ? 'text-indigo-600' : 'text-blue-600'}`}>
+            {isMasteryPlan ? 'Plan de Maestría y Consolidación Clínica' : 'Plan de Estudio Prescriptivo'}
           </span>
           <h3 className="text-lg sm:text-xl font-bold text-slate-900 mt-0.5">
             {plan.title}
@@ -223,8 +228,8 @@ export const PrescriptivePlanCard: React.FC<PrescriptivePlanCardProps> = ({
         </div>
       </div>
 
-      {/* Botón de Post-Test Isomórfico */}
-      {plan.source_assessment_id && onStartPostTest && (
+      {/* Acción final del plan */}
+      {!isMasteryPlan && plan.source_assessment_id && onStartPostTest && (
         <div className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <p className="text-xs text-slate-500">
             {isPlanFinished
@@ -234,11 +239,28 @@ export const PrescriptivePlanCard: React.FC<PrescriptivePlanCardProps> = ({
           <button
             type="button"
             onClick={() => onStartPostTest(plan.source_assessment_id!)}
-            className="w-full sm:w-auto px-5 py-2.5 rounded-full text-xs font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-xs transition-all shrink-0 flex items-center justify-center gap-2"
+            disabled={isStartingAssessment}
+            className="w-full sm:w-auto px-5 py-2.5 rounded-full text-xs font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed shadow-xs transition-all shrink-0 flex items-center justify-center gap-2 cursor-pointer"
           >
-            <span>Iniciar Post-Test Isomórfico</span>
+            <span>{isStartingAssessment ? 'Cargando Post-Test...' : 'Iniciar Post-Test Isomórfico'}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
+        </div>
+      )}
+
+      {isMasteryPlan && (
+        <div className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <p className="text-xs text-slate-500">
+            {isPlanFinished
+              ? 'Has completado todas las actividades avanzadas de maestría clínica. Tu preparación frente a las GPC del MSP está consolidada.'
+              : 'Completa tus actividades formativas avanzadas para afianzar el liderazgo diagnóstico y la autonomía en guardia.'}
+          </p>
+          {isPlanFinished && (
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 shrink-0">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <span>Maestría Clínica Consolidada</span>
+            </span>
+          )}
         </div>
       )}
     </div>

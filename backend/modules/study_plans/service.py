@@ -62,7 +62,9 @@ class StudyPlanService:
             # Ejecutar síntesis determinística del plan
             plan_data = StudyPlanHeuristicEngine.synthesize_prescriptive_plan(
                 assessment_items=items_payload,
-                knowledge_state=mastery_state
+                knowledge_state=mastery_state,
+                assessment_type=assessment.assessment_type or "pre_test",
+                hake_gain_g=assessment.hake_gain_g
             )
 
             # Archivar cualquier plan activo previo del estudiante

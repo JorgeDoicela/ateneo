@@ -19,11 +19,48 @@ export const AssessmentRunnerModal: React.FC<AssessmentRunnerModalProps> = ({
   assessment,
   onAssessmentCompleted,
 }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, string>>({});
+  const items = assessment?.items || [];
+  const isPostTest = assessment?.assessment_type === 'post_test';
+
+  // Pre-cargar respuestas previas o respuestas de demostración clínica
+  const [answers, setAnswers] = useState<Record<number, string>>(() => {
+    const initial: Record<number, string> = {};
+    items.forEach((it) => {
+      if (it.id && it.student_answer) {
+        initial[it.id] = it.student_answer;
+      }
+    });
+    return initial;
+  });
+
+  // Posicionar directamente en el reactivo pendiente (ej. Reactivo 4 en blanco para demostración en vivo)
+  const [currentIndex, setCurrentIndex] = useState<number>(() => {
+    if (!items.length) return 0;
+    const firstUnanswered = items.findIndex((it) => !(it.student_answer || '').trim());
+    return firstUnanswered !== -1 ? firstUnanswered : Math.max(0, items.length - 1);
+  });
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [report, setReport] = useState<AssessmentSummaryReport | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (assessment?.items) {
+      setAnswers((prev) => {
+        const next = { ...prev };
+        let hasChanges = false;
+        assessment.items.forEach((it) => {
+          if (it.id && it.student_answer && !next[it.id]) {
+            next[it.id] = it.student_answer;
+            hasChanges = true;
+          }
+        });
+        return hasChanges ? next : prev;
+      });
+      const firstUnanswered = assessment.items.findIndex((it) => !(it.student_answer || '').trim());
+      setCurrentIndex(firstUnanswered !== -1 ? firstUnanswered : Math.max(0, assessment.items.length - 1));
+    }
+  }, [assessment]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -39,10 +76,8 @@ export const AssessmentRunnerModal: React.FC<AssessmentRunnerModalProps> = ({
 
   if (!isOpen) return null;
 
-  const items = assessment.items || [];
   const currentItem = items[currentIndex];
   const isLast = currentIndex === items.length - 1;
-  const isPostTest = assessment.assessment_type === 'post_test';
 
   const handleAnswerChange = (val: string) => {
     if (!currentItem?.id) return;

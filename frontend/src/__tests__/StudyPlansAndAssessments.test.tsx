@@ -164,6 +164,21 @@ describe('Componente PrescriptivePlanCard (Plan de Estudio Heurístico)', () => 
     fireEvent.click(postTestBtn);
     expect(handleStartPostTest).toHaveBeenCalledWith('eval_pre_999');
   });
+
+  it('renderiza cabecera de maestría y oculta botón de post-test para planes de consolidación post-test', () => {
+    const postPlan: PrescriptiveStudyPlan = {
+      ...mockPlan,
+      title: 'Plan de Consolidación y Maestría Clínica (Post-Test - Ganancia de Hake: 0.85)',
+      source_assessment_id: 'eval_post_888',
+      progress_percentage: 100,
+      status: 'completed',
+    };
+
+    render(<PrescriptivePlanCard plan={postPlan} onStartPostTest={vi.fn()} />);
+    expect(screen.getByText('Plan de Maestría y Consolidación Clínica')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Iniciar Post-Test Isomórfico/i })).toBeNull();
+    expect(screen.getByText(/Maestría Clínica Consolidada/i)).toBeInTheDocument();
+  });
 });
 
 describe('Servicios de Red API (assessmentApi y studyPlanApi)', () => {
@@ -340,6 +355,31 @@ describe('Componente DiagnosticPreTestBanner (Integración en Catálogo de Inici
     expect(screen.getByText(/50%/i)).toBeInTheDocument();
     expect(screen.getByText(/1 de 2 actividades formativas/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Continuar Plan de Estudio/i })).toBeInTheDocument();
+  });
+
+  it('renderiza banner de maestría clínica post-test con su botón distintivo', async () => {
+    const postPlan = {
+      id: 'plan_mastery_001',
+      title: 'Plan de Consolidación y Maestría Clínica (Post-Test - Ganancia de Hake: 0.80)',
+      progress_percentage: 60,
+      status: 'active',
+      tasks: [
+        { id: 1, title: 'Lectura de Maestría', is_completed: true },
+        { id: 2, title: 'Simulación de Maestría', is_completed: false },
+      ],
+    };
+
+    vi.mocked(httpClient.get).mockImplementation((url: string) => {
+      if (url === '/api/study-plans/me') return Promise.resolve({ data: postPlan, status: 200, ok: true } as any);
+      if (url === '/api/assessments/history/me') return Promise.resolve({ data: [], status: 200, ok: true } as any);
+      return Promise.resolve({ data: null, status: 200, ok: true } as any);
+    });
+
+    renderWithProviders(<DiagnosticPreTestBanner />);
+
+    expect(await screen.findByText(/Plan de Maestría y Consolidación Clínica \(Post-Test\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Progreso de Consolidación/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Continuar Plan de Maestría/i })).toBeInTheDocument();
   });
 });
 
