@@ -633,7 +633,9 @@ def main():
     add_body_paragraph(
         doc,
         "La interfaz divide el espacio de trabajo en dos paneles equilibrados: a la izquierda, la viñeta clínica estructurada, constantes vitales "
-        "y estudios paraclínicos; a la derecha, el lienzo de argumentación SOAP (Subjetivo, Objetivo, Análisis, Plan). "
+        "y estudios paraclínicos multimodales; a la derecha, el lienzo de argumentación clínica estructurado en los cuatro ejes formativos normativos "
+        "del Ministerio de Salud Pública del Ecuador: (1) Diagnóstico y Estratificación de Severidad, (2) Plan Terapéutico y Farmacología Normada, "
+        "(3) Prevención y Control de Factores de Riesgo, y (4) Criterios de Seguimiento, Alarma y Referencia a Tercer Nivel. "
         "Integra el módulo ClinicalVoiceRecorder con la Web Speech API nativa calibrada a 'es-EC', permitiendo dictar juicios clínicos "
         "con una precisión de transcripción fluida y sin consumo de tokens de audio en el LLM."
     )
@@ -785,6 +787,58 @@ def main():
         "obtener evidencia científica verificable sobre el impacto pedagógico de la plataforma. La ganancia de Hake cuantifica objetivamente "
         "cómo el estudio prescriptivo guiado por las GPC de Ecuador transforma brechas clínicas basales en competencia diagnóstica consolidada.",
         title="EVIDENCIA CIENTÍFICA DEL APRENDIZAJE FORMATIVO / GANANCIA DE HAKE"
+    )
+
+    add_heading_2(doc, "9.7 Subsistema de Carrera Formativa Médica y Gamificación Académica")
+    add_body_paragraph(
+        doc,
+        "En simuladores médicos de alta fidelidad, la motivación del estudiante no debe fundamentarse en mecánicas arcade "
+        "infantiles o recompensas vacías (monedas o vidas), sino en el reconocimiento del rigor formativo, la consistencia clínica "
+        "y la adhesión estricta a las Guías de Práctica Clínica del MSP. Ateneo+ introduce un modelo formal de Gamificación Académica "
+        "basado en Puntos de Experiencia Clínica (XP) y una escala canónica de 5 rangos de carrera médica:",
+        bold_prefix="Filosofía Formativa y Mérito Clínico: "
+    )
+    add_bullet_item(doc, "Nivel 1: Estudiante Clínico Inicial (0 – 299 XP) — Fase de inducción y familiarización con las normativas GPC.", bold_prefix="1. Rango Inicial: ")
+    add_bullet_item(doc, "Nivel 2: Externo de Medicina (300 – 699 XP) — Dominio de triaje sindrómico y correlación paraclínica básica.", bold_prefix="2. Rango Externo: ")
+    add_bullet_item(doc, "Nivel 3: Interno Rotativo (700 – 1,299 XP) — Habilidad consolidada en resolución secuencial de fases y urgencias.", bold_prefix="3. Rango Interno: ")
+    add_bullet_item(doc, "Nivel 4: Médico General Novel (1,300 – 2,099 XP) — Alta precisión diagnóstica y dosificación farmacológica conforme al CNMB.", bold_prefix="4. Rango Médico Novel: ")
+    add_bullet_item(doc, "Nivel 5: Residente Clínico de Honor (2,100+ XP) — Maestría integral multidisciplinar y excelencia socrática.", bold_prefix="5. Rango Residente de Honor: ")
+    
+    add_body_paragraph(
+        doc,
+        "El motor de gamificación opera con un catálogo de 8 hitos clínicos normativos sembrados de forma idempotente en la base relacional, "
+        "evaluados transaccionalmente al cierre de cada simulación clínica dentro del mismo bloque SqlAlchemyUnitOfWork:",
+        bold_prefix="Catálogo de 8 Hitos Clínicos Normativos: "
+    )
+    
+    hitos_headers = ["Identificador", "Hito Clínico Normativo", "Criterio Clínico de Desbloqueo", "Categoría Pedagógica", "Recompensa"]
+    hitos_rows = [
+        ["iniciacion_clinica", "Iniciación Clínica", "Primera simulación diagnóstica completada con éxito", "Exploración", "+50 XP"],
+        ["apego_gpc_excelente", "Apego Normativo de Excelencia", "Calificación clínica final >= 9.0/10 en un caso GPC", "Rigor Normativo", "+100 XP"],
+        ["maestria_secuencial", "Maestría en Fases Clínicas", "Superación exitosa de las 3 fases secuenciales sin omisiones", "Razonamiento", "+75 XP"],
+        ["resolucion_multidisciplinar", "Resolución Multidisciplinar", "Casos resueltos en >= 3 especialidades troncales distintas", "Polivalencia", "+120 XP"],
+        ["pensamiento_socratico", "Juicio Clínico Socrático", "Participación activa y fundamentada en debriefing socrático", "Reflexión Crítica", "+60 XP"],
+        ["eficiencia_urgencias", "Eficiencia en Urgencias", "Resolución acertada (>= 8.5) emitida en tiempo <= 5 minutos", "Toma de Decisiones", "+90 XP"],
+        ["constancia_formativa", "Constancia Formativa", "Acumulación de 5 casos clínicos normativos resueltos", "Perseverancia", "+150 XP"],
+        ["manejo_emergencias", "Manejo de Emergencias Críticas", "Caso clasificado como Código Rojo superado con nota >= 8.0", "Soporte Vital", "+110 XP"]
+    ]
+    add_institutional_table(doc, hitos_headers, hitos_rows, col_alignments=["center", "left", "left", "center", "center"], col_widths=[1.3, 1.6, 2.1, 1.1, 0.7])
+    
+    add_body_paragraph(
+        doc,
+        "En la arquitectura de frontend, este subsistema se presenta mediante el botón institucional CareerBadgeButton en la barra de navegación, "
+        "el cual despliega el modal ClinicalCareerModal desacoplado mediante createPortal(..., document.body). "
+        "El diálogo presenta un mini-stepper horizontal de los 5 rangos de carrera médica con barra de progreso de XP, "
+        "seguido de un sendero vertical continuo (Journey Pathway) donde cada hito normativo actúa como una estación graduada con iconos "
+        "planos de Lucide, insignias cromáticas de estado y fecha de acreditación, erradicando cualquier distracción decorativa o lenguaje comercial.",
+        bold_prefix="Arquitectura de Interfaz y Sendero Formativo: "
+    )
+    add_callout_box(
+        doc,
+        "La gamificación académica de Ateneo+ alinea la psicología del aprendizaje del interno rotativo con la salud pública: "
+        "el estudiante no busca acumular puntos arbitrarios, sino ascender en su jerarquía clínica mediante el apego estricto "
+        "a las Guías de Práctica Clínica y el dominio de protocolos de emergencia materno-infantil y patologías prevalentes.",
+        title="MÉRITO CLÍNICO Y GAMIFICACIÓN ACADÉMICA NORMATIVA"
     )
 
     # =========================================================================
@@ -994,20 +1048,20 @@ def main():
     )
     
     casos = [
-        ["case_preeclampsia_01", "Preeclampsia con Criterios de Severidad", "O14.1", "GPC Trastornos Hipertensivos del Embarazo MSP", "Esquema Zuspan (Sulfato de Magnesio) y manejo de crisis tensional con Nifedipino."],
-        ["case_hemorragia_01", "Hemorragia Posparto Inmediata (Código Rojo)", "O72.1", "GPC Prevención y Manejo de la Hemorragia Postparto MSP", "Atonía uterina (Regla 4T), masaje bimanual y balón de compresión uterina."],
-        ["case_tb_01", "Tuberculosis Pulmonar Sensible", "A15.0", "GPC Tuberculosis (2da Edición) MSP", "Captación de sintomático respiratorio, GeneXpert MTB/RIF y esquema TAES 2HRZE/4HR."],
-        ["case_vih_01", "Diagnóstico de Infección por VIH y TARV", "B20", "Acuerdo Ministerial y Guía VIH/SIDA MSP", "Estadificación clínica OMS, profilaxis con Cotrimoxazol e inicio de TLD."],
-        ["case_hta_01", "Hipertensión Arterial Primaria Grado 2", "I10", "GPC Hipertensión Arterial MSP (Acuerdo 00019)", "Estratificación de riesgo cardiovascular, HVI en ECG y terapia combinada dual."],
-        ["case_erc_01", "Enfermedad Renal Crónica en DM2 / HTA", "N18.3", "GPC Enfermedad Renal Crónica MSP", "Estadificación KDIGO G3bA2, nefroprotección y ajuste de dosis por aclaramiento."],
-        ["case_ehirn_01", "Encefalopatía Hipóxico-Isquémica Neonatal", "P91.6", "GPC EHI-RN MSP", "Criterios gasométricos de asfixia, Escala de Sarnat II e Hipotermia Terapéutica."],
-        ["case_nac_01", "Neumonía Adquirida en la Comunidad Grave", "J18.9", "GPC Neumonía en Pediatría MSP", "Tiraje subcostal en preescolar, condensación Rx y Ampicilina parenteral a dosis alta."],
-        ["case_sepsis_neonatal_01", "Sepsis Neonatal Temprana por RPM", "P36.9", "GPC Sepsis Neonatal MSP", "Factores perinatales, índice I/T > 0.2 y combinación Ampicilina + Gentamicina."],
-        ["case_aborto_01", "Aborto Incompleto no Complicado", "O03.4", "GPC Aborto Terapéutico y Espontáneo MSP", "Manejo farmacológico con Misoprostol vs AMEU y profilaxis con inmunoglobulina Anti-D."]
+        ["case_preeclampsia_01", "Preeclampsia con Criterios de Severidad", "O14.1", "GPC Trastornos Hipertensivos del Embarazo MSP", "Esquema Zuspan (Sulfato de Magnesio) y crisis tensional con Nifedipino.", "Panel laboratorial: proteinuria en tirilla/24h, plaquetas (88.000/uL), transaminasas (TGO/TGP) y frotis."],
+        ["case_hemorragia_01", "Hemorragia Posparto Inmediata (Código Rojo)", "O72.1", "GPC Prevención y Manejo de la Hemorragia Postparto MSP", "Atonía uterina (Regla 4T), masaje bimanual y balón de compresión.", "Laboratorio de urgencia: hematocrito, hemoglobina, tipificación y pruebas cruzadas."],
+        ["case_tb_01", "Tuberculosis Pulmonar Sensible", "A15.0", "GPC Tuberculosis (2da Edición) MSP", "Sintomático respiratorio, GeneXpert MTB/RIF y esquema TAES 2HRZE/4HR.", "Radiografía de tórax (Rx): infiltrado fibroexudativo con cavitación apical infraclavicular."],
+        ["case_vih_01", "Diagnóstico de Infección por VIH y TARV", "B20", "Acuerdo Ministerial y Guía VIH/SIDA MSP", "Estadificación clínica OMS, profilaxis Cotrimoxazol e inicio de TLD.", "Algoritmo dual: prueba rápida 4ta generación (p24/anticuerpo) y confirmatoria de carga viral/CD4."],
+        ["case_hta_01", "Hipertensión Arterial Primaria Grado 2", "I10", "GPC Hipertensión Arterial MSP (Acuerdo 00019)", "Estratificación de riesgo cardiovascular, HVI y terapia combinada dual.", "Electrocardiograma (ECG) 12 derivaciones a 25 mm/s: patrón de HVI (Sokolow-Lyon > 35 mm)."],
+        ["case_erc_01", "Enfermedad Renal Crónica en DM2 / HTA", "N18.3", "GPC Enfermedad Renal Crónica MSP", "Estadificación KDIGO G3bA2, nefroprotección y ajuste por filtrado.", "Panel renal: creatinina, urea, filtrado glomerular (CKD-EPI) y cociente albúmina/creatinina."],
+        ["case_ehirn_01", "Encefalopatía Hipóxico-Isquémica Neonatal", "P91.6", "GPC EHI-RN MSP", "Criterios gasométricos, Sarnat II e Hipotermia Terapéutica pasiva.", "Gasometría de cordón umbilical (pH < 7.00, EB > 16 mmol/L) y coagulograma con TP/INR."],
+        ["case_nac_01", "Neumonía Adquirida en la Comunidad Grave", "J18.9", "GPC Neumonía en Pediatría MSP", "Tiraje subcostal, condensación Rx y Ampicilina parenteral a dosis alta.", "Radiografía de tórax (Rx): radioopacidad homogénea con condensación lobar y broncograma aéreo."],
+        ["case_sepsis_neonatal_01", "Sepsis Neonatal Temprana por RPM", "P36.9", "GPC Sepsis Neonatal MSP", "Factores perinatales, índice I/T > 0.2 y Ampicilina + Gentamicina.", "Hemograma con recuento diferencial (I/T > 0.20), PCR cuantitativa y hemocultivo pareado."],
+        ["case_aborto_01", "Aborto Incompleto no Complicado", "O03.4", "GPC Aborto Terapéutico y Espontáneo MSP", "Manejo farmacológico con Misoprostol vs AMEU y profilaxis Anti-D.", "Ecografía pélvica/transvaginal con restos ovulares intrauterinos y hematocrito con tipificación."]
     ]
     
-    c_heads = ["ID de Caso", "Patología / Título Clínico", "CIE-10", "Normativa GPC del MSP", "Conducta Médica Evaluada"]
-    add_institutional_table(doc, c_heads, casos, col_alignments=["center", "left", "center", "left", "left"], col_widths=[1.2, 1.6, 0.6, 1.5, 2.0])
+    c_heads = ["ID de Caso", "Patología / Título Clínico", "CIE-10", "Normativa GPC del MSP", "Conducta Médica Evaluada", "Estudios Paraclínicos 2D / Multimodales"]
+    add_institutional_table(doc, c_heads, casos, col_alignments=["center", "left", "center", "left", "left", "left"], col_widths=[1.0, 1.4, 0.5, 1.3, 1.4, 1.5])
 
     # =========================================================================
     # SECCIÓN 14: PROTOCOLO FORMAL DE REPRODUCIBILIDAD CIENTÍFICA Y COMANDOS CLI

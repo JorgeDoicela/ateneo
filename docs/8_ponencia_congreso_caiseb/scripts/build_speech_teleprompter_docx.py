@@ -250,16 +250,19 @@ def build_teleprompter_document():
 
     add_sub_header(doc, "Resumen de Cifras Clave (Memorización de Respaldo)")
     doc.add_paragraph(
-        "• 42 Guías de Práctica Clínica del MSP Ecuador (7,052 fragmentos normativos extraídos).\n"
+        "• 42 Guías de Práctica Clínica del MSP Ecuador (7,052 fragmentos normativos extraídos con foliación física real).\n"
         "• 45.8% de alucinación clínica en modelos de IA comerciales sin anclaje normativo.\n"
         "• +369.23% de ganancia en precisión de recuperación Top-1 (Hit@1) tras fine-tuning en GPU A100.\n"
         "• +274.40% de mejora en MRR@5 (Mean Reciprocal Rank).\n"
-        "• p < 0.001 (W = 365.0) en prueba de Wilcoxon sobre 283 consultas ciegas fuera de distribución.\n"
+        "• p < 0.001 (W = 365.0) en prueba de Wilcoxon sobre 283 consultas ciegas fuera de distribución (OOD).\n"
         "• 100.0% de fidelidad normativa en evaluación RAGAS (anclaje sin alucinación).\n"
         "• N = 25 médicos internos en el estudio piloto con diseño Pre vs. Post-Test.\n"
         "• g = 0.74 de ganancia de aprendizaje de Hake (catalogada como Ganancia Alta, t = 105.26, p < 0.0001, d > 2.0).\n"
         "• Salto cuantitativo: promedio de 4.87/10 a 8.64/10 (+77.4% de incremento).\n"
         "• Reducción del 88.6% en el Índice de Brecha Formativa (IBF global pasó de 0.4151 a 0.0496).\n"
+        "• Ciclo Cerrado CACES: 4 áreas troncales evaluadas (balance 1:1:1:1 con 2.50 pts c/u) y planes prescriptivos heurísticos.\n"
+        "• Salas Sincrónicas AteneoRoom: 4 fases pedagógicas sincronizadas mediante WebSockets con co-escritura en vivo.\n"
+        "• Gamificación Médica: 5 rangos de carrera médica (Estudiante Inicial a Residente de Honor) y 8 hitos clínicos con XP.\n"
         "• Costo computacional inferior a 0.05 USD por sesión de simulación completa."
     )
 
@@ -578,9 +581,14 @@ def build_teleprompter_document():
     add_spoken_paragraph(
         doc,
         "En el panel izquierdo, el estudiante visualiza en tiempo real el expediente del paciente: motivo de consulta, antecedentes, signos vitales dinámicos "
-        "y estudios paraclínicos multimodales, tales como radiografías de tórax de alta resolución, trazos de electrocardiograma de doce derivaciones y analítica de laboratorio. "
-        "En el panel derecho, dispone de su espacio de trabajo interactivo para formular su razonamiento clínico estructurado en formato SOAP.",
-        bold_lead="Pantalla Dividida 50/50:",
+        "y estudios paraclínicos multimodales integrados, tales como radiografías de tórax digitales en neumonía o tuberculosis cavitaria, "
+        "trazados de electrocardiograma de doce derivaciones calibrados a veinticinco milímetros por segundo en hipertensión arterial, "
+        "paneles laboratoriales con plaquetometría y transaminasas en preeclampsia severa, o coagulogramas de urgencia en encefalopatía hipóxico-isquémica. "
+        "Además, cuenta con un visor DICOM multicorte nativo con presets de Unidades Hounsfield para tomografías axiales computarizadas. "
+        "En el panel derecho, dispone de su espacio de trabajo interactivo para formular su razonamiento clínico estructurado "
+        "en los cuatro ejes formativos normativos del Ministerio de Salud Pública de Ecuador: Diagnóstico y Criterios de Severidad, "
+        "Plan Terapéutico y Farmacología Normada, Prevención y Control de Riesgos, y Criterios de Seguimiento y Referencia.",
+        bold_lead="Pantalla Dividida 50/50 y Ejes Normativos MSP:",
         pause_after=True
     )
 
@@ -597,6 +605,50 @@ def build_teleprompter_document():
         "con justificación médica; y finalmente la conducta terapéutica y farmacológica con dosis por kilogramo de peso. "
         "Al concluir, el evaluador RAG genera el dictamen inmediato con desglose de aciertos, omisiones y la referencia oficial de la guía ministerial.",
         bold_lead="Simulación por Hitos:"
+    )
+
+    # -------------------------------------------------------------------------
+    # DIAPOSITIVA 9B: ATENEOROOM Y CARRERA FORMATIVA MÉDICA
+    # -------------------------------------------------------------------------
+    add_slide_transition_banner(
+        doc,
+        slide_num="9B (Módulo de Colaboración y Mérito)",
+        title="5B. Salas Colaborativas Hospitalarias (AteneoRoom) y Gamificación Médica",
+        duration="3 minutos",
+        screen_action="Mostrar diapositiva con el panel de AteneoRoom en WebSockets (las 4 fases sincrónicas) y el sendero de hitos clínicos de carrera médica."
+    )
+
+    add_cue_box(doc, "Enfatiza la deliberación colegiada hospitalaria y cómo la gamificación académica motiva el mérito clínico.", label="COLABORACIÓN Y MÉRITO")
+
+    add_spoken_paragraph(
+        doc,
+        "La formación médica hospitalaria no se vive en solitario; se vive en equipo: en las entregas de guardia matutinas, "
+        "en las juntas de servicio y en los ateneos bibliográficos donde múltiples profesionales debaten el mejor curso de acción para un paciente crítico.",
+        bold_lead="La Dimensión Colegiada de la Medicina:"
+    )
+
+    add_spoken_paragraph(
+        doc,
+        "Para recrear esta dinámica, desarrollamos el módulo AteneoRoom: salas sincrónicas colaborativas hospitalarias operando sobre WebSockets bidireccionales nativos. "
+        "Un docente modera la sala a través de cuatro fases pedagógicas estrictas: Espera o Lobby con código institucional de acceso; "
+        "Resolución Activa; Discusión y Debate de cohorte; y Consenso y Cierre analítico. "
+        "En el modo individual, el sistema oculta el panel de consenso de cohorte durante la resolución para evitar el sesgo de anclaje diagnóstico. "
+        "Y en el modo grupal, los internos colaboran en tiempo real en un lienzo compartido con detección de presencia activa ('Redactando...') y bloqueo optimista de párrafos. "
+        "Al finalizar, el motor de inteligencia colectiva calcula el promedio de sala, el porcentaje de quórum sobre el diagnóstico CIE-10 y las brechas normativas más frecuentes.",
+        bold_lead="Salas AteneoRoom con WebSockets:",
+        pause_after=True
+    )
+
+    add_spoken_paragraph(
+        doc,
+        "Y para sostener el compromiso formativo del estudiante sin caer en ludificaciones banales, implementamos el Subsistema de Carrera Formativa Médica. "
+        "Aquí no hay monedas ni vidas de videojuego infantil; hay reconocimiento al mérito clínico anclado estrictamente en las Guías de Práctica Clínica. "
+        "El estudiante progresa a lo largo de cinco rangos formales: desde Estudiante Clínico Inicial, Externo de Medicina, Interno Rotativo, "
+        "Médico General Novel hasta Residente Clínico de Honor, acumulando Puntos de Experiencia Clínica (XP). "
+        "El sistema audita de forma transaccional ocho hitos clínicos de alto rigor: desde la resolución oportuna de un Código Rojo materno, "
+        "el apego normativo de excelencia con calificación superior a nueve, hasta la maestría secuencial en fases diagnósticas, "
+        "desplegados en un sendero vertical continuo tipo Journey Pathway con iconos sobrios y trazabilidad ACID en Unit of Work.",
+        bold_lead="Carrera Médica y Mérito Clínico:"
     )
 
     # -------------------------------------------------------------------------
@@ -675,10 +727,16 @@ def build_teleprompter_document():
 
     add_spoken_paragraph(
         doc,
-        "Para neutralizar el efecto de memorización o práctica repetida (conocido como testing effect), el sistema no repitió las mismas preguntas en el post-test; "
-        "generó casos isomórficos: viñetas clínicas funcionalmente equivalentes que mantienen el mismo nivel de complejidad y la misma guía normativa, "
-        "pero con diferente presentación de signos y variables del paciente.",
-        bold_lead="Casos Isomórficos sin Sesgo de Memoria:",
+        "Un componente metodológico cardinal de Ateneo+ es que cierra el ciclo didáctico formativo (closing the clinical loop) mediante tres fases estructuradas: "
+        "Primero, una Evaluación Diagnóstica Inicial (Pre-Test) estratificada exactamente en las cuatro áreas troncales del Examen de Habilitación para el Ejercicio Profesional "
+        "del CACES y del Ministerio de Salud Pública: Ginecología y Obstetricia con emergencias como Preeclampsia severa y Código Rojo; "
+        "Pediatría y Neonatología con sepsis neonatal y asma grave; Medicina Interna y Crónicos con cetoacidosis diabética y síndrome coronario; "
+        "e Infectología y Salud Pública con neumonía comunitaria y dengue grave, bajo un balance equitativo uno a uno con dos punto cincuenta puntos por área. "
+        "Segundo, ante cada debilidad u omisión detectada, un motor heurístico prescriptivo pondera la severidad psicométrica y formula un Plan de Estudio Prescriptivo dosificado "
+        "en la Zona de Desarrollo Próximo, combinando lectura de secciones exactas de la GPC ministerial, simulación de casos guiados y debriefing socrático reflexivo. "
+        "Y tercero, la reevaluación de salida mediante un Post-Test isomórfico generado con inteligencia artificial, que preserva la encrucijada fisiopatológica y el estándar ministerial, "
+        "pero varía las constantes del paciente para neutralizar por completo el sesgo de memorización o práctica repetida (testing effect).",
+        bold_lead="El Ciclo Formativo Cerrado y Troncales CACES:",
         pause_after=True
     )
 
@@ -836,10 +894,13 @@ def build_teleprompter_document():
 
     add_spoken_paragraph(
         doc,
-        "A nivel psicométrico, Ateneo+ modela el conocimiento sobre un grafo acíclico dirigido de siete competencias clínicas (KST) "
-        "y rastrea probabilísticamente el dominio continuo de cada interno mediante Rastreo Bayesiano (BKT), aislando errores involuntarios de tipeo frente a vacíos reales. "
-        "En la interfaz, el estudiante interactúa con pantalla partida cincuenta-cincuenta con dictado clínico por voz y análisis multimodal de radiografías.",
-        bold_lead="Minuto 7 al 10 | Motor Psicométrico KST/BKT e Interfaz:"
+        "A nivel psicométrico y pedagógico, Ateneo+ modela el conocimiento sobre un grafo acíclico dirigido de siete competencias clínicas (KST), "
+        "cierra el ciclo didáctico mediante un Pre-Test estratificado en las cuatro áreas troncales del CACES y formula planes prescriptivos heurísticos "
+        "con reevaluación por Post-Test isomórfico asistido por IA. "
+        "En la interfaz split-screen, el estudiante dictamina por voz o texto sobre los cuatro ejes formativos normativos del MSP, "
+        "cuenta con salas colaborativas sincrónicas AteneoRoom con WebSockets para debate colegiado y progresa a través de cinco rangos "
+        "de carrera médica con ocho hitos clínicos normativos con persistencia transaccional ACID.",
+        bold_lead="Minuto 7 al 10 | Motor Psicométrico, Ciclo CACES, Salas y Carrera Médica:"
     )
 
     add_spoken_paragraph(
@@ -908,7 +969,19 @@ def build_teleprompter_document():
          "La pasarela de inteligencia artificial de Ateneo+ implementa el patrón de arquitectura Adapter desacoplado. Basta con cambiar una sola variable de entorno para que el sistema deje de apuntar a APIs externas y se conecte a un servidor local ejecutando modelos abiertos como LLaMA-3.1, BioMistral o DeepSeek sobre vLLM u Ollama. De esta manera, el cien por ciento del procesamiento, los datos y las evaluaciones se quedan dentro de la red privada de la institución."),
 
         ("Pregunta 12: ¿Cómo garantizan que el Post-Test mida aprendizaje clínico real y no la memorización del Pre-Test?",
-         "Para neutralizar el efecto de práctica repetida (testing effect), Ateneo+ utiliza su generador de casos isomórficos. El sistema no repite las viñetas clínicas basales; genera problemas funcionalmente equivalentes que evalúan exactamente las mismas competencias y la misma guía del MSP, pero variando la edad del paciente, la presentación de los paraclínicos y el contexto clínico. De esta manera, la Ganancia Normalizada de Hake refleja una auténtica transferencia de razonamiento clínico y no la memoria episódica del estudiante.")
+         "Para neutralizar el efecto de práctica repetida (testing effect), Ateneo+ utiliza su generador de casos isomórficos. El sistema no repite las viñetas clínicas basales; genera problemas funcionalmente equivalentes que evalúan exactamente las mismas competencias y la misma guía del MSP, pero variando la edad del paciente, la presentación de los paraclínicos y el contexto clínico. De esta manera, la Ganancia Normalizada de Hake refleja una auténtica transferencia de razonamiento clínico y no la memoria episódica del estudiante."),
+
+        ("Pregunta 13: ¿Cómo opera el módulo de Salas Colaborativas Hospitalarias (AteneoRoom) y cómo previene el sesgo de anclaje diagnóstico?",
+         "AteneoRoom simula las sesiones hospitalarias de ateneo clínico mediante WebSockets bidireccionales nativos estructurados en cuatro fases pedagógicas secuenciales: Espera o Lobby, Resolución Activa, Discusión y Debate de cohorte, y Consenso Analítico. Para evitar el sesgo de anclaje diagnóstico (anchoring bias), el sistema segrega la analítica de cohorte: durante la fase de resolución individual, el promedio de sala y las respuestas de los compañeros permanecen estrictamente ocultos para los estudiantes, revelándose únicamente cuando el docente moderador transiciona la sala a la fase de debate. En la modalidad grupal, integra un lienzo de co-escritura sincrónica con detección de presencia activa ('Redactando...') y bloqueo optimista de párrafos, calculando en tiempo real el porcentaje de quórum sobre el diagnóstico CIE-10 y las brechas normativas frente a las GPC del MSP."),
+
+        ("Pregunta 14: ¿Cómo se estructura la evaluación diagnóstica de entrada (Pre-Test) y su correspondencia con el examen nacional del CACES?",
+         "Para erradicar la subrepresentación de constructo (construct underrepresentation), el Pre-Test de Ateneo+ implementa un muestreo estratificado balanceado de un reactivo por cada una de las cuatro áreas troncales del Examen de Habilitación para el Ejercicio Profesional (EHEP) del CACES y las GPC del MSP: Ginecología y Obstetricia (Preeclampsia severa / Código Rojo), Pediatría y Neonatología (Sepsis neonatal temprana / Asma grave), Medicina Interna y Crónicos (Cetoacidosis diabética / Síndrome coronario) e Infectología y Salud Pública (Neumonía bacteriana grave / Dengue con signos de alarma). Cada área tiene una ponderación equitativa de dos punto cincuenta puntos sobre diez. Las omisiones detectadas alimentan un motor heurístico que pondera el riesgo psicométrico W_i = Severidad * (1.05 - P(L)) y prescribe tareas en tres ejes: lectura de la GPC, simulación en ZDP y debriefing socrático reflexivo."),
+
+        ("Pregunta 15: ¿Por qué decidieron sustituir la metodología SOAP tradicional por los cuatro ejes normativos del MSP?",
+         "La metodología SOAP tradicional (Subjetivo, Objetivo, Análisis, Plan) fue concebida para la redacción de notas de evolución en historias clínicas de soporte físico, pero no responde a la estructura analítica ni a los estándares de evaluación de competencias del Ministerio de Salud Pública de Ecuador ni del CACES. Las auditorías del internado rotativo y los baremos de evaluación formativa evalúan cuatro dimensiones clínicas específicas: 1) Diagnóstico sindrómico y estratificación de severidad; 2) Manejo terapéutico y dosificación farmacológica conforme al Cuadro Nacional de Medicamentos Básicos; 3) Prevención y control de factores de riesgo; y 4) Criterios de seguimiento, signos de alarma y referencia oportuna a la red hospitalaria. Al estructurar la argumentación del estudiante en estos cuatro ejes normativos, eliminamos contradicciones pedagógicas y alineamos el entrenamiento directamente con las competencias profesionales exigidas por la ley ecuatoriana."),
+
+        ("Pregunta 16: ¿Cómo garantiza el subsistema de gamificación el mérito formativo médico sin trivializar el aprendizaje?",
+         "En educación médica de alta fidelidad, la ludificación arcade (vidas, monedas virtuales o stickers) resulta contraproducente y trivializa situaciones clínicas críticas donde se debaten vidas humanas. Ateneo+ erradica esa superficialidad mediante una Carrera Formativa Médica basada estrictamente en mérito académico y Puntos de Experiencia Clínica (XP). La progresión abarca cinco rangos formales congruentes con la carrera médica: Estudiante Clínico Inicial, Externo de Medicina, Interno Rotativo, Médico General Novel y Residente Clínico de Honor. Los XP se obtienen exclusivamente mediante ocho hitos normativos auditados transaccionalmente con SqlAlchemyUnitOfWork (ej. manejo acertado de un Código Rojo materno, apego estricto a la GPC superior a 9.0 o superación de las tres fases secuenciales), desplegados en un sendero vertical sobrio tipo Journey Pathway con iconos médicos limpios y trazabilidad ACID.")
     ]
 
     for q_tit, q_resp in qa_list:

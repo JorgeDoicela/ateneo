@@ -84,7 +84,7 @@ describe('Página de Login (Google Accounts Pattern - Ateneo+)', () => {
 
     await waitFor(() => {
       expect(mockLogin).toHaveBeenCalledWith('alumno@ateneo.edu.ec', 'Alumno123!');
-      expect(mockNavigate).toHaveBeenCalledWith('/');
+      expect(mockNavigate).toHaveBeenCalledWith('/cases');
     });
   });
 
@@ -171,7 +171,7 @@ describe('Página de Login (Google Accounts Pattern - Ateneo+)', () => {
     fireEvent.click(screen.getByRole('button', { name: /Ingresar/i }));
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/');
+      expect(mockNavigate).toHaveBeenCalledWith('/cases');
     });
   });
 
@@ -188,6 +188,6 @@ describe('Página de Login (Google Accounts Pattern - Ateneo+)', () => {
       </MemoryRouter>
     );
 
-    expect(mockNavigate).toHaveBeenCalledWith('/admin', { replace: true });
+    expect(mockNavigate).toHaveBeenCalledWith('/admin/users', { replace: true });
   });
 });

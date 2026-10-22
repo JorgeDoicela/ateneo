@@ -215,7 +215,7 @@ $$g = \frac{\text{Score}_{\text{Post}} - \text{Score}_{\text{Pre}}}{10.0 - \text
 * **Componente `PrescriptivePlanCard.tsx`:**
   * Tarjeta de diagnóstico de entrada con indicador de avance porcentual en gradiente tricolor (`cyan-500`, `blue-600`, `indigo-600`).
   * Tareas formativas dosificadas: Lectura GPC (`BookOpen`), Simulación en ZDP (`Stethoscope`), Debriefing Socrático (`MessageSquare`).
-  * Checkbox interactivo de cumplimiento con recálculo dinámico en tiempo real.
+  * Indicadores de estado fácticos y accesos directos contextuales (`Resolver ->`, `Leer GPC ->` con confirmación en visor PDF, `Debatir ->`), erradicando bypass manual.
   * Botón directo de acción para inicio del Post-Test Isomórfico.
 * **Componente `HakeGainBadge.tsx`:**
   * Indicador tipográfico de Ganancia Normalizada de Hake ($g$) categorizado según los estándares de Hake (1998):
@@ -225,7 +225,7 @@ $$g = \frac{\text{Score}_{\text{Post}} - \text{Score}_{\text{Pre}}}{10.0 - \text
     - $g < 0.0$: Regresión Clínica (Rojo carmesí).
 * **Modal Desacoplado `AssessmentRunnerModal.tsx`:**
   * Renderizado mediante `createPortal(..., document.body)` con overlay `backdrop-blur-sm`.
-  * Navegación fluida entre reactivos, soporte de tecla `Escape`, argumentación estructurada SOAP y dictamen en tiempo real.
+  * Navegación fluida entre reactivos, soporte de tecla `Escape`, argumentación clínica estructurada en los 4 ejes normativos del MSP y dictamen en tiempo real.
 
 ---
 

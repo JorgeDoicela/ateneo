@@ -23,8 +23,9 @@ docs/
 ├── 4_pdf_compilado/                         # Documentos y artículos científicos compilados
 ├── 5_capturas_sistema/                      # Evidencias visuales de la interfaz de usuario
 ├── 6_despliegue_y_operaciones/              # Infraestructura Docker, túneles y variables de entorno
-└── 7_planes_de_escalabilidad_y_hoja_de_ruta/ # Hojas de ruta de evolución técnica
-    └── PLAN_PROFESIONALIZACION_AUTH_Y_TELEMETRIA_DB.md # Especificación de persistencia y telemetría
+├── 7_planes_de_escalabilidad_y_hoja_de_ruta/ # Hojas de ruta de evolución técnica
+│   └── PLAN_PROFESIONALIZACION_AUTH_Y_TELEMETRIA_DB.md # Especificación de persistencia y telemetría
+└── 8_ponencia_congreso_caiseb/               # Dossier técnico Word, teleprompter de discurso y scripts para CAISEB 2026
 ```
 
 ---
@@ -44,6 +45,11 @@ docs/
 ### 2.3 Analítica del Aprendizaje y Educación Médica
 * [CURRICULO_ADAPTATIVO_KST_Y_LEARNING_ANALYTICS.md](./3_documentacion_metodologica/CURRICULO_ADAPTATIVO_KST_Y_LEARNING_ANALYTICS.md): Formalización matemática de la Teoría de Espacios del Conocimiento (*Knowledge Space Theory - KST*) aplicada a la navegación curricular adaptativa de casos clínicos según maestría diagnóstica.
 * [DOSIER_POST_TEST_Y_PLAN_ESTUDIOS_HEURISTICO.md](./3_documentacion_metodologica/DOSIER_POST_TEST_Y_PLAN_ESTUDIOS_HEURISTICO.md): Especificación técnica del sistema de Pre-Test / Post-Test con IA y motor heurístico de planes de estudio prescriptivos basados en brechas clínicas GPC y ganancia de Hake.
+
+### 2.4 Ponencia Magistral y Congreso CAISEB 2026
+* [ATENEO_DOSSIER_TECNICO_Y_PONENCIA_CAISEB.docx](./8_ponencia_congreso_caiseb/ATENEO_DOSSIER_TECNICO_Y_PONENCIA_CAISEB.docx): Dossier técnico integral de 2.55 MB con la totalidad de la arquitectura, RAG híbrido denso/disperso con 7,052 fragmentos GPC, modelo KST/BKT, salas colaborativas sincrónicas AteneoRoom, ciclo formativo cerrado CACES, carrera formativa médica y catálogo de 10 casos clínicos canónicos con estudios paraclínicos 2D.
+* [DISCURSO_PONENCIA_VIRTUAL_CAISEB.docx](./8_ponencia_congreso_caiseb/DISCURSO_PONENCIA_VIRTUAL_CAISEB.docx): Guion y teleprompter para la ponencia virtual de 40 minutos (y Plan B de 15 minutos), con desglose por diapositiva y banco de 16 preguntas de defensa oral ante el tribunal.
+* [DOSSIER_PONENCIA_MAGISTRAL_CAISEB_40MIN.md](./8_ponencia_congreso_caiseb/DOSSIER_PONENCIA_MAGISTRAL_CAISEB_40MIN.md): Versión Markdown estructurada del guion y defensa oral.
 
 ---
 
