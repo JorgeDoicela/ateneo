@@ -289,16 +289,16 @@ def build_teleprompter_document():
     # -------------------------------------------------------------------------
     add_cue_box(
         doc,
-        "Tu compañera acaba de exponer el problema clínico, la brecha de error médico y por qué fallan los LLMs genéricos en salud. "
+        "Tu compañera acaba de exponer la importancia del entrenamiento clínico de grado, la complejidad de las decisiones en guardia hospitalaria y por qué los LLMs comerciales genéricos no ofrecen garantías de fidelidad normativa en salud. "
         "Al escuchar que te cede la palabra ('Doy paso al Tecnólogo Jorge Doicela...'), toma el mando con voz enérgica, segura y profesional.",
         label="CUE DE ENTRADA — HANDOFF"
     )
 
     add_spoken_paragraph(
         doc,
-        "Muchas gracias, Magíster Sánchez. Estimados miembros del tribunal y colegas: habiendo analizado la brecha clínica y el riesgo que "
-        "implica la alucinación de los modelos genéricos en salud, permítanme explicarles cómo diseñamos la ingeniería de software y la arquitectura "
-        "de inteligencia artificial de Ateneo+ para garantizar rigor científico, fidelidad normativa innegociable y respuesta en tiempo real.",
+        "Muchas gracias, Magíster Sánchez. Estimados miembros del tribunal y colegas: reconociendo la alta exigencia formativa del internado rotativo y la necesidad de "
+        "herramientas de apoyo que garanticen estricto rigor científico frente a las alucinaciones de los modelos comerciales, permítanme explicarles cómo diseñamos la ingeniería de software y la arquitectura "
+        "de inteligencia artificial de Ateneo+ para asegurar fidelidad normativa innegociable, soberanía de datos y respuesta en tiempo real.",
         bold_lead="Toma de la Palabra y Enfoque de Ingeniería:",
         pause_after=True
     )
@@ -370,8 +370,8 @@ def build_teleprompter_document():
 
     add_spoken_paragraph(
         doc,
-        "Uno de los mayores aportes de ingeniería en Ateneo+ es que trasciende la simple asignación de una nota estática del uno al diez. "
-        "Un diez en un examen tradicional puede ocultar que el estudiante no sabe dosificar un fármaco en una crisis, mientras que un seis no revela con precisión qué competencia específica falló.",
+        "Uno de los mayores aportes de ingeniería en Ateneo+ es que trasciende la simple asignación de una calificación numérica estática. "
+        "En lugar de una nota global que resume el desempeño sin detalle analítico, nuestro sistema identifica con precisión matemática el grado de consolidación de cada destreza clínica.",
         bold_lead="Más Allá de la Nota Numérica:"
     )
 
@@ -390,8 +390,8 @@ def build_teleprompter_document():
         "Segundo, implementamos el Rastreo Bayesiano del Conocimiento continuo (Bayesian Knowledge Tracing o BKT). "
         "En cada interacción del estudiante, el motor recalcula la probabilidad latente de dominio de cada nodo del grafo. "
         "Y calibramos parámetros matemáticos de 'desliz' y 'adivinación' (Slip y Guess). "
-        "Esto significa que si un interno que usualmente responde con excelencia comete un error involuntario de tipeo o un lapsus por fatiga de guardia, el sistema no reduce su dominio a cero; "
-        "amortigua el descenso bayesiano hasta contrastar la siguiente evidencia.",
+        "Esto significa que si un interno que usualmente responde con excelencia presenta una variación involuntaria de tipeo o una omisión transitoria, el sistema no reduce su dominio a cero; "
+        "amortigua el ajuste bayesiano hasta contrastar la siguiente evidencia formativa.",
         bold_lead="Rastreo Bayesiano Continuo (BKT):"
     )
 
@@ -428,9 +428,9 @@ def build_teleprompter_document():
         "En el panel izquierdo, el estudiante examina el expediente del paciente: constantes vitales dinámicas y estudios paraclínicos multimodales integrados, "
         "tales como radiografías digitales de tórax en neumonía o tuberculosis, trazados electrocardiográficos de doce derivaciones calibrados a veinticinco milímetros por segundo en hipertensión, "
         "paneles laboratoriales con plaquetometría y transaminasas en preeclampsia severa, y coagulogramas de urgencia. "
-        "Además, desarrollamos un visor DICOM volumétrico nativo ejecutado directamente sobre Canvas y GPU del navegador, permitiendo desplazamiento continuo multicorte "
-        "y calibración de Unidades Hounsfield según estándares del American College of Radiology, con cero consumo de tokens de IA por renderizado.",
-        bold_lead="Panel Clínico Multimodal y Visor DICOM:",
+        "Además, desarrollamos un visor interactivo 2D y 3D nativo ejecutado directamente sobre Canvas, WebGL y la GPU del navegador, permitiendo navegación volumétrica multicorte, "
+        "reconstrucción anatómica tridimensional de lesiones y calibración de Unidades Hounsfield según estándares del American College of Radiology, con cero consumo de tokens de IA por renderizado.",
+        bold_lead="Panel Clínico Multimodal, Visor DICOM y Reconstrucción 3D:",
         pause_after=True
     )
 
@@ -469,7 +469,7 @@ def build_teleprompter_document():
         "Resolución Activa, Discusión y Debate de cohorte, y Consenso Analítico de Cierre. "
         "En la modalidad individual, el sistema segrega la analítica y oculta las respuestas de los compañeros durante la resolución para neutralizar el sesgo de anclaje diagnóstico. "
         "En la modalidad grupal, habilita un lienzo de co-escritura en tiempo real con bloqueo optimista de párrafos y detección de presencia activa ('Redactando...'). "
-        "El motor calcula al instante el promedio de sala, el porcentaje de quórum sobre el diagnóstico CIE-10 y las brechas normativas frente a las GPC.",
+        "El motor calcula al instante el promedio de sala, el porcentaje de quórum sobre el diagnóstico CIE-10 y el grado de apego normativo frente a las GPC.",
         bold_lead="Dinámica de 4 Fases y Motor de Consenso:",
         pause_after=True
     )
@@ -577,6 +577,7 @@ def build_teleprompter_document():
     add_spoken_paragraph(
         doc,
         "En nuestra hoja de ruta técnica inmediata, estamos expandiendo la base a cincuenta escenarios normativos de atención primaria y medicina rural; "
+        "estamos incorporando la renderización de modelos anatómicos 3D interactivos con WebGL para patología quirúrgica y traumatológica; "
         "estamos implementando 'Nosology Adapters' para admitir consensos internacionales complementarios sin fracturar la norma nacional; "
         "estamos desarrollando la capa de interoperabilidad con historias clínicas electrónicas bajo el estándar HL7 FHIR; "
         "y nos encontramos listos para iniciar la validación multicéntrica en cinco facultades de medicina del país.",
@@ -649,52 +650,61 @@ def build_teleprompter_document():
     )
 
     qa_list = [
-        ("Pregunta 1: ¿Por qué eligieron BGE-M3 para fine-tuning en lugar de embeddings de OpenAI o Google?",
+        ("Pregunta 1: ¿Qué problema concreto aborda la solución tecnológica presentada y cómo se evaluó su efectividad?",
+         "Ateneo+ aborda el desafío pedagógico de la transición del aula a la práctica clínica hospitalaria, fortaleciendo la toma de decisiones estandarizadas en escenarios prioritarios de atención como Código Rojo obstétrico, preeclampsia severa y sepsis neonatal, donde los simuladores mecatrónicos tradicionales son de difícil acceso por costo (más de mil doscientos dólares la hora) y los modelos de lenguaje comerciales genéricos presentan un 45.8% de alucinación o discrepancias normativas frente a las guías oficiales. Su efectividad se evaluó en dos dimensiones rigurosas: Primero, a nivel de ingeniería de Inteligencia Artificial, mediante doscientas ochenta y tres consultas ciegas fuera de distribución evaluadas en GPU NVIDIA A100, donde logramos un incremento del más trescientos sesenta y nueve por ciento en Hit@1, más doscientos setenta y cuatro por ciento en MRR@5, significancia estadística con la prueba no paramétrica de Wilcoxon (W = 365.0, p menor a 0.001) y cien por ciento de fidelidad normativa en el estándar RAGAS. Segundo, a nivel formativo, mediante un estudio pre-test y post-test pareado con veinticinco médicos internos, alcanzando una Ganancia de Hake alta de cero punto setenta y cuatro, un d de Cohen superior a dos punto cero (t de Student = 105.26, p menor a diez a la menos diez), y una reducción del ochenta y ocho punto seis por ciento en el Índice de Brecha Formativa hacia el umbral de maestría, duplicando la velocidad de consolidación de juicio clínico con nuestro motor adaptativo KST/BKT."),
+
+        ("Pregunta 2: ¿Qué riesgos relacionados con privacidad, sesgos, accesibilidad o brecha digital deben atenderse en su implementación?",
+         "Diseñamos Ateneo+ bajo una matriz integral de mitigación de riesgos: En privacidad, aplicamos el principio de Privacidad desde el Diseño y estricto cumplimiento de la Ley Orgánica de Protección de Datos Personales (LOPDP); todos los casos clínicos son cien por ciento sintéticos y canónicos basados en los perfiles epidemiológicos de las guías sin usar historias reales de pacientes, y las identidades viajan seudonimizadas con identificadores opacos. Además, la arquitectura contenerizada en Docker permite despliegue on-premise en los servidores del propio hospital, evitando transferencias a nubes públicas. En sesgos clínicos, el recuperador BGE-M3 fine-tuned y la fusión RRF eliminan sesgos foráneos al forzar que toda recomendación provenga exclusivamente de las cuarenta y dos guías del MSP y el Cuadro Nacional de Medicamentos Básicos. Y en accesibilidad y brecha digital, la plataforma opera como una Progressive Web App de ultra-bajo consumo que corre en cualquier navegador y dispositivo modesto, con renderizado gráfico y visor paraclínico 2D/3D acelerado localmente en Canvas WebGL sin consumo de tokens de IA, costo operativo menor a cinco centavos de dólar por sesión, y capacidad de operar en red local u offline mediante modelos abiertos en Ollama."),
+
+        ("Pregunta 3: ¿Qué recursos y competencias necesitaría otra institución para adaptar esta propuesta a su contexto?",
+         "La adaptación institucional es sumamente accesible gracias al desacoplamiento modular de la arquitectura: En infraestructura física, la institución solo requiere un servidor convencional con soporte para Docker y Docker Compose; si opta por inferencia local soberana, basta una estación con una GPU comercial de doce o dieciséis gigabytes de VRAM para correr modelos abiertos cuantizados, o un procesador multicore estándar con dieciséis gigabytes de RAM si utiliza nuestro recuperador BGE-M3 en formato ONNX cuantizado a ocho bits consumiendo apenas quinientos ochenta megabytes. En competencias técnicas, el departamento de TI únicamente requiere conocimientos básicos de administración de servidores Linux o Windows y despliegue de contenedores Docker, sin necesidad de especialistas en deep learning, pues los pipelines de ingesta y las bases vectoriales en ChromaDB están empaquetados y automatizados. En competencias docentes, la cátedra médica solo define o valida sus casos clínicos y protocolos normativos; gracias a nuestros 'Nosology Adapters' y al pipeline modular de ingesta, cualquier guía o consenso institucional se procesa e indexa en la base de conocimiento en minutos sin tocar una sola línea del código fuente."),
+
+        ("Pregunta 4: ¿Por qué eligieron BGE-M3 para fine-tuning en lugar de embeddings de OpenAI o Google?",
          "Esa es una decisión clave de arquitectura. Los modelos comerciales de embeddings como los de OpenAI son cajas negras cerradas: cobran por cada petición en la nube, no permiten reentrenar sus capas profundas y sufren de desfases terminológicos frente al vocabulario epidemiológico ecuatoriano. BGE-M3, en cambio, es un modelo multilingüe de código abierto de mil veinticuatro dimensiones que admite representaciones densas y dispersas. Esto nos permitió someterlo a fine-tuning supervisado con la función MultipleNegativesRankingLoss directamente sobre nuestra GPU dedicada NVIDIA A100, logrando un espacio vectorial a la medida de la normativa sanitaria nacional y garantizando soberanía de datos on-premise."),
 
-        ("Pregunta 2: Una muestra de 25 médicos internos en el piloto es pequeña. ¿Cómo garantizan validez estadística?",
+        ("Pregunta 5: Una muestra de 25 médicos internos en el piloto es pequeña. ¿Cómo garantizan validez estadística?",
          "Es una observación muy pertinente. El estudio piloto se diseñó bajo un esquema intra-sujeto pre-test y post-test pareado, lo que neutraliza la varianza inter-individual entre los participantes. La significancia estadística alcanzada con la prueba t pareada de Student arrojó un valor de ciento cinco punto doscientos sesenta y seis con veinticuatro grados de libertad y un p-valor menor a diez a la menos diez, con un tamaño de efecto d de Cohen mayor a dos punto cero, superando ampliamente los umbrales de rigor científico en educación médica. Además, la Ganancia de Hake de cero punto setenta y cuatro valida una ganancia alta. Actualmente estamos expandiendo el protocolo a más de trescientos estudiantes en cinco facultades de medicina para la validación multicéntrica."),
 
-        ("Pregunta 3: ¿Cómo evita el sistema que un estudiante engañe a la IA usando 'prompt hacking' o términos incoherentes?",
+        ("Pregunta 6: ¿Cómo evita el sistema que un estudiante engañe a la IA usando 'prompt hacking' o términos incoherentes?",
          "Ateneo+ implementa una defensa en profundidad de tres barreras técnicas: Primero, el módulo PromptSecurityGuard realiza un escaneo léxico y sintáctico en tiempo real en la entrada para neutralizar intentos de fuga de rol o inyección de instrucciones. Segundo, el evaluador incorpora el framework RAGAS de fidelidad estricta, penalizando cualquier afirmación que no cuente con respaldo explícito en el fragmento recuperado de la GPC. Y tercero, la evaluación se desglosa ontológicamente en cuatro ejes clínicos independientes (diagnóstico, tratamiento, prevención y seguimiento); un texto incoherente no puede satisfacer simultáneamente los umbrales de los cuatro ejes."),
 
-        ("Pregunta 4: ¿Qué ocurre si el Ministerio de Salud Pública actualiza o deroga una Guía de Práctica Clínica?",
+        ("Pregunta 7: ¿Qué ocurre si el Ministerio de Salud Pública actualiza o deroga una Guía de Práctica Clínica?",
          "La arquitectura del sistema desacopló por completo el código de la aplicación respecto a la base de conocimiento normativo. Si el Ministerio emite una nueva guía, nuestro pipeline de ingesta automatizado procesa el nuevo PDF, extrae las tablas y actualiza la colección vectorial en ChromaDB en menos de diez minutos, sin necesidad de modificar el frontend ni reiniciar el backend. Además, cada actualización se sella criptográficamente con un hash SHA-256 para preservar la trazabilidad histórica de versiones."),
 
-        ("Pregunta 5: En zonas rurales o centros de salud de la Amazonía sin acceso a internet, ¿cómo funciona Ateneo+?",
+        ("Pregunta 8: En zonas rurales o centros de salud de la Amazonía sin acceso a internet, ¿cómo funciona Ateneo+?",
          "Diseñamos el sistema pensando en la realidad de la ruralidad médica. El recuperador BGE-M3 se cuantiza a formato ONNX de ocho bits ocupando apenas quinientos ochenta megabytes de memoria con una latencia de dieciocho milisegundos en cualquier computadora estándar. Por su parte, el evaluador puede ejecutarse localmente con modelos clínicos abiertos cuantizados a cuatro bits mediante Ollama o vLLM sin internet. La aplicación frontend es una Progressive Web App (PWA) que almacena los casos y resoluciones en IndexedDB y los sincroniza de forma transparente en cuanto se recupera conectividad hospitalaria."),
 
-        ("Pregunta 6: ¿Por qué no hicieron Fine-Tuning directo en el modelo generativo (LLM) en lugar de ajustar el recuperador?",
+        ("Pregunta 9: ¿Por qué no hicieron Fine-Tuning directo en el modelo generativo (LLM) en lugar de ajustar el recuperador?",
          "Hacer fine-tuning directo en los pesos generativos de un LLM en medicina presenta tres riesgos críticos: Primero, el olvido catastrófico (catastrophic forgetting), donde el modelo pierde facultades de razonamiento general al forzarle la memorización de datos específicos. Segundo, la persistencia de alucinación latente, ya que los pesos neuronales son probabilísticos y no ofrecen garantía de citación de página exacta. Y tercero, el costo prohibitivo de reentrenar un LLM ante cada cambio normativo. En contraste, ajustar el modelo recuperador vectorial (BGE-M3) garantiza que el conocimiento factual resida siempre en la base indexada de forma auditable, permitiendo al LLM actuar exclusivamente como un evaluador socrático con anclaje normativo innegociable."),
 
-        ("Pregunta 7: ¿Cómo asegura el sistema el cumplimiento de la Ley Orgánica de Protección de Datos Personales (LOPDP)?",
+        ("Pregunta 10: ¿Cómo asegura el sistema el cumplimiento de la Ley Orgánica de Protección de Datos Personales (LOPDP)?",
          "Ateneo+ cumple con la LOPDP mediante el principio de Privacidad desde el Diseño: Primero, todos los casos clínicos son cien por ciento sintéticos y canónicos, generados a partir de los perfiles epidemiológicos de las guías sin usar historias clínicas reales de pacientes. Segundo, las identidades de los estudiantes viajan seudonimizadas con identificadores opacos en los registros de telemetría. Y tercero, la arquitectura soporta despliegue on-premise en los propios servidores del hospital o facultad, evitando transferencias internacionales de datos."),
 
-        ("Pregunta 8: ¿Qué pasa si una guía ecuatoriana discrepa de consensos internacionales como la AHA o la Sociedad Europea de Cardiología?",
+        ("Pregunta 11: ¿Qué pasa si una guía ecuatoriana discrepa de consensos internacionales como la AHA o la Sociedad Europea de Cardiología?",
          "En el marco legal ecuatoriano, el médico interno y el profesional en funciones dentro de la Red Pública Integral de Salud está obligado deontológica y jurídicamente a cumplir las directrices vinculantes del Ministerio de Salud Pública. Por ello, Ateneo+ evalúa prioritariamente el estándar nacional. No obstante, el sistema incorpora 'Nosology Adapters' que permiten a la cátedra docente habilitar notas complementarias de guías internacionales sin perder la trazabilidad de la conducta legal exigida en el país."),
 
-        ("Pregunta 9: En el rastreo bayesiano (BKT), ¿cómo se evita castigar injustamente a un interno por un lapsus o error de tipeo?",
-         "Precisamente esa es la ventaja de utilizar Bayesian Knowledge Tracing frente a una regla estática. El modelo BKT incorpora el parámetro de desliz o 'Slip', que calibramos entre cero punto cero ocho y cero punto doce. Si un estudiante que ha demostrado alta maestría previa comete un fallo aislado, la actualización bayesiana no reduce su dominio a cero; amortigua el descenso a un rango intermedio. Si en la siguiente interacción responde correctamente, la evidencia confirma su maestría y restaura su curva de dominio."),
+        ("Pregunta 12: En el rastreo bayesiano (BKT), ¿cómo se evita subestimar el dominio de un interno ante una variación puntual o lapsus involuntario?",
+         "Precisamente esa es la ventaja de utilizar Bayesian Knowledge Tracing frente a una regla estática. El modelo BKT incorpora el parámetro de desliz o 'Slip', que calibramos entre cero punto cero ocho y cero punto doce. Si un estudiante que ha demostrado alta maestría previa presenta una variación puntual de tipeo o una omisión transitoria, la actualización bayesiana no reduce su dominio a cero; amortigua el ajuste a un rango intermedio. Si en la siguiente interacción responde con apego normativo, la evidencia confirma su maestría y consolida su curva de dominio."),
 
-        ("Pregunta 10: ¿Cuál es la ventaja de Ateneo+ frente a simuladores comerciales como SimMan o Body Interact?",
+        ("Pregunta 13: ¿Cuál es la ventaja de Ateneo+ frente a simuladores comerciales como SimMan o Body Interact?",
          "Ateneo+ supera a los simuladores comerciales extranjeros en tres aspectos decisivos: Primero, el factor económico: los simuladores físicos cuestan decenas de miles de dólares en adquisición y licencias anuales, mientras que Ateneo+ opera a menos de cinco centavos de dólar por sesión en cualquier navegador. Segundo, la pertinencia territorial: los simuladores extranjeros evalúan algoritmos anglosajones desconectados de nuestra realidad hospitalaria. Y tercero, la evaluación del lenguaje libre: no limitamos al estudiante a elegir opciones prefijadas, sino que evaluamos su argumentación clínica real en texto y voz."),
 
-        ("Pregunta 11: Si una institución prohíbe el uso de nubes externas por política de ciberseguridad, ¿cómo se implementa el sistema?",
+        ("Pregunta 14: Si una institución prohíbe el uso de nubes externas por política de ciberseguridad, ¿cómo se implementa el sistema?",
          "La pasarela de inteligencia artificial de Ateneo+ implementa el patrón de arquitectura Adapter desacoplado. Basta con cambiar una sola variable de entorno para que el sistema deje de apuntar a APIs externas y se conecte a un servidor local ejecutando modelos abiertos como LLaMA-3.1, BioMistral o DeepSeek sobre vLLM u Ollama. De esta manera, el cien por ciento del procesamiento, los datos y las evaluaciones se quedan dentro de la red privada de la institución."),
 
-        ("Pregunta 12: ¿Cómo garantizan que el Post-Test mida aprendizaje clínico real y no la memorización del Pre-Test?",
+        ("Pregunta 15: ¿Cómo garantizan que el Post-Test mida aprendizaje clínico real y no la memorización del Pre-Test?",
          "Para neutralizar el efecto de práctica repetida (testing effect), Ateneo+ utiliza su generador de casos isomórficos. El sistema no repite las viñetas clínicas basales; genera problemas funcionalmente equivalentes que evalúan exactamente las mismas competencias y la misma guía del MSP, pero variando la edad del paciente, la presentación de los paraclínicos y el contexto clínico. De esta manera, la Ganancia Normalizada de Hake refleja una auténtica transferencia de razonamiento clínico y no la memoria episódica del estudiante."),
 
-        ("Pregunta 13: ¿Cómo opera el módulo de Salas Colaborativas Hospitalarias (AteneoRoom) y cómo previene el sesgo de anclaje diagnóstico?",
-         "AteneoRoom simula las sesiones hospitalarias de ateneo clínico mediante WebSockets bidireccionales nativos estructurados en cuatro fases pedagógicas secuenciales: Espera o Lobby, Resolución Activa, Discusión y Debate de cohorte, y Consenso Analítico. Para evitar el sesgo de anclaje diagnóstico (anchoring bias), el sistema segrega la analítica de cohorte: durante la fase de resolución individual, el promedio de sala y las respuestas de los compañeros permanecen estrictamente ocultos para los estudiantes, revelándose únicamente cuando el docente moderador transiciona la sala a la fase de debate. En la modalidad grupal, integra un lienzo de co-escritura sincrónica con detección de presencia activa ('Redactando...') y bloqueo optimista de párrafos, calculando en tiempo real el porcentaje de quórum sobre el diagnóstico CIE-10 y las brechas normativas frente a las GPC del MSP."),
+        ("Pregunta 16: ¿Cómo opera el módulo de Salas Colaborativas Hospitalarias (AteneoRoom) y cómo previene el sesgo de anclaje diagnóstico?",
+         "AteneoRoom simula las sesiones hospitalarias de ateneo clínico mediante WebSockets bidireccionales nativos estructurados en cuatro fases pedagógicas secuenciales: Espera o Lobby, Resolución Activa, Discusión y Debate de cohorte, y Consenso Analítico. Para evitar el sesgo de anclaje diagnóstico (anchoring bias), el sistema segrega la analítica de cohorte: durante la fase de resolución individual, el promedio de sala y las respuestas de los compañeros permanecen estrictamente ocultos para los estudiantes, revelándose únicamente cuando el docente moderador transiciona la sala a la fase de debate. En la modalidad grupal, integra un lienzo de co-escritura sincrónica con detección de presencia activa ('Redactando...') y bloqueo optimista de párrafos, calculando en tiempo real el porcentaje de quórum sobre el diagnóstico CIE-10 y el grado de apego normativo frente a las GPC del MSP."),
 
-        ("Pregunta 14: ¿Cómo se estructura la evaluación diagnóstica de entrada (Pre-Test) y su correspondencia con el examen nacional del CACES?",
-         "Para erradicar la subrepresentación de constructo (construct underrepresentation), el Pre-Test de Ateneo+ implementa un muestreo estratificado balanceado de un reactivo por cada una de las cuatro áreas troncales del Examen de Habilitación para el Ejercicio Profesional (EHEP) del CACES y las GPC del MSP: Ginecología y Obstetricia (Preeclampsia severa / Código Rojo), Pediatría y Neonatología (Sepsis neonatal temprana / Asma grave), Medicina Interna y Crónicos (Cetoacidosis diabética / Síndrome coronario) e Infectología y Salud Pública (Neumonía bacteriana grave / Dengue con signos de alarma). Cada área tiene una ponderación equitativa de dos punto cincuenta puntos sobre diez. Las omisiones detectadas alimentan un motor heurístico que pondera el riesgo psicométrico W_i = Severidad * (1.05 - P(L)) y prescribe tareas en tres ejes: lectura de la GPC, simulación en ZDP y debriefing socrático reflexivo."),
+        ("Pregunta 17: ¿Cómo se estructura la evaluación diagnóstica de entrada (Pre-Test) y su correspondencia con el examen nacional del CACES?",
+         "Para garantizar representatividad integral de constructo, el Pre-Test de Ateneo+ implementa un muestreo estratificado balanceado de un reactivo por cada una de las cuatro áreas troncales del Examen de Habilitación para el Ejercicio Profesional (EHEP) del CACES y las GPC del MSP: Ginecología y Obstetricia (Preeclampsia severa / Código Rojo), Pediatría y Neonatología (Sepsis neonatal temprana / Asma grave), Medicina Interna y Crónicos (Cetoacidosis diabética / Síndrome coronario) e Infectología y Salud Pública (Neumonía bacteriana grave / Dengue con signos de alarma). Cada área tiene una ponderación equitativa de dos punto cincuenta puntos sobre diez. Las áreas que requieren consolidación alimentan un motor heurístico que calcula la prioridad formativa W_i = Severidad * (1.05 - P(L)) y prescribe actividades formativas en tres ejes: lectura guiada de la GPC, simulación interactiva en ZDP y debriefing socrático reflexivo."),
 
-        ("Pregunta 15: ¿Por qué decidieron sustituir la metodología SOAP tradicional por los cuatro ejes normativos del MSP?",
+        ("Pregunta 18: ¿Por qué decidieron sustituir la metodología SOAP tradicional por los cuatro ejes normativos del MSP?",
          "La metodología SOAP tradicional (Subjetivo, Objetivo, Análisis, Plan) fue concebida para la redacción de notas de evolución en historias clínicas de soporte físico, pero no responde a la estructura analítica ni a los estándares de evaluación de competencias del Ministerio de Salud Pública de Ecuador ni del CACES. Las auditorías del internado rotativo y los baremos de evaluación formativa evalúan cuatro dimensiones clínicas específicas: 1) Diagnóstico sindrómico y estratificación de severidad; 2) Manejo terapéutico y dosificación farmacológica conforme al Cuadro Nacional de Medicamentos Básicos; 3) Prevención y control de factores de riesgo; y 4) Criterios de seguimiento, signos de alarma y referencia oportuna a la red hospitalaria. Al estructurar la argumentación del estudiante en estos cuatro ejes normativos, eliminamos contradicciones pedagógicas y alineamos el entrenamiento directamente con las competencias profesionales exigidas por la ley ecuatoriana."),
 
-        ("Pregunta 16: ¿Cómo garantiza el subsistema de gamificación el mérito formativo médico sin trivializar el aprendizaje?",
+        ("Pregunta 19: ¿Cómo garantiza el subsistema de gamificación el mérito formativo médico sin trivializar el aprendizaje?",
          "En educación médica de alta fidelidad, la ludificación arcade (vidas, monedas virtuales o stickers) resulta contraproducente y trivializa situaciones clínicas críticas donde se debaten vidas humanas. Ateneo+ erradica esa superficialidad mediante una Carrera Formativa Médica basada estrictamente en mérito académico y Puntos de Experiencia Clínica (XP). La progresión abarca cinco rangos formales congruentes con la carrera médica: Estudiante Clínico Inicial, Externo de Medicina, Interno Rotativo, Médico General Novel y Residente Clínico de Honor. Los XP se obtienen exclusivamente mediante ocho hitos normativos auditados transaccionalmente con SqlAlchemyUnitOfWork (ej. manejo acertado de un Código Rojo materno, apego estricto a la GPC superior a 9.0 o superación de las tres fases secuenciales), desplegados en un sendero vertical sobrio tipo Journey Pathway con iconos médicos limpios y trazabilidad ACID.")
     ]
 
