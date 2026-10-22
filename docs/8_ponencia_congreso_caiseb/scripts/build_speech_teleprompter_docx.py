@@ -1,12 +1,20 @@
 # -*- coding: utf-8 -*-
 """
-Generador del Guión Verbatim y Teleprompter Oficial para Ponencia Virtual (DOCX)
+Generador del Guion Verbatim y Teleprompter Oficial para Ponencia Virtual (DOCX)
 Congreso Académico Internacional de Innovación en Salud, Educación y Bienestar (CAISEB 2026)
 Ateneo+: Simulador Clínico Multimodal con IA y RAG.
 
-Autores:
-- Tnlgo. Jorge Ismael Doicela Molina (Desarrollo, IA, DevOps)
-- Mgtr. Estefani Angélica Sánchez Morales (Metodología y Validación Clínica)
+ROL: EXPOSITOR TÉCNICO Y ARQUITECTO DE SOFTWARE
+Expositor: Tnlgo. Jorge Ismael Doicela Molina (Desarrollo, IA, MLOps, DevOps)
+Coautora: Mgtr. Estefani Angélica Sánchez Morales (Metodología, Educación Médica y Validación Clínica)
+
+NOTA DE SINCRONIZACIÓN:
+Este documento está calibrado para la intervención técnica de Jorge Doicela.
+La introducción, el marco médico-pedagógico, el diseño de la evaluación clínica,
+los baremos del instrumento y los resultados de notas en internos son presentados
+por la coautora (Mgtr. Sánchez). Este guion cubre con máxima profundidad la
+ingeniería, modelos de IA, psicometría computacional, arquitectura de software,
+infraestructura, benchmarks y la defensa técnica ante el tribunal.
 """
 
 import sys
@@ -14,22 +22,22 @@ from pathlib import Path
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
-from docx.oxml import OxmlElement, parse_xml
-from docx.oxml.ns import nsdecls, qn
+from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.oxml import parse_xml
+from docx.oxml.ns import nsdecls
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 MODULE_DIR = SCRIPT_DIR.parent
 DOCX_OUTPUT = MODULE_DIR / "DISCURSO_PONENCIA_VIRTUAL_CAISEB.docx"
 
-# Colores Institucionales
+# Colores Institucionales Ateneo+ / CAISEB
 COLOR_NAVY = RGBColor(15, 76, 129)       # #0f4c81 - Navy Institucional
-COLOR_BLUE = RGBColor(37, 99, 235)       # #2563eb - Azul Royal
-COLOR_DARK = RGBColor(30, 41, 59)        # #1e293b - Texto Principal
+COLOR_BLUE = RGBColor(37, 99, 235)       # #2563eb - Azul Royal Médico
+COLOR_DARK = RGBColor(30, 41, 59)        # #1e293b - Pizarra Oscuro Texto
 COLOR_MUTED = RGBColor(100, 116, 139)    # #64748b - Gris Neutro
-COLOR_GREEN = RGBColor(4, 120, 87)       # #047857 - Verde Cues
+COLOR_GREEN = RGBColor(4, 120, 87)       # #047857 - Verde Indicaciones Cues
 COLOR_TEAL = RGBColor(13, 148, 136)      # #0d9488 - Teal Transiciones
-COLOR_RED = RGBColor(185, 28, 28)        # #b91c1c - Alertas / Pausas
+COLOR_RED = RGBColor(185, 28, 28)        # #b91c1c - Alertas / Pausas de Respiración
 
 def set_cell_background(cell, fill_hex):
     tcPr = cell._tc.get_or_add_tcPr()
@@ -73,11 +81,11 @@ def add_slide_transition_banner(doc, slide_num, title, duration, screen_action):
     p.paragraph_format.space_before = Pt(3)
     p.paragraph_format.space_after = Pt(2)
     
-    r_tag = p.add_run(f"DIAPOSITIVA {slide_num} | TIEMPO APROX: {duration}\n")
+    r_tag = p.add_run(f"DIAPOSITIVA {slide_num} | TIEMPO ESTIMADO: {duration}\n")
     r_tag.font.name = "Arial"
     r_tag.font.size = Pt(9.5)
     r_tag.font.bold = True
-    r_tag.font.color.rgb = RGBColor(147, 197, 253) # Azul claro
+    r_tag.font.color.rgb = RGBColor(147, 197, 253)
     
     r_tit = p.add_run(f"{title}\n")
     r_tit.font.name = "Arial"
@@ -101,7 +109,7 @@ def add_cue_box(doc, text, label="INDICACIÓN DE CÁMARA Y VOZ"):
     
     cell = table.cell(0, 0)
     cell.width = Inches(6.8)
-    set_cell_background(cell, "F0FDF4") # Verde muy claro
+    set_cell_background(cell, "F0FDF4")
     set_cell_margins(cell, top=100, bottom=100, left=180, right=180)
     
     tcPr = cell._tc.get_or_add_tcPr()
@@ -187,7 +195,7 @@ def add_sub_header(doc, text):
 def build_teleprompter_document():
     doc = Document()
     
-    # Configurar márgenes de página (1 pulgada)
+    # Configurar márgenes de página A4 / Carta para teleprompter
     for section in doc.sections:
         section.top_margin = Inches(1.0)
         section.bottom_margin = Inches(1.0)
@@ -197,15 +205,15 @@ def build_teleprompter_document():
         section.page_height = Inches(11.0)
 
     # =========================================================================
-    # PORTADA / TÍTULO PRINCIPAL
+    # PORTADA INSTITUCIONAL DEL EXPOSITOR TÉCNICO
     # =========================================================================
     p_title = doc.add_paragraph()
     p_title.paragraph_format.space_before = Pt(10)
     p_title.paragraph_format.space_after = Pt(4)
     p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r_t1 = p_title.add_run("GUION VERBATIM Y TELEPROMPTER OFICIAL\nPONENCIA VIRTUAL CAISEB 2026\n")
+    r_t1 = p_title.add_run("GUION VERBATIM Y TELEPROMPTER OFICIAL\nDEL EXPOSITOR TÉCNICO\nCAISEB 2026\n")
     r_t1.font.name = "Arial"
-    r_t1.font.size = Pt(19)
+    r_t1.font.size = Pt(18)
     r_t1.font.bold = True
     r_t1.font.color.rgb = COLOR_NAVY
 
@@ -223,9 +231,10 @@ def build_teleprompter_document():
     p_meta.paragraph_format.space_after = Pt(14)
     p_meta.alignment = WD_ALIGN_PARAGRAPH.CENTER
     r_meta = p_meta.add_run(
-        "Expositor Principal: Tnlgo. Jorge Ismael Doicela Molina (Desarrollo, IA, DevOps)\n"
-        "Coautora e Investigadora: Mgtr. Estefani Angélica Sánchez Morales (Metodología y Educación Médica)\n"
-        "Modalidad: Virtual Sincrónica | Duración Estimada: 35 a 40 Minutos de Exposición + Sesión de Q&A"
+        "Expositor Técnico: Tnlgo. Jorge Ismael Doicela Molina (Desarrollo de Software, IA, MLOps y DevOps)\n"
+        "Coautora e Investigadora: Mgtr. Estefani Angélica Sánchez Morales (Metodología, Educación Médica y Validación Clínica)\n"
+        "Modalidad: Ponencia Virtual Compartida (Bloque de Ingeniería, Modelos de IA e Infraestructura)\n"
+        "Tiempo Estimado de Intervención Técnica: 12 a 15 Minutos + Ronda de Preguntas Técnicas del Tribunal (Q&A)"
     )
     r_meta.font.name = "Arial"
     r_meta.font.size = Pt(10)
@@ -235,227 +244,63 @@ def build_teleprompter_document():
     doc.add_page_break()
 
     # =========================================================================
-    # GUÍA DE USO DEL TELEPROMPTER VIRTUAL
+    # GUÍA DE USO Y RESUMEN DE CIFRAS CLAVE PARA MEMORIZACIÓN DE RESPALDO
     # =========================================================================
-    add_section_header(doc, "GUÍA PRÁCTICA PARA LA LECTURA EN PANTALLA (MODO TELEPROMPTER)")
+    add_section_header(doc, "GUÍA DEL TELEPROMPTER Y CIFRAS CLAVE DE RESPALDO")
     
     add_cue_box(
         doc,
-        "Coloca este documento en la mitad superior de tu pantalla principal, lo más cerca posible del lente físico de tu cámara web. "
-        "Al compartir pantalla en Zoom, Teams o Google Meet, comparte únicamente la ventana de Canva o PowerPoint (NO tu pantalla completa). "
-        "Así tendrás este texto frente a tus ojos sin que el público o el tribunal lo vean. "
-        "Mantén una mirada constante hacia la cámara, utiliza el scroll suave del ratón y respira profundamente en los marcadores de pausa.",
-        label="CONFIGURACIÓN VIRTUAL RECOMENDADA"
+        "Coloca este documento en la mitad superior de la pantalla donde tengas tu cámara web, lo más cerca posible del lente físico. "
+        "En la plataforma de videoconferencia (Zoom, Teams o Google Meet), comparte ÚNICAMENTE la ventana de Canva o PowerPoint de las diapositivas. "
+        "Tu compañera iniciará con la introducción médica y el problema clínico. Al darte paso ('Doy la palabra al Tecnólogo Jorge Doicela...'), "
+        "inicia inmediatamente la lectura fluida desde la Transición de Entrada. Utiliza el scroll suave y mantén mirada fija en la cámara.",
+        label="CONFIGURACIÓN OPERATIVA EN PANTALLA DIVIDIDA"
     )
 
-    add_sub_header(doc, "Resumen de Cifras Clave (Memorización de Respaldo)")
+    add_sub_header(doc, "Cifras Clave Técnicas (Consulta Inmediata)")
     doc.add_paragraph(
-        "• 42 Guías de Práctica Clínica del MSP Ecuador (7,052 fragmentos normativos extraídos con foliación física real).\n"
-        "• 45.8% de alucinación clínica en modelos de IA comerciales sin anclaje normativo.\n"
-        "• +369.23% de ganancia en precisión de recuperación Top-1 (Hit@1) tras fine-tuning en GPU A100.\n"
-        "• +274.40% de mejora en MRR@5 (Mean Reciprocal Rank).\n"
-        "• p < 0.001 (W = 365.0) en prueba de Wilcoxon sobre 283 consultas ciegas fuera de distribución (OOD).\n"
-        "• 100.0% de fidelidad normativa en evaluación RAGAS (anclaje sin alucinación).\n"
-        "• N = 25 médicos internos en el estudio piloto con diseño Pre vs. Post-Test.\n"
-        "• g = 0.74 de ganancia de aprendizaje de Hake (catalogada como Ganancia Alta, t = 105.26, p < 0.0001, d > 2.0).\n"
-        "• Salto cuantitativo: promedio de 4.87/10 a 8.64/10 (+77.4% de incremento).\n"
-        "• Reducción del 88.6% en el Índice de Brecha Formativa (IBF global pasó de 0.4151 a 0.0496).\n"
-        "• Ciclo Cerrado CACES: 4 áreas troncales evaluadas (balance 1:1:1:1 con 2.50 pts c/u) y planes prescriptivos heurísticos.\n"
-        "• Salas Sincrónicas AteneoRoom: 4 fases pedagógicas sincronizadas mediante WebSockets con co-escritura en vivo.\n"
-        "• Gamificación Médica: 5 rangos de carrera médica (Estudiante Inicial a Residente de Honor) y 8 hitos clínicos con XP.\n"
-        "• Costo computacional inferior a 0.05 USD por sesión de simulación completa."
+        "• 42 Guías de Práctica Clínica del MSP Ecuador procesadas en 7,052 fragmentos normativos indivisibles.\n"
+        "• Modelo Transformer de Embeddings BGE-M3 (1,024 dimensiones) con fine-tuning supervisado (MNRL) en GPU NVIDIA A100.\n"
+        "• +369.23% de ganancia en precisión Top-1 (Hit@1) y +274.40% en MRR@5.\n"
+        "• p < 0.001 (W = 365.0) en prueba no paramétrica de Wilcoxon sobre 283 consultas ciegas fuera de distribución (OOD).\n"
+        "• 100.0% de fidelidad normativa en framework RAGAS (anclaje ministerial sin alucinación).\n"
+        "• Búsqueda híbrida: BGE-M3 denso + BM25 Okapi disperso con Fusión de Rangos Recíprocos (RRF k=60).\n"
+        "• Caché semántica en memoria de 0.05 ms y PromptSecurityGuard contra jailbreaks.\n"
+        "• Grafo KST de 7 competencias clínicas con relaciones estrictas de prerrequisito.\n"
+        "• BKT continuo con modelado bayesiano de parámetros Slip (desliz) y Guess (adivinación).\n"
+        "• Split-Screen 50/50 y estructuración en los 4 ejes normativos del MSP (sustitutos de SOAP).\n"
+        "• Visor DICOM volumétrico multicorte nativo en Canvas/GPU con Unidades Hounsfield (cero tokens de IA).\n"
+        "• Salas sincrónicas AteneoRoom: WebSockets bidireccionales, 4 fases, motor de consenso CIE-10 y co-escritura con presencia activa.\n"
+        "• Carrera formativa médica: 5 rangos formales y catálogo de 8 hitos clínicos con XP transaccional ACID (Unit of Work).\n"
+        "• Generador de variantes isomórficas paralelas con IA para el Post-Test (evita sesgo de memorización).\n"
+        "• Costo computacional inferior a 0.05 USD por simulación completa (frente a > $1,200/h físico).\n"
+        "• Docker on-premise y cumplimiento riguroso de la Ley Orgánica de Protección de Datos Personales (LOPDP)."
     )
 
     doc.add_page_break()
 
     # =========================================================================
-    # GUIÓN COMPLETO DIAPOSITIVA POR DIAPOSITIVA
+    # DISCURSO TÉCNICO DIAPOSITIVA POR DIAPOSITIVA
     # =========================================================================
-    add_section_header(doc, "DISCURSO VERBATIM COMPLETO DIAPOSITIVA POR DIAPOSITIVA (40 MINUTOS)")
+    add_section_header(doc, "DISCURSO VERBATIM DEL EXPOSITOR TÉCNICO (JORGE DOICELA)")
 
     # -------------------------------------------------------------------------
-    # DIAPOSITIVA 1: BIENVENIDA CAISEB 2026
+    # TRANSICIÓN DE ENTRADA (TRAS LA EXPOSICIÓN DE LA COAUTORA)
     # -------------------------------------------------------------------------
-    add_slide_transition_banner(
+    add_cue_box(
         doc,
-        slide_num="1",
-        title="Carátula Oficial y Bienvenida al Congreso CAISEB 2026",
-        duration="1 minuto",
-        screen_action="Mostrar diapositiva institucional de bienvenida de CAISEB 2026."
+        "Tu compañera acaba de exponer el problema clínico, la brecha de error médico y por qué fallan los LLMs genéricos en salud. "
+        "Al escuchar que te cede la palabra ('Doy paso al Tecnólogo Jorge Doicela...'), toma el mando con voz enérgica, segura y profesional.",
+        label="CUE DE ENTRADA — HANDOFF"
     )
-    
-    add_cue_box(doc, "Tono formal, respetuoso y seguro. Sonríe ligeramente al iniciar el saludo institucional.", label="CÁMARA")
 
     add_spoken_paragraph(
         doc,
-        "Muy buenos días con todos. Estimados miembros del comité organizador, honorable tribunal evaluador, colegas docentes, "
-        "investigadores y profesionales de las ciencias de la salud y la tecnología: es un verdadero honor para nosotros participar en esta "
-        "edición del Congreso Académico Internacional de Innovación en Salud, Educación y Bienestar (CAISEB 2026).",
-        bold_lead="Saludo Protocolar:",
+        "Muchas gracias, Magíster Sánchez. Estimados miembros del tribunal y colegas: habiendo analizado la brecha clínica y el riesgo que "
+        "implica la alucinación de los modelos genéricos en salud, permítanme explicarles cómo diseñamos la ingeniería de software y la arquitectura "
+        "de inteligencia artificial de Ateneo+ para garantizar rigor científico, fidelidad normativa innegociable y respuesta en tiempo real.",
+        bold_lead="Toma de la Palabra y Enfoque de Ingeniería:",
         pause_after=True
-    )
-
-    add_spoken_paragraph(
-        doc,
-        "El día de hoy venimos a compartir los resultados de una investigación interdisciplinaria que une la ingeniería de software de alto rendimiento, "
-        "la inteligencia artificial aplicada y la educación médica formal en el contexto específico de la salud pública de nuestro país, el Ecuador.",
-        bold_lead="Propósito de la Conferencia:"
-    )
-
-    # -------------------------------------------------------------------------
-    # DIAPOSITIVA 2: VIDEO DE TRANSICIÓN / IDENTIDAD DINÁMICA
-    # -------------------------------------------------------------------------
-    add_slide_transition_banner(
-        doc,
-        slide_num="2",
-        title="Video de Transición / Identidad Tecnológica Dinámica",
-        duration="45 segundos",
-        screen_action="Reproducir animación de video en pantalla completa (fondo dinámico) mientras introduces la visión del proyecto."
-    )
-
-    add_cue_box(doc, "Voz firme y pausada. Deja que el video corra fluidamente de fondo mientras hablas con calma.", label="VOZ")
-
-    add_spoken_paragraph(
-        doc,
-        "La medicina contemporánea avanza a una velocidad vertiginosa. Sin embargo, en la práctica clínica hospitalaria, "
-        "el mayor desafío sigue estando en el puente que conecta el conocimiento teórico de las aulas universitarias con la toma de decisiones "
-        "críticas frente al paciente en la sala de emergencias.",
-        bold_lead="Reflexión Inicial:",
-        pause_after=True
-    )
-
-    add_spoken_paragraph(
-        doc,
-        "Para responder a esta necesidad, concebimos Ateneo+: un ecosistema inteligente de simulación clínica diseñado para transformar "
-        "la forma en que los futuros médicos entrenan su razonamiento diagnóstico y terapéutico bajo estándares normativos estrictos.",
-        bold_lead="Presentación del Ecosistema:"
-    )
-
-    # -------------------------------------------------------------------------
-    # DIAPOSITIVA 3: PORTADA OFICIAL DEL PROYECTO
-    # -------------------------------------------------------------------------
-    add_slide_transition_banner(
-        doc,
-        slide_num="3",
-        title="Portada Oficial de la Investigación y Equipo de Autores",
-        duration="1 minuto 30 segundos",
-        screen_action="Mostrar diapositiva con el título formal de la ponencia y los nombres de ambos investigadores."
-    )
-
-    add_spoken_paragraph(
-        doc,
-        "El título oficial de nuestro trabajo es: 'Simulador clínico multimodal basado en inteligencia artificial y RAG para el entrenamiento formativo "
-        "y analítica del aprendizaje médico en Ecuador'.",
-        bold_lead="Título Oficial de la Investigación:"
-    )
-
-    add_spoken_paragraph(
-        doc,
-        "Esta investigación fue desarrollada por un equipo de dos autores. Por un lado, mi coautora, la Magíster Estefani Angélica Sánchez Morales, "
-        "investigadora a cargo del diseño metodológico, la validación clínica y el marco pedagógico de educación médica. "
-        "Y por mi parte, Jorge Ismael Doicela Molina, Tecnólogo en Desarrollo de Software e investigador enfocado en Inteligencia Artificial, Ciberseguridad y DevOps, "
-        "responsable de la arquitectura integral del sistema, el entrenamiento de los modelos de inteligencia artificial en GPU, el pipeline vectorial y el despliegue de la plataforma.",
-        bold_lead="Equipo de Investigación:",
-        pause_after=True
-    )
-
-    # -------------------------------------------------------------------------
-    # DIAPOSITIVA 4: FICHA DE LOS INVESTIGADORES
-    # -------------------------------------------------------------------------
-    add_slide_transition_banner(
-        doc,
-        slide_num="4",
-        title="Perfiles Técnicos y Académicos de los Investigadores",
-        duration="1 minuto",
-        screen_action="Mostrar diapositiva con las fichas de presentación, especialidades y roles en el proyecto."
-    )
-
-    add_spoken_paragraph(
-        doc,
-        "Como observan en pantalla, nuestro enfoque ha sido garantizar una sinergia perfecta entre el rigor clínico y la ingeniería informática. "
-        "En mi rol técnico, diseñé toda la plataforma Ateneo+ desde cero: construyendo su arquitectura desacoplada, ejecutando el fine-tuning supervisado "
-        "de modelos de lenguaje en aceleradores GPU, estructurando las bases de datos vectoriales y asegurando una infraestructura conteinerizada con altos estándares de ciberseguridad. "
-        "La Magíster Sánchez, por su parte, calibró los escenarios médicos y coordinó las pruebas clínicas con los médicos internos de pregrado.",
-        bold_lead="Sinergia Interdisciplinaria:"
-    )
-
-    # -------------------------------------------------------------------------
-    # DIAPOSITIVA 5 (CONTENIDO 1): BRECHA FORMATIVA Y ERROR MÉDICO
-    # -------------------------------------------------------------------------
-    add_slide_transition_banner(
-        doc,
-        slide_num="5 (Diapositiva 1 en Canva)",
-        title="1. Brecha Formativa y Error Médico en Salud",
-        duration="2 minutos 30 segundos",
-        screen_action="Mostrar diapositiva dividida en dos columnas: Desafío en el Internado Rotativo vs. Límites de la Simulación Tradicional."
-    )
-
-    add_cue_box(doc, "Tono sobrio y reflexivo. Enfatiza los datos de la OMS y el costo de los simuladores físicos.", label="ÉNFASIS")
-
-    add_spoken_paragraph(
-        doc,
-        "Para comprender por qué creamos Ateneo+, debemos analizar con total franqueza la realidad formativa en nuestras facultades y hospitales. "
-        "Según la Organización Mundial de la Salud, cada año se registran en el mundo más de dos punto seis millones de muertes prevenibles causadas por fallas "
-        "en el diagnóstico y en la conducta terapéutica. Y una parte sustancial de este problema se origina en la curva inicial de aprendizaje.",
-        bold_lead="El Desafío Clínico:",
-        pause_after=True
-    )
-
-    add_spoken_paragraph(
-        doc,
-        "En el internado rotativo, los estudiantes enfrentan una intensa sobrecarga asistencial: con frecuencia encontramos entre doce y dieciocho internos "
-        "por cada médico tratante de guardia. Esto provoca que la retroalimentación docente sea forzosamente tardía, fragmentada o incluso inexistente. "
-        "Además, por razones éticas elementales y de seguridad del paciente, un estudiante en formación no puede practicar ensayo y error directamente sobre un ser humano en estado crítico.",
-        bold_lead="Realidad Hospitalaria:"
-    )
-
-    add_spoken_paragraph(
-        doc,
-        "¿Y qué alternativas existen hoy en día? La simulación médica tradicional con maniquíes mecatrónicos de alta fidelidad cuesta entre cuarenta y cinco mil y ciento veinte mil dólares por unidad, "
-        "haciéndola económicamente inaccesible para más del ochenta y cinco por ciento de nuestras facultades de medicina. "
-        "Por otro lado, los maniquíes presentan un grave sesgo de casos: permiten escuchar un soplo cardíaco, pero no permiten que el estudiante exprese en lenguaje libre su razonamiento ante emergencias obstétricas complejas como el Código Rojo o la sepsis neonatal. "
-        "Y finalmente, las evaluaciones tradicionales en papel carecen de trazabilidad analítica para medir competencias longitudinales.",
-        bold_lead="Límites de la Simulación Física:",
-        pause_after=True
-    )
-
-    # -------------------------------------------------------------------------
-    # DIAPOSITIVA 6 (CONTENIDO 2): ¿POR QUÉ FALLAN LOS LLMS GENÉRICOS?
-    # -------------------------------------------------------------------------
-    add_slide_transition_banner(
-        doc,
-        slide_num="6 (Diapositiva 2 en Canva)",
-        title="2. ¿Por qué los Modelos de Lenguaje Genéricos Fallan en Medicina?",
-        duration="2 minutos 30 segundos",
-        screen_action="Mostrar diapositiva comparativa: Riesgos de LLMs Comerciales vs. Solución Arquitectónica Ateneo+."
-    )
-
-    add_cue_box(doc, "Este punto es crucial ante el jurado de IA y médicos. Explica con claridad por qué un LLM genérico es peligroso.", label="ARGUMENTACIÓN TÉCNICA")
-
-    add_spoken_paragraph(
-        doc,
-        "Ante esta falta de retroalimentación, en los últimos dos años miles de estudiantes de medicina han comenzado a consultar modelos comerciales generalistas "
-        "como ChatGPT o Claude. Pero en el ámbito médico, utilizar estos modelos sin un control arquitectónico estricto es sumamente peligroso.",
-        bold_lead="La Falsa Salida de la IA Genérica:"
-    )
-
-    add_spoken_paragraph(
-        doc,
-        "Los modelos comerciales presentan una tasa de alucinación clínica del cuarenta y cinco punto ocho por ciento en prescripción y dosificación cuando se usan de forma directa. "
-        "Además, sufren de una absoluta desconexión territorial: fueron entrenados con literatura mayoritariamente anglosajona, por lo que prescriben fármacos o esquemas de la FDA estadounidense "
-        "que ni siquiera constan en el Cuadro Nacional de Medicamentos Básicos del Ecuador. "
-        "Y lo más grave: carecen de trazabilidad jurídica. No pueden justificar un dictamen citando la página, la sección y la tabla exacta de la normativa ministerial.",
-        bold_lead="Peligros del Modelo Comercial:",
-        pause_after=True
-    )
-
-    add_spoken_paragraph(
-        doc,
-        "La solución no consiste en escribir 'prompts más largos'. La solución radica en rediseñar la arquitectura: "
-        "construir un sistema RAG (Generación Aumentada por Recuperación) con anclaje normativo estricto contra siete mil cincuenta y dos fragmentos de las Guías de Práctica Clínica "
-        "del Ministerio de Salud Pública de Ecuador. En Ateneo+, cada dictamen evaluativo incluye la cita física verificable de la guía oficial, garantizando un cien por ciento de anclaje normativo "
-        "y adaptando la prescripción a los niveles de atención de nuestra red pública de salud.",
-        bold_lead="La Solución Ateneo+:"
     )
 
     # -------------------------------------------------------------------------
@@ -466,21 +311,21 @@ def build_teleprompter_document():
         slide_num="7 (Diapositiva 3 en Canva)",
         title="3. Pipeline RAG Híbrido y Generación Normativa",
         duration="3 minutos",
-        screen_action="Mostrar diapositiva de 4 columnas: Ingesta Curada, Recuperación RRF, Optimización/Resiliencia e Inferencia Multimodal."
+        screen_action="Mostrar diapositiva con el diagrama de 4 etapas: Ingesta Curada, Recuperación Híbrida RRF, Optimización/Resiliencia e Inferencia Multimodal."
     )
 
-    add_cue_box(doc, "Habla con la seguridad del desarrollador que construyó el pipeline. Describe las 4 etapas con fluidez.", label="INGENIERÍA")
+    add_cue_box(doc, "Habla como el arquitecto de software que construyó el pipeline. Explica con total dominio cada etapa.", label="INGENIERÍA")
 
     add_spoken_paragraph(
         doc,
-        "Permítanme explicarles cómo opera el motor tecnológico de Ateneo+ a través de cuatro etapas rigurosamente integradas.",
-        bold_lead="Arquitectura del Pipeline:"
+        "El núcleo de Ateneo+ opera mediante un pipeline de Recuperación Aumentada por Generación (RAG) estructurado en cuatro etapas rigurosamente integradas.",
+        bold_lead="Arquitectura del Motor RAG:"
     )
 
     add_spoken_paragraph(
         doc,
-        "En la primera etapa, ejecutamos la ingesta y curación del corpus oficial: procesamos cuarenta y dos Guías de Práctica Clínica vigentes del Ministerio de Salud Pública. "
-        "Utilizamos herramientas especializadas en bajo nivel para extraer el texto preservando la foliación física real del PDF y construimos un extractor matricial que convierte "
+        "En la primera etapa, ejecutamos la ingesta y curación del corpus oficial: procesamos cuarenta y dos Guías de Práctica Clínica vigentes del Ministerio de Salud Pública de Ecuador. "
+        "Utilizamos herramientas especializadas de bajo nivel para extraer el texto preservando la foliación física real del documento oficial y construimos un extractor matricial que convierte "
         "las tablas complejas de dosificación farmacológica a formato estructurado Markdown, generando siete mil cincuenta y dos fragmentos normativos indivisibles.",
         bold_lead="1. Ingesta y Curación Normativa:"
     )
@@ -488,9 +333,9 @@ def build_teleprompter_document():
     add_spoken_paragraph(
         doc,
         "En la segunda etapa, implementamos un motor de recuperación híbrida. ¿Por qué híbrido? Porque combinamos dos enfoques complementarios: "
-        "por una parte, una búsqueda semántica densa utilizando nuestro propio modelo 'ateneo-bge-m3-ecuador-v2', ajustado con fine-tuning supervisado en una GPU NVIDIA A100; "
+        "por una parte, una búsqueda semántica densa utilizando nuestro propio modelo 'ateneo-bge-m3-ecuador-v2', ajustado mediante fine-tuning supervisado en una GPU NVIDIA A100 dedicada; "
         "y por otra parte, una búsqueda dispersa con el algoritmo BM25 Okapi en memoria para capturar coincidencias exactas de términos médicos, códigos CIE-10 y dosis específicas. "
-        "Ambas ramas se fusionan mediante el algoritmo de Fusión de Rangos Recíprocos (RRF) con constante de suavizado k igual a sesenta, logrando el equilibrio perfecto entre comprensión semántica y exactitud literal.",
+        "Ambas ramas se fusionan mediante el algoritmo de Fusión de Rangos Recíprocos (RRF) con una constante de suavizado k igual a sesenta, logrando el equilibrio perfecto entre comprensión semántica y exactitud literal.",
         bold_lead="2. Recuperación Híbrida RRF:",
         pause_after=True
     )
@@ -498,16 +343,16 @@ def build_teleprompter_document():
     add_spoken_paragraph(
         doc,
         "En la tercera etapa, optimizamos la resiliencia del sistema. Incorporamos una caché semántica de dos niveles que responde en apenas cero punto cero cinco milisegundos "
-        "ante consultas frecuentes, y un guardián de seguridad llamado PromptSecurityGuard que neutraliza al cien por ciento cualquier intento de inyección de prompts o jailbreak clínico. "
-        "Además, mediante el adaptador universal compatible con APIs estándar, la plataforma puede conectarse tanto a modelos avanzados en la nube como a modelos médicos de código abierto ejecutándose de forma local en servidores propios bajo Docker.",
+        "ante consultas recurrentes, y un guardián de seguridad llamado PromptSecurityGuard que neutraliza al cien por ciento cualquier intento de inyección de prompts o jailbreak clínico. "
+        "Además, mediante una pasarela desacoplada compatible con APIs estándar, la plataforma puede conectarse tanto a modelos avanzados en la nube como a modelos médicos de código abierto ejecutándose de forma local en servidores propios bajo Docker.",
         bold_lead="3. Optimización y Resiliencia:"
     )
 
     add_spoken_paragraph(
         doc,
-        "Y en la cuarta etapa, la inferencia multimodal entrega al estudiante un debriefing socrático mediante streaming token a token vía Server-Sent Events, "
-        "mostrando aciertos, omisiones y la referencia exacta de la guía en menos de dos segundos.",
-        bold_lead="4. Inferencia Multimodal e Interfaz:"
+        "Y en la cuarta etapa, la inferencia multimodal entrega al estudiante un debriefing socrático mediante streaming token a token vía Server-Sent Events (SSE), "
+        "mostrando aciertos, omisiones y la referencia física exacta de la guía ministerial en menos de dos segundos.",
+        bold_lead="4. Inferencia Multimodal y Streaming:"
     )
 
     # -------------------------------------------------------------------------
@@ -516,46 +361,46 @@ def build_teleprompter_document():
     add_slide_transition_banner(
         doc,
         slide_num="8 (Diapositiva 4 en Canva)",
-        title="4. Modelado Psicométrico: KST, BKT y Aprendizaje Adaptativo",
+        title="4. Modelado Psicométrico en Software: KST, BKT y Aprendizaje Adaptativo",
         duration="3 minutos",
-        screen_action="Mostrar diapositiva con la explicación del motor adaptativo y las gráficas comparativas de curvas BKT (Ruta fija vs. Ruta KST adaptativa)."
+        screen_action="Mostrar diapositiva con el grafo DAG de competencias clínicas y la gráfica comparativa de convergencia BKT (Ruta fija vs. Ruta adaptativa KST)."
     )
 
-    add_cue_box(doc, "Explica esto de forma clara y sencilla, sin enredarte en fórmulas complejas. Es el corazón pedagógico del sistema.", label="CLARIDAD CONCEPTUAL")
+    add_cue_box(doc, "Enfatiza que la evaluación no es una nota estática del 1 al 10, sino un modelo cognitivo probabilístico en tiempo real.", label="MODELADO COGNITIVO")
 
     add_spoken_paragraph(
         doc,
-        "Uno de los mayores aportes de Ateneo+ es que no evalúa al estudiante con una simple nota estática del uno al diez. "
-        "Un diez en un examen tradicional puede ocultar que el estudiante no sabe dosificar un fármaco en una crisis, mientras que un seis no nos dice con precisión qué competencia específica falló.",
+        "Uno de los mayores aportes de ingeniería en Ateneo+ es que trasciende la simple asignación de una nota estática del uno al diez. "
+        "Un diez en un examen tradicional puede ocultar que el estudiante no sabe dosificar un fármaco en una crisis, mientras que un seis no revela con precisión qué competencia específica falló.",
         bold_lead="Más Allá de la Nota Numérica:"
     )
 
     add_spoken_paragraph(
         doc,
-        "Para resolver esto, integramos dos marcos matemáticos formales de modelado cognitivo: "
-        "Primero, la Teoría de Espacios del Conocimiento (Knowledge Space Theory o KST), donde estructuramos la medicina en un grafo acíclico dirigido de siete competencias clínicas secuenciales: "
-        "desde la anamnesis y la semiología, pasando por el diagnóstico presuntivo, la correlación de imágenes y laboratorios, hasta el diagnóstico definitivo y el plan terapéutico normado. "
-        "El sistema respeta los prerrequisitos: un estudiante no puede recibir un caso de terapéutica avanzada si antes no ha demostrado dominio en el diagnóstico diferencial.",
+        "Para modelar el conocimiento clínico en software, integramos dos marcos matemáticos consolidados: "
+        "Primero, la Teoría de Espacios del Conocimiento (Knowledge Space Theory o KST), donde estructuramos la medicina en un grafo acíclico dirigido (DAG) de siete competencias clínicas secuenciales: "
+        "desde la anamnesis y la semiología, pasando por el diagnóstico diferencial, la selección y correlación de exámenes paraclínicos, hasta el diagnóstico definitivo y el plan terapéutico normado. "
+        "El motor algorítmico valida los prerrequisitos en código: el sistema jamás prescribe un caso de terapéutica avanzada si el alumno no ha demostrado maestría en el diagnóstico diferencial previo.",
         bold_lead="Grafo de Competencias KST:",
         pause_after=True
     )
 
     add_spoken_paragraph(
         doc,
-        "Segundo, incorporamos el Rastreo Bayesiano del Conocimiento (Bayesian Knowledge Tracing o BKT). "
-        "En cada interacción del estudiante, el motor calcula la probabilidad latente de que domine cada competencia. "
-        "Y algo muy importante: calibramos parámetros matemáticos de 'desliz' y 'adivinación' (Slip y Guess). "
-        "Esto significa que si un interno que usualmente responde bien comete un error involuntario de tipeo o un lapsus por fatiga de guardia, el sistema no lo castiga a cero; "
-        "reconoce la probabilidad acumulada previa y amortigua el resultado hasta confirmar si se trata de un verdadero vacío cognitivo.",
+        "Segundo, implementamos el Rastreo Bayesiano del Conocimiento continuo (Bayesian Knowledge Tracing o BKT). "
+        "En cada interacción del estudiante, el motor recalcula la probabilidad latente de dominio de cada nodo del grafo. "
+        "Y calibramos parámetros matemáticos de 'desliz' y 'adivinación' (Slip y Guess). "
+        "Esto significa que si un interno que usualmente responde con excelencia comete un error involuntario de tipeo o un lapsus por fatiga de guardia, el sistema no reduce su dominio a cero; "
+        "amortigua el descenso bayesiano hasta contrastar la siguiente evidencia.",
         bold_lead="Rastreo Bayesiano Continuo (BKT):"
     )
 
     add_spoken_paragraph(
         doc,
-        "Como pueden apreciar en la gráfica de la derecha, al comparar la ruta fija tradicional frente a nuestra ruta adaptativa KST, "
-        "los estudiantes que utilizan Ateneo+ alcanzan el umbral de maestría en apenas cuatro sesiones de entrenamiento, mientras que la ruta fija requirió ocho sesiones. "
-        "Esto demuestra empíricamente la efectividad de prescribir casos dentro de la Zona de Desarrollo Próximo del estudiante.",
-        bold_lead="Convergencia Acelerada:"
+        "Como observan en la gráfica de convergencia, al comparar la ruta fija convencional frente a nuestra ruta adaptativa KST en la Zona de Desarrollo Próximo, "
+        "los estudiantes alcanzan el umbral de maestría en apenas cuatro sesiones de entrenamiento, mientras que la ruta fija requirió ocho sesiones. "
+        "Duplicamos la velocidad de adquisición de juicio clínico mediante prescripción adaptativa guiada por datos.",
+        bold_lead="Convergencia en la ZDP:"
     )
 
     # -------------------------------------------------------------------------
@@ -566,45 +411,36 @@ def build_teleprompter_document():
         slide_num="9 (Diapositiva 5 en Canva)",
         title="5. Simulación Multimodal Split-Screen y Dictado por Voz",
         duration="2 minutos 30 segundos",
-        screen_action="Mostrar diapositiva con la captura real de la interfaz de Ateneo+ en pantalla dividida y las viñetas explicativas."
+        screen_action="Mostrar diapositiva con la captura real del entorno Split-Screen de Ateneo+, destacando el visor paraclínico y el lienzo estructurado."
     )
 
-    add_cue_box(doc, "Señala la captura de pantalla de la interfaz con entusiasmo. Aquí se demuestra la calidad de producto terminado.", label="DEMOSTRACIÓN VISUAL")
+    add_cue_box(doc, "Señala la interfaz con orgullo de desarrollador. Enfatiza la calidad de producto terminado de grado hospitalario.", label="DEMOSTRACIÓN DE SOFTWARE")
 
     add_spoken_paragraph(
         doc,
-        "En esta diapositiva pueden observar la interfaz real de Ateneo+ con la que interactuaron los médicos internos durante nuestro estudio piloto. "
-        "Diseñamos una experiencia dividida en pantalla partida al cincuenta por ciento, exactamente como en las estaciones de trabajo hospitalarias modernas.",
-        bold_lead="La Experiencia del Usuario:"
+        "En esta diapositiva pueden observar la estación de trabajo clínica de Ateneo+. "
+        "Diseñamos un entorno dividido en pantalla partida al cincuenta por ciento, emulando las consolas de diagnóstico hospitalarias modernas.",
+        bold_lead="Entorno de Trabajo Split-Screen:"
     )
 
     add_spoken_paragraph(
         doc,
-        "En el panel izquierdo, el estudiante visualiza en tiempo real el expediente del paciente: motivo de consulta, antecedentes, signos vitales dinámicos "
-        "y estudios paraclínicos multimodales integrados, tales como radiografías de tórax digitales en neumonía o tuberculosis cavitaria, "
-        "trazados de electrocardiograma de doce derivaciones calibrados a veinticinco milímetros por segundo en hipertensión arterial, "
-        "paneles laboratoriales con plaquetometría y transaminasas en preeclampsia severa, o coagulogramas de urgencia en encefalopatía hipóxico-isquémica. "
-        "Además, cuenta con un visor DICOM multicorte nativo con presets de Unidades Hounsfield para tomografías axiales computarizadas. "
-        "En el panel derecho, dispone de su espacio de trabajo interactivo para formular su razonamiento clínico estructurado "
-        "en los cuatro ejes formativos normativos del Ministerio de Salud Pública de Ecuador: Diagnóstico y Criterios de Severidad, "
-        "Plan Terapéutico y Farmacología Normada, Prevención y Control de Riesgos, y Criterios de Seguimiento y Referencia.",
-        bold_lead="Pantalla Dividida 50/50 y Ejes Normativos MSP:",
+        "En el panel izquierdo, el estudiante examina el expediente del paciente: constantes vitales dinámicas y estudios paraclínicos multimodales integrados, "
+        "tales como radiografías digitales de tórax en neumonía o tuberculosis, trazados electrocardiográficos de doce derivaciones calibrados a veinticinco milímetros por segundo en hipertensión, "
+        "paneles laboratoriales con plaquetometría y transaminasas en preeclampsia severa, y coagulogramas de urgencia. "
+        "Además, desarrollamos un visor DICOM volumétrico nativo ejecutado directamente sobre Canvas y GPU del navegador, permitiendo desplazamiento continuo multicorte "
+        "y calibración de Unidades Hounsfield según estándares del American College of Radiology, con cero consumo de tokens de IA por renderizado.",
+        bold_lead="Panel Clínico Multimodal y Visor DICOM:",
         pause_after=True
     )
 
     add_spoken_paragraph(
         doc,
-        "Para eliminar la fricción del teclado y reproducir la naturalidad de la práctica médica, integramos un módulo de dictado clínico por voz nativo en el navegador, "
-        "calibrado específicamente para la terminología médica y fonética ecuatoriana. El estudiante puede hablar fluidamente y el sistema transcribe su juicio clínico al instante.",
-        bold_lead="Dictado por Voz Nativo:"
-    )
-
-    add_spoken_paragraph(
-        doc,
-        "Además, la simulación opera por fases dinámicas en tres hitos progresivos: primero la sospecha diagnóstica inicial; luego el desbloqueo de estudios complementarios "
-        "con justificación médica; y finalmente la conducta terapéutica y farmacológica con dosis por kilogramo de peso. "
-        "Al concluir, el evaluador RAG genera el dictamen inmediato con desglose de aciertos, omisiones y la referencia oficial de la guía ministerial.",
-        bold_lead="Simulación por Hitos:"
+        "En el panel derecho, el estudiante formula su juicio clínico estructurado no en notas libres ambiguas, sino en los cuatro ejes formativos normativos del Ministerio de Salud Pública: "
+        "1) Diagnóstico y Estratificación de Severidad; 2) Plan Terapéutico y Farmacología conforme al Cuadro Nacional de Medicamentos Básicos; "
+        "3) Prevención y Control de Factores de Riesgo; y 4) Criterios de Seguimiento y Referencia a Tercer Nivel. "
+        "E integramos el módulo ClinicalVoiceRecorder con la Web Speech API nativa calibrada a fonética ecuatoriana ('es-EC'), permitiendo dictar la nota clínica con total fluidez.",
+        bold_lead="Los 4 Ejes Normativos del MSP y Dictado por Voz:"
     )
 
     # -------------------------------------------------------------------------
@@ -614,41 +450,38 @@ def build_teleprompter_document():
         doc,
         slide_num="9B (Módulo de Colaboración y Mérito)",
         title="5B. Salas Colaborativas Hospitalarias (AteneoRoom) y Gamificación Médica",
-        duration="3 minutos",
-        screen_action="Mostrar diapositiva con el panel de AteneoRoom en WebSockets (las 4 fases sincrónicas) y el sendero de hitos clínicos de carrera médica."
+        duration="2 minutos 30 segundos",
+        screen_action="Mostrar diapositiva con el panel de AteneoRoom en WebSockets (4 fases sincrónicas) y el sendero de hitos clínicos con XP."
     )
 
-    add_cue_box(doc, "Enfatiza la deliberación colegiada hospitalaria y cómo la gamificación académica motiva el mérito clínico.", label="COLABORACIÓN Y MÉRITO")
+    add_cue_box(doc, "Destaca la ingeniería detrás de la colaboración multiusuario en tiempo real y el mérito formativo.", label="CONCURRENCIA Y MÉRITO")
 
     add_spoken_paragraph(
         doc,
-        "La formación médica hospitalaria no se vive en solitario; se vive en equipo: en las entregas de guardia matutinas, "
-        "en las juntas de servicio y en los ateneos bibliográficos donde múltiples profesionales debaten el mejor curso de acción para un paciente crítico.",
-        bold_lead="La Dimensión Colegiada de la Medicina:"
+        "Para simular las reuniones de entrega de guardia y juntas hospitalarias, desarrollamos el subsistema AteneoRoom: salas sincrónicas colaborativas multiusuario "
+        "construidas sobre WebSockets bidireccionales nativos en FastAPI y React 18.",
+        bold_lead="Salas Sincrónicas AteneoRoom con WebSockets:"
     )
 
     add_spoken_paragraph(
         doc,
-        "Para recrear esta dinámica, desarrollamos el módulo AteneoRoom: salas sincrónicas colaborativas hospitalarias operando sobre WebSockets bidireccionales nativos. "
-        "Un docente modera la sala a través de cuatro fases pedagógicas estrictas: Espera o Lobby con código institucional de acceso; "
-        "Resolución Activa; Discusión y Debate de cohorte; y Consenso y Cierre analítico. "
-        "En el modo individual, el sistema oculta el panel de consenso de cohorte durante la resolución para evitar el sesgo de anclaje diagnóstico. "
-        "Y en el modo grupal, los internos colaboran en tiempo real en un lienzo compartido con detección de presencia activa ('Redactando...') y bloqueo optimista de párrafos. "
-        "Al finalizar, el motor de inteligencia colectiva calcula el promedio de sala, el porcentaje de quórum sobre el diagnóstico CIE-10 y las brechas normativas más frecuentes.",
-        bold_lead="Salas AteneoRoom con WebSockets:",
+        "AteneoRoom opera bajo un protocolo estricto de cuatro fases sincrónicas gobernadas por el docente: Espera o Lobby con código de acceso institucional, "
+        "Resolución Activa, Discusión y Debate de cohorte, y Consenso Analítico de Cierre. "
+        "En la modalidad individual, el sistema segrega la analítica y oculta las respuestas de los compañeros durante la resolución para neutralizar el sesgo de anclaje diagnóstico. "
+        "En la modalidad grupal, habilita un lienzo de co-escritura en tiempo real con bloqueo optimista de párrafos y detección de presencia activa ('Redactando...'). "
+        "El motor calcula al instante el promedio de sala, el porcentaje de quórum sobre el diagnóstico CIE-10 y las brechas normativas frente a las GPC.",
+        bold_lead="Dinámica de 4 Fases y Motor de Consenso:",
         pause_after=True
     )
 
     add_spoken_paragraph(
         doc,
-        "Y para sostener el compromiso formativo del estudiante sin caer en ludificaciones banales, implementamos el Subsistema de Carrera Formativa Médica. "
-        "Aquí no hay monedas ni vidas de videojuego infantil; hay reconocimiento al mérito clínico anclado estrictamente en las Guías de Práctica Clínica. "
-        "El estudiante progresa a lo largo de cinco rangos formales: desde Estudiante Clínico Inicial, Externo de Medicina, Interno Rotativo, "
+        "Y para impulsar la adherencia del estudiante sin caer en mecánicas arcade o juegos infantiles, implementamos el Subsistema de Carrera Formativa Médica. "
+        "El estudiante progresa a lo largo de una escala canónica de cinco rangos: desde Estudiante Clínico Inicial, Externo de Medicina, Interno Rotativo, "
         "Médico General Novel hasta Residente Clínico de Honor, acumulando Puntos de Experiencia Clínica (XP). "
-        "El sistema audita de forma transaccional ocho hitos clínicos de alto rigor: desde la resolución oportuna de un Código Rojo materno, "
-        "el apego normativo de excelencia con calificación superior a nueve, hasta la maestría secuencial en fases diagnósticas, "
-        "desplegados en un sendero vertical continuo tipo Journey Pathway con iconos sobrios y trazabilidad ACID en Unit of Work.",
-        bold_lead="Carrera Médica y Mérito Clínico:"
+        "El motor audita de forma transaccional ocho hitos clínicos normativos con persistencia ACID en SqlAlchemyUnitOfWork: desde el manejo acertado de un Código Rojo obstétrico "
+        "hasta el apego normativo de excelencia superior a nueve sobre diez, desplegados en un sendero vertical sobrio tipo Journey Pathway.",
+        bold_lead="Carrera Médica y Persistencia Transaccional ACID:"
     )
 
     # -------------------------------------------------------------------------
@@ -657,280 +490,204 @@ def build_teleprompter_document():
     add_slide_transition_banner(
         doc,
         slide_num="10 (Diapositiva 6 en Canva)",
-        title="6. Resultados I: Benchmarks de Recuperación y Supresión de Alucinación",
+        title="6. Resultados Técnicos: Benchmarks de Recuperación en GPU A100 y Supresión de Alucinación",
         duration="3 minutos",
-        screen_action="Mostrar diapositiva con las métricas de oro (+369% Hit@1, +274% MRR@5, <5% alucinación) y la tabla comparativa de estrategias."
+        screen_action="Mostrar diapositiva con las tablas de métricas IR (+369% Hit@1, +274% MRR@5), la prueba de Wilcoxon y la fidelidad RAGAS."
     )
 
-    add_cue_box(doc, "Momento clave de rigor técnico. Lee las cifras con precisión y seguridad. Destaca el salto empírico de la GPU A100.", label="RIGOR EXPERIMENTAL")
+    add_cue_box(doc, "Momento cumbre de rigor científico. Lee las cifras con seguridad absoluta. Demuestra el impacto del fine-tuning.", label="EVIDENCIA TÉCNICA")
 
     add_spoken_paragraph(
         doc,
-        "Pasemos ahora al núcleo de la validación experimental y los resultados empíricos que respaldan esta investigación.",
-        bold_lead="Evidencia Técnica y Experimental:"
-    )
-
-    add_spoken_paragraph(
-        doc,
-        "En la tabla que tienen en pantalla comparamos tres estrategias: en primer lugar, el modelo comercial sin anclaje normativo; en segundo lugar, un RAG genérico sin fine-tuning; "
-        "y en tercer lugar, la arquitectura definitiva de Ateneo+ con fine-tuning supervisado en GPU A100.",
-        bold_lead="Comparativa de Estrategias:"
+        "Pasemos ahora a la evidencia cuantitativa y a los benchmarks experimentales que validan la superioridad de esta arquitectura.",
+        bold_lead="Validación Experimental de Inteligencia Artificial:"
     )
 
     add_spoken_paragraph(
         doc,
-        "Los resultados son concluyentes: en la métrica Hit@1, que mide la probabilidad de que el fragmento normativo exacto aparezca en la primerísima posición de búsqueda, "
-        "nuestro modelo fine-tuneado alcanzó un incremento del más trescientos sesenta y nueve punto veintitrés por ciento. "
+        "En la tabla comparativa contrastamos tres escenarios: el modelo comercial sin anclaje normativo, un RAG genérico sin fine-tuning, "
+        "y nuestra arquitectura Ateneo+ re-entrenada con fine-tuning supervisado sobre GPU NVIDIA A100.",
+        bold_lead="Comparativa de Rendimiento IR:"
+    )
+
+    add_spoken_paragraph(
+        doc,
+        "Los resultados de recuperación de información son contundentes: en la métrica Hit@1, que mide si el fragmento ministerial exacto aparece en la primerísima posición de búsqueda, "
+        "obtuvimos un incremento del más trescientos sesenta y nueve punto veintitrés por ciento. "
         "Pasamos de un modesto cinco punto veintidós por ciento en el modelo base a un veinticuatro punto cincuenta por ciento, cuadruplicando la precisión en primera posición. "
-        "En la métrica MRR@5, que evalúa la relevancia inmediata de los resultados, obtuvimos un salto del más doscientos setenta y cuatro punto cuarenta por ciento, "
-        "subiendo de cero punto cero ocho ochenta y nueve a cero punto treinta y tres veintiocho.",
-        bold_lead="Salto en Recuperación de Información (IR):",
+        "Y en la métrica MRR@5, que mide la posición promedio de la evidencia clínica correcta, registramos un salto del más doscientos setenta y cuatro punto cuarenta por ciento, "
+        "elevándose de cero punto cero ocho ochenta y nueve a cero punto treinta y tres veintiocho.",
+        bold_lead="Salto Cuantitativo en Recuperación (IR):",
         pause_after=True
     )
 
     add_spoken_paragraph(
         doc,
-        "Para validar que este rendimiento no fuera producto del sobreajuste, sometimos el modelo a un benchmark ciego con doscientas ochenta y tres consultas clínicas "
-        "completamente fuera de distribución (Out-of-Distribution). La prueba estadística no paramétrica de Wilcoxon arrojó un estadístico W de trescientos sesenta y cinco punto cero "
-        "con un p-valor menor a cero punto cero cero uno, confirmando con alta significancia estadística que la ganancia es estructural y reproducible.",
-        bold_lead="Validación Ciega de Wilcoxon:"
+        "Para certificar que este desempeño generalice en la práctica y no sea producto de sobreajuste o fuga de datos, sometimos el modelo a un benchmark ciego con doscientas ochenta y tres consultas "
+        "fuera de distribución (Out-of-Distribution) sobre guías clínicas jamás observadas durante el entrenamiento. "
+        "La prueba estadística no paramétrica de Wilcoxon arrojó un estadístico W de trescientos sesenta y cinco punto cero con un p-valor menor a cero punto cero cero uno, "
+        "confirmando con máxima significancia estadística que la mejora es estructural, robusta e irrefutable.",
+        bold_lead="Generalización Ciega de Wilcoxon:"
     )
 
     add_spoken_paragraph(
         doc,
-        "Y en cuanto a la seguridad clínica, evaluamos el anclaje mediante el framework internacional RAGAS. "
-        "Ateneo+ alcanzó un Faithfulness Score de entre ochenta y cien por ciento de afirmaciones ancladas directamente en las guías, "
-        "reduciendo la tasa de alucinación crítica por debajo del cinco por ciento, erradicando por completo el cuarenta y cinco punto ocho por ciento de alucinación que presentan los LLMs comerciales.",
-        bold_lead="Erradicación de la Alucinación:"
+        "Finalmente, auditamos la seguridad clínica mediante el estándar internacional RAGAS. "
+        "Ateneo+ alcanzó un Faithfulness Score de fidelidad normativa del cien por ciento en las pruebas formales con una tasa de alucinación crítica inferior al cinco por ciento, "
+        "suprimiendo de raíz el cuarenta y cinco punto ocho por ciento de alucinaciones y omisiones farmacológicas que presentan los modelos comerciales.",
+        bold_lead="Supresión de Alucinaciones con RAGAS:"
     )
 
     # -------------------------------------------------------------------------
-    # DIAPOSITIVA 11 (CONTENIDO 7): VALIDACIÓN EDUCATIVA Y GANANCIA DE HAKE
+    # DIAPOSITIVA 11 (APORTE DE INGENIERÍA): GENERACIÓN ISOMÓRFICA ASISTIDA POR IA
     # -------------------------------------------------------------------------
     add_slide_transition_banner(
         doc,
-        slide_num="11 (Diapositiva 7 en Canva)",
-        title="7. Validación Educativa: Ganancia de Aprendizaje en Internos Rotativos",
-        duration="3 minutos",
-        screen_action="Mostrar diapositiva con las gráficas de barras Pre vs. Post-Test individual y la distribución de Ganancia Normalizada de Hake (g=0.74, N=25)."
+        slide_num="11 (Diapositiva 7 en Canva - Perspectiva de Software)",
+        title="7. Arquitectura del Generador Isomórfico para Evaluación de Salida",
+        duration="1 minuto 30 segundos",
+        screen_action="Mostrar diapositiva del ciclo cerrado y el contraste entre reactivo basal y variante isomórfica generada por IA."
     )
 
-    add_cue_box(doc, "Presenta los resultados en humanos con orgullo técnico. Demuestra que la tecnología produce aprendizaje médico real.", label="IMPACTO CLÍNICO")
+    add_cue_box(doc, "Explica brevemente la técnica de IA que previene que los estudiantes memoricen las respuestas del examen.", label="IA RESILIENTE")
 
     add_spoken_paragraph(
         doc,
-        "La mejor arquitectura informática carece de valor si no produce una mejora medible en el aprendizaje de los estudiantes. "
-        "Por ello, ejecutamos un estudio piloto experimental cuantitativo con una cohorte de veinticinco médicos internos de pregrado, "
-        "utilizando un diseño pareado Pre-Test versus Post-Test sobre casos normativos del Ministerio de Salud Pública.",
-        bold_lead="El Estudio Piloto con Internos Rotativos:"
+        "Desde la ingeniería del software, un reto crítico al evaluar el impacto educativo era neutralizar el sesgo de memorización o práctica repetida (testing effect). "
+        "Si presentábamos exactamente el mismo caso en la entrada y en la salida, el alumno podía aprobar simplemente por recordar las opciones.",
+        bold_lead="Neutralización del Sesgo de Memorización:"
     )
 
     add_spoken_paragraph(
         doc,
-        "Un componente metodológico cardinal de Ateneo+ es que cierra el ciclo didáctico formativo (closing the clinical loop) mediante tres fases estructuradas: "
-        "Primero, una Evaluación Diagnóstica Inicial (Pre-Test) estratificada exactamente en las cuatro áreas troncales del Examen de Habilitación para el Ejercicio Profesional "
-        "del CACES y del Ministerio de Salud Pública: Ginecología y Obstetricia con emergencias como Preeclampsia severa y Código Rojo; "
-        "Pediatría y Neonatología con sepsis neonatal y asma grave; Medicina Interna y Crónicos con cetoacidosis diabética y síndrome coronario; "
-        "e Infectología y Salud Pública con neumonía comunitaria y dengue grave, bajo un balance equitativo uno a uno con dos punto cincuenta puntos por área. "
-        "Segundo, ante cada debilidad u omisión detectada, un motor heurístico prescriptivo pondera la severidad psicométrica y formula un Plan de Estudio Prescriptivo dosificado "
-        "en la Zona de Desarrollo Próximo, combinando lectura de secciones exactas de la GPC ministerial, simulación de casos guiados y debriefing socrático reflexivo. "
-        "Y tercero, la reevaluación de salida mediante un Post-Test isomórfico generado con inteligencia artificial, que preserva la encrucijada fisiopatológica y el estándar ministerial, "
-        "pero varía las constantes del paciente para neutralizar por completo el sesgo de memorización o práctica repetida (testing effect).",
-        bold_lead="El Ciclo Formativo Cerrado y Troncales CACES:",
+        "Para solucionar esto, desarrollamos un generador de casos isomórficos asistido por IA dentro de la pasarela ResilientLLMGateway. "
+        "El motor toma la encrucijada fisiopatológica y la norma ministerial del caso basal, pero genera una variante paralela modificando la demografía del paciente, "
+        "la edad gestacional y las cifras hemodinámicas dentro de los mismos rangos de severidad. "
+        "De este modo, cuando mi compañera les presente las extraordinarias ganancias de aprendizaje alcanzadas, tendrán la certeza técnica "
+        "de que lo que se midió fue razonamiento clínico genuino y no memoria a corto plazo.",
+        bold_lead="Generación Paralela Isomórfica:",
         pause_after=True
     )
 
-    add_spoken_paragraph(
-        doc,
-        "Los resultados pedagógicos fueron extraordinarios: la calificación promedio de razonamiento clínico ascendió de cuatro punto ochenta y siete sobre diez en el pre-test "
-        "a ocho punto sesenta y cuatro sobre diez en el post-test. Esto representa una mejora formativa del setenta y siete punto cuatro por ciento. "
-        "Al calcular la Ganancia Normalizada de Aprendizaje de Hake, obtuvimos un índice g igual a cero punto setenta y cuatro. "
-        "En la literatura psicométrica internacional de Richard Hake, cualquier valor superior a cero punto setenta se cataloga como 'Ganancia Alta', "
-        "un umbral que casi ningún método tradicional alcanza de forma homogénea.",
-        bold_lead="Ganancia Alta de Hake (g = 0.74):"
-    )
-
-    add_spoken_paragraph(
-        doc,
-        "La prueba estadística t de Student pareada arrojó un valor de ciento cinco punto doscientos sesenta y seis con veinticuatro grados de libertad "
-        "y un p-valor menor a cero punto cero cero cero uno, con un tamaño de efecto d de Cohen superior a dos punto cero. "
-        "Como observan en la distribución de barras, el cien por ciento de los internos superó el umbral aprobatorio de siete sobre diez, "
-        "logrando una notable reducción en la dispersión de conocimientos.",
-        bold_lead="Significancia Estadística:"
-    )
-
     # -------------------------------------------------------------------------
-    # DIAPOSITIVA 12 (CONTENIDO 8): ANALÍTICA INSTITUCIONAL E ÍNDICE IBF
+    # DIAPOSITIVA 12 (CONTENIDO 8): ANALÍTICA INSTITUCIONAL Y SOSTENIBILIDAD
     # -------------------------------------------------------------------------
     add_slide_transition_banner(
         doc,
         slide_num="12 (Diapositiva 8 en Canva)",
-        title="8. Analítica Institucional: Índice de Brecha Formativa (IBF) y Sostenibilidad",
-        duration="2 minutos 30 segundos",
-        screen_action="Mostrar diapositiva con el gráfico de barras del IBF por eje clínico y la comparación de impacto global (0.4151 vs. 0.0496)."
+        title="8. Analítica Institucional, Soberanía Tecnológica y Sostenibilidad",
+        duration="2 minutos",
+        screen_action="Mostrar diapositiva con la reducción del IBF (0.4151 a 0.0496), el semáforo curricular y el costo computacional sub-0.05 USD."
     )
 
-    add_cue_box(doc, "Muestra el valor de gestión para decanos y directores de hospital. Destaca el costo sub-0.05 USD.", label="GESTIÓN Y SOSTENIBILIDAD")
+    add_cue_box(doc, "Resalta el costo accesible para facultades públicas y el cumplimiento de la ley de datos ecuatoriana.", label="SOBERANÍA Y EFICIENCIA")
 
     add_spoken_paragraph(
         doc,
-        "Ateneo+ no solo acompaña al estudiante en su pantalla; también brinda a las facultades de medicina y a los comités de docencia hospitalaria "
-        "un panel de analítica institucional en tiempo real a través del Índice de Brecha Formativa o IBF.",
-        bold_lead="Vigilancia Curricular en Tiempo Real:"
+        "A nivel de analítica de datos institucional, Ateneo+ proporciona a los comités de docencia y decanatos un cuadro de mando automatizado a través del Índice de Brecha Formativa (IBF). "
+        "El IBF calcula de forma continua qué tan alejada está una cohorte frente al estándar normativo de ocho sobre diez, operando como un semáforo de alerta temprana "
+        "que permite a la cátedra detectar debilidades curriculares antes de que los internos enfrenten pacientes en sus guardias hospitalarias.",
+        bold_lead="Panel Analítico del IBF:"
     )
 
     add_spoken_paragraph(
         doc,
-        "El IBF es un indicador continuo entre cero y uno que cuantifica qué tan alejada se encuentra una cohorte respecto al estándar normativo de ocho sobre diez. "
-        "Funciona como un semáforo curricular de alerta temprana: permite identificar con precisión quirúrgica en qué eje clínico específico se concentran los vacíos. "
-        "Por ejemplo, en nuestro piloto detectamos que las mayores debilidades se concentraban en los ejes de Tratamiento y Prevención, permitiendo a los docentes planificar talleres de refuerzo focalizados antes de que los internos enfrenten guardias hospitalarias reales.",
-        bold_lead="Semáforo Curricular:",
+        "En términos de viabilidad económica y soberanía tecnológica, el costo computacional de una sesión clínica completa en Ateneo+ es inferior a cero punto cero cinco dólares, "
+        "frente a los más de mil doscientos dólares por hora que demanda la operación de centros de simulación mecatrónicos tradicionales. "
+        "Además, la plataforma está 100% contenerizada en Docker Compose para ser desplegada en centros de datos locales o servidores universitarios propios, "
+        "garantizando la soberanía de la información y el cumplimiento estricto de la Ley Orgánica de Protección de Datos Personales del Ecuador.",
+        bold_lead="Eficiencia Económica y Cumplimiento LOPDP:",
         pause_after=True
     )
 
-    add_spoken_paragraph(
-        doc,
-        "La gráfica de la derecha ilustra el impacto global del motor adaptativo: el IBF general de la cohorte descendió de cero punto cuarenta y uno cincuenta y uno, "
-        "que corresponde a una brecha crítica, a tan solo cero punto cero cuatrocientos noventa y seis, catalogada como leve. "
-        "Esto representa una reducción de la brecha formativa del ochenta y ocho punto seis por ciento.",
-        bold_lead="Reducción del 88.6% de la Brecha:"
-    )
-
-    add_spoken_paragraph(
-        doc,
-        "En términos de viabilidad económica y soberanía, el costo computacional de una simulación completa en Ateneo+ es inferior a cero punto cero cinco dólares por caso, "
-        "frente a los más de mil doscientos dólares por hora que representa la operación en centros de simulación físicos tradicionales. "
-        "Además, la plataforma está completamente conteinerizada en Docker para ser instalada de forma local en los centros de datos de cada hospital, "
-        "garantizando la custodia de datos y el cumplimiento estricto de la Ley Orgánica de Protección de Datos Personales del Ecuador.",
-        bold_lead="Eficiencia Económica y Soberanía:"
-    )
-
     # -------------------------------------------------------------------------
-    # DIAPOSITIVA 13 (CONTENIDO 9): CONCLUSIONES Y HOJA DE RUTA
+    # DIAPOSITIVA 13 (CONTENIDO 9): CONCLUSIONES TÉCNICAS Y HOJA DE RUTA
     # -------------------------------------------------------------------------
     add_slide_transition_banner(
         doc,
         slide_num="13 (Diapositiva 9 en Canva)",
-        title="9. Conclusiones y Hoja de Ruta: Aporte a la Educación Médica y Escalabilidad",
-        duration="2 minutos 30 segundos",
-        screen_action="Mostrar diapositiva final de balance: 4 Conclusiones Principales y 4 Líneas de Trabajo Futuro."
+        title="9. Conclusiones Técnicas y Hoja de Ruta Tecnológica",
+        duration="2 minutos",
+        screen_action="Mostrar diapositiva de balance técnico y líneas de evolución en ingeniería e interoperabilidad."
     )
 
-    add_cue_box(doc, "Conclusión firme y propositiva. Cierra con convicción y abre formalmente el espacio de preguntas.", label="CIERRE MAGISTRAL")
+    add_cue_box(doc, "Cierre sólido de tu intervención técnica. Reafirma la solvencia del software y cede el paso para las conclusiones finales.", label="CIERRE TÉCNICO")
 
     add_spoken_paragraph(
         doc,
-        "Para concluir nuestra exposición, deseamos sintetizar los cuatro aportes científicos y sanitarios más significativos de esta investigación:",
-        bold_lead="Aportes Fundamentales del Proyecto:"
+        "Para concluir mi intervención en el ámbito tecnológico, podemos afirmar con certeza científica que Ateneo+ demuestra que es posible "
+        "construir inteligencia artificial aplicada a la salud en Ecuador con rigor metodológico, alta precisión y soberanía de datos.",
+        bold_lead="Balance Tecnológico del Proyecto:"
     )
 
     add_spoken_paragraph(
         doc,
-        "Primero: Demostramos que el anclaje normativo mediante RAG híbrido y fine-tuning supervisado de embeddings BGE-M3 elimina el riesgo de alucinación clínica en la IA evaluativa. "
-        "Segundo: El modelado psicométrico formal basado en KST y BKT permite personalizar la trayectoria pedagógica en la Zona de Desarrollo Próximo, acelerando la curva de aprendizaje al doble de velocidad. "
-        "Tercero: Democratizamos el acceso a la simulación clínica de alta fidelidad, haciéndola accesible desde cualquier navegador web a costos operativos insignificantes. "
-        "Y cuarto: Fortalecemos de manera decisiva la seguridad del paciente, cerrando brechas formativas críticas en un entorno virtual seguro antes de que el médico atienda urgencias reales.",
-        bold_lead="Los Cuatro Pilares Demostrados:",
+        "En nuestra hoja de ruta técnica inmediata, estamos expandiendo la base a cincuenta escenarios normativos de atención primaria y medicina rural; "
+        "estamos implementando 'Nosology Adapters' para admitir consensos internacionales complementarios sin fracturar la norma nacional; "
+        "estamos desarrollando la capa de interoperabilidad con historias clínicas electrónicas bajo el estándar HL7 FHIR; "
+        "y nos encontramos listos para iniciar la validación multicéntrica en cinco facultades de medicina del país.",
+        bold_lead="Hoja de Ruta de Ingeniería e Interoperabilidad:",
         pause_after=True
     )
 
     add_spoken_paragraph(
         doc,
-        "En nuestra hoja de ruta de escalabilidad, estamos expandiendo el catálogo a cincuenta escenarios clínicos prioritarios de atención primaria y salud rural; "
-        "estamos diseñando adaptadores nosológicos para incorporar consensos internacionales complementarios sin romper la norma nacional; "
-        "estamos preparando la interoperabilidad con historias clínicas electrónicas bajo el estándar HL7 FHIR; "
-        "y nos encontramos iniciando la validación multicéntrica en cinco facultades de medicina del Ecuador para consolidar este proyecto como un estándar nacional.",
-        bold_lead="Hoja de Ruta Futura:"
-    )
-
-    # -------------------------------------------------------------------------
-    # DIAPOSITIVA 14: CIERRE Y PREGUNTAS
-    # -------------------------------------------------------------------------
-    add_slide_transition_banner(
-        doc,
-        slide_num="14",
-        title="Agradecimiento y Sesión de Preguntas y Respuestas (Q&A)",
-        duration="1 minuto",
-        screen_action="Mostrar diapositiva final de contacto con los datos de ambos investigadores."
-    )
-
-    add_spoken_paragraph(
-        doc,
-        "Agradecemos profundamente al comité organizador de CAISEB 2026 por brindarnos este espacio para divulgar ciencia aplicada hecha en Ecuador, "
-        "y quedamos a entera disposición del honorable tribunal evaluador para atender sus preguntas y comentarios. Muchas gracias.",
-        bold_lead="Cierre Protocolar:"
+        "Agradezco su atención y cedo nuevamente la palabra a mi coautora, la Magíster Sánchez, para el cierre pedagógico de la ponencia.",
+        bold_lead="Transición de Salida (Retorno a la Coautora):"
     )
 
     doc.add_page_break()
 
     # =========================================================================
-    # VERSIÓN DE EMERGENCIA: PLAN B (15 MINUTOS)
+    # PLAN B TÉCNICO: COMPRESIÓN TÁCTICA (6 A 8 MINUTOS)
     # =========================================================================
-    add_section_header(doc, "PLAN B: VERSIÓN DE COMPRESIÓN TÁCTICA (15 MINUTOS)")
+    add_section_header(doc, "PLAN B TÉCNICO: COMPRESIÓN TÁCTICA (6 A 8 MINUTOS)")
     
     add_cue_box(
         doc,
-        "Utiliza esta sección únicamente si el moderador del congreso anuncia al inicio que por retrasos de agenda el tiempo se reduce a 15 minutos. "
-        "Esta versión va directo al grano, preservando el 100% de las métricas clave sin perder impacto científico.",
-        label="USO EXCLUSIVO ANTE RECORTE DE TIEMPO"
+        "Utiliza esta sección condensada únicamente si el moderador anuncia recorte de tiempo para la exposición general. "
+        "Resume la ingeniería y los benchmarks con máxima potencia en menos de 8 minutos.",
+        label="USO ANTE RECORTE SEVERO DE TIEMPO"
     )
 
     add_spoken_paragraph(
         doc,
-        "Muy buenos días con todos. Presentamos Ateneo+: un simulador clínico multimodal desarrollado para resolver un desafío estructural en la formación médica: "
-        "la necesidad de que los médicos internos entrenen su razonamiento diagnóstico y terapéutico bajo las Guías de Práctica Clínica del Ministerio de Salud Pública de Ecuador, "
-        "sin comprometer la seguridad del paciente y sin depender de costosos maniquíes físicos inaccesibles para la mayoría de universidades.",
-        bold_lead="Minuto 0 al 3 | El Problema y la Solución:"
+        "Muchas gracias. En el componente de ingeniería de software e inteligencia artificial de Ateneo+, resolvimos el problema de la alucinación médica comercial "
+        "mediante una arquitectura RAG supervisada: curamos cuarenta y dos Guías de Práctica Clínica del Ministerio de Salud Pública generando siete mil cincuenta y dos fragmentos normativos indivisibles. "
+        "Realizamos fine-tuning supervisado del modelo Transformer BGE-M3 en una GPU NVIDIA A100 dedicada y fusionamos búsqueda semántica densa y dispersa con Reciprocal Rank Fusion (k=60), "
+        "respaldado por una caché de cero punto cero cinco milisegundos y un guardián de seguridad contra jailbreaks.",
+        bold_lead="Bloque 1 | Arquitectura RAG Híbrida y Fine-Tuning en GPU A100:"
     )
 
     add_spoken_paragraph(
         doc,
-        "El uso de modelos de inteligencia artificial comerciales genéricos presenta un cuarenta y cinco punto ocho por ciento de alucinación crítica en dosificación médica y desconoce el Cuadro Nacional de Medicamentos Básicos. "
-        "Nuestra solución consistió en diseñar una arquitectura RAG supervisada: procesamos cuarenta y dos guías oficiales del MSP generando siete mil cincuenta y dos fragmentos normativos. "
-        "Realizamos fine-tuning supervisado del modelo de embeddings BGE-M3 en una GPU NVIDIA A100 y fusionamos búsqueda densa y léxica con Reciprocal Rank Fusion, "
-        "logrando una caché semántica de cero punto cero cinco milisegundos y un debriefing socrático por streaming con cita física verificable de página.",
-        bold_lead="Minuto 3 al 7 | Arquitectura Técnica y Fine-Tuning en GPU:"
+        "En la dimensión psicométrica y de software, modelamos el razonamiento clínico sobre un grafo acíclico dirigido de siete competencias (KST) "
+        "con actualización bayesiana continua (BKT), duplicando la velocidad de maestría en la Zona de Desarrollo Próximo. "
+        "En la interfaz split-screen, el interno dictamina sobre los cuatro ejes normativos del MSP mediante voz o texto, interactúa con paraclínicos 2D y tomografías en visor DICOM Canvas GPU, "
+        "debate en tiempo real en salas colaborativas AteneoRoom con WebSockets y progresa a través de cinco rangos de carrera médica con ocho hitos clínicos con persistencia transaccional ACID.",
+        bold_lead="Bloque 2 | Modelado Cognitivo KST/BKT, Salas Sincrónicas y Carrera Médica:"
     )
 
     add_spoken_paragraph(
         doc,
-        "A nivel psicométrico y pedagógico, Ateneo+ modela el conocimiento sobre un grafo acíclico dirigido de siete competencias clínicas (KST), "
-        "cierra el ciclo didáctico mediante un Pre-Test estratificado en las cuatro áreas troncales del CACES y formula planes prescriptivos heurísticos "
-        "con reevaluación por Post-Test isomórfico asistido por IA. "
-        "En la interfaz split-screen, el estudiante dictamina por voz o texto sobre los cuatro ejes formativos normativos del MSP, "
-        "cuenta con salas colaborativas sincrónicas AteneoRoom con WebSockets para debate colegiado y progresa a través de cinco rangos "
-        "de carrera médica con ocho hitos clínicos normativos con persistencia transaccional ACID.",
-        bold_lead="Minuto 7 al 10 | Motor Psicométrico, Ciclo CACES, Salas y Carrera Médica:"
-    )
-
-    add_spoken_paragraph(
-        doc,
-        "En los resultados técnicos, el fine-tuning en GPU cuadruplicó la precisión de recuperación Top-1 con un incremento del más trescientos sesenta y nueve por ciento en Hit@1 "
-        "y más doscientos setenta y cuatro por ciento en MRR@5, con significancia estadística de Wilcoxon con p menor a cero punto cero cero uno en consultas ciegas fuera de distribución, "
-        "y cien por ciento de fidelidad normativa RAGAS.",
-        bold_lead="Minuto 10 al 13 | Resultados Técnicos y Experimentales:"
-    )
-
-    add_spoken_paragraph(
-        doc,
-        "En el estudio piloto con veinticinco médicos internos, la calificación promedio se elevó de cuatro punto ochenta y siete a ocho punto sesenta y cuatro sobre diez (+setenta y siete por ciento), "
-        "alcanzando una Ganancia Normalizada de Hake de g igual a cero punto setenta y cuatro, catalogada como Ganancia Alta, con t pareada de ciento cinco punto veintiséis y p menor a cero punto cero cero cero uno. "
-        "El Índice de Brecha Formativa se redujo en un ochenta y ocho punto seis por ciento, con un costo menor a cinco centavos de dólar por sesión. "
-        "Ateneo+ demuestra que es posible unir la inteligencia artificial y la salud pública con soberanía y rigor científico. Muchas gracias.",
-        bold_lead="Minuto 13 al 15 | Impacto Educativo y Conclusión:"
+        "Los benchmarks técnicos validan esta arquitectura de forma irrefutable: en la GPU A100 cuadruplicamos la precisión Top-1 con un salto del más trescientos sesenta y nueve por ciento en Hit@1 "
+        "y más doscientos setenta y cuatro por ciento en MRR@5. La prueba no paramétrica de Wilcoxon sobre doscientas ochenta y tres consultas ciegas fuera de distribución "
+        "arrojó significancia estadística con p menor a cero punto cero cero uno (W=365.0), alcanzando cien por ciento de fidelidad normativa en RAGAS. "
+        "Todo esto con un costo menor a cinco centavos de dólar por sesión y despliegue on-premise bajo Docker para cumplimiento de la LOPDP. Muchas gracias.",
+        bold_lead="Bloque 3 | Benchmarks IR, Wilcoxon, Eficiencia y Cierre:"
     )
 
     doc.add_page_break()
 
     # =========================================================================
-    # BANCO DE RESPUESTAS A PREGUNTAS DEL TRIBUNAL (Q&A)
+    # BANCO DE DEFENSA TÉCNICA ANTE EL TRIBUNAL (Q&A COMPLETO - 16 PREGUNTAS)
     # =========================================================================
-    add_section_header(doc, "BANCO DE RESPUESTAS VERBATIM PARA LA DEFENSA ANTE EL TRIBUNAL (Q&A)")
+    add_section_header(doc, "BANCO DE RESPUESTAS TÉCNICAS VERBATIM ANTE EL TRIBUNAL (Q&A)")
     
     add_cue_box(
         doc,
-        "Durante la sesión de preguntas, escucha con calma al jurado, anota la palabra clave de su duda y lee directamente la respuesta correspondiente. "
-        "Todas las respuestas están redactadas en primera persona, manteniendo tu rol como desarrollador e investigador de software.",
+        "Durante la sesión de preguntas, escucha atentamente al jurado. Identifica la temática técnica o metodológica de la duda "
+        "y lee con serenidad la respuesta correspondiente. Todas están redactadas en primera persona desde tu autoridad como desarrollador.",
         label="DEFENSA ORAL ANTE EL JURADO"
     )
 
@@ -988,7 +745,7 @@ def build_teleprompter_document():
         add_sub_header(doc, q_tit)
         add_spoken_paragraph(doc, q_resp, bold_lead="Respuesta para el Expositor:")
 
-    # Guardar documento
+    # Guardar documento Word
     doc.save(str(DOCX_OUTPUT))
     print(f"Documento Word de Teleprompter generado con éxito: {DOCX_OUTPUT} ({DOCX_OUTPUT.stat().st_size} bytes)")
 
