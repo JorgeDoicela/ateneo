@@ -144,29 +144,16 @@ def add_cue_box(doc, text, label="INDICACIÓN DE CÁMARA Y VOZ"):
 
 def add_spoken_paragraph(doc, text, bold_lead=None, pause_after=False):
     p = doc.add_paragraph()
-    p.paragraph_format.space_before = Pt(3)
-    p.paragraph_format.space_after = Pt(7)
+    p.paragraph_format.space_before = Pt(4)
+    p.paragraph_format.space_after = Pt(10 if pause_after else 6)
     p.paragraph_format.line_spacing = 1.25
     p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     
-    if bold_lead:
-        r_lead = p.add_run(bold_lead + " ")
-        r_lead.font.name = "Arial"
-        r_lead.font.size = Pt(11.5)
-        r_lead.font.bold = True
-        r_lead.font.color.rgb = COLOR_NAVY
-        
+    # Lectura 100% fluida de corrido: NO se incrustan subtítulos, números ni etiquetas dentro del párrafo hablado
     r_body = p.add_run(text)
     r_body.font.name = "Arial"
-    r_body.font.size = Pt(11.5)
+    r_body.font.size = Pt(12)
     r_body.font.color.rgb = COLOR_DARK
-    
-    if pause_after:
-        r_pause = p.add_run("  [PAUSA DE RESPIRACIÓN]")
-        r_pause.font.name = "Arial"
-        r_pause.font.size = Pt(9.5)
-        r_pause.font.bold = True
-        r_pause.font.color.rgb = COLOR_RED
 
 def add_section_header(doc, text):
     h = doc.add_paragraph()
@@ -713,8 +700,13 @@ def build_teleprompter_document():
         add_spoken_paragraph(doc, q_resp, bold_lead="Respuesta para el Expositor:")
 
     # Guardar documento Word
-    doc.save(str(DOCX_OUTPUT))
-    print(f"Documento Word de Teleprompter generado con éxito: {DOCX_OUTPUT} ({DOCX_OUTPUT.stat().st_size} bytes)")
+    try:
+        doc.save(str(DOCX_OUTPUT))
+        print(f"Documento Word de Teleprompter generado con éxito: {DOCX_OUTPUT} ({DOCX_OUTPUT.stat().st_size} bytes)")
+    except PermissionError:
+        fallback = DOCX_OUTPUT.with_name("DISCURSO_PONENCIA_VIRTUAL_CAISEB_CORRIDO.docx")
+        doc.save(str(fallback))
+        print(f"AVISO: El archivo principal está abierto en Word. Se guardó una copia lista para leer de corrido en: {fallback} ({fallback.stat().st_size} bytes)")
 
 if __name__ == "__main__":
     build_teleprompter_document()
