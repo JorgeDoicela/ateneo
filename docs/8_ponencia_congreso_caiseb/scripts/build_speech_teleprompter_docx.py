@@ -539,56 +539,17 @@ def build_teleprompter_document():
     )
 
     # -------------------------------------------------------------------------
-    # DIAPOSITIVA 11 (APORTE DE INGENIERÍA): GENERACIÓN ISOMÓRFICA ASISTIDA POR IA
-    # -------------------------------------------------------------------------
-    add_slide_transition_banner(
-        doc,
-        slide_num="11 (Diapositiva 7 en Canva - Perspectiva de Software)",
-        title="7. Arquitectura del Generador Isomórfico para Evaluación de Salida",
-        duration="1 minuto 30 segundos",
-        screen_action="Mostrar diapositiva del ciclo cerrado y el contraste entre reactivo basal y variante isomórfica generada por IA."
-    )
-
-    add_cue_box(doc, "Explica brevemente la técnica de IA que previene que los estudiantes memoricen las respuestas del examen.", label="IA RESILIENTE")
-
-    add_spoken_paragraph(
-        doc,
-        "Desde la ingeniería del software, un reto crítico al evaluar el impacto educativo era neutralizar el sesgo de memorización o práctica repetida (testing effect). "
-        "Si presentábamos exactamente el mismo caso en la entrada y en la salida, el alumno podía aprobar simplemente por recordar las opciones.",
-        bold_lead="Neutralización del Sesgo de Memorización:"
-    )
-
-    add_spoken_paragraph(
-        doc,
-        "Para solucionar esto, desarrollamos un generador de casos isomórficos asistido por IA dentro de la pasarela ResilientLLMGateway. "
-        "El motor toma la encrucijada fisiopatológica y la norma ministerial del caso basal, pero genera una variante paralela modificando la demografía del paciente, "
-        "la edad gestacional y las cifras hemodinámicas dentro de los mismos rangos de severidad. "
-        "De este modo, cuando mi compañera les presente las extraordinarias ganancias de aprendizaje alcanzadas, tendrán la certeza técnica "
-        "de que lo que se midió fue razonamiento clínico genuino y no memoria a corto plazo.",
-        bold_lead="Generación Paralela Isomórfica:",
-        pause_after=True
-    )
-
-    # -------------------------------------------------------------------------
-    # DIAPOSITIVA 12 (CONTENIDO 8): ANALÍTICA INSTITUCIONAL Y SOSTENIBILIDAD
+    # DIAPOSITIVA 12 (CONTENIDO 8): INFRAESTRUCTURA Y SOBERANÍA TECNOLÓGICA
     # -------------------------------------------------------------------------
     add_slide_transition_banner(
         doc,
         slide_num="12 (Diapositiva 8 en Canva)",
-        title="8. Analítica Institucional, Soberanía Tecnológica y Sostenibilidad",
-        duration="2 minutos",
-        screen_action="Mostrar diapositiva con la reducción del IBF (0.4151 a 0.0496), el semáforo curricular y el costo computacional sub-0.05 USD."
+        title="8. Infraestructura, Soberanía Tecnológica y Cumplimiento LOPDP",
+        duration="1 minuto 30 segundos",
+        screen_action="Mostrar diapositiva destacando la arquitectura on-premise en Docker, la eficiencia de costos sub-0.05 USD y la custodia de datos según la LOPDP."
     )
 
     add_cue_box(doc, "Resalta el costo accesible para facultades públicas y el cumplimiento de la ley de datos ecuatoriana.", label="SOBERANÍA Y EFICIENCIA")
-
-    add_spoken_paragraph(
-        doc,
-        "A nivel de analítica de datos institucional, Ateneo+ proporciona a los comités de docencia y decanatos un cuadro de mando automatizado a través del Índice de Brecha Formativa (IBF). "
-        "El IBF calcula de forma continua qué tan alejada está una cohorte frente al estándar normativo de ocho sobre diez, operando como un semáforo de alerta temprana "
-        "que permite a la cátedra detectar debilidades curriculares antes de que los internos enfrenten pacientes en sus guardias hospitalarias.",
-        bold_lead="Panel Analítico del IBF:"
-    )
 
     add_spoken_paragraph(
         doc,
@@ -601,24 +562,17 @@ def build_teleprompter_document():
     )
 
     # -------------------------------------------------------------------------
-    # DIAPOSITIVA 13 (CONTENIDO 9): CONCLUSIONES TÉCNICAS Y HOJA DE RUTA
+    # DIAPOSITIVA 13 (CONTENIDO 9): HOJA DE RUTA TECNOLÓGICA Y CIERRE TÉCNICO
     # -------------------------------------------------------------------------
     add_slide_transition_banner(
         doc,
         slide_num="13 (Diapositiva 9 en Canva)",
-        title="9. Conclusiones Técnicas y Hoja de Ruta Tecnológica",
-        duration="2 minutos",
-        screen_action="Mostrar diapositiva de balance técnico y líneas de evolución en ingeniería e interoperabilidad."
+        title="9. Hoja de Ruta Tecnológica y Cierre del Bloque de Ingeniería",
+        duration="1 minuto 30 segundos",
+        screen_action="Mostrar diapositiva con las 4 líneas de evolución técnica (50 escenarios, Nosology Adapters, HL7 FHIR y validación multicéntrica)."
     )
 
-    add_cue_box(doc, "Cierre sólido de tu intervención técnica. Reafirma la solvencia del software y cede el paso para las conclusiones finales.", label="CIERRE TÉCNICO")
-
-    add_spoken_paragraph(
-        doc,
-        "Para concluir mi intervención en el ámbito tecnológico, podemos afirmar con certeza científica que Ateneo+ demuestra que es posible "
-        "construir inteligencia artificial aplicada a la salud en Ecuador con rigor metodológico, alta precisión y soberanía de datos.",
-        bold_lead="Balance Tecnológico del Proyecto:"
-    )
+    add_cue_box(doc, "Cierre sólido de tu intervención técnica. Cede formalmente la palabra a tu coautora para los resultados pedagógicos.", label="CIERRE TÉCNICO")
 
     add_spoken_paragraph(
         doc,
@@ -632,11 +586,14 @@ def build_teleprompter_document():
 
     add_spoken_paragraph(
         doc,
-        "Agradezco su atención y cedo nuevamente la palabra a mi coautora, la Magíster Sánchez, para el cierre pedagógico de la ponencia.",
+        "Con esto concluyo la exposición de la arquitectura técnica y los modelos de inteligencia artificial. "
+        "Cedo nuevamente la palabra a mi coautora, la Magíster Estefani Sánchez, para la presentación de la metodología de evaluación, "
+        "el instrumento clínico, los resultados en los médicos internos y las conclusiones finales del estudio.",
         bold_lead="Transición de Salida (Retorno a la Coautora):"
     )
 
     doc.add_page_break()
+
 
     # =========================================================================
     # PLAN B TÉCNICO: COMPRESIÓN TÁCTICA (6 A 8 MINUTOS)
