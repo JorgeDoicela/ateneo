@@ -15,6 +15,7 @@ docs/
 │   ├── ARQUITECTURA_MODULAR_MONOLITO_BACKEND.md # FastAPI, Repositorios, Unit of Work y Schemas
 │   ├── ARQUITECTURA_RAG_Y_FINE_TUNING.md    # Pipeline RAG híbrido (denso + disperso), BGE-M3 y GPC
 │   ├── ARQUITECTURA_RESILIENTE_LLM_Y_CONFIGURACION.md # Circuit breakers, reintentos y fallback defensivo
+│   ├── ARQUITECTURA_SIMULADOR_HOSPITALARIO_3D_Y_PIPELINE_BLENDER.md # WebGL, Blender 5.2, PBR y triaje 3D
 │   ├── ARQUITECTURA_Y_MODELADO_BASE_DE_DATOS.md # Esquema relacional SQLite, índices y migraciones
 │   ├── DOSIER_TECNICO_MARKDOWN_CLINICO_Y_SEGURIDAD_DEEP_LINKING.md # AST Pipeline y Deep-Linking JWT
 │   ├── CURRICULO_ADAPTATIVO_KST_Y_LEARNING_ANALYTICS.md # Knowledge Space Theory y modelos bayesianos
@@ -33,7 +34,8 @@ docs/
 ## 2. Documentos Metodológicos Principales
 
 ### 2.1 Arquitectura e Ingeniería de Software
-* [ARQUITECTURA_MODULAR_FRONTEND.md](./3_documentacion_metodologica/ARQUITECTURA_MODULAR_FRONTEND.md): Detalla la partición del cliente React + Vite PWA en módulos de dominio clínico (`cases`, `evaluation`, `collaboration`, `analytics`, `teacher`, `admin`), ViewModels desacoplados mediante custom hooks, y el sistema de diseño clínico normativo (Material 3 Canvas `#f0f4f9`, sin emojis, iconos planos transparentes).
+* [ARQUITECTURA_MODULAR_FRONTEND.md](./3_documentacion_metodologica/ARQUITECTURA_MODULAR_FRONTEND.md): Detalla la partición del cliente React + Vite PWA en módulos de dominio clínico (`cases`, `evaluation`, `collaboration`, `analytics`, `teacher`, `admin`, `spatial`), ViewModels desacoplados mediante custom hooks, y el sistema de diseño clínico normativo (Material 3 Canvas `#f0f4f9`, sin emojis, iconos planos transparentes).
+* [ARQUITECTURA_SIMULADOR_HOSPITALARIO_3D_Y_PIPELINE_BLENDER.md](./3_documentacion_metodologica/ARQUITECTURA_SIMULADOR_HOSPITALARIO_3D_Y_PIPELINE_BLENDER.md): Especifica el entorno inmersivo WebGL en `/hospital-3d`, el pipeline determinista en Blender 5.2.3 LTS, texturas PBR procedurales (vinilo, acero, curvas ECG), cinemática en primera persona y sincronización de las 6 bahías clínicas con casos normativos de las GPC del MSP.
 * [ARQUITECTURA_MODULAR_MONOLITO_BACKEND.md](./3_documentacion_metodologica/ARQUITECTURA_MODULAR_MONOLITO_BACKEND.md): Especifica el monolito modular en FastAPI, la inyección de dependencias, repositorios relacionales y el patrón Unit of Work.
 * [ARQUITECTURA_Y_MODELADO_BASE_DE_DATOS.md](./3_documentacion_metodologica/ARQUITECTURA_Y_MODELADO_BASE_DE_DATOS.md): Detalla el modelo relacional ACID en `ateneo_clinical.db`, tablas maestras (`users`, `tenants`, `user_sessions`, `evaluation_history`), claves foráneas e integridad referencial.
 * [DOSIER_TECNICO_MARKDOWN_CLINICO_Y_SEGURIDAD_DEEP_LINKING.md](./3_documentacion_metodologica/DOSIER_TECNICO_MARKDOWN_CLINICO_Y_SEGURIDAD_DEEP_LINKING.md): Especifica el motor de compilación AST de Markdown clínico (`ClinicalMarkdownRenderer.tsx`), los modos visuales (`standard`, `dense`, `academic`), la preservación de deep-linking con mitigación de Open Redirect (CWE-601), y el ciclo de captura reactiva de errores HTTP 401 en tiempo real.
@@ -57,7 +59,7 @@ docs/
 
 | Batería de Pruebas | Entorno | Casos de Prueba | Resultado |
 | :--- | :--- | :---: | :---: |
-| **Frontend Unit & Integration** | Vitest 5 + React Testing Library | 156 / 156 | **100% PASS** |
+| **Frontend Unit & Integration** | Vitest 5 + React Testing Library | 199 / 199 | **100% PASS** |
 | **Backend Total Suite (Pytest)** | Pytest 9 + FastAPI TestClient | 108 / 108 | **100% PASS** |
 | **Seguridad de Autenticación & RBAC** | Pytest (RBAC, JTI, Lockout) | 6 / 6 | **100% PASS** |
 | **Verificación de Tipos Estricta** | TypeScript 5 (`tsc --noEmit`) | 0 errores | **100% PASS** |

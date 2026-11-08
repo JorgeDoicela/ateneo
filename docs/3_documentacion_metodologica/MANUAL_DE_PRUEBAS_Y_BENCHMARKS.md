@@ -27,7 +27,7 @@ El sistema organiza sus pruebas en 4 niveles complementarios que garantizan la i
 │ • test_api_endpoints.py (Rutas /auth, /cases, /history, /adaptive, /rooms)  │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ NIVEL 1: PRUEBAS DE FRONTEND, TIEMPO REAL Y E2E                             │
-│ • Vitest + React Testing Library (26 suites, 122 tests unitarios aprobados)  │
+│ • Vitest + React Testing Library (40 suites, 199 tests unitarios e integración)│
 │ • Playwright E2E Multi-Navegador (15 tests en Chrome, Edge y Mobile Pixel 5)│
 │ • test_multimodal_and_cases.py (10 casos ChromaDB, PDF ReportLab SHA-256)   │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -37,7 +37,7 @@ El sistema organiza sus pruebas en 4 niveles complementarios que garantizan la i
 
 ## 2. Catálogo de Pruebas de Frontend (Vitest + React Testing Library & Playwright)
 
-El frontend dispone de **32 suites de prueba y 156 especificaciones unitarias y de integración** en Vitest, junto con 4 suites E2E multi-navegador en Playwright (15 pruebas), que convalidan el árbol de componentes, auto-registro multi-tenant, imagenología DICOM, exámenes OSCE, tele-audio WebRTC, temas multi-tenancy, i18n tipado, observabilidad forense y estándar de diseño:
+El frontend dispone de **40 suites de prueba y 199 especificaciones unitarias y de integración** en Vitest, junto con 4 suites E2E multi-navegador en Playwright (15 pruebas), que convalidan el árbol de componentes, simulador hospitalario 3D, auto-registro multi-tenant, imagenología DICOM, exámenes OSCE, tele-audio WebRTC, temas multi-tenancy, i18n tipado, observabilidad forense y estándar de diseño:
 
 ### 2.1 Ejecución de Pruebas Unitarias e Integración (Vitest)
 ```bash
@@ -87,6 +87,7 @@ npm run typecheck
 | `src/__tests__/ThemeProvider.test.tsx` | Multi-Tenancy UI | Inyección en caliente de CSS variables, ratio de contraste WCAG AA computado ($\ge 4.5:1$) y persistencia. |
 | `src/__tests__/I18nNosology.test.tsx` | i18n & Nosología | Diccionarios tipados `es-EC`, `es-PE`, `en-US` y adaptador nosológico (CIE-10 / CIE-11 / NTS / GPC). |
 | `src/__tests__/TelemetryRum.test.tsx` | Observabilidad RUM | Captura de Core Web Vitals, metadatos de red, W3C `traceparent` y correlación distribuida `X-Request-ID`. |
+| `src/__tests__/SpatialHospitalMaster.test.tsx` | Simulador Hospitalario 3D | Inicialización de 6 camas, triaje Código Rojo, telemetría de constantes vitales, rótulos diegéticos y tableta clínica de cabecera. |
 
 ---
 

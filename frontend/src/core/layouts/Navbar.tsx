@@ -9,7 +9,8 @@ import {
   BookOpen, 
   Search, 
   ArrowLeft,
-  BarChart3
+  BarChart3,
+  Box
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import GlobalSearchBar from './components/GlobalSearchBar';
@@ -134,6 +135,19 @@ export default function Navbar() {
                       <div data-tour="career-nav" className="hidden md:block">
                         <CareerBadgeButton />
                       </div>
+
+                      <Link
+                        to={location.pathname === '/hospital-3d' ? '/cases' : '/hospital-3d'}
+                        title={location.pathname === '/hospital-3d' ? 'Volver al Catálogo 2D' : 'Simulador Hospitalario 3D'}
+                        className={`hidden md:flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 select-none ${
+                          location.pathname === '/hospital-3d'
+                            ? 'bg-gradient-to-r from-cyan-100/80 via-blue-100/70 to-indigo-100/80 text-[#0b57d0] font-semibold border border-blue-300/80 shadow-xs'
+                            : 'bg-gradient-to-r from-cyan-50/50 via-blue-50/40 to-indigo-50/50 hover:from-cyan-100/70 hover:via-blue-100/60 hover:to-indigo-100/70 text-slate-700 hover:text-[#0b57d0] border border-blue-200/60 hover:border-blue-300/90 shadow-xs hover:shadow-sm'
+                        }`}
+                      >
+                        <Box className="w-4 h-4 text-[#0b57d0]" />
+                        <span className="hidden lg:inline">{location.pathname === '/hospital-3d' ? 'Catálogo 2D' : 'Hospital 3D'}</span>
+                      </Link>
 
                       <button
                         type="button"

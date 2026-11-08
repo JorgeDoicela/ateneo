@@ -20,6 +20,7 @@ const TeacherCasesPage = lazy(() => import('../modules/teacher/pages/TeacherCase
 const TeacherAnalyticsPage = lazy(() => import('../modules/teacher/pages/TeacherAnalyticsPage'));
 const ScientificBenchmarkView = lazy(() => import('../modules/analytics/components/ScientificBenchmarkView'));
 const StudentAnalyticsPage = lazy(() => import('../modules/analytics/pages/StudentAnalyticsPage'));
+const Hospital3DPage = lazy(() => import('../modules/spatial/pages/Hospital3DPage'));
 
 function RouteLoader() {
   return (
@@ -93,6 +94,15 @@ export default function AppRoutes() {
             element={
               <ProtectedRoute>
                 <CaseSolve />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/hospital-3d"
+            element={
+              <ProtectedRoute>
+                <Hospital3DPage />
               </ProtectedRoute>
             }
           />

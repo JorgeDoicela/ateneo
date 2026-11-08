@@ -92,6 +92,15 @@ graph TD
             RegisterPage["Register"]
             AuthApi["authApi"]
         end
+
+        subgraph Mod_Spatial [Simulador Hospitalario 3D (spatial/)]
+            SpatialPage["Hospital3DPage"]
+            SpatialStore["useSpatialStore"]
+            WardScene["HospitalWardScene (GLB PBR)"]
+            CharCtrl["CharacterController"]
+            BedBadge["BedInteractionBadge (Html 3D)"]
+            BedTablet["ClinicalBedsideTablet"]
+        end
     end
 
     subgraph Core_Shared [Capa Transversal Compartida (core/)]
@@ -107,6 +116,7 @@ graph TD
     Guard --> TeacherPage
     Guard --> AdminPage
     Guard --> BenchmarkPage
+    Guard --> SpatialPage
     Router --> LoginPage
     Router --> RegisterPage
 
@@ -500,6 +510,20 @@ La arquitectura implementada incorpora formalmente cinco subsistemas de alta tec
 * **Manejo Desacoplado de Expiración de Token (401 Unauthorized):** `httpClient.ts` intercepta códigos HTTP 401 en llamadas protegidas de la API y emite el evento DOM `ateneo:unauthorized`. `AuthContext` escucha el evento, purga la sesión caducada en Zustand y almacenamiento local, y `ProtectedRoute` guía al usuario hacia `/login` preservando su ubicación activa para re-autenticación fluida sin pérdida de estado.
 * **Resolución Limpia de Rechazos RBAC (403 Forbidden):** Eliminación de navegaciones contradictorias montadas dentro de alertas. `ProtectedRoute` renderiza una vista de acceso denegado sobria con icono plano `ShieldAlert` (sin envoltorios decorativos) y enlace de retorno seguro a su espacio asignado.
 * **Guardia Pre-Autenticado:** `Login.tsx` y `Register.tsx` detectan sesiones vivas y redirigen inmediatamente al usuario a su panel correspondiente, evitando vistas de formulario redundantes.
+
+### 8.14 Simulador Hospitalario 3D y Entorno Inmersivo WebGL (R3F + Drei + GLB)
+* **Implementación:** `src/modules/spatial/pages/Hospital3DPage.tsx`, `HospitalWardScene.tsx`, `CharacterController.tsx`, `BedInteractionBadge.tsx`, `ClinicalBedsideTablet.tsx`, `useSpatialStore.ts` y suite en `src/__tests__/SpatialHospitalMaster.test.tsx`.
+* **Renderizado WebGL de Alta Fidelidad:**
+  - Integración de `@react-three/fiber` y `@react-three/drei` con carga optimizada del activo binario `hospital_ward.glb` (3.06 MB compilado con compresión Draco/Meshopt).
+  - Materiales con sombreado PBR fotorrealista (vinilo de suelo cerámico reflectante, friso sanitario con guardacamillas de acero inoxidable, monitores de telemetría médica y cortinas divisorias plisadas).
+  - Iluminación equilibrada hospitalaria: `ambientLight` (1.1), `hemisphereLight` (0.65), `directionalLight` con sombras duras filtradas por mapa de $2048 \times 2048$, entorno de radiación `city` para reflejos metálicos y `<ContactShadows />` suaves en el suelo.
+* **Cinemática en Primera Persona:**
+  - Controlador cinemático desacoplado `CharacterController.tsx` con navegación fluida WASD / flechas, aceleración con `Shift`, orientación angular con ratón (sensibilidad $\kappa = 0.003\,\text{rad/px}$, pitch limitado a $[-\pi/3, \pi/3]$) y límites perimétricos herméticos $(-10.5 \le X \le 10.5$, $-7.8 \le Z \le 7.8$).
+  - Cámara inicial en la entrada Oeste del pabellón (`[-9.2, 1.68, 0]`, orientación `yaw = -Math.PI / 2`) con vista directa al corredor central.
+* **Micro-Tarjetas Diegéticas y Tableta de Cabecera:**
+  - Micro-tarjetas proyectadas en espacio tridimensional mediante `<Html>` (`BedInteractionBadge.tsx`) con diseño reactivo compacto (`Cama N` + estado `CÓDIGO ROJO` / `En Evaluación`) y expansión contextual al detectar proximidad euclidiana ($r \le 2.8\,\text{m}$).
+  - Tableta clínica modal de cabecera (`ClinicalBedsideTablet.tsx`) con telemetría en tiempo real (FC, PA, FR, $\text{SpO}_2$, temperatura axilar), caso clínico normativo y enlace directo de resolución diagnóstica hacia `/cases/:caseId`.
+* **Detalle Completo de Arquitectura:** Especificado en [ARQUITECTURA_SIMULADOR_HOSPITALARIO_3D_Y_PIPELINE_BLENDER.md](./ARQUITECTURA_SIMULADOR_HOSPITALARIO_3D_Y_PIPELINE_BLENDER.md).
 
 ---
 

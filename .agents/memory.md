@@ -2093,3 +2093,33 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
   - **Calibración y Desacoplamiento del Teleprompter del Expositor Técnico (`DISCURSO_PONENCIA_VIRTUAL_CAISEB.docx`, 2026-10-22):**
     - Purgadas las secciones introductorias médicas, la epidemiología general y los resultados de notas en humanos (presentados por la coautora Mgtr. Sánchez).
     - Focalización del guion verbatim de Jorge Doicela en 12-15 minutos de intervención técnica pura: Transición de entrada (handoff), pipeline RAG híbrido y MLOps en GPU A100 (D7), modelado psicométrico KST/BKT en software (D8), split-screen 50/50 y paraclínicos 2D / DICOM HU (D9), salas sincrónicas AteneoRoom y carrera médica con persistencia ACID (D9B), benchmarks experimentales IR, Wilcoxon y RAGAS (D10), generador isomórfico paralelo de Post-Test con IA (D11), analítica IBF y soberanía Docker/LOPDP (D12), conclusiones técnicas (D13), Plan B comprimido (6-8 min) y el banco íntegro de 16 respuestas de defensa técnica ante el tribunal (Q&A).
+* **Fase 13: Gobernanza de Memoria y Optimización del Hipervisor WSL 2 / Docker (`2026-11-07`):**
+  - **Causa Raíz Diagnosticada:** En Windows 11 con 16 GB de RAM, `vmmemWSL` llegó a retener 7.72 GB de memoria privada comprometida (6.19 GB activos) debido a la ausencia de `.wslconfig`. El subsistema Linux de WSL 2 acaparaba el 50% de la RAM del host y retenía buffers/pagecache sin liberarlos hacia Windows, reduciendo la memoria libre del host a apenas 348 MB y forzando swap intensivo y compresión de memoria.
+  - **Solución Arquitectural e Infraestructura Host (Cero Parches):**
+    - Aprovisionamiento canónico de `C:\Users\jorge\.wslconfig` con:
+      - `[wsl2] memory=6GB, processors=4, swap=2GB`.
+      - `[experimental] autoMemoryReclaim=gradual, sparseVhd=true`.
+    - Esta configuración preserva 10 GB limpios para el host (Windows, Antigravity IDE, compiladores y navegador) y asegura 6 GB para la máquina virtual, soportando holgadamente los 4.5 GB de límite y 2 GB de reserva de `ateneo-backend-1`.
+    - La directiva `autoMemoryReclaim=gradual` devuelve de forma continua y desatendida la caché inactiva de Linux a la RAM de Windows sin requerir reinicios manuales ni scripts efímeros de `drop_caches`.
+  - **Verificación Fáctica de Métricas:**
+    - Memoria física libre del host restaurada de 348 MB a 1.73 GB - 6.18 GB.
+    - Contenedores Docker (`ateneo-backend-1`, `ateneo-frontend-1`, `delivery-postgres`, `delivery-redis`) verificados en estado saludable (`healthy`).
+* **Fase 14: Arquitectura Maestra 3D con Texturas PBR, Corrección de Ejes Z-Up -> Y-Up y Archivo .blend Editable (`2026-11-07`):**
+  - **Causa Raíz del Defecto Visual Anterior y Solución Definitiva:**
+    1. *Inversión de Ejes Blender Z-Up vs. Three.js Y-Up:* Blender utiliza el eje `Z` como vertical nativo y, al exportar a glTF 2.0 con `export_yup=True`, aplica la transformación `(X_blender, Y_blender, Z_blender) -> (X_three, Z_blender, -Y_blender)`. El script previo había modelado el piso y muros usando `Y` como eje vertical, lo que provocaba que todo el pabellón apareciera volcado 90° de costado en el navegador (el suelo como pared vertical y las camas colgando de lado). Se reescribió íntegramente `build_master_hospital.py` en coordenadas nativas `Z-Up` de Blender (`X` = ancho `[-12, 12]`, `Y` = fondo `[-9, 9]`, `Z` = altura `[0, 3.8]`), verificado mediante renderizado sintético con cámara `BLENDER_EEVEE_NEXT`.
+    2. *Escala UV Métrica Real (Tiling):* Se implementó `scale_object_uvs(floor, 16.0, 12.0)` para que las baldosas de vinilo hospitalario se repitan a escala arquitectónica real (~40x40 cm) en lugar de estirarse sobre los 24 metros, y planos UV explícitos `add_screen_plane` para que los trazados de ondas ECG se orienten horizontalmente.
+    3. *Descongestión de Etiquetas HTML Diegéticas:* En `BedInteractionBadge.tsx` se redujo `distanceFactor={8}` y se muestra de forma predeterminada una píldora compacta (`Cama N` + estado `CÓDIGO ROJO` / `En Evaluación`), desplegando el título completo del caso clínico únicamente al acercarse (`isHovered`).
+  - **Estructura Organizada de Activos (`assets_src/`):**
+    - `assets_src/blender/hospital_ward.blend`: Archivo maestro nativo editable en Blender 5.2.3 LTS con colecciones (`01_Architecture`, `02_Medical_Props`, `03_Lighting`), modificadores Bevel aplicados y luces de estudio.
+    - `assets_src/textures/`: 9 mapas de texturas PBR generados con NumPy y exportados en PNG (`floor_basecolor.png`, `floor_roughness.png`, `floor_normal.png`, `wall_basecolor.png`, `wall_roughness.png`, `wall_normal.png`, `ecg_screen.png`, `curtain_basecolor.png`, `curtain_normal.png`).
+    - `assets_src/scripts/build_master_hospital.py`: Pipeline determinista de construcción, verificación óptica y empaquetado glTF.
+  - **Geometría y Ambientación Hospitalaria:**
+    - Pabellón hermético de 24m × 18m × 3.8m con piso cerámico reflectante, corredor central azul con líneas blancas de guía, muros con friso sanitario azul acero, guardacamillas con rieles de aluminio, puertas dobles de emergencia con mirillas y letrero luminoso, ventanales exteriores iluminados, central de enfermería al fondo Este (`X = +9.8`) y cortinas plisadas divisorias.
+    - 6 bahías de camas articuladas con ruedas, barandales abatibles, paciente hospitalizado acostado sobre cada cama (cabeza en almohada, torso con bata clínica y manta), mesa puente, portasueros con bolsas IV, consola de gases medicinales (`O2`, `VAC`, `AIR`) y monitor multiparámetro con ondas horizontales en vivo.
+  - **Frontend y Rendimiento WebGL:**
+    - Carga del modelo unificado `hospital_ward.glb` mediante `useGLTF` en `HospitalWardScene.tsx`.
+    - Cámara inicial en `CharacterController.tsx` posicionada en la entrada Oeste del corredor central (`[-9.2, 1.68, 0]`, `yaw = -Math.PI / 2`) mirando directamente hacia el pasillo central y las 6 bahías clínicas.
+  - **Certificación Total de Calidad:**
+    - Suite dedicada `SpatialHospitalMaster.test.tsx`: 5/5 pruebas aprobadas al 100%.
+    - Tipado TypeScript (`tsc --noEmit`): 0 errores.
+    - Compilación de producción (`vite build`): Rollup limpio y precache PWA generado.

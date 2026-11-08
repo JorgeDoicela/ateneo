@@ -80,6 +80,12 @@ Algoritmo de auditoría que comprueba que cada acierto u omisión generado por l
 * Reconocimiento de voz en tiempo real con Web Speech API nativa configurada para terminología médica en español (`es-EC`).
 * Simulación secuencial por fases clínicas (Anamnesis $\rightarrow$ Paraclínicos $\rightarrow$ Terapéutica) con revelación progresiva de datos.
 
+### 2.5 Simulador Hospitalario 3D y Triaje Espacial Inmersivo (Three.js & Blender 5.2)
+* Recorrido cinemático en primera persona por un pabellón de urgencias y choque de $24\,\text{m} \times 18\,\text{m}$ (`/hospital-3d`).
+* 6 cubículos clínicos independientes con camas articuladas, pacientes hospitalizados, consolas de gases medicinales y monitores de UCI con trazados continuos de ECG y $\text{SpO}_2$.
+* Detección de proximidad euclidiana, micro-tarjetas diegéticas y tableta médica interactiva de cabecera sincronizada con las Guías de Práctica Clínica (GPC Ecuador), identificando prioritariamente Códigos Rojos obstétricos y hemodinámicos.
+* Pipeline automatizado en Blender 5.2.3 LTS con texturas PBR procedurales generadas a escala métrica real y modelo compilado `hospital_ward.glb` (3.06 MB).
+
 ---
 
 ## 3. Puesta en Marcha (Docker)
@@ -220,6 +226,7 @@ ateneo/
 │   │
 │   ├── 3_documentacion_metodologica/     # BASES TEÓRICAS Y METODOLÓGICAS (.md)
 │   │   ├── ARQUITECTURA_MODULAR_FRONTEND.md # Arquitectura React 18, TypeScript 5, DICOM, OSCE y RUM
+│   │   ├── ARQUITECTURA_SIMULADOR_HOSPITALARIO_3D_Y_PIPELINE_BLENDER.md # WebGL, Blender 5.2, PBR y triaje 3D
 │   │   ├── ARQUITECTURA_MODULAR_MONOLITO_BACKEND.md # Monolito modular, persistencia desacoplada y UoW
 │   │   ├── ARQUITECTURA_Y_MODELADO_BASE_DE_DATOS.md # Entidades relacionales SQLAlchemy, ERD e índices
 │   │   ├── INFORME_AUDITORIA_CARGA_Y_CONCURRENCIA.md # Simulación de estrés con 100 estudiantes concurrentes
@@ -374,9 +381,15 @@ ateneo/
 │       │   ├── evaluation/               # Simulador split-screen, SocraticDebrief, ClinicalStudyViewer (Canvas 60 FPS)
 │       │   ├── collaboration/            # Salas de consenso sincrónico, room store y useAteneoRoom (WebSockets)
 │       │   ├── adaptive/                 # Algorítmica adaptativa KST/BKT, grafo SVG y useAdaptiveCurriculum
+│       │   ├── spatial/                  # Simulador Hospitalario 3D (R3F, Drei, CharacterController, BedsideTablet)
 │       │   └── analytics/                # Paneles docentes, radar clínico e IBF institucional
 │       ├── routes/AppRoutes.tsx          # Enrutamiento con code-splitting dinámico (React.lazy + Suspense)
 │       └── context/AuthContext.tsx       # Fachada contextual para retrocompatibilidad con tests existentes
+│
+├── assets_src/                           # ACTIVOS MAESTROS Y PIPELINE 3D EN BLENDER
+│   ├── blender/hospital_ward.blend       # Archivo maestro editable con colecciones, modificadores Bevel y luces
+│   ├── textures/                         # Mapas PBR procedurales (floor, wall, ecg_screen, curtain)
+│   └── scripts/build_master_hospital.py  # Compilador automatizado a glTF 2.0 (hospital_ward.glb)
 │
 └── docker-compose.yml                    # Orquestación multicontenedor para producción
 ```
@@ -409,7 +422,7 @@ docker compose exec backend python tests/run_kst_simulation.py
 # 7. Compilar el Compendio Unificado en PDF:
 docker compose exec backend python scripts/generate_paper_tables_pdf.py
 
-# 8. Ejecutar suite unitaria frontend Vitest (32 suites, 156 tests PASS):
+# 8. Ejecutar suite unitaria frontend Vitest (40 suites, 199 tests PASS):
 docker compose exec frontend npm test
 
 # 9. Ejecutar pruebas End-to-End con Playwright (15 tests PASS):
@@ -461,6 +474,7 @@ Evaluación comparativa rigurosa en guías completas no vistas durante el entren
   * [Dosier Ingesta v2: Fases 7 y 8 (Indexación Vectorial v2 y Benchmark Ciego OOD)](docs/3_documentacion_metodologica/DOSIER_PIPELINE_INGESTA_V2_FASES_7_Y_8_INDEXACION_Y_BENCHMARK.md)
 * **Documentación Metodológica y Arquitectónica:** Los archivos `.md` en [`docs/3_documentacion_metodologica/`](docs/3_documentacion_metodologica/) contienen la formulación matemática, justificación de la pérdida MNRL, análisis de limitaciones y las especificaciones de arquitectura de software:
   * [Arquitectura Modular del Frontend (Feature-Driven Slices & Core Shared)](docs/3_documentacion_metodologica/ARQUITECTURA_MODULAR_FRONTEND.md)
+  * [Arquitectura del Simulador Hospitalario 3D y Pipeline de Compilación Blender](docs/3_documentacion_metodologica/ARQUITECTURA_SIMULADOR_HOSPITALARIO_3D_Y_PIPELINE_BLENDER.md)
   * [Arquitectura del Backend: Monolito Modular con Persistencia Desacoplada](docs/3_documentacion_metodologica/ARQUITECTURA_MODULAR_MONOLITO_BACKEND.md)
   * [Arquitectura y Modelado de la Base de Datos Relacional](docs/3_documentacion_metodologica/ARQUITECTURA_Y_MODELADO_BASE_DE_DATOS.md)
   * [Informe de Auditoría de Carga, Concurrencia y Resistencia al Fallo](docs/3_documentacion_metodologica/INFORME_AUDITORIA_CARGA_Y_CONCURRENCIA.md)
