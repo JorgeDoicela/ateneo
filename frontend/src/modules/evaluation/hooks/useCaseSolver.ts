@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, FormEvent } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import casesApi from '../../cases/api/casesApi';
 import evaluationApi from '../api/evaluationApi';
 import offlineDb from '../../../core/storage/offlineDb';
@@ -9,10 +9,12 @@ import type { ClinicalCase, CasePhase, EvaluationResult, PhaseEvaluationResult, 
 
 /**
  * useCaseSolver — Hook controlador de la simulación clínica y evaluación
- * Optimizado con TanStack Query para resolución de caso, Zustand para autoguardado de borradores
- * e IndexedDB para resiliencia hospitalaria offline-first.
+ * Optimizado con persistencia transaccional (localStorage + IndexedDB + Backend ACID),
+ * recuperación automática de borradores por fase y protección ante pérdida de conectividad.
  */
 export function useCaseSolver(caseId?: string) {
+  const queryClient = useQueryClient();
+
   // Cargar caso clínico con caché reactiva de TanStack Query y fallback offline
   const {
     data: caso = null,
@@ -40,40 +42,21 @@ export function useCaseSolver(caseId?: string) {
 
   const [error, setError] = useState<string | null>(null);
 
-  // Sesión de borradores en memoria
-  const saveDraft = useClinicalCaseSessionStore((state) => state.saveDraft);
-  const getDraft = useClinicalCaseSessionStore((state) => state.getDraft);
-  const clearDraft = useClinicalCaseSessionStore((state) => state.clearDraft);
+  // Sesión persistente por caso
+  const getSession = useClinicalCaseSessionStore((state) => state.getSession);
+  const savePhaseDraft = useClinicalCaseSessionStore((state) => state.savePhaseDraft);
+  const savePhaseEvaluation = useClinicalCaseSessionStore((state) => state.savePhaseEvaluation);
+  const advancePhase = useClinicalCaseSessionStore((state) => state.advancePhase);
+  const completeCaseSession = useClinicalCaseSessionStore((state) => state.completeCaseSession);
+  const resetCaseSession = useClinicalCaseSessionStore((state) => state.resetCaseSession);
 
-  // Estados de entrada del estudiante inicializados con borrador si existiera
-  const [respuesta, setRespuestaState] = useState<string>(() => (caseId ? getDraft(caseId) : ''));
+  // Estados de entrada del estudiante
+  const [respuesta, setRespuestaState] = useState<string>('');
   const [imagenes, setImagenes] = useState<File[]>([]);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [evaluating, setEvaluating] = useState<boolean>(false);
 
-  const setRespuesta = useCallback(
-    (valueOrUpdater: string | ((prev: string) => string)) => {
-      setRespuestaState((prev) => {
-        const next = typeof valueOrUpdater === 'function' ? valueOrUpdater(prev) : valueOrUpdater;
-        if (caseId) {
-          saveDraft(caseId, next);
-        }
-        return next;
-      });
-    },
-    [caseId, saveDraft]
-  );
-
-  useEffect(() => {
-    if (caseId) {
-      const draft = getDraft(caseId);
-      if (draft && !respuesta) {
-        setRespuestaState(draft);
-      }
-    }
-  }, [caseId, getDraft, respuesta]);
-
-  // Resultado directo (single-turn)
+  // Resultado definitivo
   const [resultado, setResultado] = useState<EvaluationResult | null>(null);
 
   // Estados del Modo Multi-Fase
@@ -90,6 +73,60 @@ export function useCaseSolver(caseId?: string) {
   const activePhaseData: CasePhase | null = isPhaseMode && caso?.fases
     ? caso.fases.find((f) => f.fase_numero === currentPhase) || caso.fases[0]
     : null;
+
+  // Restauración profunda de sesión al montar o cambiar caseId
+  useEffect(() => {
+    if (!caseId) return;
+
+    const savedSession = getSession(caseId);
+    if (savedSession) {
+      if (savedSession.isCompleted && savedSession.finalResult) {
+        setResultado(savedSession.finalResult);
+        setCompletedPhases(savedSession.completedPhases || [1, 2, 3]);
+        setPhaseAnswers(savedSession.phaseAnswers || {});
+        setPhaseScores(savedSession.phaseScores || {});
+        setPhaseResults(savedSession.phaseResults || {});
+        return;
+      }
+
+      if (savedSession.completedPhases && savedSession.completedPhases.length > 0) {
+        setCurrentPhase(savedSession.currentPhase || 1);
+        setCompletedPhases(savedSession.completedPhases);
+        setPhaseAnswers(savedSession.phaseAnswers || {});
+        setPhaseScores(savedSession.phaseScores || {});
+        setPhaseResults(savedSession.phaseResults || {});
+        const activeText = savedSession.activeDraft || savedSession.phaseAnswers[savedSession.currentPhase] || '';
+        setRespuestaState(activeText);
+        return;
+      }
+
+      if (savedSession.activeDraft) {
+        setRespuestaState(savedSession.activeDraft);
+        return;
+      }
+    }
+
+    // Fallback a caché IndexedDB si existe evaluación previa
+    offlineDb.getCachedResult(caseId).then((cached) => {
+      if (cached && !resultado) {
+        setResultado(cached);
+      }
+    });
+  }, [caseId, getSession, resultado]);
+
+  // Guardado continuo del borrador en la fase activa
+  const setRespuesta = useCallback(
+    (valueOrUpdater: string | ((prev: string) => string)) => {
+      setRespuestaState((prev) => {
+        const next = typeof valueOrUpdater === 'function' ? valueOrUpdater(prev) : valueOrUpdater;
+        if (caseId) {
+          savePhaseDraft(caseId, currentPhase, next);
+        }
+        return next;
+      });
+    },
+    [caseId, currentPhase, savePhaseDraft]
+  );
 
   // Envío en Modo Directo (Single-Turn)
   const submitSingleTurn = useCallback(
@@ -120,6 +157,7 @@ export function useCaseSolver(caseId?: string) {
         };
 
         setResultado(provisionalOutcome);
+        completeCaseSession(caseId, provisionalOutcome);
         setEvaluating(false);
         return;
       }
@@ -132,7 +170,12 @@ export function useCaseSolver(caseId?: string) {
           audioBlob
         );
         setResultado(res);
+        completeCaseSession(caseId, res);
         await offlineDb.cacheEvaluationResult(caseId, res);
+
+        queryClient.invalidateQueries({ queryKey: ['clinical-cases'] });
+        queryClient.invalidateQueries({ queryKey: ['user-evaluation-history'] });
+        queryClient.invalidateQueries({ queryKey: ['student-trends'] });
       } catch (err: unknown) {
         // Encolar si es fallo de red
         await offlineDb.queueEvaluation({
@@ -157,11 +200,12 @@ export function useCaseSolver(caseId?: string) {
             : 'Modo Local Activo: No fue posible contactar al servidor central en este momento. Su respuesta clínica fue almacenada localmente y se enviará de forma automática en segundo plano.',
         };
         setResultado(provisionalOutcome);
+        completeCaseSession(caseId, provisionalOutcome);
       } finally {
         setEvaluating(false);
       }
     },
-    [caseId, respuesta, imagenes, audioBlob, evaluating, caso?.titulo]
+    [caseId, respuesta, imagenes, audioBlob, evaluating, caso?.titulo, completeCaseSession, queryClient]
   );
 
   // Envío en Modo Multi-Fase
@@ -196,6 +240,7 @@ export function useCaseSolver(caseId?: string) {
           desbloquea_siguiente: true,
         };
 
+        savePhaseEvaluation(caseId, currentPhase, respuesta || 'Nota de voz', provisionalPhaseResult);
         setPhaseAnswers((prev) => ({ ...prev, [currentPhase]: respuesta || 'Nota de voz' }));
         setPhaseResults((prev) => ({ ...prev, [currentPhase]: provisionalPhaseResult }));
         setPhaseScores((prev) => ({ ...prev, [currentPhase]: 0 }));
@@ -219,6 +264,7 @@ export function useCaseSolver(caseId?: string) {
           audioBlob
         );
 
+        savePhaseEvaluation(caseId, currentPhase, respuesta || 'Nota de voz clínica', res);
         setPhaseAnswers((prev) => ({ ...prev, [currentPhase]: respuesta || 'Nota de voz clínica' }));
         setPhaseResults((prev) => ({ ...prev, [currentPhase]: res }));
         setPhaseScores((prev) => ({ ...prev, [currentPhase]: res.score_fase }));
@@ -247,6 +293,7 @@ export function useCaseSolver(caseId?: string) {
           desbloquea_siguiente: true,
         };
 
+        savePhaseEvaluation(caseId, currentPhase, respuesta || 'Nota de voz', provisionalPhaseResult);
         setPhaseAnswers((prev) => ({ ...prev, [currentPhase]: respuesta || 'Nota de voz' }));
         setPhaseResults((prev) => ({ ...prev, [currentPhase]: provisionalPhaseResult }));
         setPhaseScores((prev) => ({ ...prev, [currentPhase]: 0 }));
@@ -260,19 +307,24 @@ export function useCaseSolver(caseId?: string) {
         setEvaluating(false);
       }
     },
-    [caseId, currentPhase, respuesta, imagenes, audioBlob, phaseAnswers, evaluating, caso?.titulo]
+    [caseId, currentPhase, respuesta, imagenes, audioBlob, phaseAnswers, evaluating, caso?.titulo, savePhaseEvaluation]
   );
 
-  // Avanzar a la siguiente fase
-  const proceedToNextPhase = useCallback(() => {
+  // Avanzar a la siguiente fase o consolidar y persistir simulación
+  const proceedToNextPhase = useCallback(async () => {
     setShowingPhaseFeedback(false);
     setCurrentPhaseResult(null);
-    setRespuesta('');
     setImagenes([]);
     setAudioBlob(null);
 
     if (currentPhase < totalPhases) {
-      setCurrentPhase((prev) => prev + 1);
+      const nextPhase = currentPhase + 1;
+      if (caseId) {
+        advancePhase(caseId, nextPhase);
+      }
+      setCurrentPhase(nextPhase);
+      const nextPhaseText = phaseAnswers[nextPhase] || '';
+      setRespuestaState(nextPhaseText);
     } else {
       // Consolidar resultado global de todas las fases
       const scores = Object.values(phaseScores);
@@ -316,12 +368,68 @@ export function useCaseSolver(caseId?: string) {
       };
 
       setResultado(finalOutcome);
-    }
-  }, [currentPhase, totalPhases, phaseScores, phaseResults, setRespuesta, caseId, caso?.titulo, caso?.guia_asociada]);
 
-  // Reiniciar caso para reintentar
+      if (caseId) {
+        // 1. Guardar en memoria local estructurada (localStorage)
+        completeCaseSession(caseId, finalOutcome);
+        // 2. Guardar en IndexedDB
+        await offlineDb.cacheEvaluationResult(caseId, finalOutcome);
+
+        // 3. Persistir en el Backend relacional (ACID)
+        try {
+          await evaluationApi.saveEvaluationRecord({
+            case_id: caseId,
+            case_title: caso?.titulo || 'Caso Clínico Formativo',
+            guia_asociada: caso?.guia_asociada || 'GPC Ecuador',
+            score: finalOutcome.score,
+            score_max: 10,
+            faithfulness_score: 1.0,
+            aciertos: finalOutcome.aciertos,
+            omisiones: finalOutcome.omisiones,
+            competencias_deficientes: finalOutcome.competencias_deficientes,
+            cita_normativa: finalOutcome.cita_normativa,
+            citas_normativas: finalOutcome.citas_normativas,
+            retroalimentacion_general: finalOutcome.retroalimentacion_general,
+            tiempo_segundos: 180,
+            modo_simulacion: 'fases',
+            fases_respuestas: Object.fromEntries(
+              Object.entries(phaseAnswers).map(([k, v]) => [String(k), String(v)])
+            ),
+          });
+        } catch (saveErr) {
+          console.warn('Error al sincronizar resultado en backend, encolando en Outbox:', saveErr);
+          await offlineDb.queueEvaluation({
+            case_id: caseId,
+            case_title: caso?.titulo || 'Caso Clínico Formativo',
+            respuesta_estudiante: JSON.stringify(phaseAnswers),
+            user_email: 'estudiante@ateneo.local',
+            tipo: 'single_turn',
+          });
+        }
+
+        // 4. Invalidar queries para actualizar catálogo y analítica de inmediato
+        queryClient.invalidateQueries({ queryKey: ['clinical-cases'] });
+        queryClient.invalidateQueries({ queryKey: ['user-evaluation-history'] });
+        queryClient.invalidateQueries({ queryKey: ['student-trends'] });
+      }
+    }
+  }, [
+    currentPhase,
+    totalPhases,
+    caseId,
+    advancePhase,
+    phaseAnswers,
+    phaseScores,
+    phaseResults,
+    caso?.titulo,
+    caso?.guia_asociada,
+    completeCaseSession,
+    queryClient
+  ]);
+
+  // Reiniciar caso para reintentar desde cero conscientemente
   const resetCase = useCallback(() => {
-    if (caseId) clearDraft(caseId);
+    if (caseId) resetCaseSession(caseId);
     setResultado(null);
     setRespuestaState('');
     setImagenes([]);
@@ -334,7 +442,7 @@ export function useCaseSolver(caseId?: string) {
     setCompletedPhases([]);
     setCurrentPhaseResult(null);
     setShowingPhaseFeedback(false);
-  }, [caseId, clearDraft]);
+  }, [caseId, resetCaseSession]);
 
   const effectiveError = error || (queryError ? queryError.message : null);
 

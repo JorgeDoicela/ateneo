@@ -460,18 +460,30 @@ def retrieve_top_k_chunks(
         return cached_result
 
     client = get_chroma_client()
+    collection = None
+    has_dense_collection = False
 
     try:
-        collection = client.get_collection(CHROMA_COLLECTION_NAME)
-        if collection.count() == 0:
-            raise ValueError(f"Colección ChromaDB {CHROMA_COLLECTION_NAME} vacía.")
+        collection = client.get_or_create_collection(CHROMA_COLLECTION_NAME)
+        if collection.count() > 0:
+            has_dense_collection = True
+        else:
+            logger.warning(
+                f"Colección ChromaDB {CHROMA_COLLECTION_NAME} sin vectores; activando fallback léxico BM25 v2.",
+                extra={"action": "chroma_fallback_bm25"}
+            )
     except Exception as e:
-        logger.error(f"Error al acceder a la colección {CHROMA_COLLECTION_NAME} en ChromaDB: {e}", extra={"action": "chroma_collection_error"})
-        raise
+        logger.warning(
+            f"No se pudo consultar ChromaDB ({e}); activando fallback léxico BM25 v2.",
+            extra={"action": "chroma_fallback_bm25_error"}
+        )
+
+    if not has_dense_collection and retrieval_mode in ["hybrid", "dense_only"]:
+        retrieval_mode = "sparse_only"
 
     # Resolver nombre canónico exacto para la base de datos
-    canonical_guia = resolve_canonical_guia(collection, guia_filtro)
-    if guia_filtro and not canonical_guia:
+    canonical_guia = resolve_canonical_guia(collection, guia_filtro) if (collection and has_dense_collection) else (guia_filtro or None)
+    if guia_filtro and not canonical_guia and has_dense_collection:
         logger.warning(
             f"La guía solicitada '{guia_filtro}' no existe en el catálogo canónico ni en el corpus.",
             extra={"action": "guia_not_found", "guia_filtro": guia_filtro}
@@ -482,8 +494,8 @@ def retrieve_top_k_chunks(
     dense_ranked_ids = []
     chunk_data_map = {}
 
-    # 1. Búsqueda Densa (si no es sparse_only)
-    if retrieval_mode in ["hybrid", "dense_only"]:
+    # 1. Búsqueda Densa (si no es sparse_only y existe colección densa)
+    if retrieval_mode in ["hybrid", "dense_only"] and has_dense_collection and collection:
         model_target = custom_dense_model or EMBEDDING_MODEL_NAME
         model = get_embedding_model(model_target)
         # Optimización de latencia en CPU: BGE-M3 escala cuadráticamente con longitud de secuencia.

@@ -15,6 +15,7 @@ from models.schemas import EvaluationResult, PhaseEvaluationResult
 from modules.cases.service import CaseService
 from modules.analytics_history.service import AnalyticsHistoryService
 from modules.analytics_history.models import EvaluationHistoryModel
+from modules.auth.models import UserModel
 import datetime
 
 logger = logging.getLogger(__name__)
@@ -218,6 +219,186 @@ class EvaluationService:
                 # El context manager uow ejecuta rollback() automáticamente
 
         return eval_result
+
+    def save_simulation_record(
+        self,
+        case_id: str,
+        eval_data: Dict[str, Any],
+        user_id: str = "usr_alumno_001",
+        user_email: str = "alumno@ateneo.edu.ec",
+        tenant_id: str = "tenant_default"
+    ) -> Dict[str, Any]:
+        """
+        Persiste de forma transaccional e idempotente el resultado definitivo de una simulación
+        clínica (directa o multifase), actualizando el historial, BKT, gamificación y plan prescriptivo.
+        """
+        case = self.case_service.get_case(case_id)
+        case_title = eval_data.get("case_title") or (case.titulo if case else "Caso Clínico Formativo")
+        guia_asociada = eval_data.get("guia_asociada") or (case.guia_asociada if case else "GPC Ecuador")
+
+        uow = self.uow_factory()
+        with uow:
+            # 1. Asegurar existencia de usuario para integridad de clave foránea
+            user_exists = uow.session.query(UserModel).filter(UserModel.id == user_id).first()
+            if not user_exists:
+                fallback_user = uow.session.query(UserModel).filter(UserModel.id == "usr_alumno_001").first()
+                if fallback_user:
+                    user_id = fallback_user.id
+                    user_email = fallback_user.email
+                else:
+                    from modules.auth.models import RoleEnum
+                    fallback_user = UserModel(
+                        id="usr_alumno_001",
+                        email="alumno@ateneo.edu.ec",
+                        nombre="Estudiante de Medicina",
+                        rol=RoleEnum.ALUMNO,
+                        hashed_password="hashed_demo_password",
+                        tenant_id="tenant_default"
+                    )
+                    uow.session.add(fallback_user)
+                    uow.session.flush()
+                    user_id = "usr_alumno_001"
+                    user_email = "alumno@ateneo.edu.ec"
+
+            resolved_tenant = tenant_id or getattr(case, "tenant_id", "tenant_default") or "tenant_default"
+            now_dt = datetime.datetime.now(datetime.timezone.utc)
+
+            cita = eval_data.get("cita_normativa") or {}
+            citas = eval_data.get("citas_normativas") or []
+            if not cita and citas:
+                cita = citas[0]
+
+            faithfulness = eval_data.get("faithfulness_score")
+            if faithfulness is None:
+                faithfulness = 1.0 if cita and (isinstance(cita, dict) and cita.get("guia")) else 0.85
+
+            competencias = eval_data.get("competencias_deficientes", [])
+            if hasattr(competencias, "__iter__") and not isinstance(competencias, (list, str)):
+                competencias = [c.dict() if hasattr(c, "dict") else c for c in competencias]
+
+            history_record = EvaluationHistoryModel(
+                user_id=user_id,
+                user_email=user_email,
+                case_id=case_id,
+                guia_asociada=guia_asociada,
+                case_title=case_title,
+                score=float(eval_data.get("score", 0.0)),
+                score_max=int(eval_data.get("score_max", 10)),
+                faithfulness_score=float(faithfulness),
+                cohorte_id=eval_data.get("cohorte_id", "general"),
+                tiempo_segundos=float(eval_data.get("tiempo_segundos", 180.0)),
+                llm_latency_ms=float(eval_data.get("llm_latency_ms", 0.0)),
+                llm_model_used=str(eval_data.get("llm_model_used", "gemini-3.8-flash")),
+                rag_tokens_used=int(eval_data.get("rag_tokens_used", 0)),
+                paraclinical_studies_count=int(eval_data.get("paraclinical_studies_count", 0)),
+                tenant_id=resolved_tenant,
+                aciertos_json=json.dumps(eval_data.get("aciertos", []), ensure_ascii=False),
+                omisiones_json=json.dumps(eval_data.get("omisiones", []), ensure_ascii=False),
+                competencias_json=json.dumps(competencias if isinstance(competencias, list) else [], ensure_ascii=False),
+                cita_normativa_json=json.dumps(cita if isinstance(cita, dict) else {}, ensure_ascii=False),
+                retroalimentacion_general=eval_data.get("retroalimentacion_general", ""),
+                timestamp=now_dt
+            )
+            uow.history.create(history_record, commit=False)
+            uow.session.flush()
+            record_id = history_record.id
+            record_score = history_record.score
+
+            # 2. Modelo adaptativo BKT
+            if self.adaptive_service and hasattr(uow, "adaptive") and case:
+                comp_list = (
+                    getattr(case, "competencias_activadas", None)
+                    or getattr(case, "competencias_evaluadas", None)
+                    or ["semiologia_anamnesis", "diagnostico_final", "plan_terapeutico_msp"]
+                )
+                try:
+                    from adaptive.knowledge_tracer import bayesian_update, BKT_PARAMETERS, set_student_knowledge_state, get_initial_knowledge_state
+                    persisted_state = uow.adaptive.get_mastery(user_id)
+                    state = persisted_state.copy() if persisted_state else get_initial_knowledge_state().copy()
+                    is_correct = float(eval_data.get("score", 0.0)) >= 7.0
+                    for comp_id in comp_list:
+                        if comp_id in BKT_PARAMETERS:
+                            state[comp_id] = bayesian_update(state[comp_id], is_correct, BKT_PARAMETERS[comp_id])
+                    set_student_knowledge_state(user_id, state)
+                    uow.adaptive.save_mastery(user_id, state, commit=False)
+                    existing_snapshots = uow.adaptive.get_snapshots(user_id)
+                    uow.adaptive.add_snapshot(
+                        user_id=user_id,
+                        session_num=len(existing_snapshots),
+                        score=float(eval_data.get("score", 0.0)),
+                        state=state,
+                        commit=False
+                    )
+                except Exception as bkt_err:
+                    logger.warning("[EvaluationService] Error actualizando BKT: %s", bkt_err)
+
+            # 3. Gamificación
+            gamif_result = None
+            if hasattr(uow, "gamification"):
+                try:
+                    from modules.gamification.service import GamificationService
+                    gamification_svc = GamificationService(repository=uow.gamification, session=uow.session)
+                    dificultad = (getattr(case, "dificultad", "") or "").lower() if case else ""
+                    es_emergencia = "rojo" in dificultad or "alta" in dificultad or "emergencia" in dificultad or (getattr(case, "codigo_rojo", False) if case else False)
+                    especialidad_val = getattr(case, "especialidad", None) or guia_asociada or "Medicina General"
+
+                    gamif_result = gamification_svc.process_evaluation_event(
+                        user_id=user_id,
+                        case_id=case_id,
+                        score=float(eval_data.get("score", 0.0)),
+                        faithfulness_score=float(faithfulness),
+                        tiempo_segundos=float(eval_data.get("tiempo_segundos", 180.0)),
+                        es_fases=True,
+                        especialidad=especialidad_val,
+                        es_emergencia=es_emergencia
+                    )
+                except Exception as gam_err:
+                    logger.warning("[EvaluationService] Error en gamificación: %s", gam_err)
+
+            # 4. Plan prescriptivo
+            if hasattr(uow, "study_plans") and case:
+                try:
+                    active_plan = uow.study_plans.get_active_plan_by_user(user_id)
+                    if active_plan:
+                        for task in (active_plan.tasks or []):
+                            if task.task_type == "case_simulation" and task.resource_reference == case_id and not task.is_completed:
+                                uow.study_plans.mark_task_completed(task.id)
+                except Exception as plan_err:
+                    logger.warning("[EvaluationService] Error actualizando plan de estudio: %s", plan_err)
+
+            # Commit transaccional
+            uow.commit()
+
+        # 5. Registrar evento de actividad de aprendizaje
+        try:
+            self.analytics_service.record_learning_event(
+                user_id=user_id,
+                case_id=case_id,
+                event_type="case_completed",
+                metadata={
+                    "score": record_score,
+                    "record_id": record_id,
+                    "modo": eval_data.get("modo_simulacion", "fases")
+                },
+                tenant_id=resolved_tenant
+            )
+        except Exception as ev_err:
+            logger.warning("[EvaluationService] Error registrando evento de telemetría: %s", ev_err)
+
+        logger.info(
+            f"[EvaluationService] Simulación clínica persistida con éxito: user={user_id}, case={case_id}, score={record_score}",
+            extra={"action": "simulation_saved", "case_id": case_id, "user_id": user_id, "score": record_score}
+        )
+
+        return {
+            "status": "success",
+            "message": "Simulación clínica guardada exitosamente en el historial del estudiante.",
+            "record_id": record_id,
+            "case_id": case_id,
+            "score": record_score,
+            "timestamp": now_dt.isoformat(),
+            "gamification_update": gamif_result.model_dump() if gamif_result else None
+        }
 
     def evaluate_phase(
         self,

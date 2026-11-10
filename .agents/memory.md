@@ -2211,3 +2211,44 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
     - Suite `SpatialMobileControls.test.tsx`: 4/4 pruebas aprobadas.
     - Suite `SpatialHospitalMaster.test.tsx`: 5/5 pruebas aprobadas. Total: 13/13 (100%).
     - Compilación de producción (`vite build`): Rollup limpio y PWA generada sin errores.
+* **Fase 19: Arquitectura de Persistencia Transaccional, Recuperación de Sesiones Multifase y Erradicación de Pérdida de Progreso (`2026-11-10`):**
+  - **Causa Raíz Diagnosticada:**
+    1. En la resolución por fases (`isPhaseMode = true`), el frontend invocaba secuencialmente a `/api/evaluate/phase` para las Fases 1, 2 y 3. Al concluir la Fase 3, la función `proceedToNextPhase` construía el objeto consolidado `finalOutcome` puramente en memoria volátil de React (`setResultado`), sin enviarlo a ninguna API transaccional del backend ni a la base de datos de historial.
+    2. El almacén de sesiones Zustand (`useClinicalCaseSessionStore`) operaba en memoria volátil sin persistencia duradera (`persist` middleware), y además borraba la respuesta redactada (`setRespuesta('')`) al avanzar de fase, destruyendo el progreso ante cualquier recarga de página, cambio de pestaña o navegación accidental.
+    3. Al retornar al catálogo (`/cases`), el sistema consultaba `/api/history` donde el caso no figuraba registrado, mostrando al usuario un estado en blanco como si nunca hubiera practicado el caso clínico.
+    4. El retriever RAG (`backend/rag/retriever.py`) arrojaba fallo 500 no capturado (`InvalidCollectionException: Collection gpc_msp_v2 does not exist`) cuando la colección de ChromaDB no estaba indexada, interrumpiendo la evaluación.
+  - **Solución Backend (Causa Raíz / Cero Parches):**
+    1. `backend/rag/retriever.py`:
+       - Resuelto fallo 500 mediante `client.get_or_create_collection(CHROMA_COLLECTION_NAME)`.
+       - Detección de colección con vectores (`collection.count() > 0`); si la colección vectorial no está inicializada, se activa fallback automático e instantáneo al motor léxico BM25 v2 (`bm25_index_v2.pkl`) sobre los 7,052 fragmentos de las GPC de Ecuador, garantizando evaluación continua e ininterrumpida.
+    2. `backend/modules/evaluation/service.py`:
+       - Implementado método `save_simulation_record(case_id, eval_data, user_id, user_email, tenant_id)`:
+         - Asegura existencia de usuario e integridad referencial foránea en `UserModel`.
+         - Persistencia atómica de `EvaluationHistoryModel` con Unit of Work (`SqlAlchemyUnitOfWork`).
+         - Actualización bayesiana de competencias en espacio de conocimiento (modelo BKT).
+         - Adjudicación de puntos de experiencia (XP) y desbloqueo de hitos formativos (`GamificationService.process_evaluation_event`).
+         - Actualización de estado en planes prescriptivos de estudio y registro de telemetría de aprendizaje (`case_completed`).
+         - Corrección de desvinculación de sesión SQLAlchemy mediante `uow.session.flush()` previo al `commit()`.
+    3. `backend/routers/evaluation.py` & `backend/routers/history.py`:
+       - Creado endpoint transaccional `POST /api/evaluate/save` (con DTO `SaveSimulationPayload` tipado en Pydantic) y alias `POST /api/history/record`.
+       - Sembrado de evaluaciones iniciales de demostración en `lifespan` (`seed_rich_history_data()`), garantizando disponibilidad de datos analíticos.
+  - **Solución Frontend (Causa Raíz / Cero Parches):**
+    1. `frontend/src/core/stores/useClinicalCaseSessionStore.ts`:
+       - Refactorizado con middleware Zustand `persist` sobre `localStorage` (`ateneo_clinical_case_sessions_v1`) y fallback seguro en memoria.
+       - Mantenimiento estructurado de sesión por caso: `currentPhase`, `totalPhases`, `phaseAnswers`, `phaseResults`, `phaseScores`, `completedPhases`, `isCompleted` y `finalResult`.
+       - Métodos de estado: `savePhaseDraft`, `savePhaseEvaluation`, `advancePhase`, `completeCaseSession`, `resetCaseSession`, `getCaseProgress` y `getAllProgressMap`.
+    2. `frontend/src/modules/evaluation/hooks/useCaseSolver.ts`:
+       - Restauración automática de sesión activa al montar la vista de resolución: si el usuario ya tenía borradores o fases aprobadas, se retoman sin pérdida de datos.
+       - Al completar la última fase, se invoca atómicamente a `evaluationApi.saveEvaluationRecord(payload)` para persistir el resultado definitivo en backend, actualizando simultáneamente el `useClinicalCaseSessionStore`. Si la conexión de red falla, se encola en el Outbox de IndexedDB para sincronización offline transparente.
+    3. `frontend/src/modules/cases/hooks/useCases.ts` & `CaseCard.tsx`:
+       - Cruzamiento reactivo entre historial verificado del backend (`analyticsApi.getHistory()`) y sesiones locales en curso (`useClinicalCaseSessionStore`).
+       - Indicadores tipográficos sobrios de progreso sin emojis ni fondos decorativos:
+         - Caso completado: Icono plano `CheckCircle2` y texto `"Completado • {score}/10"` con CTA `"Revisar"`.
+         - Caso en progreso: Icono plano `Clock` y texto `"En progreso • Fase {currentPhase}/3"` con CTA `"Continuar"`.
+         - Caso nuevo: CTA `"Resolver"`.
+  - **Certificación de Calidad y Pruebas:**
+    - Suite de pruebas de almacenamiento: `ClinicalCaseSessionStore.test.ts` (4/4 pruebas aprobadas).
+    - Suite general del frontend: 43 archivos de prueba, 211 pruebas pasando al 100% en Vitest.
+    - Typecheck (`tsc --noEmit`): 0 errores.
+    - Compilación de producción (`vite build`): Rollup limpio y PWA generada exitosamente.
+    - Verificación E2E de persistencia HTTP: Endpoint `POST /api/evaluate/save` retorna HTTP 201 Created y se refleja inmediatamente en `GET /api/history`.

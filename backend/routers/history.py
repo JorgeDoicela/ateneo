@@ -84,6 +84,32 @@ async def get_coordinator_analytics(
     return analytics_service.analyze_coordinator_cohort_analytics(cohorte_id=cohorte_id, tenant_id=resolved_tenant)
 
 
+@router.post("/record", status_code=status.HTTP_201_CREATED)
+async def record_evaluation_history(
+    payload: Dict[str, Any],
+    current_user: Optional[UserResponse] = Depends(get_optional_current_user),
+    evaluation_service: EvaluationService = Depends(get_evaluation_service)
+):
+    """
+    Registra directamente un resultado evaluativo en el historial del estudiante y actualiza sus métricas BKT.
+    """
+    case_id = payload.get("case_id")
+    if not case_id:
+        raise HTTPException(status_code=400, detail="El campo 'case_id' es obligatorio.")
+
+    target_user_id = current_user.id if current_user else "usr_alumno_001"
+    target_user_email = current_user.email if current_user else "alumno@ateneo.edu.ec"
+    target_tenant_id = getattr(current_user, "tenant_id", "tenant_default") if current_user else "tenant_default"
+
+    return evaluation_service.save_simulation_record(
+        case_id=case_id,
+        eval_data=payload,
+        user_id=target_user_id,
+        user_email=target_user_email,
+        tenant_id=target_tenant_id
+    )
+
+
 @router.post("/export-pdf")
 async def export_pdf_history_alias(req: Dict[str, Any]):
     """

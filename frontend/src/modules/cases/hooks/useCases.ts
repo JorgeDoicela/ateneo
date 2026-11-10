@@ -1,7 +1,9 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import casesApi from '../api/casesApi';
+import analyticsApi from '../../analytics/api/analyticsApi';
 import offlineDb from '../../../core/storage/offlineDb';
+import { useClinicalCaseSessionStore } from '../../../core/stores/useClinicalCaseSessionStore';
 import type { ClinicalCase } from '../../../types';
 
 export interface GpcMeta {
@@ -95,9 +97,17 @@ export const CATEGORIES: CategoryOption[] = [
 export type ViewMode = 'grid' | 'list';
 export type ClassificationTab = 'all' | 'urgent';
 
+export interface CaseProgressInfo {
+  status: 'completed' | 'in_progress' | 'not_started';
+  score?: number;
+  currentPhase?: number;
+  totalPhases?: number;
+}
+
 export interface ExtendedClinicalCase extends ClinicalCase {
   guia_asociada?: string;
   enunciado?: string;
+  progress?: CaseProgressInfo;
 }
 
 /**
@@ -110,7 +120,7 @@ export function useCases(searchQuery: string = '') {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
   const {
-    data: cases = [],
+    data: rawCases = [],
     isLoading: loading,
     error: queryError,
     refetch: reloadCases,
@@ -132,6 +142,61 @@ export function useCases(searchQuery: string = '') {
     },
     staleTime: 5 * 60 * 1000,
   });
+
+  const { data: userHistory = [] } = useQuery<Array<{ case_id: string; score: number }>>({
+    queryKey: ['user-evaluation-history'],
+    queryFn: async () => {
+      try {
+        const hist = await analyticsApi.getHistory();
+        return Array.isArray(hist) ? (hist as Array<{ case_id: string; score: number }>) : [];
+      } catch {
+        return [];
+      }
+    },
+    staleTime: 30 * 1000,
+  });
+
+  const localSessions = useClinicalCaseSessionStore((state) => state.sessions);
+
+  const cases = useMemo(() => {
+    const historyMap: Record<string, number> = {};
+    for (const h of userHistory) {
+      const cid = h.case_id || (h as any).caso_id;
+      if (cid && typeof h.score === 'number') {
+        historyMap[cid] = h.score;
+      }
+    }
+
+    return rawCases.map((c) => {
+      const localSess = localSessions[c.id];
+      const hasHistoryScore = historyMap[c.id] !== undefined;
+
+      let progress: CaseProgressInfo = { status: 'not_started' };
+
+      if (hasHistoryScore || (localSess && localSess.isCompleted)) {
+        const score = localSess?.finalResult?.score ?? historyMap[c.id] ?? 8.0;
+        progress = {
+          status: 'completed',
+          score,
+          totalPhases: c.fases?.length || 3,
+        };
+      } else if (
+        localSess &&
+        (localSess.completedPhases?.length > 0 || (localSess.activeDraft && localSess.activeDraft.trim().length > 0))
+      ) {
+        progress = {
+          status: 'in_progress',
+          currentPhase: localSess.currentPhase || 1,
+          totalPhases: c.fases?.length || 3,
+        };
+      }
+
+      return {
+        ...c,
+        progress,
+      };
+    });
+  }, [rawCases, userHistory, localSessions]);
 
   const error = queryError ? queryError.message : null;
 

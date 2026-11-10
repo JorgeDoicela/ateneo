@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Layers, Stethoscope } from 'lucide-react';
+import { ArrowRight, Layers, Stethoscope, CheckCircle2, Clock } from 'lucide-react';
 import type { ExtendedClinicalCase, GpcMeta, ViewMode } from '../hooks/useCases';
 
 export interface CaseCardProps {
@@ -10,10 +10,16 @@ export interface CaseCardProps {
 
 /**
  * CaseCard — Tarjeta de caso clínico individual
+ * Presenta estado de avance (Completado, En progreso o Por resolver) con diseño institucional plano.
  */
 export default function CaseCard({ caso, gpcMeta, viewMode = 'grid' }: CaseCardProps) {
   const isUrgent = gpcMeta?.isUrgent || false;
   const labelGpc = gpcMeta?.label || caso.guia_asociada || caso.gpc_referencia;
+
+  const progress = caso.progress;
+  const isCompleted = progress?.status === 'completed';
+  const isInProgress = progress?.status === 'in_progress';
+  const actionText = isCompleted ? 'Revisar' : isInProgress ? 'Continuar' : 'Resolver';
 
   if (viewMode === 'list') {
     return (
@@ -40,6 +46,18 @@ export default function CaseCard({ caso, gpcMeta, viewMode = 'grid' }: CaseCardP
                     3 Fases
                   </span>
                 )}
+                {isCompleted && (
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-emerald-600 inline-flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    Completado • {progress?.score}/10
+                  </span>
+                )}
+                {isInProgress && (
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-amber-600 inline-flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                    En progreso • Fase {progress?.currentPhase}/3
+                  </span>
+                )}
               </div>
               <h3 className="text-sm sm:text-base font-normal text-[#1f1f1f] group-hover:text-[#0b57d0] transition-colors line-clamp-2 sm:truncate font-heading leading-snug">
                 {caso.titulo}
@@ -51,7 +69,7 @@ export default function CaseCard({ caso, gpcMeta, viewMode = 'grid' }: CaseCardP
 
             <div className="flex items-center shrink-0 self-center">
               <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white shadow-xs shadow-blue-500/20 group-hover:shadow-md group-hover:shadow-blue-500/30 group-hover:scale-[1.02] active:scale-[0.98] transition-all duration-300">
-                <span className="hidden sm:inline">Resolver</span>
+                <span className="hidden sm:inline">{actionText}</span>
                 <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
               </div>
             </div>
@@ -74,10 +92,22 @@ export default function CaseCard({ caso, gpcMeta, viewMode = 'grid' }: CaseCardP
         className="relative flex flex-col h-full bg-white/95 backdrop-blur-xl rounded-[28px] p-6 shadow-xs border border-white/80 group-hover:border-white/90 active:scale-[0.995] transition-all duration-300 justify-between focus:outline-none"
       >
         <div className="space-y-3">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
             <span className={`text-xs font-semibold ${isUrgent ? 'text-rose-700' : 'text-[#0b57d0]'}`}>
               {labelGpc}
             </span>
+            {isCompleted && (
+              <span className="text-xs font-semibold text-emerald-600 inline-flex items-center gap-1">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                Completado • {progress?.score}/10
+              </span>
+            )}
+            {isInProgress && (
+              <span className="text-xs font-semibold text-amber-600 inline-flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                En progreso • Fase {progress?.currentPhase}/3
+              </span>
+            )}
           </div>
 
           <h3 className="text-lg font-normal text-[#1f1f1f] group-hover:text-[#0b57d0] transition-colors line-clamp-2 font-heading leading-snug">
@@ -103,7 +133,7 @@ export default function CaseCard({ caso, gpcMeta, viewMode = 'grid' }: CaseCardP
           )}
 
           <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white shadow-xs shadow-blue-500/20 group-hover:shadow-md group-hover:shadow-blue-500/30 group-hover:scale-[1.02] active:scale-[0.98] transition-all duration-300">
-            <span>Resolver</span>
+            <span>{actionText}</span>
             <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
           </div>
         </div>

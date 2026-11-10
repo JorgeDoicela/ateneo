@@ -39,6 +39,11 @@ logger = get_logger("ateneo.main")
 async def lifespan(app: FastAPI):
     logger.info("Inicializando base de datos relacional (SQLAlchemy)...", extra={"action": "database_init"})
     init_database()
+    try:
+        from models.history_db import seed_rich_history_data
+        seed_rich_history_data()
+    except Exception as seed_err:
+        logger.warning(f"Error al sembrar datos de historial inicial: {seed_err}")
     logger.info("Servidor FastAPI de Ateneo iniciado correctamente.", extra={"action": "server_started"})
     import asyncio
     async def _preload():

@@ -83,6 +83,31 @@ export const evaluationApi = {
       responseType: 'blob',
     });
     return res.data;
+  },
+
+  async saveEvaluationRecord(payload: {
+    case_id: string;
+    case_title?: string;
+    guia_asociada?: string;
+    score: number;
+    score_max?: number;
+    faithfulness_score?: number;
+    aciertos?: string[];
+    omisiones?: string[];
+    competencias_deficientes?: unknown[];
+    cita_normativa?: unknown;
+    citas_normativas?: unknown[];
+    retroalimentacion_general?: string;
+    tiempo_segundos?: number;
+    cohorte_id?: string;
+    modo_simulacion?: string;
+    fases_respuestas?: Record<string, string>;
+  }): Promise<{ status: string; record_id: number; message: string; gamification_update?: unknown }> {
+    const res = await httpClient.post<{ status: string; record_id: number; message: string; gamification_update?: unknown }>(
+      '/api/evaluate/save',
+      payload
+    );
+    return res.data;
   }
 };
 

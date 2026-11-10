@@ -32,6 +32,25 @@ class ExportPdfRequest(BaseModel):
     eval_result: Dict[str, Any]
 
 
+class SaveSimulationPayload(BaseModel):
+    case_id: str
+    case_title: Optional[str] = "Caso Clínico Formativo"
+    guia_asociada: Optional[str] = "GPC Ecuador"
+    score: float
+    score_max: Optional[int] = 10
+    faithfulness_score: Optional[float] = 1.0
+    aciertos: Optional[List[str]] = []
+    omisiones: Optional[List[str]] = []
+    competencias_deficientes: Optional[List[Any]] = []
+    cita_normativa: Optional[Dict[str, Any]] = None
+    citas_normativas: Optional[List[Dict[str, Any]]] = None
+    retroalimentacion_general: Optional[str] = ""
+    tiempo_segundos: Optional[float] = 180.0
+    cohorte_id: Optional[str] = "general"
+    modo_simulacion: Optional[str] = "fases"
+    fases_respuestas: Optional[Dict[str, str]] = None
+
+
 @router.get("/benchmark-scientific")
 async def get_scientific_benchmark() -> Dict[str, Any]:
     """
@@ -223,6 +242,33 @@ async def download_evaluation_task_artifact(task_id: str):
         headers={"Content-Disposition": f'attachment; filename="{task.filename}"'}
     )
 
+
+@router.post("/save", status_code=status.HTTP_201_CREATED)
+async def save_evaluation_outcome(
+    payload: SaveSimulationPayload,
+    current_user: Optional[UserResponse] = Depends(get_optional_current_user),
+    evaluation_service: EvaluationService = Depends(get_evaluation_service)
+):
+    """
+    Persiste y certifica de forma transaccional (ACID) la resolución completa de un caso clínico,
+    garantizando la actualización del historial, modelo adaptativo BKT, gamificación (XP) y tareas.
+    """
+    target_user_id = current_user.id if current_user else "usr_alumno_001"
+    target_user_email = current_user.email if current_user else "alumno@ateneo.edu.ec"
+    target_tenant_id = getattr(current_user, "tenant_id", "tenant_default") if current_user else "tenant_default"
+
+    try:
+        saved_result = evaluation_service.save_simulation_record(
+            case_id=payload.case_id,
+            eval_data=payload.model_dump(),
+            user_id=target_user_id,
+            user_email=target_user_email,
+            tenant_id=target_tenant_id
+        )
+        return saved_result
+    except Exception as e:
+        logger.error(f"[EvaluationRouter] Error guardando simulación clínica: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error persistiendo la simulación clínica: {str(e)}")
 
 
 @router.post("", response_model=EvaluationResult, dependencies=[Depends(rate_limit_inference)])
