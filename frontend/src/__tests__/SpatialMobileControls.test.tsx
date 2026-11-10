@@ -27,20 +27,18 @@ describe('Suite de Pruebas: Controles Móviles y Orientación Horizontal 3D (Ate
     });
   });
 
-  it('debe renderizar los controles táctiles móviles en pantalla (joystick y botones)', () => {
+  it('debe renderizar el botón de alternancia de velocidad Caminar/Correr sin iconos SVG ni emojis', () => {
     render(<MobileTouchControls />);
 
-    // Botones de rotación rápida
-    expect(screen.getByTitle('Girar 45° a la izquierda')).toBeInTheDocument();
-    expect(screen.getByTitle('Girar 45° a la derecha')).toBeInTheDocument();
-
-    // Botón de sprint
-    const sprintBtn = screen.getByTitle(/Caminar/i);
+    // Botón de alternancia de velocidad basado estrictamente en texto plano
+    const sprintBtn = screen.getByRole('button', { name: /Caminar/i });
     expect(sprintBtn).toBeInTheDocument();
+    expect(screen.queryByTitle(/Girar/i)).not.toBeInTheDocument();
 
-    // Al pulsar el botón de sprint, debe alternar el estado en el store
+    // Al pulsar el botón, debe alternar al modo Correr en el store
     fireEvent.click(sprintBtn);
     expect(useSpatialStore.getState().touchInput.isSprinting).toBe(true);
+    expect(screen.getByRole('button', { name: /Correr/i })).toBeInTheDocument();
   });
 
   it('debe mostrar el botón contextual de examinar cama cuando el médico está en rango', () => {

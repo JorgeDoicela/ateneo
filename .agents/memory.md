@@ -2158,7 +2158,8 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
        - Detección reactiva de dispositivos táctiles en orientación vertical (`isTouchDevice && isPortrait`).
        - Modal institucional Ateneo+ con overlay sutil (`bg-slate-900/60 backdrop-blur-sm`), tarjeta blanca pura (`bg-white rounded-[28px] shadow-2xl`), halos de refracción difusos tricolor, imagotipo oficial plano `/ateneo.png`, título de marca con gradiente oficial (`ATENEO+`), icono plano `Smartphone` en `#0b57d0` (sin marcos circulares ni cajas oscuras), botón primario con gradiente tricolor de marca y botón secundario blanco con borde sutil.
     2. *Joystick Virtual Análogo y Multi-Touch (`MobileTouchControls.tsx`):*
-       - Base en Liquid Glassmorphism claro (`bg-white/50 backdrop-blur-xl border border-slate-200/80`), perilla blanca deslizable con punto central `#0b57d0`, y botonera de acciones institucionales (rotación 45°, sprint y examinar cama) con gradientes oficiales.
+       - Base en Liquid Glassmorphism ampliada (`w-36 h-36` / `w-40 h-40`) y ultra-translúcida (`bg-white/18 border-white/35`), perilla blanca suave con punto central `#0b57d0`/70, eliminando botones auxiliares de rotación (la cámara se rota deslizando libremente sobre la pantalla).
+       - Botón de alternancia de velocidad puramente tipográfico ("Caminar" / "Correr") sin iconos SVG ni emojis, en estricto cumplimiento con el Ateneo+ Design System.
     3. *Superficie Táctil de Cámara y Rotación Rápida:*
        - Área táctil dedicada en el 55% derecho de la pantalla para rotar suavemente la vista (`yaw`, `pitch`) sin interferir con el joystick.
        - Botones circulares flotantes para giros precisos de 45° a la izquierda y derecha.

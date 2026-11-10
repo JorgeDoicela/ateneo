@@ -1,10 +1,5 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
-import {
-  Zap,
-  RotateCcw,
-  RotateCw,
-  Stethoscope
-} from 'lucide-react';
+import { Stethoscope } from 'lucide-react';
 import { useSpatialStore } from '../store/useSpatialStore';
 
 export const MobileTouchControls: React.FC = () => {
@@ -27,7 +22,7 @@ export const MobileTouchControls: React.FC = () => {
 
   const hoveredBed = beds.find((b) => b.id === hoveredBedId);
 
-  // Toggle de correr / sprint
+  // Alternar entre modo Caminar y Correr
   const toggleSprint = useCallback(() => {
     setIsSprinting((prev) => {
       const next = !prev;
@@ -35,15 +30,6 @@ export const MobileTouchControls: React.FC = () => {
       return next;
     });
   }, [setTouchSprinting]);
-
-  // Rotación rápida mediante toques de botón (giro de 45 grados)
-  const handleQuickTurn = useCallback(
-    (direction: 'left' | 'right') => {
-      const angleDelta = direction === 'left' ? -220 : 220;
-      addTouchLookDelta(angleDelta, 0);
-    },
-    [addTouchLookDelta]
-  );
 
   // =========================================================================
   // GESTIÓN DEL JOYSTICK VIRTUAL ANÁLOGO
@@ -66,7 +52,7 @@ export const MobileTouchControls: React.FC = () => {
     const deltaX = clientX - centerX;
     const deltaY = clientY - centerY;
     const distance = Math.hypot(deltaX, deltaY);
-    const maxRadius = rect.width / 2 - 16; // Radio máximo permitido
+    const maxRadius = rect.width / 2 - 18; // Radio máximo de desplazamiento
 
     let clampedX = deltaX;
     let clampedY = deltaY;
@@ -81,7 +67,7 @@ export const MobileTouchControls: React.FC = () => {
 
     // Normalizar entre -1.0 y 1.0 (X: derecha/izquierda, Y: adelante/atrás)
     const normalizedX = clampedX / maxRadius;
-    const normalizedY = -clampedY / maxRadius; // Arriba en pantalla es avanzar (+Y en espacio local)
+    const normalizedY = -clampedY / maxRadius;
 
     setTouchMove(normalizedX, normalizedY);
   };
@@ -144,91 +130,68 @@ export const MobileTouchControls: React.FC = () => {
         onPointerCancel={handleLookPointerUp}
       />
 
-      {/* 2. Joystick Virtual Análogo (Lado Inferior Izquierdo) */}
-      <div className="absolute bottom-5 left-6 pointer-events-auto touch-none">
+      {/* 2. Joystick Virtual Análogo (Más amplio y transparente en Liquid Glassmorphism) */}
+      <div className="absolute bottom-6 left-6 pointer-events-auto touch-none">
         <div
           ref={joystickBaseRef}
           onPointerDown={handleJoystickPointerDown}
           onPointerMove={handleJoystickPointerMove}
           onPointerUp={handleJoystickPointerUp}
           onPointerCancel={handleJoystickPointerUp}
-          className={`w-32 h-32 rounded-full border flex items-center justify-center transition-colors relative backdrop-blur-xl shadow-lg ${
+          className={`w-36 h-36 sm:w-40 sm:h-40 rounded-full border flex items-center justify-center transition-colors relative backdrop-blur-md shadow-lg ${
             isJoystickActive
-              ? 'bg-white/80 border-[#0b57d0] shadow-blue-500/20'
-              : 'bg-white/50 border-slate-200/80 shadow-slate-900/5'
+              ? 'bg-white/30 border-[#0b57d0]/70 shadow-blue-500/15'
+              : 'bg-white/18 border-white/35 shadow-slate-900/5'
           }`}
         >
-          {/* Guías cardinales discretas */}
-          <div className="absolute top-2.5 w-1.5 h-1.5 rounded-full bg-slate-400/50" />
-          <div className="absolute bottom-2.5 w-1.5 h-1.5 rounded-full bg-slate-400/50" />
-          <div className="absolute left-2.5 w-1.5 h-1.5 rounded-full bg-slate-400/50" />
-          <div className="absolute right-2.5 w-1.5 h-1.5 rounded-full bg-slate-400/50" />
+          {/* Guías cardinales sutiles */}
+          <div className="absolute top-3 w-1.5 h-1.5 rounded-full bg-slate-500/25" />
+          <div className="absolute bottom-3 w-1.5 h-1.5 rounded-full bg-slate-500/25" />
+          <div className="absolute left-3 w-1.5 h-1.5 rounded-full bg-slate-500/25" />
+          <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-slate-500/25" />
 
-          {/* Perilla análoga deslizable */}
+          {/* Perilla análoga deslizable translúcida */}
           <div
             style={{
               transform: `translate3d(${knobPos.x}px, ${knobPos.y}px, 0)`
             }}
-            className={`w-14 h-14 rounded-full border transition-all flex items-center justify-center shadow-md ${
+            className={`w-16 h-16 rounded-full border transition-all flex items-center justify-center shadow-md backdrop-blur-sm ${
               isJoystickActive
-                ? 'bg-white border-[#0b57d0] shadow-blue-500/30 scale-105'
-                : 'bg-white border-slate-200/90'
+                ? 'bg-white/85 border-[#0b57d0] shadow-blue-500/25 scale-105'
+                : 'bg-white/60 border-white/70'
             }`}
           >
-            <div className="w-4 h-4 rounded-full bg-[#0b57d0]" />
+            <div className="w-4 h-4 rounded-full bg-[#0b57d0]/70" />
           </div>
         </div>
       </div>
 
-      {/* 3. Botonera de Acción y Navegación Rápida (Lado Inferior Derecho) */}
-      <div className="absolute bottom-5 right-6 pointer-events-auto flex items-end space-x-3">
+      {/* 3. Botonera de Acción y Desplazamiento (Lado Inferior Derecho) */}
+      <div className="absolute bottom-6 right-6 pointer-events-auto flex items-center space-x-3">
         {/* Botón contextual de Inspección de Cama si el médico está cerca */}
         {hoveredBed && (
           <button
             type="button"
             onClick={() => openBedInspection(hoveredBed.id)}
-            className="px-5 py-3.5 bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-700 hover:via-blue-700 hover:to-indigo-700 text-white rounded-full font-medium text-xs shadow-md shadow-blue-500/20 hover:shadow-lg transition-all flex items-center space-x-2 animate-pulse cursor-pointer"
+            className="px-5 py-3 bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-700 hover:via-blue-700 hover:to-indigo-700 text-white rounded-full font-medium text-xs shadow-md shadow-blue-500/20 hover:shadow-lg transition-all flex items-center space-x-2 animate-pulse cursor-pointer"
           >
             <Stethoscope className="w-4 h-4 text-white" />
             <span>Examinar Cama {hoveredBed.bedNumber}</span>
           </button>
         )}
 
-        {/* Botones de rotación rápida de cámara (45°) */}
-        <div className="flex flex-col space-y-2">
-          <button
-            type="button"
-            onClick={() => handleQuickTurn('left')}
-            className="p-3 bg-white/90 hover:bg-white active:bg-slate-100 text-slate-800 rounded-full border border-slate-200/80 shadow-xs backdrop-blur-md transition-all flex items-center justify-center hover:border-blue-300 active:scale-95 cursor-pointer"
-            title="Girar 45° a la izquierda"
-            aria-label="Girar a la izquierda"
-          >
-            <RotateCcw className="w-4 h-4 text-[#0b57d0]" />
-          </button>
-          <button
-            type="button"
-            onClick={() => handleQuickTurn('right')}
-            className="p-3 bg-white/90 hover:bg-white active:bg-slate-100 text-slate-800 rounded-full border border-slate-200/80 shadow-xs backdrop-blur-md transition-all flex items-center justify-center hover:border-blue-300 active:scale-95 cursor-pointer"
-            title="Girar 45° a la derecha"
-            aria-label="Girar a la derecha"
-          >
-            <RotateCw className="w-4 h-4 text-[#0b57d0]" />
-          </button>
-        </div>
-
-        {/* Botón conmutador de Correr / Sprint */}
+        {/* Botón de alternancia Caminar / Correr (estrictamente texto plano, cero emojis e iconos SVG) */}
         <button
           type="button"
           onClick={toggleSprint}
-          className={`px-4 py-3 rounded-full border shadow-xs backdrop-blur-md transition-all flex items-center space-x-2 text-xs font-medium cursor-pointer active:scale-95 ${
+          className={`px-5 py-3 rounded-full border shadow-xs backdrop-blur-md transition-all text-xs font-semibold tracking-wide cursor-pointer active:scale-95 ${
             isSprinting
-              ? 'bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white border-blue-400 shadow-md shadow-blue-500/25 ring-2 ring-blue-300/50'
-              : 'bg-white/90 hover:bg-white text-slate-800 border-slate-200/80 hover:border-blue-300'
+              ? 'bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white border-blue-400 shadow-md shadow-blue-500/25'
+              : 'bg-white/85 hover:bg-white text-slate-800 border-slate-200/80 hover:border-blue-300'
           }`}
-          title={isSprinting ? 'Corriendo (Velocidad x2)' : 'Caminar (Toca para correr)'}
+          title={isSprinting ? 'Modo Correr activo' : 'Modo Caminar activo'}
         >
-          <Zap className={`w-4 h-4 ${isSprinting ? 'text-amber-300 fill-amber-300' : 'text-[#0b57d0]'}`} />
-          <span className="hidden sm:inline">{isSprinting ? 'Corriendo' : 'Caminar'}</span>
+          <span>{isSprinting ? 'Correr' : 'Caminar'}</span>
         </button>
       </div>
     </div>
