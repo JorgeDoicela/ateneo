@@ -2201,9 +2201,10 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
       - Rango de inclinación vertical ampliado a `-Math.PI / 2.3` (~ -78°) y plano cercano optimizado a `near: 0.05` en `<Canvas>`, permitiendo al usuario mirar directamente hacia abajo para observar su bata, credencial, estetoscopio, manos y calzado dando zancadas en tiempo real.
     - Botón institucional en el HUD superior con iconos planos `User` (3ª Persona) y `Eye` (1ª Persona) sin marcos decorativos.
   - **Letrero Aéreo Flotante de Bienvenida y Cápsula Superior (`WelcomeAerialSign.tsx`, `Hospital3DPage.tsx`):**
-    - Ubicación corregida arriba del hospital: suspendido en el cielo a `Y = 14.5m` sobre el coronamiento central del edificio (`X = -12.2m`, `Z = 0.0m`), despejando por completo la vista de la calzada, la fachada y el avatar médico.
-    - Estilo canónico Ateneo+ Design System: tarjeta blanca pura `#ffffff` con esquinas redondeadas `rounded-[28px]`, sombra suave difusa `shadow-2xl`, borde sutil `border-slate-200/80` y micro-levitación armónica (`Math.sin(t * 1.0) * 0.06m`).
-    - Eliminación de defectos visuales y cajas oscuras: suprimida la duplicación de texto invertido (`backfaceVisibility: 'hidden'` y placa de respaldo blanca), erradicadas cajas oscuras `bg-slate-900`, e integrado el imagotipo institucional plano `/ateneo.png` junto al gradiente oficial de marca (`#06b6d4`, `#2563eb`, `#7c3aed`).
+    - Ubicación a cielo abierto: suspendido en el cielo a `Y = 17.2m` sobre el edificio (`X = -12.2m`, `Z = 0.0m`), dejando 3.7 metros de cielo despejado por encima del coronamiento del hospital y sin tapar ninguna planta o elemento arquitectónico.
+    - Formato Píldora Institucional Ateneo+: contenedor cápsula estilizado `rounded-full` (`bg-white/95 backdrop-blur-xl border border-slate-200/80 shadow-2xl px-8 py-3.5`) con micro-levitación armónica (`Math.sin(t * 1.0) * 0.08m`).
+    - Contenido limpio y esencial: eliminado el encabezado redundante ("HOSPITAL UNIVERSITARIO • ATENEO+"), suprimidas las instrucciones de pasillo y prescindido de cajas rectangulares pesadas. Presenta únicamente el imagotipo plano oficial `/ateneo.png` (w-7 h-7) y el saludo tipográfico "¡Bienvenidos a Ateneo+!" con gradiente de marca (`from-[#06b6d4] via-[#2563eb] to-[#7c3aed]`).
+    - Eliminación de sangrado y doble cara: `distanceFactor={14}`, `backfaceVisibility: 'hidden'` y `WebkitBackfaceVisibility: 'hidden'`.
     - Cápsula superior en el HUD de navegación (`hidden md:flex`) con halo de pulso cyan y tipografía institucional centrada ("Bienvenido a Ateneo+ • Simulador Clínico 3D").
   - **Certificación de Calidad:**
     - Suite `SpatialDoctorCharacter.test.tsx`: 4/4 pruebas aprobadas.
