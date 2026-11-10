@@ -2156,9 +2156,9 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
   - **Solución Arquitectural e Integridad de Diseño (Cero Parches):**
     1. *Bloqueo y Exigencia de Modo Horizontal (`LandscapeOrientationNotice.tsx`):*
        - Detección reactiva de dispositivos táctiles en orientación vertical (`isTouchDevice && isPortrait`).
-       - Bloqueo de interacción mediante pantalla de cristal esmerilado con animación CSS de rotación de smartphone, mensaje clínico de Ateneo+ ("Orientación Horizontal Requerida") y botón para activar pantalla completa e invocar `screen.orientation.lock('landscape')`.
+       - Modal institucional Ateneo+ con overlay sutil (`bg-slate-900/60 backdrop-blur-sm`), tarjeta blanca pura (`bg-white rounded-[28px] shadow-2xl`), halos de refracción difusos tricolor, imagotipo oficial plano `/ateneo.png`, título de marca con gradiente oficial (`ATENEO+`), icono plano `Smartphone` en `#0b57d0` (sin marcos circulares ni cajas oscuras), botón primario con gradiente tricolor de marca y botón secundario blanco con borde sutil.
     2. *Joystick Virtual Análogo y Multi-Touch (`MobileTouchControls.tsx`):*
-       - Perilla análoga con `PointerEvents` y captura de puntero en la esquina inferior izquierda (`w-32 h-32`), normalizando la fuerza y ángulo de desplazamiento en `useSpatialStore.setTouchMove(normalizedX, normalizedY)`.
+       - Base en Liquid Glassmorphism claro (`bg-white/50 backdrop-blur-xl border border-slate-200/80`), perilla blanca deslizable con punto central `#0b57d0`, y botonera de acciones institucionales (rotación 45°, sprint y examinar cama) con gradientes oficiales.
     3. *Superficie Táctil de Cámara y Rotación Rápida:*
        - Área táctil dedicada en el 55% derecho de la pantalla para rotar suavemente la vista (`yaw`, `pitch`) sin interferir con el joystick.
        - Botones circulares flotantes para giros precisos de 45° a la izquierda y derecha.

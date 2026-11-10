@@ -152,30 +152,30 @@ export const MobileTouchControls: React.FC = () => {
           onPointerMove={handleJoystickPointerMove}
           onPointerUp={handleJoystickPointerUp}
           onPointerCancel={handleJoystickPointerUp}
-          className={`w-32 h-32 rounded-full border flex items-center justify-center transition-colors relative backdrop-blur-md shadow-xl ${
+          className={`w-32 h-32 rounded-full border flex items-center justify-center transition-colors relative backdrop-blur-xl shadow-lg ${
             isJoystickActive
-              ? 'bg-slate-900/40 border-cyan-400/60 shadow-cyan-500/20'
-              : 'bg-slate-900/25 border-white/40 shadow-black/20'
+              ? 'bg-white/80 border-[#0b57d0] shadow-blue-500/20'
+              : 'bg-white/50 border-slate-200/80 shadow-slate-900/5'
           }`}
         >
           {/* Guías cardinales discretas */}
-          <div className="absolute top-2 w-1.5 h-1.5 rounded-full bg-white/50" />
-          <div className="absolute bottom-2 w-1.5 h-1.5 rounded-full bg-white/50" />
-          <div className="absolute left-2 w-1.5 h-1.5 rounded-full bg-white/50" />
-          <div className="absolute right-2 w-1.5 h-1.5 rounded-full bg-white/50" />
+          <div className="absolute top-2.5 w-1.5 h-1.5 rounded-full bg-slate-400/50" />
+          <div className="absolute bottom-2.5 w-1.5 h-1.5 rounded-full bg-slate-400/50" />
+          <div className="absolute left-2.5 w-1.5 h-1.5 rounded-full bg-slate-400/50" />
+          <div className="absolute right-2.5 w-1.5 h-1.5 rounded-full bg-slate-400/50" />
 
           {/* Perilla análoga deslizable */}
           <div
             style={{
               transform: `translate3d(${knobPos.x}px, ${knobPos.y}px, 0)`
             }}
-            className={`w-14 h-14 rounded-full border transition-shadow flex items-center justify-center shadow-lg ${
+            className={`w-14 h-14 rounded-full border transition-all flex items-center justify-center shadow-md ${
               isJoystickActive
-                ? 'bg-white border-cyan-400 shadow-cyan-400/50 scale-105'
-                : 'bg-white/90 border-slate-200/90'
+                ? 'bg-white border-[#0b57d0] shadow-blue-500/30 scale-105'
+                : 'bg-white border-slate-200/90'
             }`}
           >
-            <div className="w-4 h-4 rounded-full bg-[#0b57d0]/80" />
+            <div className="w-4 h-4 rounded-full bg-[#0b57d0]" />
           </div>
         </div>
       </div>
@@ -187,9 +187,9 @@ export const MobileTouchControls: React.FC = () => {
           <button
             type="button"
             onClick={() => openBedInspection(hoveredBed.id)}
-            className="px-4 py-3 bg-[#0b57d0] hover:bg-blue-700 text-white rounded-full border border-blue-300 shadow-xl backdrop-blur-md transition-all flex items-center space-x-2 text-xs font-bold animate-pulse cursor-pointer"
+            className="px-5 py-3.5 bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-700 hover:via-blue-700 hover:to-indigo-700 text-white rounded-full font-medium text-xs shadow-md shadow-blue-500/20 hover:shadow-lg transition-all flex items-center space-x-2 animate-pulse cursor-pointer"
           >
-            <Stethoscope className="w-4 h-4 text-cyan-300" />
+            <Stethoscope className="w-4 h-4 text-white" />
             <span>Examinar Cama {hoveredBed.bedNumber}</span>
           </button>
         )}
@@ -199,7 +199,7 @@ export const MobileTouchControls: React.FC = () => {
           <button
             type="button"
             onClick={() => handleQuickTurn('left')}
-            className="p-3 bg-white/85 active:bg-white text-slate-800 rounded-full border border-slate-200/80 shadow-md backdrop-blur-md transition-all flex items-center justify-center hover:border-blue-300"
+            className="p-3 bg-white/90 hover:bg-white active:bg-slate-100 text-slate-800 rounded-full border border-slate-200/80 shadow-xs backdrop-blur-md transition-all flex items-center justify-center hover:border-blue-300 active:scale-95 cursor-pointer"
             title="Girar 45° a la izquierda"
             aria-label="Girar a la izquierda"
           >
@@ -208,7 +208,7 @@ export const MobileTouchControls: React.FC = () => {
           <button
             type="button"
             onClick={() => handleQuickTurn('right')}
-            className="p-3 bg-white/85 active:bg-white text-slate-800 rounded-full border border-slate-200/80 shadow-md backdrop-blur-md transition-all flex items-center justify-center hover:border-blue-300"
+            className="p-3 bg-white/90 hover:bg-white active:bg-slate-100 text-slate-800 rounded-full border border-slate-200/80 shadow-xs backdrop-blur-md transition-all flex items-center justify-center hover:border-blue-300 active:scale-95 cursor-pointer"
             title="Girar 45° a la derecha"
             aria-label="Girar a la derecha"
           >
@@ -220,10 +220,10 @@ export const MobileTouchControls: React.FC = () => {
         <button
           type="button"
           onClick={toggleSprint}
-          className={`px-3.5 py-3 rounded-full border shadow-lg backdrop-blur-md transition-all flex items-center space-x-1.5 text-xs font-semibold cursor-pointer ${
+          className={`px-4 py-3 rounded-full border shadow-xs backdrop-blur-md transition-all flex items-center space-x-2 text-xs font-medium cursor-pointer active:scale-95 ${
             isSprinting
-              ? 'bg-[#0b57d0] text-white border-blue-400 shadow-blue-500/30 ring-2 ring-blue-300'
-              : 'bg-white/85 text-slate-800 border-slate-200/80 hover:border-blue-300'
+              ? 'bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white border-blue-400 shadow-md shadow-blue-500/25 ring-2 ring-blue-300/50'
+              : 'bg-white/90 hover:bg-white text-slate-800 border-slate-200/80 hover:border-blue-300'
           }`}
           title={isSprinting ? 'Corriendo (Velocidad x2)' : 'Caminar (Toca para correr)'}
         >
