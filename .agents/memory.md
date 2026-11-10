@@ -2165,8 +2165,9 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
     4. *Botonera de Acción Ergonómica al Pulgar:*
        - Conmutador de carrera/sprint con icono `Zap` y realce azul (`bg-[#0b57d0]`).
        - Botón contextual animado `Examinar Cama {n}` con icono `Stethoscope` que aparece bajo el pulgar derecho cuando el médico se encuentra en proximidad de un paciente.
-    5. *Integración en Motor Cinemático (`CharacterController.tsx`):*
+    5. *Integración en Motor Cinemático y Descarte de Warnings WebGL (`CharacterController.tsx`, `Hospital3DPage.tsx`):*
        - Consumo de `touchInput` en `useFrame` sin re-renders en React, sumando vectorialmente la traslación del joystick al plano XZ y aplicando deltas de vista táctiles a 60 FPS continuos.
+       - Corrección de mapa de sombras en R3F: asignación de `shadows="percentage"` en `<Canvas>` para configurar explícitamente `THREE.PCFShadowMap`, erradicando la inundación de advertencias en consola (`THREE.WebGLShadowMap: PCFSoftShadowMap has been removed`).
   - **Certificación de Calidad:**
     - Suite `SpatialMobileControls.test.tsx`: 4/4 pruebas unitarias aprobadas.
     - Suite `SpatialHospitalMaster.test.tsx`: 5/5 pruebas aprobadas.
