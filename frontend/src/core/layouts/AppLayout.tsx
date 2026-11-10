@@ -22,7 +22,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
     );
   }
 
-  // Rutas espaciales/inmersivas (Simulador Hospitalario 3D): Vista Edge-to-Edge sin márgenes restrictivos ni scrollbar
+  // Rutas espaciales/inmersivas (Simulador Hospitalario 3D): Inmersión total sin Navbar ni Footer
   const isImmersiveRoute = ['/hospital-3d'].some(p =>
     location.pathname.startsWith(p)
   );
@@ -30,8 +30,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   if (isImmersiveRoute) {
     return (
       <div className="h-screen w-screen bg-[#f0f4f9] flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 overflow-hidden">
-        <Navbar />
-        <main className="w-full h-[calc(100vh-4rem)] flex-1 relative z-10 overflow-hidden p-0 m-0">
+        <main className="w-full h-full relative z-10 overflow-hidden p-0 m-0">
           {children}
         </main>
       </div>

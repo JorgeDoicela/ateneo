@@ -131,16 +131,14 @@ export const Hospital3DPage: React.FC = () => {
       <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none z-10">
         {/* Lado Izquierdo: Volver al Catálogo */}
         <div className="flex items-center space-x-3 pointer-events-auto">
-          {!isFullscreen && (
-            <button
-              onClick={() => navigate('/cases')}
-              className="px-3.5 py-2 bg-white/90 hover:bg-white text-slate-800 rounded-full border border-slate-200/80 shadow-xs backdrop-blur-md transition-all flex items-center space-x-2 text-xs font-semibold hover:border-blue-300"
-              title="Volver al Catálogo 2D"
-            >
-              <ArrowLeft className="w-4 h-4 text-[#0b57d0]" />
-              <span className="hidden sm:inline">Catálogo</span>
-            </button>
-          )}
+          <button
+            onClick={() => navigate('/cases')}
+            className="px-3.5 py-2 bg-white/90 hover:bg-white text-slate-800 rounded-full border border-slate-200/80 shadow-xs backdrop-blur-md transition-all flex items-center space-x-2 text-xs font-semibold hover:border-blue-300 cursor-pointer"
+            title="Volver al Catálogo 2D"
+          >
+            <ArrowLeft className="w-4 h-4 text-[#0b57d0]" />
+            <span className="hidden sm:inline">Catálogo</span>
+          </button>
         </div>
 
         {/* Lado Derecho: Estadísticas de Triaje y Botón Pantalla Completa */}
