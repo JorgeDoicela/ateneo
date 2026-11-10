@@ -18,6 +18,14 @@ export const CharacterController: React.FC = () => {
   const yawRef = useRef<number>(-Math.PI / 2);
   const pitchRef = useRef<number>(0.07);
 
+  // Dinámica física realista: velocidad con inercia, cadencia y bamboleo biomecánico (head bobbing)
+  const velocityRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 0, 0));
+  const bobTimerRef = useRef<number>(0);
+  const idleTimerRef = useRef<number>(0);
+  const currentBobYRef = useRef<number>(0);
+  const currentBobSwayRef = useRef<number>(0);
+  const currentBobRollRef = useRef<number>(0);
+
   const keysRef = useRef<{ [key: string]: boolean }>({});
   const isMouseDownRef = useRef<boolean>(false);
   const previousMousePositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -135,52 +143,81 @@ export const CharacterController: React.FC = () => {
       keysRef.current['ShiftLeft'] ||
       keysRef.current['ShiftRight'] ||
       touchInput.isSprinting;
-    const moveSpeed = (isSprinting ? 6.0 : 3.5) * delta;
 
-    // Vector de traslación en el plano XZ
+    // Vectores direccionales relativos al ángulo de mirada horizontal
     const forward = new THREE.Vector3(-Math.sin(yawRef.current), 0, -Math.cos(yawRef.current));
     const right = new THREE.Vector3(Math.cos(yawRef.current), 0, -Math.sin(yawRef.current));
 
-    const moveDir = new THREE.Vector3(0, 0, 0);
+    const inputDir = new THREE.Vector3(0, 0, 0);
 
-    if (keysRef.current['KeyW'] || keysRef.current['ArrowUp']) moveDir.add(forward);
-    if (keysRef.current['KeyS'] || keysRef.current['ArrowDown']) moveDir.sub(forward);
-    if (keysRef.current['KeyA'] || keysRef.current['ArrowLeft']) moveDir.sub(right);
-    if (keysRef.current['KeyD'] || keysRef.current['ArrowRight']) moveDir.add(right);
+    if (keysRef.current['KeyW'] || keysRef.current['ArrowUp']) inputDir.add(forward);
+    if (keysRef.current['KeyS'] || keysRef.current['ArrowDown']) inputDir.sub(forward);
+    if (keysRef.current['KeyA'] || keysRef.current['ArrowLeft']) inputDir.sub(right);
+    if (keysRef.current['KeyD'] || keysRef.current['ArrowRight']) inputDir.add(right);
 
     // Entrada análoga desde el joystick virtual táctil
     if (Math.abs(touchInput.moveX) > 0.04 || Math.abs(touchInput.moveY) > 0.04) {
-      moveDir.addScaledVector(forward, touchInput.moveY);
-      moveDir.addScaledVector(right, touchInput.moveX);
+      inputDir.addScaledVector(forward, touchInput.moveY);
+      inputDir.addScaledVector(right, touchInput.moveX);
     }
 
-    if (moveDir.lengthSq() > 0) {
+    const hasInput = inputDir.lengthSq() > 0.001;
+    if (hasInput && inputDir.lengthSq() > 1.0) {
+      inputDir.normalize();
+    }
+
+    // 1. Inercia biomecánica y aceleración suave
+    const targetSpeed = hasInput ? (isSprinting ? 5.8 : 3.2) : 0.0;
+    const targetVelocity = inputDir.clone().multiplyScalar(targetSpeed);
+
+    // Tasa de aceleración (arranque rápido y frenado suave orgánico)
+    const accelRate = hasInput ? 13.0 : 9.5;
+    velocityRef.current.lerp(targetVelocity, Math.min(1.0, accelRate * delta));
+
+    const currentSpeed = velocityRef.current.length();
+
+    // 2. Desplazamiento y resolución de colisiones físicas
+    if (currentSpeed > 0.005) {
       const prevX = positionRef.current.x;
       const prevZ = positionRef.current.z;
 
-      moveDir.normalize().multiplyScalar(moveSpeed);
-      positionRef.current.add(moveDir);
+      positionRef.current.x += velocityRef.current.x * delta;
+      positionRef.current.z += velocityRef.current.z * delta;
 
-      // 1. Confinamiento global del campus hospitalario (Explanada Exterior + Pabellón Interior)
-      positionRef.current.x = Math.max(-35.0, Math.min(10.5, positionRef.current.x));
+      // 2A. Confinamiento perimetral del campus hospitalario
+      if (positionRef.current.x < -35.0) {
+        positionRef.current.x = -35.0;
+        velocityRef.current.x = 0;
+      } else if (positionRef.current.x > 10.5) {
+        positionRef.current.x = 10.5;
+        velocityRef.current.x = 0;
+      }
 
-      // 2. Colisión física con el Muro de Fachada Oeste (X = -12.0) y Portal de Puertas Abiertas (Z en [-1.55, 1.55])
+      // 2B. Colisión física con el Muro de Fachada Oeste (X = -12.0) y Portal de Puertas Abiertas (Z en [-1.55, 1.55])
       const inDoorwayZ = Math.abs(positionRef.current.z) <= 1.55;
       if (!inDoorwayZ) {
         if (prevX <= -12.45 && positionRef.current.x > -12.45) {
           positionRef.current.x = -12.45;
+          velocityRef.current.x = 0;
         } else if (prevX >= -11.55 && positionRef.current.x < -11.55) {
           positionRef.current.x = -11.55;
+          velocityRef.current.x = 0;
         }
       }
 
-      // 3. Límites laterales Z según zona (Umbral de puerta vs. Interior del Pabellón vs. Explanada Exterior)
+      // 2C. Límites laterales Z según zona
       if (positionRef.current.x > -12.45 && positionRef.current.x < -11.55) {
         positionRef.current.z = Math.max(-1.55, Math.min(1.55, positionRef.current.z));
       } else if (positionRef.current.x >= -11.55) {
-        positionRef.current.z = Math.max(-7.8, Math.min(7.8, positionRef.current.z));
+        if (positionRef.current.z < -7.8 || positionRef.current.z > 7.8) {
+          positionRef.current.z = Math.max(-7.8, Math.min(7.8, positionRef.current.z));
+          velocityRef.current.z = 0;
+        }
       } else {
-        positionRef.current.z = Math.max(-16.0, Math.min(16.0, positionRef.current.z));
+        if (positionRef.current.z < -16.0 || positionRef.current.z > 16.0) {
+          positionRef.current.z = Math.max(-16.0, Math.min(16.0, positionRef.current.z));
+          velocityRef.current.z = 0;
+        }
 
         // Colisión con la Ambulancia SVA estacionada en la bahía exterior (X en [-23.4, -20.2], Z en [4.6, 10.8])
         if (
@@ -191,16 +228,55 @@ export const CharacterController: React.FC = () => {
         ) {
           positionRef.current.x = prevX;
           positionRef.current.z = prevZ;
+          velocityRef.current.set(0, 0, 0);
         }
       }
     }
 
-    // Actualizar cámara
-    camera.position.copy(positionRef.current);
+    // 3. Bamboleo natural del paso (Head Bobbing) y respiración
+    const isRunning = isSprinting && currentSpeed > 3.4;
+    const speedRatio = Math.min(1.0, currentSpeed / 5.8);
+
+    let targetBobY = 0;
+    let targetBobSway = 0;
+    let targetBobRoll = 0;
+
+    if (currentSpeed > 0.12) {
+      // Cadencia: ~1.4 pasos/s caminando (8.8 rad/s), ~2.2 pasos/s corriendo (13.8 rad/s)
+      const stepCadence = isRunning ? 13.8 : 8.8;
+      bobTimerRef.current += stepCadence * delta;
+
+      const ampY = isRunning ? 0.038 : 0.020;
+      const ampSway = isRunning ? 0.016 : 0.009;
+      const ampRoll = isRunning ? 0.012 : 0.006;
+
+      // Oscilación vertical en cada pisada
+      targetBobY = Math.sin(bobTimerRef.current) * ampY * speedRatio;
+      // Balanceo lateral biomecánico (un ciclo por cada dos pasos)
+      targetBobSway = Math.cos(bobTimerRef.current * 0.5) * ampSway * speedRatio;
+      targetBobRoll = Math.cos(bobTimerRef.current * 0.5) * ampRoll * speedRatio;
+    } else {
+      // Respiración sutil en reposo
+      idleTimerRef.current += delta * 1.5;
+      targetBobY = Math.sin(idleTimerRef.current) * 0.0025;
+    }
+
+    // Suavizado dinámico de transiciones
+    currentBobYRef.current = THREE.MathUtils.lerp(currentBobYRef.current, targetBobY, Math.min(1.0, 14.0 * delta));
+    currentBobSwayRef.current = THREE.MathUtils.lerp(currentBobSwayRef.current, targetBobSway, Math.min(1.0, 12.0 * delta));
+    currentBobRollRef.current = THREE.MathUtils.lerp(currentBobRollRef.current, targetBobRoll, Math.min(1.0, 12.0 * delta));
+
+    // 4. Posicionamiento final de la cámara con oscilación física
+    const eyePosition = positionRef.current.clone();
+    eyePosition.y = 1.62 + currentBobYRef.current;
+    eyePosition.addScaledVector(right, currentBobSwayRef.current);
+
+    camera.position.copy(eyePosition);
     camera.rotation.set(0, 0, 0);
     camera.rotation.order = 'YXZ';
     camera.rotation.y = yawRef.current;
     camera.rotation.x = pitchRef.current;
+    camera.rotation.z = currentBobRollRef.current;
 
     // Sincronizar posición con el store
     setPlayerTransform(

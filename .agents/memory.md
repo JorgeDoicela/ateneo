@@ -2170,6 +2170,13 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
     5. *Integración en Motor Cinemático y Descarte de Warnings WebGL (`CharacterController.tsx`, `Hospital3DPage.tsx`):*
        - Consumo de `touchInput` en `useFrame` sin re-renders en React, sumando vectorialmente la traslación del joystick al plano XZ y aplicando deltas de vista táctiles a 60 FPS continuos.
        - Corrección de mapa de sombras en R3F: asignación de `shadows="percentage"` en `<Canvas>` para configurar explícitamente `THREE.PCFShadowMap`, erradicando la inundación de advertencias en consola (`THREE.WebGLShadowMap: PCFSoftShadowMap has been removed`).
+    6. *Cinemática Biomecánica Realista al Caminar y Correr (`CharacterController.tsx`):*
+       - Inercia y aceleración orgánica con interpolación exponencial (`lerp`): tasa de aceleración de `13.0` y desaceleración suave de `9.5`, eliminando por completo el movimiento instantáneo rígido.
+       - Velocidades biométricas diferenciadas: caminata a `3.2 m/s` y carrera deportiva a `5.8 m/s`.
+       - Cabeceo vertical (*head bobbing*) armónico dependiente de la velocidad y cadencia de paso: ~1.4 pasos/s (`8.8 rad/s`, amplitud vertical de 2.0 cm) en caminata vs ~2.2 pasos/s (`13.8 rad/s`, amplitud de 3.8 cm) en carrera.
+       - Balanceo lateral (*sway*, amplitud de 1.2 cm a 2.2 cm) e inclinación angular (*roll*, 0.005 a 0.012 rad) a la frecuencia de zancada completa (un ciclo cada dos pasos), simulando fielmente la transferencia de peso corporal del médico en movimiento.
+       - Respiración sutil en reposo (*idle breathing*, `0.25 Hz` / 15 respiraciones/minuto, amplitud de 0.4 cm) que elimina la sensación de cámara estática congelada.
+       - Desacoplamiento de la posición física de colisiones respecto a la altura visual de los ojos con oscilación dinámica.
   - **Certificación de Calidad:**
     - Suite `SpatialMobileControls.test.tsx`: 4/4 pruebas unitarias aprobadas.
     - Suite `SpatialHospitalMaster.test.tsx`: 5/5 pruebas aprobadas.
