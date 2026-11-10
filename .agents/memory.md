@@ -2134,6 +2134,7 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
       - Posición inicial ajustada a `[-8.5, 1.58, 0]` (altura de ojos humana clínica de 1.58 m y 70 cm más adelante en el pasillo central).
       - Inclinación sutil (`pitch = -0.04` rad, ~2.3° hacia abajo) y campo de visión ampliado a `fov: 66` en `<Canvas>` y `CharacterController.tsx`. Esto balancea la perspectiva, reduce el techo innecesario e incorpora de inmediato las bahías clínicas de urgencias en el plano visual del usuario.
       - Sincronización exacta en `useSpatialStore.ts` (`playerPosition: [-8.5, 1.58, 0]`).
+    - **Depuración de Elementos HUD Redundantes en `Hospital3DPage.tsx`:** Eliminada la tarjeta flotante de título superior izquierdo ("Simulador Hospitalario 3D ATENEO+") y la barra inferior de atajos ("WASD / Ratón / Shift / E"), despejando por completo el campo de visión y maximizando el área útil de inmersión clínica.
   - **Certificación de Pruebas:**
     - Frontend Vitest: 5/5 tests aprobados en `SpatialHospitalMaster.test.tsx`.
     - Compilación de producción (`vite build`): Rollup limpio y PWA generada sin errores.

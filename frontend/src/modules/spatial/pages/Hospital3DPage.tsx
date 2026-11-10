@@ -6,7 +6,6 @@ import {
   ArrowLeft,
   ShieldAlert,
   CheckCircle2,
-  Activity,
   Users,
   Maximize2,
   Minimize2
@@ -130,7 +129,7 @@ export const Hospital3DPage: React.FC = () => {
 
       {/* 2. HUD Superior: Navegación, Triaje y Pantalla Completa (Liquid Glassmorphism Ateneo+) */}
       <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none z-10">
-        {/* Lado Izquierdo: Volver y Título Institucional */}
+        {/* Lado Izquierdo: Volver al Catálogo */}
         <div className="flex items-center space-x-3 pointer-events-auto">
           {!isFullscreen && (
             <button
@@ -142,19 +141,6 @@ export const Hospital3DPage: React.FC = () => {
               <span className="hidden sm:inline">Catálogo</span>
             </button>
           )}
-
-          <div className="bg-white/90 backdrop-blur-md rounded-[20px] border border-white/80 px-4 py-2 shadow-xs">
-            <div className="flex items-center space-x-2">
-              <Activity className="w-4 h-4 text-cyan-600 animate-pulse" />
-              <h1 className="text-xs font-bold text-slate-900 tracking-tight">
-                Simulador Hospitalario 3D
-              </h1>
-              <span className="text-[10px] font-black tracking-tight text-slate-900">
-                ATENEO<span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600">+</span>
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-500">Pabellón de Urgencias y Choque • GPC Ecuador</p>
-          </div>
         </div>
 
         {/* Lado Derecho: Estadísticas de Triaje y Botón Pantalla Completa */}
@@ -218,26 +204,7 @@ export const Hospital3DPage: React.FC = () => {
         </div>
       )}
 
-      {/* 4. Barra de Ayuda / Controles Inferior Izquierda */}
-      <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-md rounded-full border border-slate-200/80 px-4 py-2 text-[11px] text-slate-600 shadow-xs flex items-center space-x-3 select-none z-10">
-        <div>
-          <span className="font-semibold text-slate-900">WASD:</span> Moverse
-        </div>
-        <span className="text-slate-300">•</span>
-        <div>
-          <span className="font-semibold text-slate-900">Arrastrar Ratón:</span> Mirar
-        </div>
-        <span className="text-slate-300">•</span>
-        <div>
-          <span className="font-semibold text-slate-900">Shift:</span> Correr
-        </div>
-        <span className="text-slate-300">•</span>
-        <div>
-          <span className="font-semibold text-slate-900">E:</span> Examinar Cama
-        </div>
-      </div>
-
-      {/* 5. Tableta Clínica Diegética Superpuesta */}
+      {/* 4. Tableta Clínica Diegética Superpuesta */}
       <ClinicalBedsideTablet />
     </div>
   );
