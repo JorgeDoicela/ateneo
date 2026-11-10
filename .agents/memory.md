@@ -2123,3 +2123,17 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
     - Suite dedicada `SpatialHospitalMaster.test.tsx`: 5/5 pruebas aprobadas al 100%.
     - Tipado TypeScript (`tsc --noEmit`): 0 errores.
     - Compilación de producción (`vite build`): Rollup limpio y precache PWA generado.
+* **Fase 15: Optimización de Espacio de Pantalla Edge-to-Edge y Calibración de Encuadre de Cámara en Simulador 3D (`2026-11-09`):**
+  - **Causa Raíz Diagnosticada:**
+    1. *Contenedor Web Encajonado y Franjas Laterales:* `AppLayout.tsx` aplicaba indistintamente a todas las rutas `max-w-[1680px] mx-auto px-4 sm:px-8 lg:px-12 py-8` e insertaba el pie de página institucional (`<footer>`). En `/hospital-3d`, esto causaba franjas laterales masivas en monitores de alta resolución, margen vertical de 32px y una barra de desplazamiento que cortaba los controles inferiores o mostraba un pie de página innecesario.
+    2. *Encuadre Inicial Subóptimo en la Escena 3D:* La posición inicial de la cámara en `[-9.2, 1.68, 0]` con `pitch = 0` dejaba más del 35% de la parte superior de la pantalla con espacio muerto de techo/vigas y una franja azul desierta en primer plano, mientras las Camas 1 y 2 (Códigos Rojos de urgencia) quedaban fuera de la vista en los extremos periféricos.
+  - **Solución Arquitectural e Integridad de Diseño (Cero Parches):**
+    - **Layout Especializado para Rutas Inmersivas en `AppLayout.tsx`:** Detección de `isImmersiveRoute` para `/hospital-3d`, renderizando `h-screen w-screen overflow-hidden` con `<Navbar />` arriba (`h-16`) y `<main className="w-full h-[calc(100vh-4rem)] flex-1 relative z-10 overflow-hidden p-0 m-0">` sin márgenes, paddings ni pie de página, logrando una visualización 100% Edge-to-Edge en ventana.
+    - **Adaptabilidad a Pantalla Completa en `Hospital3DPage.tsx`:** Contenedor raíz adaptativo con `isFullscreen ? 'h-screen w-screen fixed inset-0 z-50 bg-[#f0f4f9]' : 'relative h-full w-full bg-[#f0f4f9]'`.
+    - **Calibración Óptica de Cámara Médica:**
+      - Posición inicial ajustada a `[-8.5, 1.58, 0]` (altura de ojos humana clínica de 1.58 m y 70 cm más adelante en el pasillo central).
+      - Inclinación sutil (`pitch = -0.04` rad, ~2.3° hacia abajo) y campo de visión ampliado a `fov: 66` en `<Canvas>` y `CharacterController.tsx`. Esto balancea la perspectiva, reduce el techo innecesario e incorpora de inmediato las bahías clínicas de urgencias en el plano visual del usuario.
+      - Sincronización exacta en `useSpatialStore.ts` (`playerPosition: [-8.5, 1.58, 0]`).
+  - **Certificación de Pruebas:**
+    - Frontend Vitest: 5/5 tests aprobados en `SpatialHospitalMaster.test.tsx`.
+    - Compilación de producción (`vite build`): Rollup limpio y PWA generada sin errores.

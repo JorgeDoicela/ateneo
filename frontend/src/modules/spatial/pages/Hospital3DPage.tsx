@@ -69,14 +69,14 @@ export const Hospital3DPage: React.FC = () => {
   return (
     <div
       ref={containerRef}
-      className={`relative w-full overflow-hidden select-none transition-all duration-300 ${
-        isFullscreen ? 'h-screen w-screen fixed inset-0 z-50 bg-[#f0f4f9]' : 'h-[calc(100vh-4rem)] bg-[#f0f4f9]'
+      className={`w-full overflow-hidden select-none transition-all duration-300 ${
+        isFullscreen ? 'h-screen w-screen fixed inset-0 z-50 bg-[#f0f4f9]' : 'relative h-full w-full bg-[#f0f4f9]'
       }`}
     >
       {/* 1. Canvas WebGL/WebGPU Tridimensional con Iluminación PBR */}
       <Canvas
         shadows
-        camera={{ position: [-9.2, 1.68, 0], fov: 62, near: 0.1, far: 50 }}
+        camera={{ position: [-8.5, 1.58, 0], fov: 66, near: 0.1, far: 50 }}
         className="w-full h-full cursor-crosshair"
       >
         <color attach="background" args={['#e2e8f0']} />

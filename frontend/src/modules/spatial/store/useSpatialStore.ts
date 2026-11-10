@@ -89,7 +89,7 @@ const INITIAL_BEDS: BedSpatialData[] = [
 ];
 
 export const useSpatialStore = create<SpatialState>((set, get) => ({
-  playerPosition: [-9.2, 1.68, 0],
+  playerPosition: [-8.5, 1.58, 0],
   playerRotation: -Math.PI / 2,
   beds: INITIAL_BEDS,
   hoveredBedId: null,

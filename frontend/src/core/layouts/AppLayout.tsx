@@ -22,6 +22,22 @@ export default function AppLayout({ children }: AppLayoutProps) {
     );
   }
 
+  // Rutas espaciales/inmersivas (Simulador Hospitalario 3D): Vista Edge-to-Edge sin márgenes restrictivos ni scrollbar
+  const isImmersiveRoute = ['/hospital-3d'].some(p =>
+    location.pathname.startsWith(p)
+  );
+
+  if (isImmersiveRoute) {
+    return (
+      <div className="h-screen w-screen bg-[#f0f4f9] flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 overflow-hidden">
+        <Navbar />
+        <main className="w-full h-[calc(100vh-4rem)] flex-1 relative z-10 overflow-hidden p-0 m-0">
+          {children}
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#f0f4f9] flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 relative overflow-x-clip">
       {/* Halos de Luz Ambiental (Aurora de IA Ateneo+: Cyan, Azul, Violeta) para refracción Glassmorphism */}

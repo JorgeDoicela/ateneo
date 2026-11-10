@@ -14,9 +14,9 @@ export const CharacterController: React.FC = () => {
   const isTabletOpen = useSpatialStore((s) => s.isTabletOpen);
 
   // Posición y rotación cinemática (Entrada Oeste del corredor mirando hacia el Este +X)
-  const positionRef = useRef<THREE.Vector3>(new THREE.Vector3(-9.2, 1.68, 0));
+  const positionRef = useRef<THREE.Vector3>(new THREE.Vector3(-8.5, 1.58, 0));
   const yawRef = useRef<number>(-Math.PI / 2);
-  const pitchRef = useRef<number>(0);
+  const pitchRef = useRef<number>(-0.04);
 
   const keysRef = useRef<{ [key: string]: boolean }>({});
   const isMouseDownRef = useRef<boolean>(false);
