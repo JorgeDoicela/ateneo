@@ -2151,3 +2151,23 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
     - Inicio del jugador en el mirador peatonal exterior (`[-33.5, 1.62, 0]`, `pitch = 0.07`, `fov = 64`, `far = 150`) con cielo diurno (`<Sky />`) viendo todo el edificio hospitalario y el interior a través de las puertas abiertas.
     - Física en `CharacterController.tsx` que permite cruzar libremente entre la explanada exterior (`X < -12.0`) y el pabellón interior (`X > -12.0`) a través del vano abierto (`|Z| <= 1.55`), bloqueando el paso a través de los muros laterales y la ambulancia estacionada.
     - Oclusión inteligente en `Hospital3DPage.tsx` (`isInsideOrAtThreshold = playerPosition[0] >= -13.5`) para que las etiquetas HTML de las camas no se superpongan sobre la fachada exterior cuando el médico se encuentra fuera del edificio.
+* **Fase 17: Soporte Móvil Integral, Orientación Horizontal Obligatoria y Controles Táctiles 3D (`2026-11-09`):**
+  - **Causa Raíz Diagnosticada:** En dispositivos móviles táctiles y pantallas verticales (Portrait), la navegación en primera persona de un entorno 3D de alta fidelidad carecía de teclado físico (WASD), ratón y espacio de relación de aspecto adecuado, provocando encajonamiento visual y ausencia de controles de desplazamiento y cámara.
+  - **Solución Arquitectural e Integridad de Diseño (Cero Parches):**
+    1. *Bloqueo y Exigencia de Modo Horizontal (`LandscapeOrientationNotice.tsx`):*
+       - Detección reactiva de dispositivos táctiles en orientación vertical (`isTouchDevice && isPortrait`).
+       - Bloqueo de interacción mediante pantalla de cristal esmerilado con animación CSS de rotación de smartphone, mensaje clínico de Ateneo+ ("Orientación Horizontal Requerida") y botón para activar pantalla completa e invocar `screen.orientation.lock('landscape')`.
+    2. *Joystick Virtual Análogo y Multi-Touch (`MobileTouchControls.tsx`):*
+       - Perilla análoga con `PointerEvents` y captura de puntero en la esquina inferior izquierda (`w-32 h-32`), normalizando la fuerza y ángulo de desplazamiento en `useSpatialStore.setTouchMove(normalizedX, normalizedY)`.
+    3. *Superficie Táctil de Cámara y Rotación Rápida:*
+       - Área táctil dedicada en el 55% derecho de la pantalla para rotar suavemente la vista (`yaw`, `pitch`) sin interferir con el joystick.
+       - Botones circulares flotantes para giros precisos de 45° a la izquierda y derecha.
+    4. *Botonera de Acción Ergonómica al Pulgar:*
+       - Conmutador de carrera/sprint con icono `Zap` y realce azul (`bg-[#0b57d0]`).
+       - Botón contextual animado `Examinar Cama {n}` con icono `Stethoscope` que aparece bajo el pulgar derecho cuando el médico se encuentra en proximidad de un paciente.
+    5. *Integración en Motor Cinemático (`CharacterController.tsx`):*
+       - Consumo de `touchInput` en `useFrame` sin re-renders en React, sumando vectorialmente la traslación del joystick al plano XZ y aplicando deltas de vista táctiles a 60 FPS continuos.
+  - **Certificación de Calidad:**
+    - Suite `SpatialMobileControls.test.tsx`: 4/4 pruebas unitarias aprobadas.
+    - Suite `SpatialHospitalMaster.test.tsx`: 5/5 pruebas aprobadas.
+    - Compilación de producción (`vite build`): Rollup limpio y PWA generada sin errores.

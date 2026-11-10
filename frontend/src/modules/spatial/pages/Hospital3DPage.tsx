@@ -13,6 +13,8 @@ import HospitalWardScene from '../components/HospitalWardScene';
 import CharacterController from '../components/CharacterController';
 import BedInteractionBadge from '../components/BedInteractionBadge';
 import ClinicalBedsideTablet from '../components/ClinicalBedsideTablet';
+import MobileTouchControls from '../components/MobileTouchControls';
+import LandscapeOrientationNotice from '../components/LandscapeOrientationNotice';
 
 export const Hospital3DPage: React.FC = () => {
   const navigate = useNavigate();
@@ -20,6 +22,14 @@ export const Hospital3DPage: React.FC = () => {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [isTouchDevice, setIsTouchDevice] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  });
+  const [isPortrait, setIsPortrait] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return window.innerHeight > window.innerWidth;
+  });
 
   const beds = useSpatialStore((s) => s.beds);
   const playerPosition = useSpatialStore((s) => s.playerPosition);
@@ -33,6 +43,25 @@ export const Hospital3DPage: React.FC = () => {
       syncCasesWithBeds(cases);
     }
   }, [cases, syncCasesWithBeds]);
+
+  // Detección reactiva de orientación en pantalla y capacidades táctiles
+  useEffect(() => {
+    const checkOrientation = () => {
+      const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const portrait = window.innerHeight > window.innerWidth;
+      setIsTouchDevice(hasTouch);
+      setIsPortrait(portrait);
+    };
+
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+
+    return () => {
+      window.removeEventListener('resize', checkOrientation);
+      window.removeEventListener('orientationchange', checkOrientation);
+    };
+  }, []);
 
   // Manejo reactivo del modo pantalla completa nativo
   useEffect(() => {
@@ -52,6 +81,13 @@ export const Hospital3DPage: React.FC = () => {
     try {
       if (!document.fullscreenElement) {
         await containerRef.current.requestFullscreen();
+        if (screen.orientation && 'lock' in screen.orientation) {
+          try {
+            await (screen.orientation as any).lock('landscape');
+          } catch {
+            // Silencioso si el navegador móvil no permite bloqueo de orientación por software
+          }
+        }
       } else if (document.exitFullscreen) {
         await document.exitFullscreen();
       }
@@ -157,8 +193,8 @@ export const Hospital3DPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. Indicador de Interacción Central (Prompt contextual Ateneo+) */}
-      {hoveredBed && (
+      {/* 3. Indicador de Interacción Central en Escritorio (Prompt contextual Ateneo+) */}
+      {!isTouchDevice && hoveredBed && (
         <div className="absolute bottom-16 left-1/2 -translate-x-1/2 pointer-events-none animate-fadeIn z-10">
           <div className="bg-white/95 backdrop-blur-xl text-slate-900 px-5 py-2.5 rounded-full border border-blue-300/80 shadow-xl flex items-center space-x-2.5 text-xs sm:text-sm">
             <span className="w-2.5 h-2.5 rounded-full bg-cyan-500 animate-ping" />
@@ -184,7 +220,15 @@ export const Hospital3DPage: React.FC = () => {
         </div>
       )}
 
-      {/* 4. Tableta Clínica Diegética Superpuesta */}
+      {/* 4. Controles Táctiles y Joystick Virtual para Dispositivos Móviles (en Modo Horizontal) */}
+      {isTouchDevice && !isPortrait && <MobileTouchControls />}
+
+      {/* 5. Bloqueo y Exigencia Institucional de Modo Horizontal en Dispositivos Móviles */}
+      {isTouchDevice && isPortrait && (
+        <LandscapeOrientationNotice onRequestFullscreen={toggleFullscreen} />
+      )}
+
+      {/* 6. Tableta Clínica Diegética Superpuesta */}
       <ClinicalBedsideTablet />
     </div>
   );

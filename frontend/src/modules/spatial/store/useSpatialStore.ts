@@ -2,6 +2,14 @@ import { create } from 'zustand';
 import type { ClinicalCase } from '../../../types';
 import type { BedSpatialData } from '../types/spatial';
 
+export interface TouchInputState {
+  moveX: number; // -1 (izq) a 1 (der)
+  moveY: number; // -1 (atrás) a 1 (adelante)
+  isSprinting: boolean;
+  lookDeltaX: number;
+  lookDeltaY: number;
+}
+
 interface SpatialState {
   playerPosition: [number, number, number];
   playerRotation: number;
@@ -10,6 +18,7 @@ interface SpatialState {
   activeBedId: string | null;
   isTabletOpen: boolean;
   selectedCase: ClinicalCase | null;
+  touchInput: TouchInputState;
 
   setPlayerTransform: (pos: [number, number, number], rot: number) => void;
   setHoveredBed: (bedId: string | null) => void;
@@ -17,6 +26,10 @@ interface SpatialState {
   closeBedInspection: () => void;
   syncCasesWithBeds: (cases: ClinicalCase[]) => void;
   markBedAsSolved: (caseId: string, score: number) => void;
+  setTouchMove: (x: number, y: number) => void;
+  setTouchSprinting: (sprinting: boolean) => void;
+  addTouchLookDelta: (dx: number, dy: number) => void;
+  consumeTouchLookDelta: () => { dx: number; dy: number };
 }
 
 const INITIAL_BEDS: BedSpatialData[] = [
@@ -96,12 +109,44 @@ export const useSpatialStore = create<SpatialState>((set, get) => ({
   activeBedId: null,
   isTabletOpen: false,
   selectedCase: null,
+  touchInput: {
+    moveX: 0,
+    moveY: 0,
+    isSprinting: false,
+    lookDeltaX: 0,
+    lookDeltaY: 0
+  },
 
   setPlayerTransform: (pos, rot) =>
     set({ playerPosition: pos, playerRotation: rot }),
 
   setHoveredBed: (bedId) =>
     set({ hoveredBedId: bedId }),
+
+  setTouchMove: (x, y) =>
+    set((state) => ({
+      touchInput: { ...state.touchInput, moveX: x, moveY: y }
+    })),
+
+  setTouchSprinting: (sprinting) =>
+    set((state) => ({
+      touchInput: { ...state.touchInput, isSprinting: sprinting }
+    })),
+
+  addTouchLookDelta: (dx, dy) => {
+    const current = get().touchInput;
+    current.lookDeltaX += dx;
+    current.lookDeltaY += dy;
+  },
+
+  consumeTouchLookDelta: () => {
+    const current = get().touchInput;
+    const dx = current.lookDeltaX;
+    const dy = current.lookDeltaY;
+    current.lookDeltaX = 0;
+    current.lookDeltaY = 0;
+    return { dx, dy };
+  },
 
   openBedInspection: (bedId) => {
     const targetBed = get().beds.find((b) => b.id === bedId);

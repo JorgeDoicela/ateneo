@@ -61,11 +61,47 @@ export const CharacterController: React.FC = () => {
       previousMousePositionRef.current = { x: e.clientX, y: e.clientY };
     };
 
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 1 && !isTabletOpen) {
+        const touch = e.touches[0];
+        // Si el toque no está en la esquina inferior izquierda (zona reservada al joystick)
+        const isJoystickArea = touch.clientX < 180 && touch.clientY > window.innerHeight - 180;
+        if (!isJoystickArea) {
+          isMouseDownRef.current = true;
+          previousMousePositionRef.current = { x: touch.clientX, y: touch.clientY };
+        }
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isMouseDownRef.current || isTabletOpen || e.touches.length === 0) return;
+      const touch = e.touches[0];
+      const deltaX = touch.clientX - previousMousePositionRef.current.x;
+      const deltaY = touch.clientY - previousMousePositionRef.current.y;
+
+      const sensitivity = 0.0035;
+      yawRef.current -= deltaX * sensitivity;
+      pitchRef.current = Math.max(
+        -Math.PI / 3,
+        Math.min(Math.PI / 3, pitchRef.current - deltaY * sensitivity)
+      );
+
+      previousMousePositionRef.current = { x: touch.clientX, y: touch.clientY };
+    };
+
+    const handleTouchEnd = () => {
+      isMouseDownRef.current = false;
+    };
+
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
     gl.domElement.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('mousemove', handleMouseMove);
+    gl.domElement.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd);
+    window.addEventListener('touchcancel', handleTouchEnd);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
@@ -73,13 +109,33 @@ export const CharacterController: React.FC = () => {
       gl.domElement.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mouseup', handleMouseUp);
       window.removeEventListener('mousemove', handleMouseMove);
+      gl.domElement.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('touchcancel', handleTouchEnd);
     };
   }, [hoveredBedId, isTabletOpen, openBedInspection, gl]);
 
   useFrame((_, delta) => {
     if (isTabletOpen) return;
 
-    const moveSpeed = (keysRef.current['ShiftLeft'] || keysRef.current['ShiftRight'] ? 6.0 : 3.5) * delta;
+    // Consumir deltas táctiles acumulados desde la zona de rotación táctil
+    const touchLook = useSpatialStore.getState().consumeTouchLookDelta();
+    if (touchLook.dx !== 0 || touchLook.dy !== 0) {
+      const touchSensitivity = 0.0035;
+      yawRef.current -= touchLook.dx * touchSensitivity;
+      pitchRef.current = Math.max(
+        -Math.PI / 3,
+        Math.min(Math.PI / 3, pitchRef.current - touchLook.dy * touchSensitivity)
+      );
+    }
+
+    const touchInput = useSpatialStore.getState().touchInput;
+    const isSprinting =
+      keysRef.current['ShiftLeft'] ||
+      keysRef.current['ShiftRight'] ||
+      touchInput.isSprinting;
+    const moveSpeed = (isSprinting ? 6.0 : 3.5) * delta;
 
     // Vector de traslación en el plano XZ
     const forward = new THREE.Vector3(-Math.sin(yawRef.current), 0, -Math.cos(yawRef.current));
@@ -91,6 +147,12 @@ export const CharacterController: React.FC = () => {
     if (keysRef.current['KeyS'] || keysRef.current['ArrowDown']) moveDir.sub(forward);
     if (keysRef.current['KeyA'] || keysRef.current['ArrowLeft']) moveDir.sub(right);
     if (keysRef.current['KeyD'] || keysRef.current['ArrowRight']) moveDir.add(right);
+
+    // Entrada análoga desde el joystick virtual táctil
+    if (Math.abs(touchInput.moveX) > 0.04 || Math.abs(touchInput.moveY) > 0.04) {
+      moveDir.addScaledVector(forward, touchInput.moveY);
+      moveDir.addScaledVector(right, touchInput.moveX);
+    }
 
     if (moveDir.lengthSq() > 0) {
       const prevX = positionRef.current.x;
