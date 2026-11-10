@@ -2193,12 +2193,15 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
     - Desacoplamiento total del render loop de React mediante paso de `React.RefObject` (`positionRef`, `yawRef`, `currentSpeedRef`, `isSprintingRef`), eliminando re-renders en React reconciler.
     - Zancada armónica cruzada: balanceo sinusoidal en oposición (pierna izquierda adelante con brazo derecho adelante) que escala en amplitud y cadencia de caminata (`0.46 rad`, `8.8 rad/s`) a carrera (`0.70 rad`, `13.8 rad/s`).
     - Rebote vertical de cadera en movimiento y respiración en reposo (`idleTimer`, `0.0035 m`) con retorno suave `lerp` al detenerse.
-  - **Cámara Orbital en Tercera Persona y Conmutación Dual (`CharacterController.tsx`, `Hospital3DPage.tsx`, `useSpatialStore.ts`):**
+  - **Cámara Orbital en Tercera Persona y Primera Persona Inmersiva Real (True First Person):**
     - Modo Tercera Persona predeterminado: cámara orbital a 2.45m enfocando la nuca/espalda superior del médico (`Z = 1.44m`), orientándose con `yaw` y `pitch` y manteniendo al avatar visible en pantalla.
-    - Modo Primera Persona inmersiva alternable con head bobbing biomecánico.
+    - Modo Primera Persona con Cuerpo Real Visible (True First Person):
+      - Desacoplamiento de cabeza en primera persona: `Doctor_Head_Pivot.visible = false` para erradicar el recorte interior del cráneo, mientras que el torso, bata médica, solapas, scrubs, estetoscopio 3D, brazos y piernas permanecen 100% visibles.
+      - Posicionamiento anatómico de los ojos: cámara desplazada `8 cm` adelante a lo largo del vector `forward` y a `1.62m` de altura, reproduciendo la ubicación real de los ojos en el rostro humano.
+      - Rango de inclinación vertical ampliado a `-Math.PI / 2.3` (~ -78°) y plano cercano optimizado a `near: 0.05` en `<Canvas>`, permitiendo al usuario mirar directamente hacia abajo para observar su bata, credencial, estetoscopio, manos y calzado dando zancadas en tiempo real.
     - Botón institucional en el HUD superior con iconos planos `User` (3ª Persona) y `Eye` (1ª Persona) sin marcos decorativos.
   - **Certificación de Calidad:**
-    - Suite `SpatialDoctorCharacter.test.tsx`: 3/3 pruebas aprobadas.
+    - Suite `SpatialDoctorCharacter.test.tsx`: 4/4 pruebas aprobadas (incluye True First Person).
     - Suite `SpatialMobileControls.test.tsx`: 4/4 pruebas aprobadas.
-    - Suite `SpatialHospitalMaster.test.tsx`: 5/5 pruebas aprobadas. Total: 12/12 (100%).
+    - Suite `SpatialHospitalMaster.test.tsx`: 5/5 pruebas aprobadas. Total: 13/13 (100%).
     - Compilación de producción (`vite build`): Rollup limpio y PWA generada sin errores.

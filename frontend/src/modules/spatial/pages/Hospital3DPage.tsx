@@ -112,7 +112,7 @@ export const Hospital3DPage: React.FC = () => {
       {/* 1. Canvas WebGL/WebGPU Tridimensional con Iluminación PBR */}
       <Canvas
         shadows="percentage"
-        camera={{ position: [-33.5, 1.62, 0], fov: 64, near: 0.1, far: 150 }}
+        camera={{ position: [-33.5, 1.62, 0], fov: 64, near: 0.05, far: 150 }}
         className="w-full h-full cursor-crosshair"
       >
         <color attach="background" args={['#7ec0ee']} />

@@ -66,7 +66,7 @@ export const CharacterController: React.FC = () => {
       const sensitivity = 0.003;
       yawRef.current -= deltaX * sensitivity;
       pitchRef.current = Math.max(
-        -Math.PI / 3,
+        -Math.PI / 2.3,
         Math.min(Math.PI / 3, pitchRef.current - deltaY * sensitivity)
       );
 
@@ -94,7 +94,7 @@ export const CharacterController: React.FC = () => {
       const sensitivity = 0.0035;
       yawRef.current -= deltaX * sensitivity;
       pitchRef.current = Math.max(
-        -Math.PI / 3,
+        -Math.PI / 2.3,
         Math.min(Math.PI / 3, pitchRef.current - deltaY * sensitivity)
       );
 
@@ -137,7 +137,7 @@ export const CharacterController: React.FC = () => {
       const touchSensitivity = 0.0035;
       yawRef.current -= touchLook.dx * touchSensitivity;
       pitchRef.current = Math.max(
-        -Math.PI / 3,
+        -Math.PI / 2.3,
         Math.min(Math.PI / 3, pitchRef.current - touchLook.dy * touchSensitivity)
       );
     }
@@ -294,8 +294,10 @@ export const CharacterController: React.FC = () => {
       camera.position.copy(camPos);
       camera.lookAt(lookTarget);
     } else {
-      // Modo Primera Persona inmersiva con cinemática biomecánica y head bobbing
+      // Modo Primera Persona inmersiva con cinemática biomecánica y cuerpo propio visible (True First Person)
       const eyePosition = positionRef.current.clone();
+      // Ojos anatómicos ubicados 8 cm adelante del eje corporal
+      eyePosition.addScaledVector(forward, 0.08);
       eyePosition.y = 1.62 + currentBobYRef.current;
       eyePosition.addScaledVector(right, currentBobSwayRef.current);
 
@@ -339,7 +341,8 @@ export const CharacterController: React.FC = () => {
       yawRef={yawRef}
       currentSpeedRef={currentSpeedRef}
       isSprintingRef={isSprintingRef}
-      visible={cameraMode === 'third-person'}
+      cameraMode={cameraMode}
+      visible={true}
     />
   );
 };

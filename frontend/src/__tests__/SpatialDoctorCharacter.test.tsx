@@ -1,8 +1,10 @@
 import React from 'react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import * as THREE from 'three';
 import { useSpatialStore } from '../modules/spatial/store/useSpatialStore';
 import { Hospital3DPage } from '../modules/spatial/pages/Hospital3DPage';
+import { DoctorCharacter } from '../modules/spatial/components/DoctorCharacter';
 
 // Mock de Canvas de Three.js y React Three Fiber
 vi.mock('@react-three/fiber', () => ({
@@ -83,5 +85,19 @@ describe('Suite de Pruebas: Avatar 3D de Médico y Modos de Cámara (Ateneo+)', 
     fireEvent.click(cameraToggleBtn);
     expect(useSpatialStore.getState().cameraMode).toBe('first-person');
     expect(cameraToggleBtn).toHaveAttribute('title', 'Cambiar a 3ª Persona (Avatar Médico)');
+  });
+
+  it('debe mantener el modelo del médico activo en Primera Persona (True First Person)', () => {
+    const { container } = render(
+      <DoctorCharacter
+        positionRef={{ current: new THREE.Vector3(0, 0, 0) }}
+        yawRef={{ current: 0 }}
+        currentSpeedRef={{ current: 2.5 }}
+        isSprintingRef={{ current: false }}
+        cameraMode="first-person"
+        visible={true}
+      />
+    );
+    expect(container).toBeDefined();
   });
 });

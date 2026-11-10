@@ -8,6 +8,7 @@ interface DoctorCharacterProps {
   yawRef: React.RefObject<number>;
   currentSpeedRef: React.RefObject<number>;
   isSprintingRef: React.RefObject<boolean>;
+  cameraMode?: 'first-person' | 'third-person';
   visible?: boolean;
 }
 
@@ -16,6 +17,7 @@ export const DoctorCharacter: React.FC<DoctorCharacterProps> = ({
   yawRef,
   currentSpeedRef,
   isSprintingRef,
+  cameraMode = 'third-person',
   visible = true
 }) => {
   const groupRef = useRef<THREE.Group>(null);
@@ -68,7 +70,15 @@ export const DoctorCharacter: React.FC<DoctorCharacterProps> = ({
       groupRef.current.rotation.y = yaw;
     }
 
-    const { armL, armR, legL, legR, hips } = pivotsRef.current;
+    const { armL, armR, legL, legR, hips, head } = pivotsRef.current;
+
+    // En Primera Persona (True First Person):
+    // La cabeza y cuello se ocultan para evitar que la cámara interseque el cráneo desde adentro,
+    // mientras el torso, bata médica, estetoscopio, brazos y piernas permanecen 100% visibles al mirar abajo o caminar.
+    if (head) {
+      head.visible = cameraMode !== 'first-person';
+    }
+
     const isMoving = speed > 0.08;
     const maxSpeed = isSprinting ? 5.8 : 3.2;
     const speedFactor = Math.min(1.0, speed / maxSpeed);
