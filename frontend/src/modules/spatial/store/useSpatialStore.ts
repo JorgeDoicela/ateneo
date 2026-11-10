@@ -19,6 +19,7 @@ interface SpatialState {
   isTabletOpen: boolean;
   selectedCase: ClinicalCase | null;
   touchInput: TouchInputState;
+  cameraMode: 'first-person' | 'third-person';
 
   setPlayerTransform: (pos: [number, number, number], rot: number) => void;
   setHoveredBed: (bedId: string | null) => void;
@@ -30,6 +31,8 @@ interface SpatialState {
   setTouchSprinting: (sprinting: boolean) => void;
   addTouchLookDelta: (dx: number, dy: number) => void;
   consumeTouchLookDelta: () => { dx: number; dy: number };
+  setCameraMode: (mode: 'first-person' | 'third-person') => void;
+  toggleCameraMode: () => void;
 }
 
 const INITIAL_BEDS: BedSpatialData[] = [
@@ -116,12 +119,21 @@ export const useSpatialStore = create<SpatialState>((set, get) => ({
     lookDeltaX: 0,
     lookDeltaY: 0
   },
+  cameraMode: 'third-person',
 
   setPlayerTransform: (pos, rot) =>
     set({ playerPosition: pos, playerRotation: rot }),
 
   setHoveredBed: (bedId) =>
     set({ hoveredBedId: bedId }),
+
+  setCameraMode: (mode) =>
+    set({ cameraMode: mode }),
+
+  toggleCameraMode: () =>
+    set((state) => ({
+      cameraMode: state.cameraMode === 'third-person' ? 'first-person' : 'third-person'
+    })),
 
   setTouchMove: (x, y) =>
     set((state) => ({

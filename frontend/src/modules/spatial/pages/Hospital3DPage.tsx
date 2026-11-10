@@ -5,7 +5,9 @@ import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   Maximize2,
-  Minimize2
+  Minimize2,
+  User,
+  Eye
 } from 'lucide-react';
 import { useSpatialStore } from '../store/useSpatialStore';
 import { useCases } from '../../cases/hooks/useCases';
@@ -36,6 +38,8 @@ export const Hospital3DPage: React.FC = () => {
   const syncCasesWithBeds = useSpatialStore((s) => s.syncCasesWithBeds);
   const hoveredBedId = useSpatialStore((s) => s.hoveredBedId);
   const openBedInspection = useSpatialStore((s) => s.openBedInspection);
+  const cameraMode = useSpatialStore((s) => s.cameraMode);
+  const toggleCameraMode = useSpatialStore((s) => s.toggleCameraMode);
   const isInsideOrAtThreshold = playerPosition[0] >= -13.5;
 
   useEffect(() => {
@@ -176,8 +180,28 @@ export const Hospital3DPage: React.FC = () => {
           </button>
         </div>
 
-        {/* Lado Derecho: Botón Pantalla Completa */}
+        {/* Lado Derecho: Conmutador de Perspectiva y Pantalla Completa */}
         <div className="flex items-center space-x-2.5 pointer-events-auto">
+          {/* Conmutador de Perspectiva 3ª Persona / 1ª Persona */}
+          <button
+            onClick={toggleCameraMode}
+            className="px-3.5 py-2 bg-white/90 hover:bg-white text-slate-800 rounded-full border border-slate-200/80 shadow-xs backdrop-blur-md transition-all flex items-center space-x-2 text-xs font-semibold hover:border-blue-300 cursor-pointer"
+            title={cameraMode === 'third-person' ? 'Cambiar a 1ª Persona' : 'Cambiar a 3ª Persona (Avatar Médico)'}
+            aria-label="Conmutar perspectiva de cámara"
+          >
+            {cameraMode === 'third-person' ? (
+              <>
+                <User className="w-4 h-4 text-[#0b57d0]" />
+                <span className="hidden sm:inline">3ª Persona</span>
+              </>
+            ) : (
+              <>
+                <Eye className="w-4 h-4 text-[#0b57d0]" />
+                <span className="hidden sm:inline">1ª Persona</span>
+              </>
+            )}
+          </button>
+
           <button
             onClick={toggleFullscreen}
             className="p-2.5 bg-white/90 hover:bg-white text-slate-800 rounded-full border border-slate-200/80 shadow-xs backdrop-blur-md transition-all flex items-center justify-center hover:border-blue-300"

@@ -2181,3 +2181,24 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
     - Suite `SpatialMobileControls.test.tsx`: 4/4 pruebas unitarias aprobadas.
     - Suite `SpatialHospitalMaster.test.tsx`: 5/5 pruebas aprobadas.
     - Compilación de producción (`vite build`): Rollup limpio y PWA generada sin errores.
+* **Fase 18: Avatar 3D de Médico con Bata Clínica, Animación Cinemática de Extremidades y Modo Dual Tercera/Primera Persona (`2026-11-09`):**
+  - **Causa Raíz y Requerimiento:**
+    - El simulador operaba exclusivamente como una cámara flotante en primera persona, sin un cuerpo 3D visible que representara al médico que el usuario controla.
+  - **Modelado Anatómico en Blender (`assets_src/scripts/build_doctor_character.py` -> `doctor_character.glb`):**
+    - Modelo anatómico a escala real (1.76 m) con bata médica blanca (`Mat_DoctorCoat`), solapas abiertas en V sobre pijama quirúrgico (scrubs azul Ateneo+ `#0284c7`), faldones inferiores, bolsillo pectoral con bolígrafo y credencial institucional Ateneo+ con banda cyan.
+    - Estetoscopio 3D: tubo flexible de goma contorneando el cuello con diafragma y campana en cromo reflectante (`Mat_StethoscopeChrome`) sobre el pecho.
+    - Cabeza con cabello prolijo, mascarilla quirúrgica celeste Ateneo+, manos con guantes de nitrilo clínico (`#38bdf8`), pantalón quirúrgico azul marino (`#1e293b`) y calzado ortopédico con suela amortiguadora blanca.
+    - Jerarquía de nodos con pivotes cinemáticos parent-child (`matrix_parent_inverse`) en hombros (`Doctor_Arm_L/R_Pivot`), caderas (`Doctor_Leg_L/R_Pivot`), cuello (`Doctor_Head_Pivot`) y pelvis (`Doctor_Hips_Pivot`).
+  - **Animación Cinemática Procedural a 60 FPS (`DoctorCharacter.tsx`):**
+    - Desacoplamiento total del render loop de React mediante paso de `React.RefObject` (`positionRef`, `yawRef`, `currentSpeedRef`, `isSprintingRef`), eliminando re-renders en React reconciler.
+    - Zancada armónica cruzada: balanceo sinusoidal en oposición (pierna izquierda adelante con brazo derecho adelante) que escala en amplitud y cadencia de caminata (`0.46 rad`, `8.8 rad/s`) a carrera (`0.70 rad`, `13.8 rad/s`).
+    - Rebote vertical de cadera en movimiento y respiración en reposo (`idleTimer`, `0.0035 m`) con retorno suave `lerp` al detenerse.
+  - **Cámara Orbital en Tercera Persona y Conmutación Dual (`CharacterController.tsx`, `Hospital3DPage.tsx`, `useSpatialStore.ts`):**
+    - Modo Tercera Persona predeterminado: cámara orbital a 2.45m enfocando la nuca/espalda superior del médico (`Z = 1.44m`), orientándose con `yaw` y `pitch` y manteniendo al avatar visible en pantalla.
+    - Modo Primera Persona inmersiva alternable con head bobbing biomecánico.
+    - Botón institucional en el HUD superior con iconos planos `User` (3ª Persona) y `Eye` (1ª Persona) sin marcos decorativos.
+  - **Certificación de Calidad:**
+    - Suite `SpatialDoctorCharacter.test.tsx`: 3/3 pruebas aprobadas.
+    - Suite `SpatialMobileControls.test.tsx`: 4/4 pruebas aprobadas.
+    - Suite `SpatialHospitalMaster.test.tsx`: 5/5 pruebas aprobadas. Total: 12/12 (100%).
+    - Compilación de producción (`vite build`): Rollup limpio y PWA generada sin errores.

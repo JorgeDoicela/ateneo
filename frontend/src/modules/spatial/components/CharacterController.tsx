@@ -2,11 +2,13 @@ import React, { useRef, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useSpatialStore } from '../store/useSpatialStore';
+import DoctorCharacter from './DoctorCharacter';
 
 export const CharacterController: React.FC = () => {
   const { camera, gl } = useThree();
 
   const setPlayerTransform = useSpatialStore((s) => s.setPlayerTransform);
+  const cameraMode = useSpatialStore((s) => s.cameraMode);
   const beds = useSpatialStore((s) => s.beds);
   const hoveredBedId = useSpatialStore((s) => s.hoveredBedId);
   const setHoveredBed = useSpatialStore((s) => s.setHoveredBed);
@@ -20,6 +22,8 @@ export const CharacterController: React.FC = () => {
 
   // Dinámica física realista: velocidad con inercia, cadencia y bamboleo biomecánico (head bobbing)
   const velocityRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 0, 0));
+  const currentSpeedRef = useRef<number>(0);
+  const isSprintingRef = useRef<boolean>(false);
   const bobTimerRef = useRef<number>(0);
   const idleTimerRef = useRef<number>(0);
   const currentBobYRef = useRef<number>(0);
@@ -175,6 +179,8 @@ export const CharacterController: React.FC = () => {
     velocityRef.current.lerp(targetVelocity, Math.min(1.0, accelRate * delta));
 
     const currentSpeed = velocityRef.current.length();
+    currentSpeedRef.current = currentSpeed;
+    isSprintingRef.current = isSprinting;
 
     // 2. Desplazamiento y resolución de colisiones físicas
     if (currentSpeed > 0.005) {
@@ -266,17 +272,40 @@ export const CharacterController: React.FC = () => {
     currentBobSwayRef.current = THREE.MathUtils.lerp(currentBobSwayRef.current, targetBobSway, Math.min(1.0, 12.0 * delta));
     currentBobRollRef.current = THREE.MathUtils.lerp(currentBobRollRef.current, targetBobRoll, Math.min(1.0, 12.0 * delta));
 
-    // 4. Posicionamiento final de la cámara con oscilación física
-    const eyePosition = positionRef.current.clone();
-    eyePosition.y = 1.62 + currentBobYRef.current;
-    eyePosition.addScaledVector(right, currentBobSwayRef.current);
+    // 4. Posicionamiento dinámico de la cámara según el modo activo (3ª Persona / 1ª Persona)
+    if (cameraMode === 'third-person') {
+      // Punto de enfoque en la espalda superior / nuca del médico (Z = 1.44m)
+      const lookTarget = new THREE.Vector3(
+        positionRef.current.x,
+        1.44,
+        positionRef.current.z
+      );
+      const camDistance = 2.45;
+      const cosP = Math.cos(pitchRef.current);
+      const sinP = Math.sin(pitchRef.current);
 
-    camera.position.copy(eyePosition);
-    camera.rotation.set(0, 0, 0);
-    camera.rotation.order = 'YXZ';
-    camera.rotation.y = yawRef.current;
-    camera.rotation.x = pitchRef.current;
-    camera.rotation.z = currentBobRollRef.current;
+      // Posición orbital detrás del médico en dirección opuesta al vector de mirada
+      const camPos = new THREE.Vector3(
+        lookTarget.x + Math.sin(yawRef.current) * cosP * camDistance,
+        Math.max(0.35, lookTarget.y - sinP * camDistance + 0.22),
+        lookTarget.z + Math.cos(yawRef.current) * cosP * camDistance
+      );
+
+      camera.position.copy(camPos);
+      camera.lookAt(lookTarget);
+    } else {
+      // Modo Primera Persona inmersiva con cinemática biomecánica y head bobbing
+      const eyePosition = positionRef.current.clone();
+      eyePosition.y = 1.62 + currentBobYRef.current;
+      eyePosition.addScaledVector(right, currentBobSwayRef.current);
+
+      camera.position.copy(eyePosition);
+      camera.rotation.set(0, 0, 0);
+      camera.rotation.order = 'YXZ';
+      camera.rotation.y = yawRef.current;
+      camera.rotation.x = pitchRef.current;
+      camera.rotation.z = currentBobRollRef.current;
+    }
 
     // Sincronizar posición con el store
     setPlayerTransform(
@@ -304,7 +333,15 @@ export const CharacterController: React.FC = () => {
     }
   });
 
-  return null;
+  return (
+    <DoctorCharacter
+      positionRef={positionRef}
+      yawRef={yawRef}
+      currentSpeedRef={currentSpeedRef}
+      isSprintingRef={isSprintingRef}
+      visible={cameraMode === 'third-person'}
+    />
+  );
 };
 
 export default CharacterController;
