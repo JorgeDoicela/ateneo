@@ -74,6 +74,23 @@ def generate_all_textures(tex_dir: Path):
     asp_rgba = np.dstack([asp_rgb, np.ones((H, W, 1), dtype=np.float32)])
     save_blender_image("Asphalt_Albedo", W, H, asp_rgba, tex_dir / "asphalt_basecolor.png")
 
+    # 3. Textura PBR de Césped Natural para Parterres y Jardines del Campus (512x512)
+    u_grid = np.linspace(0, 6 * math.pi, W, dtype=np.float32)
+    v_grid = np.linspace(0, 6 * math.pi, H, dtype=np.float32)
+    uu, vv = np.meshgrid(u_grid, v_grid)
+    lawn_wave = (np.sin(uu) * np.cos(vv) * 0.032 + np.sin(uu * 2.3 + vv * 1.7) * 0.018)[:, :, None]
+    blade_grain = np.random.normal(0.0, 0.036, (H, W, 1)).astype(np.float32)
+    lush_tips = (np.random.rand(H, W, 1) > 0.86).astype(np.float32) * np.array([0.04, 0.09, 0.02], dtype=np.float32)
+    clover_shade = (np.random.rand(H, W, 1) > 0.90).astype(np.float32) * np.array([-0.03, -0.05, -0.02], dtype=np.float32)
+    grass_base = np.array([0.21, 0.52, 0.19], dtype=np.float32)
+    grass_rgb = np.clip(grass_base + lawn_wave + blade_grain + lush_tips + clover_shade, 0.10, 0.75)
+    grass_rgba = np.dstack([grass_rgb, np.ones((H, W, 1), dtype=np.float32)])
+    save_blender_image("Grass_Albedo", W, H, grass_rgba, tex_dir / "grass_basecolor.png")
+
+    grass_rough_v = np.clip(0.82 + np.random.normal(0.0, 0.05, (H, W)).astype(np.float32), 0.68, 0.95)
+    grass_rough = np.dstack([grass_rough_v] * 3 + [np.ones((H, W), dtype=np.float32)])
+    save_blender_image("Grass_Rough", W, H, grass_rough, tex_dir / "grass_roughness.png")
+
     # 3. Textura de Pantalla de Monitor Multiparamétrico UCI (512x512)
     MW, MH = 512, 512
     mon = np.zeros((MH, MW, 3), dtype=np.float32)
@@ -647,59 +664,126 @@ def build_hospital_exterior_and_plaza(RX, RY, RZ, mats):
             add_box(f"Canopy_Downlight_{lx_c}_{ly_c}", (lx_c, ly_c, 3.44), (0.65, 0.65, 0.03), mats["led_panel"], bevel_width=0.005)
 
     # =========================================================================
-    # D. EXPLANADA EXTERIOR, CALZADA ASFÁLTICA, PASO PEATONAL Y JARDINERÍA
+    # D. EXPLANADA EXTERIOR, CALZADA ASFÁLTICA, PARTERRES DE CÉSPED Y NUBES 3D
     # =========================================================================
     # 1. Acera Peatonal y Plaza de Entrada a Nivel Cero (Z = 0.0, continua con el piso del pabellón)
-    add_box("Exterior_SidewalkPlaza", (-15.5, 0.0, -0.10), (7.0, 38.0, 0.20), mats["floor"], bevel_width=0.0, uv_scale=(6.0, 24.0))
+    add_box("Exterior_SidewalkPlaza", (-15.5, 0.0, -0.10), (7.0, 20.0, 0.20), mats["floor"], bevel_width=0.0, uv_scale=(6.0, 14.0))
 
     # Franja guía azul exterior que conecta el paso de cebra con el corredor interior
     add_box("Exterior_GuideCarpet", (-15.5, 0.0, 0.003), (7.0, 2.20, 0.004), mats["corridor_stripe"], bevel_width=0.0)
     add_box("Exterior_GuideBorderN", (-15.5, 1.15, 0.004), (7.0, 0.08, 0.004), mats["corridor_border"], bevel_width=0.0)
     add_box("Exterior_GuideBorderS", (-15.5, -1.15, 0.004), (7.0, 0.08, 0.004), mats["corridor_border"], bevel_width=0.0)
 
-    # 2. Calzada Asfáltica de Ambulancias y Gran Explanada Oeste (X = -46.0 a -19.0)
-    add_box("Exterior_AsphaltRoad", (-32.5, 0.0, -0.11), (27.0, 52.0, 0.20), mats["asphalt"], bevel_width=0.0, uv_scale=(14.0, 26.0))
+    # 2. Calzada Asfáltica de Ambulancias y Vía Central (X = -46.0 a -19.0)
+    add_box("Exterior_AsphaltRoad", (-32.5, 0.0, -0.11), (27.0, 19.2, 0.20), mats["asphalt"], bevel_width=0.0, uv_scale=(14.0, 10.0))
 
     # Paso de Cebra Peatonal (Rayas blancas desde X = -29.0 hasta X = -19.5 frente a la entrada)
     for zebra_y in np.linspace(-2.1, 2.1, 7):
         add_box(f"Road_Crosswalk_{zebra_y:.2f}", (-24.2, float(zebra_y), 0.002), (7.5, 0.36, 0.004), mats["corridor_border"], bevel_width=0.0)
 
-    # Isla / Plaza Peatonal de Inicio (X = -38.0 a -29.0, donde inicia el médico)
-    add_box("Exterior_ArrivalPlaza", (-33.5, 0.0, -0.095), (9.0, 18.0, 0.20), mats["floor"], bevel_width=0.0, uv_scale=(6.0, 12.0))
+    # Isla / Paseo Peatonal Central de Inicio (X = -38.0 a -28.6, Y = -4.2 a +4.2, donde inicia el médico)
+    add_box("Exterior_ArrivalPlaza", (-33.3, 0.0, -0.095), (9.4, 8.4, 0.20), mats["floor"], bevel_width=0.0, uv_scale=(6.0, 6.0))
+
+    # 3. Parterres Laterales de Césped Natural PBR y Bordillos de Hormigón Blanco (Izquierda +Y y Derecha -Y)
+    # 3A. Praderas Laterales en el Primer Plano y Medio Plano (X = -46.0 a -25.4, ambos costados simétricos)
+    add_box("Campus_Lawn_FrontLeft", (-35.7, 21.2, -0.04), (20.6, 34.0, 0.22), mats["grass"], bevel_width=0.0, uv_scale=(11.0, 18.0))
+    add_box("Campus_Curb_FrontLeft", (-35.7, 4.18, 0.06), (20.6, 0.24, 0.14), mats["facade_white"], bevel_width=0.01)
+    add_box("Campus_Curb_MidLeft", (-25.4, 6.85, 0.06), (0.24, 5.50, 0.14), mats["facade_white"], bevel_width=0.01)
+
+    add_box("Campus_Lawn_FrontRight", (-35.7, -21.2, -0.04), (20.6, 34.0, 0.22), mats["grass"], bevel_width=0.0, uv_scale=(11.0, 18.0))
+    add_box("Campus_Curb_FrontRight", (-35.7, -4.18, 0.06), (20.6, 0.24, 0.14), mats["facade_white"], bevel_width=0.01)
+    add_box("Campus_Curb_MidRight", (-25.4, -6.85, 0.06), (0.24, 5.50, 0.14), mats["facade_white"], bevel_width=0.01)
+
+    # 3B. Grandes Praderas Laterales que flanquean la Calzada y las Alas del Hospital (X = -25.4 a +14.0)
+    add_box("Campus_Lawn_MainLeft", (-5.7, 23.8, -0.04), (39.4, 28.4, 0.22), mats["grass"], bevel_width=0.0, uv_scale=(20.0, 15.0))
+    add_box("Campus_Curb_MainLeft", (-17.2, 9.52, 0.06), (16.4, 0.24, 0.14), mats["facade_white"], bevel_width=0.01)
+
+    add_box("Campus_Lawn_MainRight", (-5.7, -23.8, -0.04), (39.4, 28.4, 0.22), mats["grass"], bevel_width=0.0, uv_scale=(20.0, 15.0))
+    add_box("Campus_Curb_MainRight", (-17.2, -9.52, 0.06), (16.4, 0.24, 0.14), mats["facade_white"], bevel_width=0.01)
+
+    # 3C. Isla Verde Ajardinada continua bajo el Tótem Institucional (Izquierda: X = -25.4 a -19.4, Y = +4.2 a +9.6)
+    add_box("Campus_Lawn_TotemIsland", (-22.4, 6.9, -0.04), (6.0, 5.4, 0.22), mats["grass"], bevel_width=0.0, uv_scale=(4.0, 3.5))
+    add_box("Campus_Curb_TotemIslandS", (-22.4, 4.18, 0.06), (6.1, 0.24, 0.14), mats["facade_white"], bevel_width=0.01)
+    add_box("Campus_Curb_TotemIslandE", (-19.4, 6.9, 0.06), (0.24, 5.5, 0.14), mats["facade_white"], bevel_width=0.01)
+
+    # Setos Ornamentales Verdes (Hedges) bordeando los parterres laterales a ambos lados
+    hedge_segments = [
+        ("Hedge_FL", (-29.8, 5.2, 0.36), (5.6, 0.75, 0.62)),
+        ("Hedge_FR", (-29.8, -5.2, 0.36), (5.6, 0.75, 0.62)),
+        ("Hedge_ML", (-16.2, 10.4, 0.40), (6.0, 0.85, 0.70)),
+        ("Hedge_MR", (-16.2, -10.4, 0.40), (6.0, 0.85, 0.70)),
+    ]
+    for h_name, h_loc, h_dim in hedge_segments:
+        add_box(h_name, h_loc, h_dim, mats["hedge"], bevel_width=0.08)
+
+    # Arbustos Esféricos Orgánicos distribuidos sobre el césped en ambos costados
+    bush_coords = [
+        (-27.2, 5.8, 0.52), (-29.2, 7.6, 0.65), (-24.5, 8.6, 0.58),
+        (-27.2, -5.8, 0.52), (-29.2, -7.6, 0.65), (-25.2, -10.2, 0.62),
+        (-19.8, 11.2, 0.65), (-19.8, -11.2, 0.65),
+    ]
+    for b_idx, (bx_b, by_b, br_b) in enumerate(bush_coords):
+        add_sphere(f"Campus_Bush_{b_idx}", (bx_b, by_b, br_b * 0.65), br_b, (1.15, 1.15, 0.82), mats["foliage"])
 
     # Bolardos de Acero Satinado con Anillo Luminoso Cyan protegiendo la acera
     for bol_y in [-8.5, -6.2, -3.4, 3.4, 6.2, 8.5]:
         add_cylinder(f"Plaza_Bollard_{bol_y}", (-18.7, bol_y, 0.45), 0.09, 0.90, mats["satin_pillar"], vertices=16)
         add_cylinder(f"Plaza_BollardLight_{bol_y}", (-18.7, bol_y, 0.78), 0.095, 0.06, mats["cyan_led"], vertices=16)
 
-    # 3. Ambulancia 3D Estacionada en la Bahía Derecha del Encuadre (X = -22.2, Y = -6.8)
-    build_emergency_ambulance(-22.2, -6.8, mats)
+    # 4. Ambulancia 3D Estacionada en la Bahía Derecha del Encuadre (X = -21.8, Y = -6.8)
+    build_emergency_ambulance(-21.8, -6.8, mats)
 
-    # 4. Tótem Institucional Luminoso a la Izquierda del Encuadre (X = -22.5, Y = +5.8)
-    add_box("Totem_Base", (-22.5, 5.8, 0.20), (0.65, 1.45, 0.40), mats["dark_metal"], bevel_width=0.02)
+    # 5. Tótem Institucional Luminoso a la Izquierda del Encuadre sobre su Isla de Césped (X = -22.5, Y = +5.8)
+    add_box("Totem_Base", (-22.5, 5.8, 0.22), (0.65, 1.45, 0.40), mats["dark_metal"], bevel_width=0.02)
     add_box("Totem_Body", (-22.5, 5.8, 1.85), (0.32, 1.25, 2.90), mats["facade_blue"], bevel_width=0.02)
     add_box("Totem_WhiteAccent", (-22.5, 5.8, 1.85), (0.34, 1.05, 2.60), mats["facade_white"], bevel_width=0.01)
     add_box("Totem_CrossV", (-22.68, 5.8, 2.45), (0.04, 0.16, 0.52), mats["crash_red"], bevel_width=0.005)
     add_box("Totem_CrossH", (-22.68, 5.8, 2.45), (0.04, 0.52, 0.16), mats["crash_red"], bevel_width=0.005)
     add_3d_text("Totem_Text", "ATENEO+", (-22.69, 5.8, 1.65), size=0.22, extrude=0.02, mat=mats["facade_blue"])
 
-    # 5. Jardineras Arquitectónicas de Hormigón y Árboles del Campus Clínico
+    # 6. Arboleda Ornamental del Campus sobre los Parterres de Césped (Izquierda y Derecha)
     tree_positions = [
-        (-16.0, -9.8), (-16.0, 9.8),
-        (-26.5, -11.2), (-26.5, 9.5),
+        (-28.8, -6.8, 1.05), (-28.8, 6.8, 1.05),
+        (-24.8, -11.2, 1.15), (-24.8, 10.6, 1.15),
+        (-19.2, -13.2, 1.20), (-19.2, 13.2, 1.20),
+        (-15.2, -11.2, 1.10), (-15.2, 11.2, 1.10),
     ]
-    for idx, (tx, ty) in enumerate(tree_positions):
-        add_box(f"Planter_Box_{idx}", (tx, ty, 0.28), (2.4, 2.4, 0.56), mats["facade_white"], bevel_width=0.02)
-        add_box(f"Planter_Soil_{idx}", (tx, ty, 0.52), (2.1, 2.1, 0.10), mats["soil"], bevel_width=0.01)
-        add_cylinder(f"Tree_Trunk_{idx}", (tx, ty, 1.65), 0.16, 2.30, mats["wood_trunk"], vertices=12)
-        add_sphere(f"Tree_CanopyMain_{idx}", (tx, ty, 3.35), 1.35, (1.0, 1.0, 0.92), mats["foliage"])
-        add_sphere(f"Tree_CanopyTop_{idx}", (tx + 0.25, ty - 0.20, 4.15), 0.95, (1.0, 1.0, 0.88), mats["foliage"])
+    for idx, (tx, ty, t_scale) in enumerate(tree_positions):
+        add_cylinder(f"Tree_SoilRing_{idx}", (tx, ty, 0.06), 0.65 * t_scale, 0.08, mats["soil"], vertices=16)
+        add_cylinder(f"Tree_Trunk_{idx}", (tx, ty, 1.45 * t_scale), 0.16 * t_scale, 2.70 * t_scale, mats["wood_trunk"], vertices=12)
+        add_sphere(f"Tree_CanopyMain_{idx}", (tx, ty, 3.15 * t_scale), 1.42 * t_scale, (1.05, 1.05, 0.90), mats["foliage"])
+        add_sphere(f"Tree_CanopyTop_{idx}", (tx + 0.28, ty - 0.22, 3.98 * t_scale), 1.02 * t_scale, (1.0, 1.0, 0.86), mats["foliage"])
+        add_sphere(f"Tree_CanopySide_{idx}", (tx - 0.35, ty + 0.30, 2.85 * t_scale), 0.95 * t_scale, (1.0, 1.0, 0.85), mats["foliage"])
 
-    # 6. Farolas LED de Iluminación Exterior del Campus
-    for idx, (lx, ly) in enumerate([(-27.5, -4.8), (-27.5, 4.8), (-19.5, -12.5), (-19.5, 12.5)]):
-        add_cylinder(f"StreetLight_Pole_{idx}", (lx, ly, 2.60), 0.07, 5.20, mats["satin_pillar"], vertices=12)
-        add_box(f"StreetLight_Arm_{idx}", (lx + 0.45, ly, 5.15), (1.05, 0.16, 0.10), mats["satin_pillar"], bevel_width=0.01)
-        add_box(f"StreetLight_Lamp_{idx}", (lx + 0.72, ly, 5.09), (0.48, 0.24, 0.04), mats["led_panel"], bevel_width=0.005)
+    # 7. Farolas LED de Iluminación Exterior del Campus (Separadas de las nubes superiores)
+    for idx, (lx, ly) in enumerate([(-26.2, -4.5), (-26.2, 4.5), (-19.2, -9.8), (-19.2, 9.8)]):
+        add_cylinder(f"StreetLight_Pole_{idx}", (lx, ly, 2.15), 0.065, 4.30, mats["satin_pillar"], vertices=12)
+        add_box(f"StreetLight_Arm_{idx}", (lx + 0.40, ly, 4.25), (0.95, 0.15, 0.09), mats["satin_pillar"], bevel_width=0.01)
+        add_box(f"StreetLight_Lamp_{idx}", (lx + 0.65, ly, 4.19), (0.44, 0.22, 0.04), mats["led_panel"], bevel_width=0.005)
+
+    # 8. Pocas Nubes Cúmulo Volumétricas Suaves en el Cielo (Flotando en el cielo abierto sobre el edificio)
+    cloud_clusters = [
+        ("SkyCloud_Left", (-8.0, 14.2, 16.0), 0.95),
+        ("SkyCloud_UpperLeft", (-2.0, 7.8, 18.8), 1.05),
+        ("SkyCloud_UpperRight", (-2.0, -8.2, 18.5), 1.00),
+        ("SkyCloud_Right", (-8.5, -14.5, 15.8), 0.92),
+    ]
+    puff_offsets = [
+        (0.0, 0.0, 0.15, 1.35, (1.0, 1.30, 0.72)),
+        (0.20, 1.35, -0.15, 1.05, (1.0, 1.15, 0.65)),
+        (-0.15, -1.30, -0.18, 1.00, (1.0, 1.15, 0.62)),
+        (0.10, 0.55, 0.68, 0.98, (1.0, 1.05, 0.78)),
+        (-0.12, -0.50, 0.58, 0.90, (1.0, 1.00, 0.74)),
+    ]
+    for c_name, (cx_c, cy_c, cz_c), c_scale in cloud_clusters:
+        for p_idx, (ox, oy, oz, p_rad, p_shape) in enumerate(puff_offsets):
+            add_sphere(
+                f"{c_name}_Puff_{p_idx}",
+                (cx_c + ox * c_scale, cy_c + oy * c_scale, cz_c + oz * c_scale),
+                p_rad * c_scale,
+                p_shape,
+                mats["cloud"]
+            )
 
 
 # ===========================================================================
@@ -712,6 +796,9 @@ def build_master_hospital(tex_dir: Path):
     mats = {
         "floor": make_textured_material("Mat_FloorVinyl", tex_dir / "floor_basecolor.png", tex_dir / "floor_roughness.png"),
         "asphalt": make_textured_material("Mat_AsphaltRoad", tex_dir / "asphalt_basecolor.png"),
+        "grass": make_textured_material("Mat_CampusGrass", tex_dir / "grass_basecolor.png", tex_dir / "grass_roughness.png", emissive=True, emission_strength=0.14),
+        "hedge": make_material("Mat_OrnamentalHedge", (0.16, 0.44, 0.20), metallic=0.0, roughness=0.82, emission=(0.12, 0.36, 0.15), emission_strength=0.15),
+        "cloud": make_material("Mat_SoftCloud", (0.99, 0.995, 1.0), metallic=0.0, roughness=0.90, emission=(0.98, 0.99, 1.0), emission_strength=1.10),
         "corridor_stripe": make_material("Mat_CorridorStripe", (0.14, 0.44, 0.68), metallic=0.05, roughness=0.25),
         "corridor_border": make_material("Mat_CorridorBorder", (0.95, 0.97, 0.99), metallic=0.0, roughness=0.25),
         "wall_upper": make_material("Mat_WallUpper", (0.94, 0.95, 0.96), metallic=0.0, roughness=0.55),
@@ -855,8 +942,8 @@ def render_verification_preview(preview_path: Path):
     world.use_nodes = True
     bg_node = world.node_tree.nodes.get("Background")
     if bg_node:
-        bg_node.inputs[0].default_value = (0.76, 0.86, 0.96, 1.0)
-        bg_node.inputs[1].default_value = 1.2
+        bg_node.inputs[0].default_value = (0.48, 0.72, 0.96, 1.0)
+        bg_node.inputs[1].default_value = 1.0
 
     # Sol frontal desde el Oeste iluminando directamente la fachada del hospital
     sun_data = bpy.data.lights.new(name="PreviewSun", type='SUN')

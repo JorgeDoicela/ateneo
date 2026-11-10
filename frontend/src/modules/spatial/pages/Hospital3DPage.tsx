@@ -75,8 +75,8 @@ export const Hospital3DPage: React.FC = () => {
         camera={{ position: [-33.5, 1.62, 0], fov: 64, near: 0.1, far: 150 }}
         className="w-full h-full cursor-crosshair"
       >
-        <color attach="background" args={['#cfe4f7']} />
-        <Sky sunPosition={[-45, 28, -15]} turbidity={0.25} rayleigh={0.35} />
+        <color attach="background" args={['#7ec0ee']} />
+        <Sky sunPosition={[-45, 32, -15]} turbidity={0.18} rayleigh={0.85} />
 
         {/* Iluminación Global Solar y Reflejos Fotorrealistas */}
         <ambientLight intensity={1.15} color="#ffffff" />
