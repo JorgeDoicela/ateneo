@@ -13,10 +13,10 @@ export const CharacterController: React.FC = () => {
   const openBedInspection = useSpatialStore((s) => s.openBedInspection);
   const isTabletOpen = useSpatialStore((s) => s.isTabletOpen);
 
-  // Posición y rotación cinemática (Entrada Oeste del corredor mirando hacia el Este +X)
-  const positionRef = useRef<THREE.Vector3>(new THREE.Vector3(-8.5, 1.58, 0));
+  // Posición y rotación cinemática inicial: Exterior del Hospital frente al portal abierto mirando al Este (+X)
+  const positionRef = useRef<THREE.Vector3>(new THREE.Vector3(-33.5, 1.62, 0));
   const yawRef = useRef<number>(-Math.PI / 2);
-  const pitchRef = useRef<number>(-0.04);
+  const pitchRef = useRef<number>(0.07);
 
   const keysRef = useRef<{ [key: string]: boolean }>({});
   const isMouseDownRef = useRef<boolean>(false);
@@ -93,12 +93,44 @@ export const CharacterController: React.FC = () => {
     if (keysRef.current['KeyD'] || keysRef.current['ArrowRight']) moveDir.add(right);
 
     if (moveDir.lengthSq() > 0) {
+      const prevX = positionRef.current.x;
+      const prevZ = positionRef.current.z;
+
       moveDir.normalize().multiplyScalar(moveSpeed);
       positionRef.current.add(moveDir);
 
-      // Confinamiento en los límites herméticos del pabellón
-      positionRef.current.x = Math.max(-10.5, Math.min(10.5, positionRef.current.x));
-      positionRef.current.z = Math.max(-7.8, Math.min(7.8, positionRef.current.z));
+      // 1. Confinamiento global del campus hospitalario (Explanada Exterior + Pabellón Interior)
+      positionRef.current.x = Math.max(-35.0, Math.min(10.5, positionRef.current.x));
+
+      // 2. Colisión física con el Muro de Fachada Oeste (X = -12.0) y Portal de Puertas Abiertas (Z en [-1.55, 1.55])
+      const inDoorwayZ = Math.abs(positionRef.current.z) <= 1.55;
+      if (!inDoorwayZ) {
+        if (prevX <= -12.45 && positionRef.current.x > -12.45) {
+          positionRef.current.x = -12.45;
+        } else if (prevX >= -11.55 && positionRef.current.x < -11.55) {
+          positionRef.current.x = -11.55;
+        }
+      }
+
+      // 3. Límites laterales Z según zona (Umbral de puerta vs. Interior del Pabellón vs. Explanada Exterior)
+      if (positionRef.current.x > -12.45 && positionRef.current.x < -11.55) {
+        positionRef.current.z = Math.max(-1.55, Math.min(1.55, positionRef.current.z));
+      } else if (positionRef.current.x >= -11.55) {
+        positionRef.current.z = Math.max(-7.8, Math.min(7.8, positionRef.current.z));
+      } else {
+        positionRef.current.z = Math.max(-16.0, Math.min(16.0, positionRef.current.z));
+
+        // Colisión con la Ambulancia SVA estacionada en la bahía exterior (X en [-23.4, -20.2], Z en [4.6, 10.8])
+        if (
+          positionRef.current.x > -23.4 &&
+          positionRef.current.x < -20.2 &&
+          positionRef.current.z > 4.6 &&
+          positionRef.current.z < 10.8
+        ) {
+          positionRef.current.x = prevX;
+          positionRef.current.z = prevZ;
+        }
+      }
     }
 
     // Actualizar cámara

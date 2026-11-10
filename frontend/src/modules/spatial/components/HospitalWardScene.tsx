@@ -27,6 +27,10 @@ export const HospitalWardScene: React.FC = () => {
         ))
       )}
 
+      {/* Iluminación bajo la marquesina exterior de Urgencias y umbral de puertas abiertas */}
+      <pointLight position={[-15.5, 3.3, 0]} intensity={14} distance={14} decay={1.6} color="#f8fafc" />
+      <pointLight position={[-12.0, 2.6, 0]} intensity={12} distance={10} decay={1.6} color="#e0f2fe" />
+
       {/* Iluminación sobre central de enfermería al fondo Este */}
       <pointLight position={[9.5, 3.3, 0]} intensity={12} distance={10} decay={1.8} color="#f0f9ff" />
     </group>

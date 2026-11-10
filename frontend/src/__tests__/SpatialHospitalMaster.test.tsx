@@ -30,7 +30,8 @@ vi.mock('../modules/cases/hooks/useCases', () => ({
 // Mock de @react-three/drei Html
 vi.mock('@react-three/drei', () => ({
   Html: ({ children }: { children: React.ReactNode }) => <div data-testid="drei-html">{children}</div>,
-  useGLTF: () => ({ scene: { clone: () => ({}) } })
+  useGLTF: () => ({ scene: { clone: () => ({}) } }),
+  Sky: () => null
 }));
 
 describe('Suite de Pruebas: Simulador Hospitalario 3D Master (Ateneo+)', () => {

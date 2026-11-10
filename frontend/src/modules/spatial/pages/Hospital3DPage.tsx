@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { Environment, ContactShadows } from '@react-three/drei';
+import { Environment, ContactShadows, Sky } from '@react-three/drei';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -22,9 +22,11 @@ export const Hospital3DPage: React.FC = () => {
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
   const beds = useSpatialStore((s) => s.beds);
+  const playerPosition = useSpatialStore((s) => s.playerPosition);
   const syncCasesWithBeds = useSpatialStore((s) => s.syncCasesWithBeds);
   const hoveredBedId = useSpatialStore((s) => s.hoveredBedId);
   const openBedInspection = useSpatialStore((s) => s.openBedInspection);
+  const isInsideOrAtThreshold = playerPosition[0] >= -13.5;
 
   useEffect(() => {
     if (cases && cases.length > 0) {
@@ -70,38 +72,39 @@ export const Hospital3DPage: React.FC = () => {
       {/* 1. Canvas WebGL/WebGPU Tridimensional con Iluminación PBR */}
       <Canvas
         shadows
-        camera={{ position: [-8.5, 1.58, 0], fov: 66, near: 0.1, far: 50 }}
+        camera={{ position: [-33.5, 1.62, 0], fov: 64, near: 0.1, far: 150 }}
         className="w-full h-full cursor-crosshair"
       >
-        <color attach="background" args={['#e2e8f0']} />
+        <color attach="background" args={['#cfe4f7']} />
+        <Sky sunPosition={[-45, 28, -15]} turbidity={0.25} rayleigh={0.35} />
 
-        {/* Iluminación Global y Reflejos Fotorrealistas */}
-        <ambientLight intensity={1.1} color="#ffffff" />
-        <hemisphereLight args={['#f8fafc', '#cbd5e1', 0.65]} />
+        {/* Iluminación Global Solar y Reflejos Fotorrealistas */}
+        <ambientLight intensity={1.15} color="#ffffff" />
+        <hemisphereLight args={['#f8fafc', '#cbd5e1', 0.75]} />
         <directionalLight
-          position={[4, 10, 4]}
-          intensity={0.9}
+          position={[-28, 26, -12]}
+          intensity={1.35}
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
           shadow-camera-near={0.5}
-          shadow-camera-far={25}
-          shadow-camera-left={-12}
-          shadow-camera-right={12}
-          shadow-camera-top={12}
-          shadow-camera-bottom={-12}
+          shadow-camera-far={80}
+          shadow-camera-left={-36}
+          shadow-camera-right={18}
+          shadow-camera-top={24}
+          shadow-camera-bottom={-24}
         />
 
-        {/* Mapa de Entorno Interior para Reflejos Metálicos y Vinilo */}
+        {/* Mapa de Entorno Interior/Exterior para Reflejos Metálicos y Muro Cortina */}
         <Environment preset="city" />
 
-        {/* Sombras de Contacto Suaves sobre el Suelo */}
+        {/* Sombras de Contacto Suaves sobre el Suelo del Campus y Pabellón */}
         <ContactShadows
-          position={[0, 0.01, 0]}
-          opacity={0.45}
-          scale={26}
+          position={[-10, 0.01, 0]}
+          opacity={0.42}
+          scale={56}
           blur={1.8}
-          far={3.5}
+          far={4.0}
           color="#0f172a"
         />
 
@@ -111,15 +114,16 @@ export const Hospital3DPage: React.FC = () => {
         {/* Controlador Cinemático en Primera Persona */}
         <CharacterController />
 
-        {/* Rótulos Diegéticos HTML Flotantes sobre las Camas */}
-        {beds.map((bed) => (
-          <BedInteractionBadge
-            key={bed.id}
-            bed={bed}
-            isHovered={hoveredBedId === bed.id}
-            onClick={() => openBedInspection(bed.id)}
-          />
-        ))}
+        {/* Rótulos Diegéticos HTML Flotantes sobre las Camas (visibles al cruzar el umbral interior) */}
+        {isInsideOrAtThreshold &&
+          beds.map((bed) => (
+            <BedInteractionBadge
+              key={bed.id}
+              bed={bed}
+              isHovered={hoveredBedId === bed.id}
+              onClick={() => openBedInspection(bed.id)}
+            />
+          ))}
       </Canvas>
 
       {/* 2. HUD Superior: Navegación, Triaje y Pantalla Completa (Liquid Glassmorphism Ateneo+) */}
