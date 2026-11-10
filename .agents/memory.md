@@ -2200,8 +2200,13 @@ Este archivo almacena el contexto operativo, decisiones de interfaz y lecciones 
       - Posicionamiento anatómico de los ojos: cámara desplazada `8 cm` adelante a lo largo del vector `forward` y a `1.62m` de altura, reproduciendo la ubicación real de los ojos en el rostro humano.
       - Rango de inclinación vertical ampliado a `-Math.PI / 2.3` (~ -78°) y plano cercano optimizado a `near: 0.05` en `<Canvas>`, permitiendo al usuario mirar directamente hacia abajo para observar su bata, credencial, estetoscopio, manos y calzado dando zancadas en tiempo real.
     - Botón institucional en el HUD superior con iconos planos `User` (3ª Persona) y `Eye` (1ª Persona) sin marcos decorativos.
+  - **Letrero Aéreo Flotante de Bienvenida y Cápsula Superior (`WelcomeAerialSign.tsx`, `Hospital3DPage.tsx`):**
+    - Letrero aéreo 3D suspendido en el aire a `Y = 5.3m` sobre la explanada exterior (`X = -23.0m`, `Z = 0.0m`) con animación sinusoidal armónica de levitación (`Math.sin(t * 1.2) * 0.08m`).
+    - Panel arquitectónico blanco clínico con marco en acero satinado `#0b57d0`, tiras LED emisivas superior (Cyan `#06b6d4`, intensidad 2.8) e inferior (Azul `#2563eb`, intensidad 2.4), y cables de suspensión hacia el cielo.
+    - Doble cara tridimensional (`<Html transform center distanceFactor={11}>`): cara frontal orientada al Oeste con bienvenida institucional ("¡BIENVENIDOS A ATENEO+! • Plataforma Médica Multimodal & Razonamiento Clínico con IA • GPC Ecuador") y cara posterior orientada hacia el hospital para el retorno peatonal.
+    - Cápsula superior en el HUD de navegación (`hidden md:flex`) con halo de pulso cyan y tipografía institucional centrada ("Bienvenido a Ateneo+ • Simulador Clínico 3D").
   - **Certificación de Calidad:**
-    - Suite `SpatialDoctorCharacter.test.tsx`: 4/4 pruebas aprobadas (incluye True First Person).
+    - Suite `SpatialDoctorCharacter.test.tsx`: 4/4 pruebas aprobadas.
     - Suite `SpatialMobileControls.test.tsx`: 4/4 pruebas aprobadas.
     - Suite `SpatialHospitalMaster.test.tsx`: 5/5 pruebas aprobadas. Total: 13/13 (100%).
     - Compilación de producción (`vite build`): Rollup limpio y PWA generada sin errores.

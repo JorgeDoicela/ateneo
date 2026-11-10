@@ -24,6 +24,7 @@ vi.mock('@react-three/drei', () => ({
   Environment: () => null,
   ContactShadows: () => null,
   Sky: () => null,
+  Html: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
   useGLTF: Object.assign(
     () => ({
       scene: {

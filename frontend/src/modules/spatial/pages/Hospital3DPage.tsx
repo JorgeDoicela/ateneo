@@ -17,6 +17,7 @@ import BedInteractionBadge from '../components/BedInteractionBadge';
 import ClinicalBedsideTablet from '../components/ClinicalBedsideTablet';
 import MobileTouchControls from '../components/MobileTouchControls';
 import LandscapeOrientationNotice from '../components/LandscapeOrientationNotice';
+import WelcomeAerialSign from '../components/WelcomeAerialSign';
 
 export const Hospital3DPage: React.FC = () => {
   const navigate = useNavigate();
@@ -151,6 +152,9 @@ export const Hospital3DPage: React.FC = () => {
         {/* Escenario PBR de la Sala de Urgencias y Choque */}
         <HospitalWardScene />
 
+        {/* Letrero Aéreo Flotante de Bienvenida en la Explanada Exterior */}
+        <WelcomeAerialSign />
+
         {/* Controlador Cinemático en Primera Persona */}
         <CharacterController />
 
@@ -178,6 +182,18 @@ export const Hospital3DPage: React.FC = () => {
             <ArrowLeft className="w-4 h-4 text-[#0b57d0]" />
             <span className="hidden sm:inline">Catálogo</span>
           </button>
+        </div>
+
+        {/* Centro Superior: Cápsula Institucional de Bienvenida a Ateneo+ */}
+        <div className="hidden md:flex items-center space-x-2.5 px-4 py-2 bg-white/90 text-slate-800 rounded-full border border-slate-200/80 shadow-xs backdrop-blur-md pointer-events-auto select-none">
+          <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse shrink-0" />
+          <span className="text-xs font-bold text-slate-900 tracking-tight">
+            Bienvenido a Ateneo+
+          </span>
+          <span className="text-slate-300">•</span>
+          <span className="text-[11px] text-slate-600 font-medium">
+            Simulador Clínico 3D
+          </span>
         </div>
 
         {/* Lado Derecho: Conmutador de Perspectiva y Pantalla Completa */}
