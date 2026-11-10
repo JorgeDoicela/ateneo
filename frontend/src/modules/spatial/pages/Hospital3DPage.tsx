@@ -4,9 +4,6 @@ import { Environment, ContactShadows } from '@react-three/drei';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
-  ShieldAlert,
-  CheckCircle2,
-  Users,
   Maximize2,
   Minimize2
 } from 'lucide-react';
@@ -62,8 +59,6 @@ export const Hospital3DPage: React.FC = () => {
   };
 
   const hoveredBed = beds.find((b) => b.id === hoveredBedId);
-  const activeRedCodes = beds.filter((b) => b.urgency === 'codigo_rojo' && !b.isSolved).length;
-  const solvedCount = beds.filter((b) => b.isSolved).length;
 
   return (
     <div
@@ -141,25 +136,8 @@ export const Hospital3DPage: React.FC = () => {
           </button>
         </div>
 
-        {/* Lado Derecho: Estadísticas de Triaje y Botón Pantalla Completa */}
+        {/* Lado Derecho: Botón Pantalla Completa */}
         <div className="flex items-center space-x-2.5 pointer-events-auto">
-          <div className="hidden md:flex items-center space-x-2 bg-white/90 backdrop-blur-md rounded-full border border-slate-200/80 px-3.5 py-2 text-xs text-slate-700 shadow-xs">
-            <div className="flex items-center space-x-1 px-2 border-r border-slate-200">
-              <Users className="w-3.5 h-3.5 text-[#2563eb]" />
-              <span className="font-medium">{beds.length} Camas</span>
-            </div>
-            <div className="flex items-center space-x-1 px-2 border-r border-slate-200">
-              <ShieldAlert className="w-3.5 h-3.5 text-red-500" />
-              <span className={activeRedCodes > 0 ? 'text-red-600 font-bold' : 'font-medium'}>
-                {activeRedCodes} Código Rojo
-              </span>
-            </div>
-            <div className="flex items-center space-x-1 px-2">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              <span className="text-emerald-700 font-medium">{solvedCount} Resueltos</span>
-            </div>
-          </div>
-
           <button
             onClick={toggleFullscreen}
             className="p-2.5 bg-white/90 hover:bg-white text-slate-800 rounded-full border border-slate-200/80 shadow-xs backdrop-blur-md transition-all flex items-center justify-center hover:border-blue-300"
